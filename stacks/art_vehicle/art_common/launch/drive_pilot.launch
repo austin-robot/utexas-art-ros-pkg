@@ -1,0 +1,33 @@
+<!-- -*- mode: nXML -*- -->
+<!-- launch file for pilot driving real vehicle -->
+
+<launch>
+  <!-- servo actuators -->
+  <node pkg="art_servo" type="brake" name="brake">
+    <param name="~port" value="/dev/brake"/>
+  </node>
+  <node pkg="art_servo" type="ioadr" name="ioadr">
+    <param name="~port" value="/dev/ioadr"/>
+  </node>
+  <node pkg="art_servo" type="ioadr" name="shifter">
+    <param name="~port" value="/dev/shifter"/>
+  </node>
+  <node pkg="art_servo" type="steering" name="steering">
+    <param name="~port" value="/dev/steering"/>
+  </node>
+  <node pkg="art_servo" type="throttle" name="throttle">
+    <param name="~port" value="/dev/throttle"/>
+  </node>
+
+  <!-- navigation components -->
+  <node pkg="applanix" type="odometry" name="odometry" />
+  <node pkg="art_nav" type="pilot" name="pilot" />
+  <node pkg="art_nav" type="teleop.py" name="teleop" />
+
+  <!-- monitoring tools -->
+  <include file="$(find art_common)/launch/monitor.launch" />
+
+  <!-- comment out, not useful right now
+      <node pkg="rviz" type="rviz" name="rviz" />
+  -->
+</launch>

@@ -1,0 +1,54 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+This is a ROS device driver node for the Applanix Position and
+Orientation System for Land Vehicles (POS-LV).  Takes input from the
+device and publishes it to the \b odom and \b gps topics.  Also,
+broadcasts a transform from the \b vehicle to the \b odom frame of
+reference.
+
+\section odometry Applanix Odometry driver
+
+\subsection odometry_usage Usage
+
+\verbatim
+Usage:
+  rosrun applanix odometry [options]
+
+Options:
+    -f <filename>  PCAP packet dump file name (default: use real device)
+    -h, -?         print help text
+    -q <integer>   set ROS topic queue depth (default: 1)
+    -t <filename>  run unit test with fake data from <filename>
+\endverbatim
+
+\par Examples
+
+Read the Applanix POS-LV, publishing /gps and /odom messages.
+
+\verbatim
+$ rosrun applanix odometry
+\endverbatim
+
+Read previously captured Applanix packets from dump.pcap file.
+
+\verbatim
+$ rosrun applanix odometry -f dump.pcap
+\endverbatim
+
+\subsection rosapi Applanix ROS API
+
+Node name: \b applanix
+
+Publishes:
+
+   - \b odom three-dimensional odometry from Applanix
+   - \b gps Applanix GPS information
+   - transform from \b vehicle to \b odom frame of reference
+
+Subscribes:
+
+   - \b shifter/state transmission gear currently selected
+
+*/

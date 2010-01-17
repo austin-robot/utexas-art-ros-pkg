@@ -1,0 +1,83 @@
+
+                          utexas-art-ros-pkg
+              Robot Operating System package repository
+
+                             Jack O'Quin
+                             8 Jan. 2010
+
+
+The stacks directory contains initial versions of several ROS stacks,
+each with one or more ROS packages containing experimental versions of
+ART software converted to use ROS instead of player.  Documentation
+for these packages is here:
+
+  http://www.cs.utexas.edu/~joq/doc/index.html
+
+Working with the ROS build system is difficult at first.  Expect a
+steep learning curve.  Working through some of the ROS tutorials is
+definitely worthwhile when starting out.  Documentation:
+
+  http://www.ros.org/wiki/ROS.
+
+The interfaces themselves are quite good.  So are the visualization
+and debugging tools.  And, there is an impressive amount of useful
+robotics software already available in the ROS package system.
+
+Overall, ROS looks like the best available technology base for future
+UT/ART robotics work.  
+
+
+Directions:
+
+ (1) Check out a copy of the ART code base with ROS interfaces
+
+     Our packages have their own Subversion project tree now.  Check
+     out the trunk in ~/svn/utexas-art-ros-pkg:
+
+     $ cd
+     $ mkdir svn
+     $ cd ~/svn
+     $ export ART=svn+ssh://svn.landrobot.com/home/svn/art
+     $ svn co $ART/ros/trunk utexas-art-ros-pkg
+
+ (2a)[for UT CS systems]
+
+     Set up ROS environment pointing to the shared install:
+
+     $ cd ~/svn/utexas-art-ros-pkg
+     $ bash etc/utcs-env.sh >> ~/.bashrc
+
+ (2b)[for individually-maintained systems]
+
+     Install ROS as in http://www.ros.org/wiki/ROS/Installation
+
+     This is time-consuming, but not especially difficult.  Be careful
+     to follow the directions exactly.  It works fine on Ubuntu and
+     can be made to work for Mac OSX with some effort.  Windows will
+     probably not work.
+
+     Add the ROS environment settings to the end of your .bashrc:
+
+     $ ~/rosconfig setup ~/ros >> ~/.bashrc
+
+     Append our packages as well as the ROS ones (this example does it
+     from the shell, or you can use any editor):
+
+     $ cat <<EOF >> ~/.bashrc
+     export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/svn/utexas-art-ros-pkg
+     export ROS_STACK_PATH=${ROS_STACK_PATH}:~/svn/utexas-art-ros-pkg
+     EOF
+
+ (3) Log out and log back in.
+
+ (4) Try to run some ROS commands:
+
+     $ rospack find velodyne_common
+     $ roscd velodyne_common
+     $ rosmake
+
+       This should compile cleanly.
+
+ (5) There is a rosemacs package, to get it working, I have to start
+     emacs from a shell.  So far I cannot start it from the GNOME
+     panel icon with all the required environment variables set.

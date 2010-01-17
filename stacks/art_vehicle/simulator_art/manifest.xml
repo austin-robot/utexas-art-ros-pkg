@@ -1,0 +1,23 @@
+<package>
+  <description brief="simulator_art">
+
+     Simulator package for ART autonomous vehicle.
+
+  </description>
+  <author>Jack O'Quin</author>
+  <license>GPL and BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://www.landrobot.com</url>
+  <depend package="roslib"/>
+  <depend package="roscpp"/>
+  <depend package="stage"/>
+  <depend package="std_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="tf"/>
+  <depend package="angles"/>
+  <depend package="art_common"/>
+  <depend package="art_servo"/>
+
+</package>

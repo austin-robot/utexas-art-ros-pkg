@@ -1,0 +1,195 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+
+Servo device drivers for the ART automonous vehicle.
+
+\section brake Brake Servo Driver
+
+Driver for ART brake servo mechanism.
+
+\subsection brake_examples Examples
+
+Test the ART brake driver using \b /dev/null, publishing simulated
+\b brake/state messages and accepting \b brake/cmd messages.
+
+\verbatim
+  rosrun art_servo brake
+\endverbatim
+
+Run the brake driver with the real ART brake device, publishing \b
+brake/state messages and accepting \b brake/cmd messages.  The port
+assignment gets saved in the ROS parameter server, persisting across
+future invocations until \b roscore stops.
+
+\verbatim
+  rosrun art_servo brake _port:=/dev/brake
+\endverbatim
+
+\subsection  brake_rosapi Brake ROS API
+
+Node name: \b brake
+
+Subscribes to: \b brake/cmd: brake commands.
+
+Publishes: \b brake/state: brake status information.
+
+Parameters:
+
+  - \b ~/port: brake serial port name (default: /dev/null).
+  - \b ~/apply_on_exit: set brake when exiting (default: false).
+  - \b ~/training: use training mode, provide status, but apply no
+    brake commands (default: false).
+  - \b ~/diagnostic: provide extra diagnostic information in
+    brake/state message (default: false).
+  - \b ~/emulate_script: emulate robot-brake setup script (default:
+    false).
+
+
+\section shifter Gear Shifter Driver
+
+Driver for ART gear shifter.  It uses an instance of the National
+Control Devices IOADR8x driver communicating with a dedicated IOADR8x
+board connected to an Arens Controls shifter mechanism.
+
+\subsection shifter_examples Examples
+
+Test the ART shifter driver with \b /dev/null, publishing simulated \b
+shifter/state messages and accepting \b shifter/cmd messages.
+
+\verbatim
+  rosrun art_servo ioadr ioadr:=shifter
+\endverbatim
+
+Run the ART shifter driver connected to the I/O board on serial port
+\b /dev/shifter, publishing \b shifter/state messages and accepting \b
+shifter/cmd messages.  The port assignment gets saved in the ROS
+parameter server, persisting across future invocations until \b
+roscore stops.
+
+\verbatim
+  rosrun art_servo ioadr ioadr:=shifter _port:=/dev/shifter
+\endverbatim
+
+\subsection shifter_rosapi Shifter ROS API
+
+Node name: \b shifter
+
+Subscribes to: \b shifter/cmd: shifter commands.
+
+Publishes: \b shifter/state: shifter status information.
+
+Parameters:
+
+  - \b ~/port: shifter serial port name (default: /dev/null).
+
+\section steering Steering Servo Driver
+
+Driver for ART steering servo mechanism.
+
+\subsection steering_examples Examples
+
+Test the ART steering driver using \b /dev/null, publishing simulated
+\b steering/state messages and accepting \b steering/cmd messages.
+
+\verbatim
+  rosrun art_servo steering
+\endverbatim
+
+Run the steering driver with the real ART steering controller,
+publishing \b steering/state messages and accepting \b steering/cmd
+messages.  The port assignment gets saved in the ROS parameter server,
+persisting across future invocations until \b roscore stops.
+
+\verbatim
+  rosrun art_servo steering _port:=/dev/steering
+\endverbatim
+
+\subsection  steering_rosapi Steering ROS API
+
+Node name: \b steering
+
+Subscribes to:
+
+  - \b steering/cmd: steering commands.
+  - \b ioadr/state: steering position sensor (not yet implemented).
+
+Publishes: \b steering/state: steering status information.
+
+Parameters:
+
+  - \b ~/port: steering serial port name (default: /dev/null).
+  - \b ~/diagnostic: provide extra diagnostic information in
+    \b steering/state message (default: false).
+  - others TBD
+
+\section shift Gear Shift Tool
+
+Simple tool to shift the ART vehicle transmission.
+
+\subsection shift_usage Usage
+
+\verbatim
+  rosrun art_servo shift.py <gear>
+
+    Where <gear> is one of: park, reverse, neutral, drive.  These
+    names are not case-sensitive, and may be abbreviated to the first
+    character.
+\endverbatim
+
+\subsection shift_examples Examples
+
+Shift the transmission into Neutral.
+
+\verbatim
+  rosrun art_servo shift.py Neutral
+\endverbatim
+
+Shift the transmission into Drive.
+
+\verbatim
+  rosrun art_servo shift.py drive
+\endverbatim
+
+Shift the transmission into Reverse.
+
+\verbatim
+  rosrun art_servo shift.py r
+\endverbatim
+
+\subsection shift_rosapi ROS API
+
+- Node name: \b shift
+- Subscribes to: \b shifter/state: shifter status information.
+- Publishes: \b shifter/cmd: shifter commands.
+
+
+\section unit_test Unit Test Tools
+
+Simple test clients for various servo mechanisms.
+
+\subsection unit_test_examples Examples
+
+Command the brake driver to gradually apply and release the brake
+mechanism.
+
+\verbatim
+  rosrun art_servo test_brake.py
+\endverbatim
+
+Command the shifter driver to shift the transmission through all the
+gears.
+
+\verbatim
+  rosrun art_servo test_shift.py
+\endverbatim
+
+Command the steering driver to gradually turn the steering wheel
+through its full range of motion.
+
+\verbatim
+  rosrun art_servo test_steering.py
+\endverbatim
+
+*/

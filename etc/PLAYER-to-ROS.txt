@@ -1,0 +1,151 @@
+
+                Notes on converting player code to ROS
+
+
+BUILD TREE
+----------
+
+ROS code is organized into stacks and packages.  Stacks are
+subdirectories in the tree with package directories inside them.  Each
+stack or package has a global name in the ROS package name space, so
+their directory names need to be unique and descriptive.
+
+A stack directory is identified by its <stack.xml> file.  The rosstack
+command should be able to find and print information about it.
+
+  http://www.ros.org/wiki/Stacks/CreateStack?highlight=(stack)|(creating)
+
+A package directory is identified by a manifest.xml file describing
+its name, authors, licences, exports and dependencies.  Once that file
+exists, the rospack command should be able to find and print
+information about it.
+
+  http://www.ros.org/wiki/ROS/Tutorials/CreatingPackage?highlight=(BeginnerCategory)
+
+Remove any old SConscript files, they are replaced by CMakeLists.txt
+in the ROS build scheme.  You should be able to build any package
+using the rosmake command.
+
+  http://www.ros.org/wiki/ROS/BuildSystemUsage
+
+
+DRIVERS
+-------
+
+Convert player drivers to ROS nodes.  The class inherited from the
+player Driver class is no longer needed and just adds unnecessary
+complexity.  
+
+Make a simple C++ main program, something like this:
+
+  int main(int argc, char** argv)
+  {
+    ros::init(argc, argv, NODE);
+    ros::NodeHandle node;
+  
+    // topics to read and write
+    brake_cmd = node.subscribe(NODE "/cmd", 10, ProcessCommand,
+                               ros::TransportHints().tcpNoDelay(true));
+    brake_state = node.advertise<art_brake::State>(NODE "/state", 10);
+  
+    if (GetParameters() != 0)             // from the player constructor
+      return 1;
+  
+    ros::Rate cycle(HERTZ_BRAKE);         // set driver cycle rate
+  
+    if (Setup() != 0)                     // from the player Setup()
+      return 2;
+  
+    // Main loop; grab messages off our queue and republish them via ROS
+    while(ros::ok())
+      {
+        ...                               // activities from player Main()
+        cycle.sleep();                    // sleep until next cycle
+      }
+  
+    Shutdown();
+  
+    return 0;
+  }
+
+
+
+INTERFACES
+----------
+
+Most player interfaces have ROS equivalents, here are some examples.
+The player code snippet is shown first, followed by an indented ROS
+version, with comments (where appropriate).
+
+
+ART_ERROR(msg);
+
+  ROS_ERROR(msg) or ROS_FATAL(msg), depending on severity.
+
+ART_MSG(level, msg);
+
+  ROS_INFO(msg) if infrequent, or ROS_DEBUG(msg) if recurring
+
+  The verbose configuration parameter is not needed.  Use
+  rxloggerlevel command to turn debug output on or off dynamically at
+  run time.  Much nicer.
+
+ART_WARN(msg);
+
+  ROS_WARN(msg);
+
+DTOR(deg);
+
+  angles::from_degees(deg);
+
+  // This requires adding <depend package="angles"/> to your
+  // manifest.xml, then adding #include <angles/angles.h> to the source
+  // file.
+
+extern PlayerTime* GlobalTime;
+GlobalTime->GetTimeDouble(&time);
+
+  double time = ros::Time::now().toSec();
+
+// main loop
+for(;;)
+  {
+    // see if we are supposed to exit
+    pthread_testcancel();
+    ...
+
+  // main loop
+  while(ros::ok())
+    {
+      ...
+
+PLAYER_ERROR(msg);
+
+  ROS_ERROR(msg) or ROS_FATAL(msg), depending on severity.
+
+PLAYER_MSGn(level, msg);
+
+  ROS_INFO(msg) if infrequent, or ROS_DEBUG(msg) if recurring
+
+PLAYER_WARN(msg);
+
+  ROS_WARN(msg);
+
+const char *port;                       // tty port name
+port = cf->ReadString(section, "port", "/dev/null");
+PLAYER_MSG1(2, CLASS " constructor: brake port = %s", port);
+
+  // use private node handle to get parameters
+  ros::NodeHandle mynh("~");
+  std::string port;                     // tty port name
+
+  if (!mynh.getParam("port", port))
+      port = "/dev/null";
+  ROS_INFO("brake port = %s", port.c_str());
+
+
+RTOD(rad);
+
+  angles::to_degrees(rad);
+
+  // See DTOR() for dependencies.

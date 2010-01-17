@@ -1,0 +1,61 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+
+Navigation control for the ART automonous vehicle.
+
+
+\section pilot Pilot Node
+
+Speed and direction control node for the ART vehicle.
+
+\subsection pilot_examples Examples
+
+Run the ART pilot, accepting \b pilot/cmd messages.
+
+\verbatim
+  rosrun art_nav pilot
+\endverbatim
+
+\subsection pilot_rosapi Pilot ROS API
+
+Node name: \b pilot
+
+Subscribes:
+
+  - \b pilot/cmd velocity and steering angle command
+  - \b vel_cmd standard ROS velocity and angle command
+  - \b odom estimate of robot position and velocity.
+  - \b brake/state brake status.
+  - \b shifter/state shifter relays status.
+  - \b steering/state steering status.
+  - \b throttle/state throttle status.
+
+Publishes:
+
+  - \b brake/cmd brake commands.
+  - \b shifter/cmd shifter commands.
+  - \b steering/cmd steering commands.
+  - \b throttle/cmd throttle commands.
+  
+Parameters: many (TBD)
+
+\section teleop Tele-Operation client
+
+Graphical tele-operation client for ART pilot.
+
+\subsection teleop_examples Examples
+
+Run Qt script for sending speeds and steering angles to the pilot.
+
+\verbatim
+  rosrun art_nav teleop.py
+\endverbatim
+
+\subsection teleop_rosapi ROS API
+
+- Node name: \b teleop
+- Publishes: \b pilot/cmd: pilot commands.
+
+*/

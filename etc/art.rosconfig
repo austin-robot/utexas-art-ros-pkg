@@ -1,0 +1,12 @@
+- svn:
+    uri: https://code.ros.org/svn/ros/stacks/ros/tags/stable
+    local-name: ros
+- svn:
+    uri: https://code.ros.org/svn/ros-pkg/stacks/common_msgs/tags/latest
+    local-name: common_msgs
+- svn:
+    uri: https://code.ros.org/svn/ros-pkg/stacks/geometry/tags/latest
+    local-name: geometry
+- svn:
+    uri: svn+ssh://svn.landrobot.com/home/svn/art/ros/trunk
+    local-name: utexas-art-ros-pkg

@@ -1,0 +1,24 @@
+<package>
+  <description brief="art_nav">
+
+     Navigation nodes for controlling the ART autonomous vehicle.
+
+  </description>
+  <author>Austin Robot Technology, Jack O'Quin</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://www.landrobot.com</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="art_common"/>
+  <depend package="art_servo"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>
+  </export>
+
+</package>
+
+

@@ -1,0 +1,20 @@
+<package>
+  <description brief="art_common">
+
+     Austin Robot Technology automomous vehicle common headers.
+
+  </description>
+  <author>Austin Robot Technology</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://www.landrobot.com</url>
+  <export>
+    <cpp cflags="-I${prefix}/include"/>
+  </export>
+  <depend package="roscpp"/>
+  <depend package="angles"/>
+  <depend package="tf"/>
+
+</package>
+
+

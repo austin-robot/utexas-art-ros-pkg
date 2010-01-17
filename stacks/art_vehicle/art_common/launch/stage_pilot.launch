@@ -1,0 +1,16 @@
+<!-- -*- mode: nXML -*- -->
+<!-- launch file for pilot with stage simulation -->
+
+<launch>
+  <!-- stage simulator for ART vehicle -->
+  <node pkg="simulator_art" type="artstage" name="artstage"
+        cwd="node"
+        args="$(optenv WORLD ../world/site_visit_3.world)"/>
+  <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
+
+  <!-- Launch pilot with null servo actuators.  NOTE: this comes
+       *after* artstage has established simulated /clock time.
+  -->
+  <include file="$(find art_common)/launch/pilot_null.launch"/>
+
+</launch>

@@ -1,0 +1,7 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+This package simulates the ART automomous vehicle using Stage.
+
+*/

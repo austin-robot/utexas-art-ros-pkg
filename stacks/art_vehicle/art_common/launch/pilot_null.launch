@@ -1,0 +1,36 @@
+<!-- -*- mode: nXML -*- -->
+<!-- launch file for pilot with null servo interfaces -->
+
+<launch>
+  <!-- servo actuators -->
+  <node pkg="art_servo" type="brake" name="brake" />
+  <node pkg="art_servo" type="ioadr" name="ioadr" />
+  <node pkg="art_servo" type="ioadr" name="shifter" />
+  <node pkg="art_servo" type="steering" name="steering">
+    <param name="~simulate_device" value="True"/>
+  </node>
+  <node pkg="art_servo" type="throttle" name="throttle" />
+
+  <!-- navigation components -->
+  <node pkg="art_nav" type="pilot" name="pilot" />
+  <node pkg="art_nav" type="teleop.py" name="teleop" />
+
+  <!-- monitoring tools -->
+  <node pkg="rxtools" type="rxconsole" name="console" />
+  <!--
+      <include file="$(find art_common)/launch/monitor.launch" />
+  -->
+
+  <!-- comment out, not working
+  <node pkg="rxtools" type="rxplot" name="steering_plot"
+        args="/steering/state/angle"/>
+  <node pkg="rxtools" type="rxplot" name="brake_plot"
+        args="/brake/state/angle"/>
+  <node pkg="rxtools" type="rxplot" name="shifter_plot"
+        args="/shifter/state/gear"/>
+  -->
+
+  <!-- comment out, not useful right now
+      <node pkg="rviz" type="rviz" name="rviz" />
+  -->
+</launch>

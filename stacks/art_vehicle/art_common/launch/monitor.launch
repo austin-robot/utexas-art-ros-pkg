@@ -1,0 +1,7 @@
+<!-- -*- mode: nXML -*- -->
+<!-- launch log monitoring tools -->
+<launch>
+  <group ns="monitor">
+    <node pkg="rxtools" type="rxconsole" name="console" />
+  </group>
+</launch>

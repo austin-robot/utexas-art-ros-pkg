@@ -1,0 +1,71 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+Headers and libraries used by the Austin Robot Technology (ART)
+autonomous vehicle.
+
+\section progapi Programming API
+
+- <art/coordinates.hh> System-wide coordinate class definitions
+- <art/DARPA_rules.hh> DARPA Urban Challenge rules description
+- <art/vehicle.hh> Constants for the dimensions of the ART autonomous
+  vehicle.
+
+\section commandline Command-line tools
+
+\subsection static_tf Vehicle static transforms
+
+This node broadcasts static transforms from various devices to the \b
+/vehicle frame of reference.  Some ROS components require that to be
+done about once every 10 seconds.
+
+\subsubsection static_tf_usage Usage
+
+\verbatim
+  rosrun art_common vehicle_static_tf
+\endverbatim
+
+\subsection static_tf_rosapi ROS API
+
+Node name: \b vehicle_static_tf
+
+Publishes transforms:
+
+ - from \b /front_sick to \b /vehicle frame
+ - from \b /rear_sick to \b /vehicle frame
+ - from \b /velodyne to \b /vehicle frame
+
+
+\section launch Launch Files
+
+This package includes several launch files for running and monitoring
+the vehicle.  See the launch subdirectory for a complete list.  
+
+\subsection launch_examples Example Launch Commands
+
+Monitor and control ROS log output.
+
+\verbatim
+$ roslaunch art_common monitor.launch
+\endverbatim
+
+Run pilot with simulated servo devices.
+
+\verbatim
+$ roslaunch art_common pilot_null.launch
+\endverbatim
+
+Run pilot with Stage simulation using \b site_visit_3.world.
+
+\verbatim
+$ roslaunch art_common pilot_stage.launch
+\endverbatim
+
+Run pilot on the car with real servo devices.
+
+\verbatim
+$ roslaunch art_common drive_pilot.launch
+\endverbatim
+
+*/

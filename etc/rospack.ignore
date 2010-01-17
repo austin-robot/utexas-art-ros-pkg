@@ -1,13 +1,7 @@
-*.os
-*.pyc
-*.so
-*.tar.gz
 .build_version
 .rosgcov_files
 TAGS
 bin
 build
 deps.gv
-doc
 lib
-tmp

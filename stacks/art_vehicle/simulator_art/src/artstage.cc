@@ -132,7 +132,7 @@ StageNode::mapName(const char *name, size_t robotID)
   if (positionmodels.size() > 1)
   {
     static char buf[100];
-    snprintf(buf, sizeof(buf), "/robot_%d/%s", robotID, name);
+    snprintf(buf, sizeof(buf), "/robot_%lu/%s", (long unsigned) robotID, name);
     return buf;
   }
   else
@@ -181,7 +181,8 @@ StageNode::StageNode(int argc, char** argv, bool gui, const char* fname)
   this->world->ForEachModel((GHFunc)ghfunc, this);
 
   size_t numRobots = positionmodels.size();
-  ROS_INFO("found %d position model(s) in the file", numRobots);
+  ROS_INFO("found %lu position model(s) in the file",
+           (long unsigned) numRobots);
 
   /// \todo support more than one simulated robot
   if (numRobots != 1)

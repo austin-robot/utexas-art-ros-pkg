@@ -22,7 +22,7 @@
  @brief ART autonomous vehicle speed controller.
 */
 
-namespace SpeedControlMatrix
+namespace ControlMatrix
 {
 
   // acceleration matrix dimensions
@@ -143,7 +143,7 @@ SpeedControlMatrix::~SpeedControlMatrix()
 void SpeedControlMatrix::adjust(float speed, float error,
                                 float *brake_req, float *throttle_req)
 {
-  using namespace SpeedControlMatrix;
+  using namespace ControlMatrix;
 
   float delta = velpid_->Update(error, speed);
   float delta_mph = mps2mph(delta);

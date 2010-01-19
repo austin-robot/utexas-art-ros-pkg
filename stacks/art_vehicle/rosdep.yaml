@@ -4,3 +4,6 @@ libpcap:
   fedora: libpcap-devel
   macports: libpcap
   arch: libpcap
+
+PyQt4:
+  ubuntu: python-qt4

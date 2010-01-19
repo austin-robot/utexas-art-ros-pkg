@@ -15,6 +15,9 @@
   <depend package="art_common"/>
   <depend package="art_servo"/>
 
+  <!-- declare run-time dependency on Qt4 python package -->
+  <rosdep name="PyQt4"/>
+
   <export>
     <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>
   </export>

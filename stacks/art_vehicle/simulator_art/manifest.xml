@@ -7,7 +7,7 @@
   <author>Jack O'Quin</author>
   <license>GPL and BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://www.landrobot.com</url>
+  <url>http://code.google.com/p/utexas-art-ros-pkg</url>
   <depend package="roslib"/>
   <depend package="roscpp"/>
   <depend package="stage"/>

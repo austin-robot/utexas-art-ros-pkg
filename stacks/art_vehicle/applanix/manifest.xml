@@ -8,7 +8,7 @@
   <author>Jack O'Quin, Patrick Beeson, Alberto Alonso</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://www.landrobot.com</url>
+  <url>http://code.google.com/p/utexas-art-ros-pkg</url>
   <depend package="roscpp"/>
   <depend package="angles"/>
   <depend package="nav_msgs"/>

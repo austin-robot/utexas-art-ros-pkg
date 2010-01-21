@@ -146,7 +146,7 @@ class Pid
   /** @brief Configure one PID parameter
    *  @param node node handle for parameter server
    *  @param pname base name for this parameter
-   *  @param value place to store parameter value, if defined
+   *  @param fvalue place to store parameter value, if defined
    *               (already set to default value).
    */
   void CfgParam(const ros::NodeHandle &node,

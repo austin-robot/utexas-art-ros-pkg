@@ -21,11 +21,11 @@
 
      @brief NCD IOADR8x multipurpose I/O board driver
 
-This driver provides an @b interface_aio to a National Control
-Devices IOADR8x hybrid relay and A/D controller board.  This hybrid
-device provides eight relays and five analog to digital converters.
-The driver publishes their current values and handles commands to set
-the relays.
+This driver provides an interface to a National Control Devices
+IOADR8x hybrid relay and A/D controller board.  This hybrid device
+provides eight relays and five analog to digital converters.  The
+driver publishes their current values and handles commands to set the
+relays.
 
 Our vehicle currently has two IOADR8x boards.  Each is controlled by a
 separate ROS node.  The node name determines the input and output
@@ -37,18 +37,6 @@ audible alarm).
 
 - "shifter" reads and sets the transmission control relays.
 
-@par Provides
-
-- @ref interface_aio
-
-Returns data from analog and digital input ports:
-
-- voltage[0] = current relay values as a uint8_t converted to float.
-- voltage[channel] = analog or digital input, configured using "poll"
-option.  Analog data are represented in float as a voltage.  Digital
-data are represented using float integer values [0.0, 255.0], similar 
-to the voltage[0] relay values.
-
 @par Commands
 
 - PLAYER_AIO_CMD_STATE
@@ -59,30 +47,9 @@ be set off, otherwise it is set on.
 
 @par ROS Parameters
 
-- port (string)
+- ~/port (string)
   - tty port name for IOADR8x board
   - default: "/dev/null"
-
-- poll ["input1" "input2" ... "input7" ]
-  - list analog or digital inputs to poll, the data will be published
-  using the corresponding message fields.  Relays are always
-  published, independent of the poll list.  Other fields not polled
-  are set to zero.  These inputs are currently provided:
-    - "AnalogA" float 8-bit voltage reading
-    - "AnalogA(10bit)" float 10-bit voltage reading
-    - "AnalogB" float 8-bit voltage reading
-    - "AnalogB(10bit)" float 10-bit voltage reading
-    - "AnalogC" float 8-bit voltage reading
-    - "AnalogC(10bit)" float 10-bit voltage reading
-    - "DigitalB" float integer [0.0, 255.0]
-    - "ShifterInd" shifter indicator translated into gear numbers
-    - "" return nothing on this channel
-  - default: AnalogA(10bit), DigitalB are polled (plus relays)
-
-- reset_relays (integer)
-  - initial and final setting for relays (value from 0 to 255)
-  - leave unchanged during Setup() and Shutdown() for value < 0
-  - default: set all relays to 0
 
   \author Jack O'Quin
 

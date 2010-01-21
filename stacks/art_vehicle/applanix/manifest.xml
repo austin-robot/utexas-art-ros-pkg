@@ -1,5 +1,5 @@
 <package>
-  <description brief="applanix">
+  <description brief="Applanix POS-LV driver">
 
      ROS driver for the Applanix Position and Orientation System for
      Land Vehicles (POS-LV).
@@ -8,7 +8,7 @@
   <author>Jack O'Quin, Patrick Beeson, Alberto Alonso</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://code.google.com/p/utexas-art-ros-pkg</url>
+  <url>http://www.ros.org/wiki/applanix</url>
   <depend package="roscpp"/>
   <depend package="angles"/>
   <depend package="nav_msgs"/>

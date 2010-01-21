@@ -1,5 +1,5 @@
 <package>
-  <description brief="art_servo">
+  <description brief="ART vehicle servo device drivers">
 
      ROS nodes for the ART autonomous vehicle servo devices.
 
@@ -7,7 +7,7 @@
   <author>Austin Robot Technology, Jack O'Quin</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://code.google.com/p/utexas-art-ros-pkg</url>
+  <url>http://www.ros.org/wiki/art_servo</url>
   <depend package="roscpp"/>
   <depend package="rospy"/>
   <depend package="std_msgs"/>

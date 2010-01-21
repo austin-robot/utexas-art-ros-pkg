@@ -1,13 +1,13 @@
 <stack>
-  <description brief="Austin Robot Technology autonomous vehicle support">
+  <description brief="ART autonomous vehicle support">
 
-    Nodes and utilities to interface with the A.R.T. autonomous vehicle.
+    ROS support for the Austin Robot Technology autonomous vehicle.
 
   </description>
   <author>Maintained by Jack O'Quin</author>
-  <license>BSD,GPL</license>  
+  <license>BSD and GPL</license>  
   <review status="unreviewed" notes=""/>
-  <url>http://www.landrobot.com</url>
+  <url>http://www.ros.org/wiki/art_vehicle</url>
   <depend stack="common_msgs" /> <!-- nav_msgs, geometry_msgs, sensor_msgs -->
   <depend stack="geometry" /> <!-- tf, angles -->
   <depend stack="ros" /> <!-- std_msgs, roslib, rospy, roscpp -->

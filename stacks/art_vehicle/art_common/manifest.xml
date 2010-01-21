@@ -1,13 +1,14 @@
 <package>
-  <description brief="art_common">
+  <description brief="ART vehicle common headers">
 
-     Austin Robot Technology automomous vehicle common headers.
+     Common headers and utilities for the Austin Robot Technology
+     automomous vehicle.
 
   </description>
   <author>Austin Robot Technology</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://code.google.com/p/utexas-art-ros-pkg</url>
+  <url>http://www.ros.org/wiki/art_common</url>
   <export>
     <cpp cflags="-I${prefix}/include"/>
   </export>

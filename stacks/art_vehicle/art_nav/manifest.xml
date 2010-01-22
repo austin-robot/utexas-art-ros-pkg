@@ -1,5 +1,5 @@
 <package>
-  <description brief="art_nav">
+  <description brief="ART vehicle navigation">
 
      Navigation nodes for controlling the ART autonomous vehicle.
 

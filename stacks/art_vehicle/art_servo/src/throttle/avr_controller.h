@@ -127,7 +127,7 @@ typedef uint8_t  u08;
 typedef uint16_t u16;
 typedef uint32_t u32;
 
-#include <art/art_command_protocol.h>
+#include "art_command_protocol.h"
 
 #define AVR_POS_ABSURD 7		/* absurdly small position value */
 

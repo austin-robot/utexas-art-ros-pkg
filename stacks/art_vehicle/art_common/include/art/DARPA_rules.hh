@@ -11,20 +11,24 @@
 #ifndef _DARPA_rules_H_
 #define _DARPA_rules_H_
 
+/**  @file
+   
+     @brief DARPA Urban Challenge rules description
+
+     This class encapsulates constants and methods required or implied
+     by the rules of the DARPA Urban Challenge.  All distances are in
+     meters, times in seconds.  Section numbers refer to the official
+     DARPA Technical Evaluation Criteria document.
+ 
+     http://www.darpa.mil/grandchallenge/rules.asp/Technical_Evaluation_Criteria_031607.pdf
+ */
+
 #include <algorithm>
 #include <math.h>
 #include <art/vehicle.hh>
 #include <art/conversions.h>
 
-/** @brief DARPA Urban Challenge rules description
- *
- *  This class encapsulates constants and methods required or implied
- *  by the rules of the DARPA Urban Challenge.  All distances are in
- *  meters, times in seconds.  Section numbers refer to the official
- *  DARPA Technical Evaluation Criteria document.
- *
- *  http://www.darpa.mil/grandchallenge/rules.asp/Technical_Evaluation_Criteria_031607.pdf
- */
+
 
 namespace DARPA_rules
 {

@@ -11,6 +11,11 @@
 #ifndef _EUCLIDEAN_DISTANCE_H_
 #define _EUCLIDEAN_DISTANCE_H_
 
+/**  @file
+   
+     @brief ART Euclidean distance functions.
+ */
+
 #ifdef USE_PLAYER
 #include <libplayercore/player.h>
 #endif
@@ -19,7 +24,6 @@
 #include <art/infinity.h>
 #include <art/types.hh>
 
-/** @brief ART Euclidean distance functions. */
 namespace Euclidean
 {
 

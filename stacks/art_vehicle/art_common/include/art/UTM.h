@@ -12,6 +12,14 @@
 #ifndef _UTM_H
 #define _UTM_H
 
+/**  @file
+   
+     @brief Universal Transverse Mercator transforms.
+
+     Functions to convert (spherical) latitude and longitude to and
+     from (Euclidean) UTM coordinates.
+ */
+
 #include <cmath>
 #include <art/conversions.h>
 #include <stdlib.h>

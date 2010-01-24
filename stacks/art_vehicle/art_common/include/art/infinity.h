@@ -13,9 +13,13 @@
 
 #include <math.h>
 
-/** @brief global ART infinity definitions.  These constants represent
- *  effectively infinite distances, times, etc.
+/**  @file
+   
+     @brief global ART infinity definitions.
+
+     These constants represent effectively infinite distances, times, etc.
  */
+
 namespace Infinite
 {
   const float distance = 1000000.0;	//< far off distance, in meters

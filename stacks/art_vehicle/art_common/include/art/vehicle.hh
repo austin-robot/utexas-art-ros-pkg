@@ -11,10 +11,14 @@
 #ifndef _VEHICLE_HH_
 #define _VEHICLE_HH_
 
-/** @brief ART vehicle dimensions.
- *
- *  This class encapsulates constants for the dimensions of the ART
- *  autonomous vehicle.  All dimensions are in meters.
+/**  @file
+   
+     @brief ART vehicle dimensions.
+   
+     This class encapsulates constants for the dimensions of the ART
+     autonomous vehicle.  All dimensions are in meters.
+   
+     @author Jack O'Quin
  */
 
 #include <math.h>

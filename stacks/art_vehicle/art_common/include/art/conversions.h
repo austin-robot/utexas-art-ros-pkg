@@ -11,12 +11,15 @@
 #ifndef _CONVERSIONS_H
 #define _CONVERSIONS_H
 
+/**  @file
+   
+     @brief Units conversion constants and functions.
+ */
+
 #include <math.h>
 #include <sys/time.h>
 #include <time.h>
-//#include <netinet/in.h>
 
-/** @brief Functions for units conversions. */
 
 /** Unit conversion constants: */
 const double INCHES_PER_FOOT = 12.0;

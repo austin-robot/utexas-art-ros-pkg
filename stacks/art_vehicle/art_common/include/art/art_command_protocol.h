@@ -11,6 +11,11 @@
 #ifndef _ART_COMMAND_PROTOCOL_H_
 #define _ART_COMMAND_PROTOCOL_H_
 
+/**  @file
+   
+     @brief ART throttle controller firmware command protocol.
+ */
+
 #undef CLI_ECHO
 
 #define COM_OFFSET  0

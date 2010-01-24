@@ -11,6 +11,11 @@
 #ifndef _FILTER_H
 #define _FILTER_H
 
+/**  @file
+   
+     @brief digital filter functions
+ */
+
 /*
  * Exponentially weighted moving average filter.  Transfer function:
  *

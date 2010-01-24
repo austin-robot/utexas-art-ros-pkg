@@ -15,6 +15,11 @@
 #ifndef ART_ERROR_H
 #define ART_ERROR_H
 
+/**  @file
+   
+     @brief ROS wrappers for ART error logging
+ */
+
 #include <ros/ros.h>
 
 /* make this header bilingual */

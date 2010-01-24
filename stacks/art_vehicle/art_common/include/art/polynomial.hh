@@ -11,14 +11,18 @@
 #ifndef _POLYNOMIAL_HH_
 #define _POLYNOMIAL_HH_
 
+/**  @file
+   
+     @brief Polynomial class interface
+*/
+
 #include <math.h>
 #include <vector>
 
 
 #define POLYNOMIAL_NAME_SIZE 32
 
-/** @brief polynomial interface
- */
+/** @brief polynomial interface */
 class Polynomial
 {
  public:

@@ -14,9 +14,14 @@
 #include <math.h>
 #include <angles/angles.h>
 
-/** @brief global ART epsilon definitions.  These constants represent
- *  trivial differences in distance, speed, angle, etc.
+/**  @file
+   
+     @brief global ART Epsilon definitions.
+
+     These constants represent trivial differences in distance, speed,
+     angle, etc.
  */
+
 namespace Epsilon
 {
   const float float_value = 1e-5;	//< minimal float value

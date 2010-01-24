@@ -11,9 +11,11 @@
 #ifndef _HERTZ_H
 #define _HERTZ_H
 
-/** @brief 
- * Cycle rates for player drivers (in hertz).
+/** @file
+    
+    @brief Cycle rates for various ART vehicle nodes (in hertz).
  */
+
 #define HERTZ_APPLANIX		20
 #define HERTZ_BRAKE		20
 #define HERTZ_OBSERVERS		10

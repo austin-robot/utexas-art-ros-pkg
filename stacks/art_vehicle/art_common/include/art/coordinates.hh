@@ -11,6 +11,13 @@
 #ifndef _COORDINATES_HH
 #define _COORDINATES_HH
 
+/**  @file
+   
+     @brief Class definitions for various system-wide coordinate types.
+   
+     @author Jack O'Quin
+ */
+
 #include <math.h>
 #include <vector>
 
@@ -22,7 +29,6 @@
 #include <angles/angles.h>
 #include <art/conversions.h>
 
-/** @brief Class definitions for system-wide coordinates. */
 
 namespace Coordinates
 {

@@ -11,14 +11,15 @@
 #ifndef _PID_H_
 #define _PID_H_
 
-#include <float.h>
+/**  @file
+   
+     @brief PID (Proportional, Integral, Derivative) control output.
+ */
 
+#include <float.h>
 #include <ros/ros.h>
 
-
-/** @brief PID (Proportional, Integral, Derivative) control output.
- *
- */
+/** @brief PID (Proportional, Integral, Derivative) control output. */
 class Pid 
 {
  public:

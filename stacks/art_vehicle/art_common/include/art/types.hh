@@ -11,6 +11,11 @@
 #ifndef _TYPES_HH_
 #define _TYPES_HH_
 
+/** @file
+    
+    @brief global ART vehicle type definitions
+ */
+
 #include <stdio.h>
 #include <art/coordinates.hh>
 #include <art/epsilon.h>

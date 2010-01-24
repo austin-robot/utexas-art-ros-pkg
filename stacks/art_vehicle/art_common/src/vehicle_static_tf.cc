@@ -88,17 +88,17 @@ int main(int argc, char** argv)
     {
       using namespace ArtVehicle;
 
-      // Velodyne 3D lidar
+      // Velodyne 3D LIDAR
       broadcastTF(&tf_broadcaster, ArtFrames::velodyne,
                   velodyne_px, velodyne_py, velodyne_pz,
                   velodyne_roll, velodyne_pitch, velodyne_yaw);
 
-      // Front Sick lidar
+      // Front Sick LIDAR
       broadcastTF(&tf_broadcaster, ArtFrames::front_sick,
                   front_SICK_px, front_SICK_py, front_SICK_pz,
                   front_SICK_roll, front_SICK_pitch, front_SICK_yaw);
 
-      // Rear Sick lidar
+      // Rear Sick LIDAR
       broadcastTF(&tf_broadcaster, ArtFrames::rear_sick,
                   rear_SICK_px, rear_SICK_py, rear_SICK_pz,
                   rear_SICK_roll, rear_SICK_pitch, rear_SICK_yaw);

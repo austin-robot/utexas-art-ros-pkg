@@ -6,7 +6,7 @@
   </description>
   <author>Maintained by Jack O'Quin</author>
   <license>BSD and GPL</license>  
-  <review status="unreviewed" notes=""/>
+  <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/art_vehicle</url>
   <depend stack="common_msgs" /> <!-- nav_msgs, geometry_msgs, sensor_msgs -->
   <depend stack="geometry" /> <!-- tf, angles -->

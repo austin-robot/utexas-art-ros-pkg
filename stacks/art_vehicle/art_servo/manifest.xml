@@ -6,7 +6,7 @@
   </description>
   <author>Austin Robot Technology, Jack O'Quin</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/art_servo</url>
   <depend package="roscpp"/>
   <depend package="rospy"/>

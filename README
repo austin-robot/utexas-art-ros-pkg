@@ -3,7 +3,7 @@
               Robot Operating System package repository
 
                              Jack O'Quin
-                             19 Jan. 2010
+                             1 Feb. 2010
 
 
 The stacks directory contains initial versions of several ROS stacks,
@@ -11,7 +11,7 @@ each with one or more ROS packages containing experimental versions of
 ART software converted to use ROS instead of player.  Documentation
 for these packages is here:
 
-  http://www.cs.utexas.edu/~joq/doc/index.html
+  http://www.ros.org/wiki/utexas-art-ros-pkg
 
 Working with the ROS build system is difficult at first.  Expect a
 steep learning curve.  Working through some of the ROS tutorials is
@@ -82,6 +82,8 @@ Directions:
 
      This should compile cleanly.
 
- (5) There is a rosemacs package, to get it working, I have to start
-     emacs from a shell.  I do not know how to start it from the GNOME
-     panel icon with all the required environment variables set.
+ (5) There is a rosemacs package, highly recommended for serious
+     software development on Linux or Unix. To get it working, I have
+     to start emacs from a shell.  I do not know how to start it from
+     the GNOME panel icon with all the required environment variables
+     set.

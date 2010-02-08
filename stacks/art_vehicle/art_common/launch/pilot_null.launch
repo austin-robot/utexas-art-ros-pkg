@@ -6,9 +6,7 @@
   <node pkg="art_servo" type="brake" name="brake" />
   <node pkg="art_servo" type="ioadr" name="ioadr" />
   <node pkg="art_servo" type="ioadr" name="shifter" />
-  <node pkg="art_servo" type="steering" name="steering">
-    <param name="~simulate_device" value="True"/>
-  </node>
+  <node pkg="art_servo" type="steering" name="steering" />
   <node pkg="art_servo" type="throttle" name="throttle" />
 
   <!-- navigation components -->

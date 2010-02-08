@@ -87,6 +87,10 @@ public:
   int	steering_absolute(float position);
   int	steering_relative(float position);
 
+  bool  simulate_;
+
+ private:
+
   int64_t GetTime();
 
   // configuration options
@@ -94,8 +98,6 @@ public:
   std::string port;			// tty port name
   bool	training;			// use training mode
   double steering_rate;			// steering velocity (deg/sec)
-
- private:
 
   int	verbose;			// log output verbosity
   float	req_angle;			// requested angle (absolute)

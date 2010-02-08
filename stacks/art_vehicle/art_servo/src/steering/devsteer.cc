@@ -34,6 +34,7 @@ devsteer::devsteer()
 {
   verbose = 0;
   req_angle = 0.0;
+  simulate_ = false;
 }
 
 int devsteer::Open()
@@ -43,7 +44,9 @@ int devsteer::Open()
   if (fd < 0) {
     ROS_ERROR("Couldn't open %s (%s)", port.c_str(), strerror(errno));
     return -1;
-  }  
+  }
+
+  simulate_ = !have_tty;
     
   // set actual baud rate
   rc = configure_raw_port((B57600|CS8), 0);

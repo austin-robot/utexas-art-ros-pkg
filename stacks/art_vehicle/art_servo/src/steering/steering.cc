@@ -93,7 +93,6 @@ private:
   void	read_wheel_angle(void);
 
   // .cfg variables:
-  bool  simulate_device_;		// simulate steering device and sensor
   bool	diagnostic_;			// enable diagnostic mode
   int	calibration_periods_;		// number of sensor calibration cycles
   double sensor_timeout_;		// sensor timeout (sec)
@@ -194,11 +193,6 @@ ArtSteer::ArtSteer()
   mynh.getParam("calibration_periods", calibration_periods_);
   ROS_INFO("calibrate steering sensor for %d cycles.", calibration_periods_);
 
-  simulate_device_ = false;
-  mynh.getParam("simulate_device", simulate_device_);
-  if (simulate_device_)
-    ROS_INFO("simulating steering device and sensor");
-
   /// @todo use this to detect when ioadr driver hung or not responding
   sensor_timeout_ = 2.0;
   mynh.getParam("sensor_timeout", sensor_timeout_);
@@ -284,7 +278,7 @@ void ArtSteer::GetCmd(const art_servo::SteeringCommand::ConstPtr &cmdIn)
 
 void ArtSteer::GetPos(const art_servo::IOadrState::ConstPtr &ioIn)
 {
-  if (simulate_device_)                 // not using real sensor?
+  if (dev_->simulate_)                  // not using real sensor?
     return;
 
   // save steering position sensor voltage, convert to degrees
@@ -369,7 +363,7 @@ void ArtSteer::Main()
     {
       ros::spinOnce();                  // handle incoming commands
 
-      if (simulate_device_)
+      if (dev_->simulate_)
         read_wheel_angle();
 
       // Processing depends on driver state.  These tests reverse the

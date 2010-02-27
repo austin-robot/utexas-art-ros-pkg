@@ -1,0 +1,20 @@
+<package>
+  <description brief="Run the ART vehicle">
+
+     Tools to run the Austin Robot Technology autonomous vehicle.
+
+  </description>
+  <author></author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/art_run</url>
+  <depend package="applanix"/>
+  <depend package="art_servo"/>
+  <depend package="art_nav"/>
+  <depend package="rxtools"/>
+  <depend package="simulator_art"/>
+  <depend package="velodyne_common"/>
+
+</package>
+
+

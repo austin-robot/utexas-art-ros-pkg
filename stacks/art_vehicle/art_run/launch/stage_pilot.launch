@@ -11,6 +11,6 @@
   <!-- Launch pilot with null servo actuators.  NOTE: this comes
        *after* artstage has established simulated /clock time.
   -->
-  <include file="$(find art_common)/launch/pilot_null.launch"/>
+  <include file="$(find art_run)/launch/pilot_null.launch"/>
 
 </launch>

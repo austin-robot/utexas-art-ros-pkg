@@ -14,10 +14,7 @@
   <node pkg="art_nav" type="teleop.py" name="teleop" />
 
   <!-- monitoring tools -->
-  <node pkg="rxtools" type="rxconsole" name="console" />
-  <!--
-      <include file="$(find art_common)/launch/monitor.launch" />
-  -->
+  <include file="$(find art_run)/launch/monitor.launch" />
 
   <!-- comment out, not working
   <node pkg="rxtools" type="rxplot" name="steering_plot"
@@ -28,7 +25,4 @@
         args="/shifter/state/gear"/>
   -->
 
-  <!-- comment out, not useful right now
-      <node pkg="rviz" type="rviz" name="rviz" />
-  -->
 </launch>

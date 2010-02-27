@@ -5,12 +5,13 @@
 
   </description>
   <author>Maintained by Jack O'Quin</author>
-  <license>BSD and GPL</license>  
+  <license>BSD,GPL</license>  
   <review status="experimental" notes=""/>
-  <url>http://www.ros.org/wiki/art_vehicle</url>
+  <url>http://ros.org/wiki/art_vehicle</url>
   <depend stack="common_msgs" /> <!-- nav_msgs, geometry_msgs, sensor_msgs -->
   <depend stack="geometry" /> <!-- tf, angles -->
-  <depend stack="ros" /> <!-- std_msgs, roslib, rospy, roscpp -->
+  <depend stack="ros" /> <!-- rxtools, std_msgs, roslib, rospy, roscpp -->
   <depend stack="simulator_stage" /> <!-- stage -->
+  <depend stack="velodyne" /> <!-- velodyne_common -->
 
 </stack>

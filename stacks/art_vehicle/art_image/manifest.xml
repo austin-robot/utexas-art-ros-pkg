@@ -1,0 +1,20 @@
+<package>
+  <description brief="ART vehicle imaging tools">
+
+     Visual imaging tools for the Austin Robot Technology autonomous vehicle.
+
+  </description>
+  <author></author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/art_image</url>
+  <depend package="applanix"/>
+  <depend package="compressed_image_transport"/>
+  <depend package="image_transport"/>
+  <depend package="image_view"/>
+  <depend package="theora_image_transport"/>
+  <depend package="velodyne_common"/>
+
+</package>
+
+

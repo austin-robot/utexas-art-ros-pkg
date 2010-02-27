@@ -33,4 +33,16 @@ Run pilot on the car with real servo devices.
 $ roslaunch art_run drive_pilot.launch
 \endverbatim
 
+Capture a raw Velodyne bag file from the live device, including
+odometry, GPS, and coordinate transforms.  The bag file goes in the
+current directory with a "velodyne_" prefix to the current date and
+time.
+
+Interrupt the capture using ^C when finished.  Be aware that the
+device generates about 3.1MB of data per second.
+
+\verbatim
+$ roslaunch art_run velodyne_bag.launch
+\endverbatim
+
 */

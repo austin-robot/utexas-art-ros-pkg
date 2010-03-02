@@ -147,8 +147,8 @@ int GetParameters(void)
   ROS_INFO("configured pressure range [%.3f, %.3f]",
            dev->pressure_min, dev->pressure_max);
 
-  // allocate PID control and configure parameters (off by default)
-  pid = new Pid("pid", 0.9, 0.0, 0.7);
+  // allocate PID control and configure parameters
+  pid = new Pid("pid", 0.25, 0.0, 0.7);
   pid->Configure(mynh);
 
   return 0;

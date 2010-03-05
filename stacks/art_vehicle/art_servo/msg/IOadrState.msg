@@ -14,7 +14,7 @@ uint8 TURN_RIGHT   = 128
 
 uint8   relays                  # current relays settings
 
-uint8   digitalB                # digital input B
+uint8   digitalB                # digital input B (steering position)
 
 int32 N_VOLTAGES = 3            # number of analog voltages
 float32[3] voltages             # analog voltages [A, B, C]

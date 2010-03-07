@@ -1,4 +1,4 @@
-<!-- -*- mode: nXML -*- -->
+<!-- -*- mode: XML -*- -->
 <!-- record an ROS bag from the raw device, with corresponding
      odometry, GPS and coordinate transforms
 -->

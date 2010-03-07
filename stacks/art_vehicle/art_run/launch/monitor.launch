@@ -1,4 +1,4 @@
-<!-- -*- mode: nXML -*- -->
+<!-- -*- mode: XML -*- -->
 <!-- launch log monitoring tools -->
 <launch>
   <group ns="monitor">

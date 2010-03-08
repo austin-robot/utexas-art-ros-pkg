@@ -1,0 +1,20 @@
+<!-- -*- mode: XML -*- -->
+
+<!-- launch file for viewing a theora camera1394 stream.  -->
+
+<launch>
+
+  <!-- republish with theora compression -->
+  <node pkg="image_transport" type="republish" name="theora"
+        args="raw theora">
+    <remap from="in" to="/camera1394/image"/>
+    <remap from="out" to="/camera1394/image"/>
+  </node>
+
+  <!-- view theora images -->
+  <node pkg="image_view" type="image_view" name="image_view">
+    <remap from="image" to="/camera1394/image"/>
+    <param name="image_transport" value="theora"/>
+  </node>
+
+</launch>

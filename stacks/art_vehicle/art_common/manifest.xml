@@ -9,13 +9,12 @@
   <license>BSD</license>
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/art_common</url>
-  <export>
-    <cpp cflags="-I${prefix}/include"/>
-  </export>
   <depend package="roscpp"/>
   <depend package="angles"/>
   <depend package="tf"/>
 
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>
+  </export>
+
 </package>
-
-

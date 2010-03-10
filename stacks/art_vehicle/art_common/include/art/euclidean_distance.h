@@ -22,7 +22,7 @@
 
 #include <art/epsilon.h>
 #include <art/infinity.h>
-#include <art/types.hh>
+//#include <art/types.hh>
 
 namespace Euclidean
 {
@@ -169,3 +169,4 @@ namespace Euclidean
 
 }
 #endif // _EUCLIDEAN_DISTANCE_H_ //
+o

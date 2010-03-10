@@ -1,0 +1,14 @@
+<!-- -*- mode: XML -*- -->
+
+<!-- Start a specific IEEE1394 digital camera.
+
+     environment: $CAMERA = guid of camera to start
+-->
+
+<launch>
+  <node pkg="camera1394" type="camera1394" name="camera_$(env CAMERA)"
+  	output="screen" respawn="false">
+    <rosparam command="load"
+              file="$(find art_image)/launch/$(env CAMERA).yaml" /> 
+  </node>
+</launch>

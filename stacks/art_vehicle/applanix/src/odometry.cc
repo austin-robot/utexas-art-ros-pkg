@@ -145,7 +145,7 @@ bool getNewData(applanix_data_t *adata)
   while (rc == 0);
 
   // see if a new navigation solution is available
-  if (adata->time != last_time)
+  if (adata->time == last_time)
     return false;
   // see if device is returning valid data yet
   if (adata->grp1.alignment == ApplStatusInvalid)

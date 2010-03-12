@@ -49,7 +49,7 @@ data are in the \b /odom frame of reference.
 
 #include <art/frames.h>
 #include <art/hertz.h>
-#include <art/coordinates.hh>
+#include <art/Position.h>
 #include <art/UTM.h>
 #include <applanix/applanix_info.h>
 
@@ -79,10 +79,10 @@ namespace
  *
  * returns: true if initial pose, false otherwise
  */
-bool GlobalToLocal(Coordinates::Pose3D *current) 
+bool GlobalToLocal(Position::Pose3D *current) 
 {
   // original pose when started (global coordinates)
-  static Coordinates::Pose3D start_pose;
+  static Position::Pose3D start_pose;
   static bool first_pose_received = false;
     
   if (first_pose_received == false)
@@ -203,7 +203,7 @@ void publishGPS(const applanix_data_t &adata, double utm_e, double utm_n,
  *
  *  \returns true if odometry should be published
  */
-bool getOdom(Coordinates::Position3D *odom_pos3d, ros::Time *odom_time,
+bool getOdom(Position::Position3D *odom_pos3d, ros::Time *odom_time,
              ros::Publisher *gps_pub)
 {
   if (!getNewData(&adata))
@@ -268,7 +268,7 @@ void getShifter(const art_servo::Shifter::ConstPtr &shifterIn)
 }
 
 /** Publish the current 3D Pose */
-void putPose(const Coordinates::Position3D *odom_pos3d,
+void putPose(const Position::Position3D *odom_pos3d,
              const ros::Time *odom_time,
              tf::TransformBroadcaster *odom_broad,
              ros::Publisher *odom_pub)
@@ -397,7 +397,7 @@ int main(int argc, char** argv)
 
   // initialize odometry state
   ros::Time odom_time;                  // time last full packet read
-  Coordinates::Position3D odom_pos3d;   // current 3D position
+  Position::Position3D odom_pos3d;      // current 3D position
   
   // connect to some ROS topics
   // no delay: we always want the most recent data

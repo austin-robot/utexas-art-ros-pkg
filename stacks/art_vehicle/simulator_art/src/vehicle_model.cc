@@ -27,7 +27,6 @@
 #include <art_servo/ThrottleState.h>
 
 #include <art_servo/steering.h>
-#include <art/coordinates.hh>
 #include <art/frames.h>
 #include <art/hertz.h>
 #include <art/vehicle.hh>

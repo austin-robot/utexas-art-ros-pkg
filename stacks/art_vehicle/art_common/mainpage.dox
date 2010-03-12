@@ -7,7 +7,6 @@ autonomous vehicle.
 
 \section progapi Programming API
 
-- <art/coordinates.hh> System-wide coordinate class definitions
 - <art/DARPA_rules.hh> DARPA Urban Challenge rules description
 - <art/vehicle.hh> Constants for the dimensions of the ART autonomous
   vehicle.

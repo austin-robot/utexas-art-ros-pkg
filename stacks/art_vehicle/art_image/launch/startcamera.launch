@@ -1,14 +1,18 @@
 <!-- -*- mode: XML -*- -->
 
-<!-- Start a specific IEEE1394 digital camera.
+<!-- Start the driver for a specific IEEE1394 digital camera.
+     (modifed from camera1394 package)
 
-     environment: $CAMERA = guid of camera to start
+     environment: $CAMERA = base file name of camera YAML parameters
+                  (default: test_camera)
 -->
 
 <launch>
-  <node pkg="camera1394" type="camera1394" name="camera_$(env CAMERA)"
-  	output="screen" respawn="false">
-    <rosparam command="load"
-              file="$(find art_image)/launch/$(env CAMERA).yaml" /> 
+
+  <!-- name node (and topic) after parameter file -->
+  <node pkg="camera1394" type="camera1394"
+        name="$(optenv CAMERA test_camera)" >
+    <rosparam
+       file="$(find art_image)/launch/$(optenv CAMERA test_camera).yaml" /> 
   </node>
 </launch>

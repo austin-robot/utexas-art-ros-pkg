@@ -17,6 +17,22 @@ OPTIONAL:
 
 DONE:
 
+* apt-get install:
+
+  git-core
+  libqt4-dev
+  ros-boxtutle-base
+  ros-boxtutle-image-transport-plugins
+  scons
+
+* svn co and build:
+
+  utexas-art-ros-pkg
+  sandbox
+  camera_drivers_experimental
+  dingo
+  player-2.12
+
 * get camera permissions working, added this to 60-art-udev.rules
 
   KERNEL=="raw1394", GROUP="video"

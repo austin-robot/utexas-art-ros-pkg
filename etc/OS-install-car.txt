@@ -3,7 +3,9 @@ Installing and configuring Ubuntu Karmic (64-bit) on the car:
 
 TODO:
 
-* figure out how to flip camera images upright
+* set ROS_PARALLEL_JOBS to -j4
+
+* figure out how to rotate camera images 180 degrees
 
 * fix simulator_art on Karmic
 

@@ -3,10 +3,6 @@ Installing and configuring Ubuntu Karmic (64-bit) on the car:
 
 TODO:
 
-* set ROS_PARALLEL_JOBS to -j4
-
-* figure out how to rotate camera images 180 degrees
-
 * fix simulator_art on Karmic
 
 * fix libQGLViewer 64-bit build for dingo
@@ -54,3 +50,12 @@ DONE:
   Ubuntu Bug #396564 for grub2
   Workaround: disable (nonexistent) floppy drive in BIOS
   (speeds up the boot slightly)
+
+* set ROS_PARALLEL_JOBS to -j4
+
+* figure out how to rotate camera images 180 degrees
+
+  Don did it mechanically
+
+* roslaunch art_run drive_pilot.launch
+

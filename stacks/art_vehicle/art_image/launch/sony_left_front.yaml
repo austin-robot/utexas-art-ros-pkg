@@ -4,6 +4,7 @@ guid: 0800461000821aa5
 video_mode: 1280x960_mono
 encoding: bayer_gbrg8
 fps: 15
+iso_speed: 800
 
 # setting Bayer pattern in the driver
 #bayer_pattern: GBRG

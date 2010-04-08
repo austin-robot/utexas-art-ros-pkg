@@ -59,3 +59,7 @@ DONE:
 
 * roslaunch art_run drive_pilot.launch
 
+* get cameras working under ROS
+
+  Had to install libraw1394-dev package to eliminate libdc1394v2
+  segfault.

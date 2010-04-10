@@ -60,8 +60,9 @@ class speedTopics:
 
     def get_odometry(self, odom):
         "ROS callback for /odom topic."
-        self.plt.set_odometry(odom.header.stamp.to_sec(),
-                              odom.twist.twist.linear.x)
+        if odom.header.stamp.to_sec() != 0.0:
+            self.plt.set_odometry(odom.header.stamp.to_sec(),
+                                  odom.twist.twist.linear.x)
 
     def get_brake_cmd(self, cmd):
         "ROS callback for /brake/cmd topic."

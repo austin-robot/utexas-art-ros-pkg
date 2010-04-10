@@ -67,6 +67,12 @@ class MainWindow(QtGui.QMainWindow):
         exit.setShortcut('Ctrl+Q')
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
+        center_wheel = QtGui.QAction(QtGui.QIcon(pkg_icon('go-first')),
+                            'center wheel', self)
+        center_wheel.setShortcut(QtCore.Qt.Key_Home)
+        self.connect(center_wheel, QtCore.SIGNAL('triggered()'),
+                     self.center_wheel)
+
         go_left = QtGui.QAction(QtGui.QIcon(pkg_icon('go-previous')),
                             'steer left', self)
         go_left.setShortcut(QtCore.Qt.Key_Left)
@@ -87,19 +93,28 @@ class MainWindow(QtGui.QMainWindow):
         go_right.setShortcut(QtCore.Qt.Key_Right)
         self.connect(go_right, QtCore.SIGNAL('triggered()'), self.go_right)
 
+        stop_car = QtGui.QAction(QtGui.QIcon(pkg_icon('go-bottom')),
+                                 'stop car', self)
+        stop_car.setShortcut(QtCore.Qt.Key_End)
+        self.connect(stop_car, QtCore.SIGNAL('triggered()'), self.stop_car)
+
 
         menubar = self.menuBar()
         file = menubar.addMenu('&File')
         file.addAction(exit)
+        file.addAction(center_wheel)
         file.addAction(go_left)
         file.addAction(slow_down)
+        file.addAction(stop_car)
         file.addAction(speed_up)
         file.addAction(go_right)
 
         toolbar = self.addToolBar('Controls')
         toolbar.addAction(exit)
+        toolbar.addAction(center_wheel)
         toolbar.addAction(go_left)
         toolbar.addAction(slow_down)
+        toolbar.addAction(stop_car)
         toolbar.addAction(speed_up)
         toolbar.addAction(go_right)
 
@@ -125,17 +140,29 @@ class MainWindow(QtGui.QMainWindow):
         self.carcmd.publish(self.car_msg)
         self.updateStatusBar()
 
+    def center_wheel(self):
+        "center steering wheel"
+        self.adjustCarCmd(0.0, -self.car_msg.angle)
+
     def go_left(self):
-        self.adjustCarCmd(0.0, 1.0)     # one degree left
+        "steer one degree left"
+        self.adjustCarCmd(0.0, 1.0)
+
+    def go_right(self):
+        "steer one degree right"
+        self.adjustCarCmd(0.0, -1.0)    # one degree right
 
     def slow_down(self):
+        "go one m/s slower"
         self.adjustCarCmd(-1.0, 0.0)    # one m/s slower
 
     def speed_up(self):
+        "go one m/s faster"
         self.adjustCarCmd(1.0, 0.0)     # one m/s faster
 
-    def go_right(self):
-        self.adjustCarCmd(0.0, -1.0)    # one degree right
+    def stop_car(self):
+        "stop car immediately"
+        self.adjustCarCmd(-self.car_msg.velocity, 0.0)
 
 
 class QtThread(threading.Thread):

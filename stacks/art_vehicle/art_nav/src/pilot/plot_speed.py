@@ -98,7 +98,6 @@ class speedData:
         it interactively.
         """
         pyplot.hold(False)
-        #pyplot.figure(3)
         pyplot.title(self.name + " servo")
         pyplot.plot(self.bs_t, -self.bs_pos, 'r-', label="-brake")
         pyplot.hold(True)
@@ -119,7 +118,6 @@ class speedData:
         it interactively.
         """
         pyplot.hold(False)
-        #pyplot.figure(2)
         pyplot.title(self.name + " speed")
         pyplot.plot(self.od_t, self.od_v, 'b-', label="velocity")
         pyplot.hold(True)
@@ -138,7 +136,6 @@ class speedData:
         it interactively.
         """
         pyplot.hold(False)
-        #pyplot.figure(1)
         pyplot.axis("off")              # no axis for overall figure
         pyplot.title(self.name + " speed summary")
 

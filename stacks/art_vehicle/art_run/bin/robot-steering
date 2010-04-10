@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# steering setup and test
+# $Id: robot-steering 2614 2005-10-01 23:08:13Z robot $
+
+CMD=${1-help}
+TTY=${2-/dev/steering}
+
+# Function to send the Quicksilver a command, then read its status
+# line with a 1-second timeout.  The parentheses keep the device open
+# for both the echo and the read.  Otherwise the status gets lost.
+
+servo_cmd()
+{
+   (
+	echo "$*"
+	if read -t 1 status
+	then
+		echo "Quicksilver returns: $status" >&2
+		return 0
+	else
+		echo "Quicksilver not responding"   >&2
+		return 1
+	fi
+   )  > ${TTY} < ${TTY}
+}
+
+case $CMD in
+  center)
+	echo "centering steering wheel"
+	servo_cmd "@16 11 20 0"
+	rc=$?
+	;;
+  config) 
+	echo "configuring ${TTY} for steering"
+	stty -F ${TTY} sane
+	stty -F ${TTY} 57600 icrnl
+	rc=$?
+	stty -F ${TTY}
+	;;
+  help)
+	echo -e "usage: `basename $0` command [serial-port]"
+	echo -e "\ncommand options:"
+	echo -e "\tcenter\tcenter steering wheel"
+	echo -e "\tconfig\tconfigure port"
+	echo -e "\thelp\tprint this help message"
+	echo -e "\tleft\tturn steering wheel left"
+	echo -e "\tright\tturn steering wheel right"
+	echo -e "\tsetup\tinitialize steering servo"
+	echo -e "\ndefault serial-port: /dev/steering"
+	exit 1
+	;;
+  setup)
+	echo initializing steering on ${TTY}
+	echo "WRI Reg 20 (Position) = 0"
+	servo_cmd "@16 11 20 0"
+	# Max Acceleration: 3865 = 1 RPS/s
+	echo "WRI Reg 21 (Accelera) = 25 RPS/s"
+	servo_cmd "@16 11 21 193274"
+	# Max Velocity: (2^31/16,000) * (60RPM/RPS) = 8,053,064 = 1 RPS
+	echo "WRI Reg 22 (Velocity) = 1 RPS"
+#	servo_cmd "@16 11 22 322122547"
+	servo_cmd "@16 11 22 644245094"
+	echo "WRI Reg 23 (Declerat) = -25 RPS/s"
+	servo_cmd "@16 11 23 193274"
+	echo "WRI Reg 24 (Offset) = 0"
+	servo_cmd "@16 11 24 0"
+	echo "PMC"
+	servo_cmd "@16 240 0 0"
+	rc=$?
+	if [ $rc != 0 ]
+	then
+		echo "steering setup failed: recycle power and try again"
+		exit $rc
+	fi
+	echo "WRI Reg 39 (Soft Stop Lower) = -300001"
+	servo_cmd "@16 11 39 -300001"
+	echo "WRI Reg 40 (Soft Stop Upper) = 300001"
+	servo_cmd "@16 11 40 300001"
+	;;
+  left) 
+	echo "turning steering wheel a little to the left"
+	servo_cmd "@16 11 20 -50000"
+	rc=$?
+	;;
+  right) 
+	echo "turning steering wheel a little to the right"
+	servo_cmd "@16 11 20 50000"
+	rc=$?
+	;;
+  *)
+	echo "unknown command: ${CMD}"
+	$0 help
+	exit 9
+	;;
+esac
+exit $rc

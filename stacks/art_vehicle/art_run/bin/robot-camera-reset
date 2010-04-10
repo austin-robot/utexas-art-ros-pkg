@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo modprobe -r video1394
+sleep 1
+sudo modprobe video1394

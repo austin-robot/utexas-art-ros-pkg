@@ -3,7 +3,7 @@
               Robot Operating System package repository
 
                              Jack O'Quin
-                             1 Feb. 2010
+                             10 Apr. 2010
 
 
 The stacks directory contains initial versions of several ROS stacks,
@@ -72,9 +72,20 @@ Directions:
      export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:~/svn/utexas-art-ros-pkg
      EOF
 
- (3) Log out and log back in.
+ (3) If you want to run ART robot utility scripts directly from the
+     shell, add this to your .bashrc:
 
- (4) Try to run some ROS commands:
+     $ cat <<'EOF' >> ~/.bashrc
+
+     ART_RUN=`rospack find art_run`
+     if [ "$ART_RUN" != "" ] && [ -d $ART_RUN/bin ]
+     then export PATH=$ART_RUN/bin:$PATH
+     fi
+     EOF
+
+ (4) Log out and log back in.
+
+ (5) Try to run some ROS commands:
 
      $ rospack find velodyne_common
      $ roscd velodyne_common
@@ -82,7 +93,7 @@ Directions:
 
      This should compile cleanly.
 
- (5) There is a rosemacs package, highly recommended for serious
+ (6) There is a rosemacs package, highly recommended for serious
      software development on Linux or Unix. To get it working, I have
      to start emacs from a shell.  I do not know how to start it from
      the GNOME panel icon with all the required environment variables

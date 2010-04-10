@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# throttle setup and test
+# $Id: robot-throttle 3883 2007-03-05 00:11:14Z robot $
+
+CMD=${1-help}
+TTY=${2-/dev/throttle}
+
+# Function to send the throttle a command, then read its response with
+# a 1-second timeout.  The parentheses keep the device open for both
+# the echo and the read.  Otherwise the response would get lost.
+
+servo_cmd()
+{
+   (
+	echo "$*"
+	echo -e "$*\r" >&3
+	if read -t 1 status <&3
+	then
+		devrc=$?
+		echo "throttle \"$*\" returned \"$status"\"
+	else
+		devrc=$?
+		echo "throttle not responding"
+	fi
+   )  3<> ${TTY}
+   return $devrc
+}
+
+case $CMD in
+  config) 
+	echo "configuring ${TTY} for throttle"
+ 	stty -F ${TTY} 115200
+	rc=$?
+	stty -F ${TTY}
+	;;
+  cli-on)
+	echo "enter CLI mode"
+	servo_cmd "9400016B"
+	rc=$?
+	;;
+  cli-off)
+	echo "exit CLI mode"
+	servo_cmd "9400006C"
+	rc=$?
+	;;
+  debug)
+	echo "debug print"
+	servo_cmd "83007D"
+	rc=$?
+	;;
+  error)
+	echo "send throttle an erroneous packet"
+	servo_cmd "3405CCF0"
+	rc=$?
+	;;
+  full)
+	echo "set throttle wide-open"
+	servo_cmd "3405CCFB"
+	rc=$?
+	;;
+  half)
+	echo "set throttle half-open"
+	servo_cmd "34047553"
+	rc=$?
+	;;
+  help)
+	echo -e "usage: `basename $0` command [serial-port]"
+	echo -e "\ncommand options:"
+	echo -e "\tconfig\tconfigure port"
+	echo -e "\tcli-off\tturn off cli mode"
+	echo -e "\tcli-on\tturn on cli mode"
+	echo -e "\tdebug\tprint debug info"
+	echo -e "\tfull\tset throttle wide-open"
+	echo -e "\thalf\tset throttle half-open"
+	echo -e "\thelp\tprint this help message"
+	echo -e "\tidle\tset throttle to idle"
+	echo -e "\tquarter\tset throttle quarter-open"
+	echo -e "\tsetup\tinitialize throttle servo"
+	echo -e "\tstatus\tquery throttle status"
+	echo -e "\ndefault serial-port: /dev/throttle"
+	exit 1
+	;;
+  idle)
+	echo "setting ${TTY} to idle"
+	servo_cmd "34021CA8"
+	rc=$?
+	;;
+  quarter)
+	echo "set throttle quarter-open"
+	servo_cmd "34032B9E"
+	rc=$?
+	;;
+  setup)
+	echo "resetting CLI mode on ${TTY}"
+	servo_cmd "9400006C"
+	echo "initializing ${TTY} (to idle)"
+	servo_cmd "34021FAB"
+	rc=$?
+	;;
+  status)
+	echo "checking ${TTY} status"
+	servo_cmd "2300DD"
+	rc=$?
+	;;
+  *)
+	echo "unknown command: ${CMD}"
+	$0 help
+	exit 9
+	;;
+esac
+exit $rc

@@ -11,8 +11,10 @@ Help is provided in each case:
     --help describes the arguments and options
 
   as a module:
-    import robot_brake
-    help(robot_brake.commands)
+    import roslib
+    roslib.load_manifest('art_servo')
+    import brake.robot_brake
+    help(brake.robot_brake.commands)
 
 """
 
@@ -33,7 +35,7 @@ class commands:
 
     def __init__(self, device=TTY):
         """ Constructor method.
-            Takes serail port as input.
+            Takes serial port as input.
         """
         self.ser=serial.Serial(device, 38400, timeout=1)
         self.ser.open()
@@ -164,9 +166,9 @@ def usage(progname):
  default serial-port: /dev/brake
 """
 
-# main program -- for either script or interactive use
+# main program
 def main(argv=None):
-    """ Main program.
+    """ Main program. For either script or interactive use.
     """
     global TTY
 
@@ -201,7 +203,11 @@ def main(argv=None):
     if len(params) == 2:
         TTY = params[1]
 
-    c = commands(TTY)
+    try:
+        c = commands(TTY)
+    except serial.serialutil.SerialException, ioerror:
+        print ioerror
+        return 1
 
     CMD=params[0]
     if CMD=="baud":

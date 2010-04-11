@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest('art_servo')
+import roslib; roslib.load_manifest('art_run')
 import sys
 import robot_brake
 sys.exit(robot_brake.main())

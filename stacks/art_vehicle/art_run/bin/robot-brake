@@ -2,5 +2,5 @@
 
 import roslib; roslib.load_manifest('art_run')
 import sys
-import robot_brake
-sys.exit(robot_brake.main())
+import brake.robot_brake
+sys.exit(brake.robot_brake.main())

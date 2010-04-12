@@ -78,6 +78,14 @@ class MainWindow(QtGui.QMainWindow):
         go_left.setShortcut(QtCore.Qt.Key_Left)
         self.connect(go_left, QtCore.SIGNAL('triggered()'), self.go_left)
 
+        go_left_more = QtGui.QAction('steer left more', self)
+        go_left_more.setShortcut(QtGui.QKeySequence.SelectPreviousWord)
+        self.connect(go_left_more, QtCore.SIGNAL('triggered()'), self.go_left_more)
+
+        go_left_less = QtGui.QAction('steer left less', self)
+        go_left_less.setShortcut(QtGui.QKeySequence.MoveToPreviousWord)
+        self.connect(go_left_less, QtCore.SIGNAL('triggered()'), self.go_left_less)
+
         slow_down = QtGui.QAction(QtGui.QIcon(pkg_icon('go-down')),
                             'slow down', self)
         slow_down.setShortcut(QtCore.Qt.Key_Down)
@@ -93,6 +101,14 @@ class MainWindow(QtGui.QMainWindow):
         go_right.setShortcut(QtCore.Qt.Key_Right)
         self.connect(go_right, QtCore.SIGNAL('triggered()'), self.go_right)
 
+        go_right_less = QtGui.QAction('steer right less', self)
+        go_right_less.setShortcut(QtGui.QKeySequence.MoveToNextWord)
+        self.connect(go_right_less, QtCore.SIGNAL('triggered()'), self.go_right_less)
+
+        go_right_more = QtGui.QAction('steer right more', self)
+        go_right_more.setShortcut(QtGui.QKeySequence.SelectNextWord)
+        self.connect(go_right_more, QtCore.SIGNAL('triggered()'), self.go_right_more)
+
         stop_car = QtGui.QAction(QtGui.QIcon(pkg_icon('go-bottom')),
                                  'stop car', self)
         stop_car.setShortcut(QtCore.Qt.Key_End)
@@ -104,10 +120,14 @@ class MainWindow(QtGui.QMainWindow):
         file.addAction(exit)
         file.addAction(center_wheel)
         file.addAction(go_left)
+        file.addAction(go_left_less)
+        file.addAction(go_left_more)
         file.addAction(slow_down)
         file.addAction(stop_car)
         file.addAction(speed_up)
         file.addAction(go_right)
+        file.addAction(go_right_less)
+        file.addAction(go_right_more)
 
         toolbar = self.addToolBar('Controls')
         toolbar.addAction(exit)
@@ -137,6 +157,10 @@ class MainWindow(QtGui.QMainWindow):
         self.car_msg.header.stamp = rospy.Time.now()
         self.car_msg.velocity += v
         self.car_msg.angle += a
+        if self.car_msg.angle > 29.0:
+            self.car_msg.angle = 29.0
+        if self.car_msg.angle < -29.0:
+            self.car_msg.angle = -29.0
         self.carcmd.publish(self.car_msg)
         self.updateStatusBar()
 
@@ -145,12 +169,28 @@ class MainWindow(QtGui.QMainWindow):
         self.adjustCarCmd(0.0, -self.car_msg.angle)
 
     def go_left(self):
-        "steer one degree left"
+        "steer left"
         self.adjustCarCmd(0.0, 1.0)
 
+    def go_left_more(self):
+        "steer more to left"
+        self.adjustCarCmd(0.0, 4.0)
+
+    def go_left_less(self):
+        "steer a little to left"
+        self.adjustCarCmd(0.0, 0.25)
+
     def go_right(self):
-        "steer one degree right"
-        self.adjustCarCmd(0.0, -1.0)    # one degree right
+        "steer right"
+        self.adjustCarCmd(0.0, -1.0)
+
+    def go_right_more(self):
+        "steer more to right"
+        self.adjustCarCmd(0.0, -4.0)
+
+    def go_right_less(self):
+        "steer far to right"
+        self.adjustCarCmd(0.0, -0.25)
 
     def slow_down(self):
         "go one m/s slower"

@@ -183,8 +183,8 @@ def main(argv=None):
     # process parameters
     opts = {}
     try:
-        o, params = getopt.gnu_getopt(argv[1:], 'h',
-                                     ('help'))
+        o, params = getopt.gnu_getopt(argv[1:], 'h', ('help'))
+
     except getopt.error, msg:
         print msg
         print "for help use --help"
@@ -205,28 +205,28 @@ def main(argv=None):
 
     try:
         c = commands(TTY)
+
+        CMD=params[0]
+        if CMD=="baud":
+            c.baud()
+        elif CMD=="pos":
+            c.pos()
+        elif CMD=="full":
+            c.full()
+        elif CMD=="off":
+            c.off()
+        elif CMD=="setup":
+            c.setup()
+        elif CMD=="st":
+            c.st()
+        else:
+            usage(progname)
+            print "invalid command provided"
+            return 7
+
     except serial.serialutil.SerialException, ioerror:
         print ioerror
         return 1
-
-    CMD=params[0]
-    if CMD=="baud":
-        c.baud()
-    elif CMD=="pos":
-        c.pos()
-    elif CMD=="full":
-        c.full()
-    elif CMD=="off":
-        c.off()
-    elif CMD=="setup":
-        c.setup()
-    elif CMD=="st":
-        c.st()
-    else:
-        usage(progname)
-        print "invalid command provided"
-        return 7
-
 
 
 if __name__ == "__main__":

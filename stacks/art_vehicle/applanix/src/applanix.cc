@@ -86,6 +86,7 @@ int DevApplanix::connect_socket(void)
 {
   int rc;
 
+  ROS_DEBUG(DEVICE " creating socket");
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
     {
@@ -112,6 +113,7 @@ int DevApplanix::connect_socket(void)
   serveraddr.sin_port = htons(APPLANIX_RTDATA_PORT);       
  
   // Now connect to the server
+  ROS_DEBUG(DEVICE " connecting to socket");
   rc = connect(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr));
   if (rc < 0)
     {
@@ -143,17 +145,21 @@ int DevApplanix::read_packet(ros::Time *time)
   // try to complete the packet in our buffer
   do
     {
+      ROS_DEBUG(DEVICE " reading socket");
       nbytes = recv(sockfd, packet_buffer+buffer_length,
 		    sizeof(packet_buffer)-buffer_length, 0);
     }
   while ((nbytes < 0) && (errno == EINTR));
 
   if (nbytes == 0)			// nothing received?
-    return EAGAIN;
+    {
+      ROS_DEBUG(DEVICE " nothing received");
+      return EAGAIN;
+    }
   else if (nbytes < 0)
     {
       if (errno != EAGAIN)
-	ROS_WARN(DEVICE "socket recv() error (%s)", strerror(errno));
+	ROS_WARN(DEVICE " socket recv() error (%s)", strerror(errno));
       return errno;
     }
 
@@ -290,6 +296,7 @@ int DevApplanixPCAP::read_packet(ros::Time *time)
               ROS_INFO("wrong TCP data port: %u", dport);
               return EAGAIN;            // ignore this packet
             }
+          ROS_DEBUG_STREAM("have TCP packet, port " << dport);
           pkt_offset += size_tcp;           // message offset in packet
         }
       else if (ip->protocol == IPPROTO_UDP) // got a UDP packet?
@@ -304,11 +311,14 @@ int DevApplanixPCAP::read_packet(ros::Time *time)
               ROS_DEBUG("other UDP data port: %u", dport);
               return EAGAIN;            // ignore this packet
             }
-          //ROS_INFO("have UDP packet, port %u", dport);
+          ROS_DEBUG_STREAM("have UDP packet, port " << dport);
           pkt_offset += sizeof(struct udphdr); // message offset in packet
         }
       else
-        return EAGAIN;                  // ignore other packets
+        {
+          ROS_DEBUG_STREAM("non-Applanix packet, protocol " << ip->protocol);
+          return EAGAIN;                // ignore other packets
+        }
 
 
         // copy all packet data after headers to buffer

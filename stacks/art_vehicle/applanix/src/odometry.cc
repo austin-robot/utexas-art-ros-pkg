@@ -82,43 +82,53 @@ namespace
 bool GlobalToLocal(Position::Pose3D *current) 
 {
   // original pose when started (global coordinates)
-  static Position::Pose3D start_pose;
+  static Position::Pose3D map_origin;
+  static double origin_grid = 10000.0;  // 10 km grid
   static bool first_pose_received = false;
-    
-  if (first_pose_received == false)
-    {
-      // initial conditions. store where we have started from so that
-      // we can offset future data points from here
 
-      ROS_INFO("INITIAL data (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)",
-               current->x, current->y, current->z,
-               current->roll, current->pitch, current->yaw);
-      start_pose = *current;
+  ROS_DEBUG("Global data (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)",
+            current->x, current->y, current->z,
+            current->roll, current->pitch, current->yaw);
+
+  bool initial_pose = !first_pose_received;
+
+  if (initial_pose)
+    {
+      // Initial conditions. Compute map origin from starting point
+      // using a 10km grid so we can offset future data points from
+      // there. If the driver restarts within the same region, it will
+      // pick the same origin.
+
+      map_origin = *current;
+      map_origin.x = rint(map_origin.x/origin_grid) * origin_grid;
+      map_origin.y = rint(map_origin.y/origin_grid) * origin_grid;
+      // map_origin.z: leave  alone, don't need to round
+
       first_pose_received = true;
-    
-      return true;
-    }
-  else
-    {
-      // general case. see how far we have gone & the angle between
-      // the coordinate systems and translate between global (X, Y)
-      // and local (x, y)
-      ROS_DEBUG("Global data (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)",
-                current->x, current->y, current->z,
-                current->roll, current->pitch, current->yaw);
 
-      // We do not subtract one entire Pose3D from the other to avoid
-      // changing the roll, pitch and yaw fields (and also to forgo
-      // unnecessary arithmetic).
-      current->x -= start_pose.x;
-      current->y -= start_pose.y;
-      current->z -= start_pose.z;
-
-      ROS_DEBUG("Local data  (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)",
-                current->x, current->y, current->z,
-                current->roll, current->pitch, current->yaw);
-      return false;
+      ROS_INFO("INITIAL data (%.3f, %.3f, %.3f), map origin (%.3f, %.3f, %.3f)",
+               current->x, current->y, current->z,
+               map_origin.x, map_origin.y, map_origin.z);
     }
+
+
+  // General case.  See how far we have gone & the angle between
+  // the coordinate systems and translate between global (X, Y)
+  // and local (x, y)
+
+  // We do not subtract one entire Pose3D from the other to avoid
+  // changing the roll, pitch and yaw fields (and also to forgo
+  // unnecessary arithmetic).
+  current->x -= map_origin.x;
+  current->y -= map_origin.y;
+  current->z -= map_origin.z;
+
+  ROS_DEBUG("Local data  (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)",
+            current->x, current->y, current->z,
+            current->roll, current->pitch, current->yaw);
+
+
+  return initial_pose;
 }
 
 /** Get new Applanix data.
@@ -131,15 +141,21 @@ bool getNewData(applanix_data_t *adata)
 {
   static ros::Time last_time;
 
+  ROS_DEBUG("getNewData()");
+
   // read and unpack first packet
   int rc = applanix_->get_packet(adata);
   if (rc != 0)				// none available?
-    return false;
+    {
+      ROS_DEBUG("no packet found");
+      return false;
+    }
 
   // Get any additional packets already queued.  It is OK if there are
   // none, but we want to return the latest available information.
   do
     {
+      ROS_DEBUG_STREAM("got packet, time: " << adata->time);
       rc = applanix_->get_packet(adata);
     }
   while (rc == 0);
@@ -150,11 +166,6 @@ bool getNewData(applanix_data_t *adata)
   // see if device is returning valid data yet
   if (adata->grp1.alignment == ApplStatusInvalid)
     return false;			// no valid solution yet
-#if 0
-  // alignment not working reliably for us, so add this hack
-  if (adata->grp1.lat == 0.0 && adata->grp1.lon == 0.0)
-    return false;			// nothing available yet
-#endif
 
   last_time = adata->time;              // remember time of last update
   return true;
@@ -207,7 +218,10 @@ bool getOdom(Position::Position3D *odom_pos3d, ros::Time *odom_time,
              ros::Publisher *gps_pub)
 {
   if (!getNewData(&adata))
-    return false;                       // nothing to publish
+    {
+      ROS_DEBUG("no data this cycle");
+      return false;                     // nothing to publish
+    }
 
   // remember when the new data arrived
   *odom_time = adata.time;
@@ -421,6 +435,8 @@ int main(int argc, char** argv)
   // main loop
   while(ros::ok())
     {
+      ROS_DEBUG(NODE ": looping");
+
       if (getOdom(&odom_pos3d, &odom_time, &gps_pub))
         {
           // publish transform and odometry only when there are new
@@ -429,6 +445,8 @@ int main(int argc, char** argv)
         }
 
       ros::spinOnce();                  // handle incoming messages
+
+      ROS_DEBUG(NODE ": end cycle");
 
       cycle.sleep();                    // sleep until next cycle
     }

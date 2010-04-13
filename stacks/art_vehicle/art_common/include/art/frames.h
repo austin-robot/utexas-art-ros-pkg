@@ -58,7 +58,7 @@ namespace ArtFrames
      */
     inline std::string getFrame(std::string relframe)
     {
-      return tf::remap(prefix_, relframe);
+      return tf::resolve(prefix_, relframe);
     }
 
   private:

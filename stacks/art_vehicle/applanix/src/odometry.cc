@@ -231,8 +231,9 @@ bool getOdom(Position::Position3D *odom_pos3d, ros::Time *odom_time,
 
   // Convert latitude and longitude (spherical coordinates) to
   // Universal Transverse Mercator (Cartesian).
+  // TODO: also save zone letter
   double utm_e, utm_n;			// easting, northing (in meters)
-  UTM(adata.grp1.lat, adata.grp1.lon, &utm_e, &utm_n);
+  UTM::UTM(adata.grp1.lat, adata.grp1.lon, &utm_e, &utm_n);
 
   // publish GPS information topic
   publishGPS(adata, utm_e, utm_n, gps_pub);

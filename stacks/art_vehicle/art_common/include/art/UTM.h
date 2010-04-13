@@ -1,8 +1,6 @@
 /*
- *  Description: conversion from Latitude/Longitude to UTM
+ *  Description: conversions between Latitude/Longitude and UTM
  *		 (Universal Transverse Mercator) coordinates.
- *
- *  Copyright (C) 2009 Austin Robot Technology                    
  *
  *  License: Modified BSD Software License Agreement
  *
@@ -18,6 +16,9 @@
 
      Functions to convert (spherical) latitude and longitude to and
      from (Euclidean) UTM coordinates.
+
+     @author Chuck Gantz- chuck.gantz@globalstar.com
+
  */
 
 #include <cmath>
@@ -25,6 +26,9 @@
 #include <stdlib.h>
 
 #include <art/conversions.h>
+
+namespace UTM
+{
 
 // WGS84 Parameters
 #define WGS84_A		6378137.0		// major axis
@@ -49,7 +53,6 @@
  * Units in are floating point degrees (sign for east/west)
  *
  * Units out are meters
- *
  */
 static inline void UTM(double lat, double lon, double *x, double *y)
 {
@@ -96,11 +99,16 @@ static inline void UTM(double lat, double lon, double *x, double *y)
 }
 
 
+/**
+ * Determine the correct UTM letter designator for the
+ * given latitude
+ *
+ * returns 'Z' if latitude is outside the UTM limits of 84N to 80S
+ *
+ * Written by Chuck Gantz- chuck.gantz@globalstar.com
+ */
 static inline char UTMLetterDesignator(double Lat)
 {
-//This routine determines the correct UTM letter designator for the given latitude
-//returns 'Z' if latitude is outside the UTM limits of 84N to 80S
-	//Written by Chuck Gantz- chuck.gantz@globalstar.com
 	char LetterDesignator;
 
 	if((84 >= Lat) && (Lat >= 72)) LetterDesignator = 'X';
@@ -129,15 +137,17 @@ static inline char UTMLetterDesignator(double Lat)
 }
 
 
+// Convert lat/long to UTM coords.  Equations from USGS Bulletin 1532 
+//
+// East Longitudes are positive, West longitudes are negative. 
+// North latitudes are positive, South latitudes are negative
+// Lat and Long are in fractional degrees
+//
+//Written by Chuck Gantz- chuck.gantz@globalstar.com
+
 static inline void LLtoUTM(const double Lat, const double Long, 
 			 double &UTMNorthing, double &UTMEasting, char* UTMZone)
 {
-//converts lat/long to UTM coords.  Equations from USGS Bulletin 1532 
-//East Longitudes are positive, West longitudes are negative. 
-//North latitudes are positive, South latitudes are negative
-//Lat and Long are in decimal degrees
-	//Written by Chuck Gantz- chuck.gantz@globalstar.com
-
 	double a = WGS84_A;
 	double eccSquared = UTM_E2;
 	double k0 = UTM_K0;
@@ -196,16 +206,17 @@ static inline void LLtoUTM(const double Lat, const double Long,
 }
 
 
+// Converts UTM coords to lat/long.  Equations from USGS Bulletin 1532 
+//
+// East Longitudes are positive, West longitudes are negative. 
+// North latitudes are positive, South latitudes are negative
+// Lat and Long are in fractional degrees. 
+//
+// Written by Chuck Gantz- chuck.gantz@globalstar.com
 
 static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting, const char* UTMZone,
 			  double& Lat,  double& Long )
 {
-//converts UTM coords to lat/long.  Equations from USGS Bulletin 1532 
-//East Longitudes are positive, West longitudes are negative. 
-//North latitudes are positive, South latitudes are negative
-//Lat and Long are in decimal degrees. 
-	//Written by Chuck Gantz- chuck.gantz@globalstar.com
-
 	double k0 = UTM_K0;
 	double a = WGS84_A;
 	double eccSquared = UTM_E2;
@@ -258,6 +269,6 @@ static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting, co
 	Long = LongOrigin + Long * DEGREES_PER_RADIAN;
 
 }
-
+} // end namespace UTM
 
 #endif // _UTM_H

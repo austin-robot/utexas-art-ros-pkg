@@ -10,8 +10,6 @@
 /**  \file
  
      Model speed and turn rate of the ART autonomous vehicle.
-
-     \todo figure out GPS publication
  
      \author Jack O'Quin
 
@@ -54,6 +52,10 @@ public:
     tf_ = tfBroad;                      // ROS transform broadcaster
     ns_prefix_ = ns_prefix;             // namespace prefix
     tf_prefix_ = ns_prefix + "/";       // transform ID prefix
+
+    // set default GPS origin (site visit at SwRI in San Antonio)
+    origin_lat_ = 29.446018;
+    origin_long_ = -98.607024;
 
     // servo control status
     brake_position_ = 1.0;
@@ -107,12 +109,12 @@ private:
   float steering_angle_;
   float throttle_position_;
 
-#ifdef GPS
-  void updateGPS(void);		        // update GPS info
-  double origin_lat, origin_long;
-  player_devaddr_t gps_addr;
-  gps_info odom_gps;
-#endif
+  void publishGPS(ros::Time sim_time);
+
+  double origin_lat_;
+  double origin_long_;
+
+  ros::Publisher gps_pub_;
 };
 
 #endif // _VEHICLE_MODEL_H_

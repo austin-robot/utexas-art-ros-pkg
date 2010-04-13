@@ -12,8 +12,8 @@ float64 latitude
 
 float64 longitude
 
-# Altitude, in millimeters.  Positive is above reference (e.g.,
-# sea-level), and negative is below.
+# Altitude, in meters.  Positive is above reference (e.g., sea-level),
+# and negative is below.
 
 float64 altitude
 
@@ -24,6 +24,10 @@ float64 utm_e
 # UTM WGS84 coordinates, northing [m]
 
 float64 utm_n
+
+# UTM zone
+
+string zone
 
 # Horizontal dilution of position (HDOP)
 

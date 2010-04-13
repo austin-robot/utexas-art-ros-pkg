@@ -10,32 +10,28 @@
  
      Model speed and turn rate of the ART autonomous vehicle.
 
-     \todo figure out GPS publication
- 
      \author Jack O'Quin
 
  */
-#undef GPS                              // not implemented
+
+//#define GPS 0                           // GPS not implemented
+#define GPS 1                           // publish GPS info
 
 #include <angles/angles.h>
 
 #include <art/conversions.h>
+#include <art/epsilon.h>
+#include <art/frames.h>
+#include <art/UTM.h>
+#include <art/vehicle.hh>
 
 #include <art_servo/BrakeState.h>
 #include <art_servo/Shifter.h>
 #include <art_servo/SteeringState.h>
 #include <art_servo/ThrottleState.h>
-
 #include <art_servo/steering.h>
-#include <art/frames.h>
-#include <art/hertz.h>
-#include <art/vehicle.hh>
-#include <art/epsilon.h>
 
-#ifdef GPS
-#include <art/applanix_info.h>
-#include <art/UTM.h>
-#endif
+#include <applanix/GpsInfo.h>
 
 #include "vehicle_model.h"
 
@@ -48,6 +44,8 @@ void ArtVehicleModel::setup(void)
     node_.advertise<nav_msgs::Odometry>(ns_prefix_ + "odom", qDepth);
   ground_truth_pub_ =
     node_.advertise<nav_msgs::Odometry>(ns_prefix_ + "ground_truth", qDepth);
+  gps_pub_ =
+    node_.advertise<applanix::GpsInfo>(ns_prefix_ + "gps", qDepth);
   
   // servo state topics
   brake_sub_ =
@@ -174,6 +172,7 @@ void ArtVehicleModel::update(ros::Time sim_time)
 
   // Get latest position data from Stage
   // Translate into ROS message format and publish
+  // TODO: relocate x and y relative to UTM origin
   odomMsg_.pose.pose.position.x = stgp_->est_pose.x;
   odomMsg_.pose.pose.position.y = stgp_->est_pose.y;
   odomMsg_.pose.pose.orientation =
@@ -220,37 +219,48 @@ void ArtVehicleModel::update(ros::Time sim_time)
   groundTruthMsg_.child_frame_id = tf_prefix_ + ArtFrames::vehicle;
   ground_truth_pub_.publish(groundTruthMsg_);
 
-#ifdef GPS
-  updateGPS();
-    
-  Publish(gps_addr,
-	  PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,
-	  (void*)&opaque, sizeof(opaque.data_count)+opaque.data_count);
-#endif
+  publishGPS(sim_time);
 
   last_update_time_ = sim_time;
 }
 
-#if GPS
-void ArtVehicleModel::updateGPS()
+void ArtVehicleModel::publishGPS(ros::Time sim_time)
 {
+#if GPS
   double UTMe = 0;
   double UTMn = 0;
   double car_lat = 0;
   double car_long = 0;
   char zone[255];
-  LLtoUTM(origin_lat, origin_long, UTMn, UTMe, zone);
-  UTMe += cur_pos.pos.px;
-  UTMn += cur_pos.pos.py;
+
+  // TODO: convert origin latitude and longitude to UTM in setup(),
+  // round to nearest 10km grid intersection.  Set positions relative
+  // to that location.
+  UTM::LLtoUTM(origin_lat_, origin_long_, UTMn, UTMe, zone);
+  UTMe += odomMsg_.pose.pose.position.x;
+  UTMn += odomMsg_.pose.pose.position.y;
+
+  UTM::UTMtoLL(UTMn, UTMe, zone, car_lat, car_long);
   //std::cerr << zone << std::endl;
-  UTMtoLL(UTMn, UTMe, zone, car_lat, car_long);
   //std::cerr << "car_x: " << cur_pos.pos.px << std::endl;
   //std::cerr << "car_y: " << cur_pos.pos.py << std::endl;
-  odom_gps.gps_latitude=car_lat;
-  odom_gps.gps_longitude=car_long;
-  /*
-  odom_gps.gps_latitude=origin_lat;
-  odom_gps.gps_longitude=origin_long;
-  */
-}
+
+  applanix::GpsInfo gpsi;
+
+  gpsi.header.stamp = sim_time;
+  gpsi.header.frame_id = tf_prefix_ + ArtFrames::odom;
+
+  gpsi.latitude   = car_lat;
+  gpsi.longitude  = car_long;
+  gpsi.altitude   = odomMsg_.pose.pose.position.z;
+
+  gpsi.utm_e  = UTMe;
+  gpsi.utm_n  = UTMn;
+  gpsi.zone = zone;
+
+  gpsi.quality = applanix::GpsInfo::DGPS_FIX;
+  gpsi.num_sats = 9;
+
+  gps_pub_.publish(gpsi);
 #endif
+}

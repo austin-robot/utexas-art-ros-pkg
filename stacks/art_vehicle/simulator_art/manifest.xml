@@ -19,5 +19,6 @@
   <depend package="angles"/>
   <depend package="art_common"/>
   <depend package="art_servo"/>
+  <depend package="applanix"/>
 
 </package>

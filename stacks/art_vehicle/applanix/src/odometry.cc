@@ -66,6 +66,9 @@ namespace
   // command parameters
   int qDepth = 1;                       // ROS topic queue size
 
+  // class for generating vehicle-relative frame IDs
+  ArtFrames::VehicleRelative vr_;
+
   // GPS information
   applanix_data_t adata;		// saved applanix data packets
   DevApplanix *applanix_;		// Applanix device interface
@@ -102,7 +105,7 @@ bool GlobalToLocal(Position::Pose3D *current)
       map_origin = *current;
       map_origin.x = rint(map_origin.x/origin_grid) * origin_grid;
       map_origin.y = rint(map_origin.y/origin_grid) * origin_grid;
-      // map_origin.z: leave  alone, don't need to round
+      map_origin.z = 0.0;               // leave elevations alone
 
       first_pose_received = true;
 
@@ -178,7 +181,7 @@ void publishGPS(const applanix_data_t &adata, double utm_e, double utm_n,
   applanix::GpsInfo gpsi;
 
   gpsi.header.stamp = adata.time;
-  gpsi.header.frame_id = ArtFrames::odom;
+  gpsi.header.frame_id = vr_.getFrame(ArtFrames::odom);
   gpsi.latitude   = adata.grp1.lat;
   gpsi.longitude  = adata.grp1.lon;
   gpsi.altitude   = adata.grp1.alt;
@@ -296,8 +299,8 @@ void putPose(const Position::Position3D *odom_pos3d,
   // broadcast Transform from vehicle to odom
   geometry_msgs::TransformStamped odom_tf;
   odom_tf.header.stamp = *odom_time;
-  odom_tf.header.frame_id = ArtFrames::odom;
-  odom_tf.child_frame_id = ArtFrames::vehicle;
+  odom_tf.header.frame_id = vr_.getFrame(ArtFrames::odom);
+  odom_tf.child_frame_id = vr_.getFrame(ArtFrames::vehicle);
   odom_tf.transform.translation.x = odom_pos3d->pos.x;
   odom_tf.transform.translation.y = odom_pos3d->pos.y;
   odom_tf.transform.translation.z = odom_pos3d->pos.z;
@@ -308,7 +311,7 @@ void putPose(const Position::Position3D *odom_pos3d,
   // publish the Odometry message
   nav_msgs::Odometry odom_msg;
   odom_msg.header.stamp = *odom_time;
-  odom_msg.header.frame_id = ArtFrames::odom;
+  odom_msg.header.frame_id = vr_.getFrame(ArtFrames::odom);
   odom_msg.pose.pose.position.x = odom_pos3d->pos.x;
   odom_msg.pose.pose.position.y = odom_pos3d->pos.y;
   odom_msg.pose.pose.position.z = odom_pos3d->pos.z;
@@ -392,6 +395,8 @@ int getParameters(int argc, char *argv[])
     applanix_ = new DevApplanixTest(test_file);
   else
     applanix_ = new DevApplanix();
+
+  vr_.getPrefixParam();                 // get vehicle-relative tf prefix
 
   return 0;
 }

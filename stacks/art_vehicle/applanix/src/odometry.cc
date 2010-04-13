@@ -317,7 +317,7 @@ void putPose(const Position::Position3D *odom_pos3d,
   odom_msg.pose.pose.position.y = odom_pos3d->pos.y;
   odom_msg.pose.pose.position.z = odom_pos3d->pos.z;
   odom_msg.pose.pose.orientation = odom_quat;
-  odom_msg.child_frame_id = ArtFrames::vehicle;
+  odom_msg.child_frame_id = vr_.getFrame(ArtFrames::vehicle);
 
   // Twist is relative to the /vehicle frame, not /odom
   odom_msg.twist.twist.linear.x = odom_pos3d->vel.x;

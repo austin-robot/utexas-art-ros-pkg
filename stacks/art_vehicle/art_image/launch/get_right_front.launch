@@ -1,0 +1,13 @@
+<!-- -*- mode: XML -*- -->
+
+<!-- Start the driver for the left front IEEE1394 digital camera.
+-->
+
+<launch>
+
+  <!-- name node (and topic) after parameter file -->
+  <node pkg="camera1394" type="camera1394" name="right_front" >
+    <rosparam file="$(find art_image)/launch/right_front.yaml" /> 
+  </node>
+
+</launch>

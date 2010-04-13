@@ -1,0 +1,25 @@
+<!-- -*- mode: XML -*- -->
+
+<!-- start nodes to acquire data from cameras and velodyne, with
+     corresponding odometry, GPS and coordinate transforms -->
+
+<launch>
+
+  <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
+  <node pkg="applanix" type="odometry" name="odometry"/>
+  <node pkg="velodyne_common" type="read" name="velodyne_read"/>
+
+  <include file="$(find art_image)/launch/get_left_front.launch" />
+  <include file="$(find art_image)/launch/get_right_front.launch" />
+
+  <!-- env not working right
+  <include file="$(find art_image)/launch/startcamera.launch" >
+    <env name="CAMERA" value="left_front" />
+  </include>
+
+  <include file="$(find art_image)/launch/startcamera.launch" >
+    <env name="CAMERA" value="right_front" />
+  </include>
+  -->
+
+</launch>

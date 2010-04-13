@@ -181,8 +181,7 @@ StageNode::StageNode(int argc, char** argv, bool gui, const char* fname)
   this->world->ForEachModel((GHFunc)ghfunc, this);
 
   size_t numRobots = positionmodels.size();
-  ROS_INFO("found %lu position model(s) in the file",
-           (long unsigned) numRobots);
+  ROS_INFO_STREAM("found " << numRobots << " position model(s) in the file");
 
   /// \todo support more than one simulated robot
   if (numRobots != 1)

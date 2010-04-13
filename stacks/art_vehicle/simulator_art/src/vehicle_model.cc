@@ -45,22 +45,22 @@ void ArtVehicleModel::setup(void)
   ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
 
   odom_pub_ =
-    node_.advertise<nav_msgs::Odometry>(prefix_ + "odom", qDepth);
+    node_.advertise<nav_msgs::Odometry>(ns_prefix_ + "odom", qDepth);
   ground_truth_pub_ =
-    node_.advertise<nav_msgs::Odometry>(prefix_ + "ground_truth", qDepth);
+    node_.advertise<nav_msgs::Odometry>(ns_prefix_ + "ground_truth", qDepth);
   
   // servo state topics
   brake_sub_ =
-    node_.subscribe(prefix_ + "brake/state", qDepth,
+    node_.subscribe(ns_prefix_ + "brake/state", qDepth,
                     &ArtVehicleModel::brakeReceived, this, noDelay);
   shifter_sub_ =
-    node_.subscribe(prefix_ + "shifter/state", qDepth,
+    node_.subscribe(ns_prefix_ + "shifter/state", qDepth,
                     &ArtVehicleModel::shifterReceived, this, noDelay);
   steering_sub_ =
-    node_.subscribe(prefix_ + "steering/state", qDepth,
+    node_.subscribe(ns_prefix_ + "steering/state", qDepth,
                     &ArtVehicleModel::steeringReceived, this, noDelay);
   throttle_sub_ =
-    node_.subscribe(prefix_ + "throttle/state", qDepth,
+    node_.subscribe(ns_prefix_ + "throttle/state", qDepth,
                     &ArtVehicleModel::throttleReceived, this, noDelay);
 }
 
@@ -159,7 +159,7 @@ void ArtVehicleModel::ModelAcceleration(geometry_msgs::Twist *odomVel,
                                               steering_angle_);
 
   // set simulated vehicle velocity using the "car" steering model,
-  // which uses steering angle in radians instead of yaw rate.
+  // which uses steering angle in radians instead of yaw rate.
   double angleRadians = angles::from_degrees(steering_angle_);
   ROS_DEBUG("Stage SetSpeed(%.3f, %.3f, %.3f)",
             odomVel->linear.x, odomVel->linear.y, angleRadians);
@@ -179,14 +179,9 @@ void ArtVehicleModel::update(ros::Time sim_time)
   odomMsg_.pose.pose.orientation =
     tf::createQuaternionMsgFromYaw(stgp_->est_pose.a);
 
-  //Stg::stg_velocity_t v = stgp_->GetVelocity();
-  //odomMsg_.twist.twist.linear.x = v.x;
-  //odomMsg_.twist.twist.linear.y = v.y;
-  //odomMsg_.twist.twist.angular.z = v.a;
-
   odomMsg_.header.stamp = sim_time;
-  odomMsg_.header.frame_id = prefix_ + ArtFrames::odom;
-  odomMsg_.child_frame_id = ArtFrames::vehicle;
+  odomMsg_.header.frame_id = tf_prefix_ + ArtFrames::odom;
+  odomMsg_.child_frame_id = tf_prefix_ + ArtFrames::vehicle;
   odom_pub_.publish(odomMsg_);
 
   // broadcast odometry transform
@@ -196,8 +191,8 @@ void ArtVehicleModel::update(ros::Time sim_time)
                        tf::Point(odomMsg_.pose.pose.position.x,
                                  odomMsg_.pose.pose.position.y, 0.0));
   tf_->sendTransform(tf::StampedTransform(txOdom, sim_time,
-                                          prefix_ + ArtFrames::odom,
-                                          prefix_ + ArtFrames::vehicle));
+                                          tf_prefix_ + ArtFrames::odom,
+                                          tf_prefix_ + ArtFrames::vehicle));
 
   // Also publish the ground truth pose and velocity, correcting for
   // Stage's screwed-up coord system.
@@ -221,8 +216,8 @@ void ArtVehicleModel::update(ros::Time sim_time)
   groundTruthMsg_.twist.twist.linear.y     = gv.getOrigin().y();
   groundTruthMsg_.twist.twist.angular.z    = gvel.a;
   groundTruthMsg_.header.stamp = sim_time;
-  groundTruthMsg_.header.frame_id = prefix_ + ArtFrames::odom;
-  groundTruthMsg_.child_frame_id = ArtFrames::vehicle;
+  groundTruthMsg_.header.frame_id = tf_prefix_ + ArtFrames::odom;
+  groundTruthMsg_.child_frame_id = tf_prefix_ + ArtFrames::vehicle;
   ground_truth_pub_.publish(groundTruthMsg_);
 
 #ifdef GPS

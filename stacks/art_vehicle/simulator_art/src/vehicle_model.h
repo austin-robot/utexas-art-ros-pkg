@@ -52,7 +52,8 @@ public:
   {
     stgp_ = stgPos;                     // Stage position model
     tf_ = tfBroad;                      // ROS transform broadcaster
-    prefix_ = ns_prefix;                // namespace prefix
+    ns_prefix_ = ns_prefix;             // namespace prefix
+    tf_prefix_ = ns_prefix + "/";       // transform ID prefix
 
     // servo control status
     brake_position_ = 1.0;
@@ -75,7 +76,8 @@ private:
   // ROS interfaces
   ros::NodeHandle node_;                // simulation node handle
   tf::TransformBroadcaster *tf_;        // ROS transform broadcaster
-  std::string prefix_;                  // vehicle namespace
+  std::string ns_prefix_;               // vehicle namespace
+  std::string tf_prefix_;               // transform ID prefix
 
   nav_msgs::Odometry odomMsg_;
   ros::Publisher odom_pub_;

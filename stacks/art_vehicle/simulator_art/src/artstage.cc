@@ -63,7 +63,7 @@
 
 #include "vehicle_model.h"
 
-#define USAGE "stage_art <worldfile>"
+#define USAGE "stage_art [-g] <worldfile>"
 
 // ROS relative topic names
 #define FRONT_LASER "laser/front"
@@ -305,7 +305,7 @@ main(int argc, char** argv)
     exit(-1);
   }
 
-  ros::init(argc, argv, "stage_art");
+  ros::init(argc, argv, "artstage");
 
   bool gui = true;
   for(int i=0;i<(argc-1);i++)
@@ -314,7 +314,13 @@ main(int argc, char** argv)
       gui = false;
   }
 
-  StageNode sn(argc-1,argv,gui,argv[argc-1]);
+  // TODO: code above requires at least one parameter, even if
+  // overridden. Fix parameter handling.
+  ros::NodeHandle private_nh("~");
+  std::string world_file;
+  private_nh.param("world_file", world_file, std::string(argv[argc-1]));
+
+  StageNode sn(argc-1, argv, gui, world_file.c_str());
 
   if(sn.SubscribeModels() != 0)
     exit(-1);

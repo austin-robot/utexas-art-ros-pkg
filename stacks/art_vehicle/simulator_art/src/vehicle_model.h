@@ -53,10 +53,6 @@ public:
     ns_prefix_ = ns_prefix;             // namespace prefix
     tf_prefix_ = ns_prefix + "/";       // transform ID prefix
 
-    // set default GPS origin (site visit at SwRI in San Antonio)
-    origin_lat_ = 29.446018;
-    origin_long_ = -98.607024;
-
     // servo control status
     brake_position_ = 1.0;
     shifter_gear_ = art_servo::Shifter::Drive;
@@ -113,6 +109,11 @@ private:
 
   double origin_lat_;
   double origin_long_;
+  double origin_easting_;
+  double origin_northing_;
+  char   origin_zone_[20];
+  double map_origin_x_;
+  double map_origin_y_;
 
   ros::Publisher gps_pub_;
 };

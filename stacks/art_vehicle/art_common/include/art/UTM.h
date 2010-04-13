@@ -103,7 +103,7 @@ static inline void UTM(double lat, double lon, double *x, double *y)
  * Determine the correct UTM letter designator for the
  * given latitude
  *
- * returns 'Z' if latitude is outside the UTM limits of 84N to 80S
+ * @returns 'Z' if latitude is outside the UTM limits of 84N to 80S
  *
  * Written by Chuck Gantz- chuck.gantz@globalstar.com
  */
@@ -111,18 +111,18 @@ static inline char UTMLetterDesignator(double Lat)
 {
 	char LetterDesignator;
 
-	if((84 >= Lat) && (Lat >= 72)) LetterDesignator = 'X';
-	else if((72 > Lat) && (Lat >= 64)) LetterDesignator = 'W';
-	else if((64 > Lat) && (Lat >= 56)) LetterDesignator = 'V';
-	else if((56 > Lat) && (Lat >= 48)) LetterDesignator = 'U';
-	else if((48 > Lat) && (Lat >= 40)) LetterDesignator = 'T';
-	else if((40 > Lat) && (Lat >= 32)) LetterDesignator = 'S';
-	else if((32 > Lat) && (Lat >= 24)) LetterDesignator = 'R';
-	else if((24 > Lat) && (Lat >= 16)) LetterDesignator = 'Q';
-	else if((16 > Lat) && (Lat >= 8)) LetterDesignator = 'P';
-	else if(( 8 > Lat) && (Lat >= 0)) LetterDesignator = 'N';
-	else if(( 0 > Lat) && (Lat >= -8)) LetterDesignator = 'M';
-	else if((-8> Lat) && (Lat >= -16)) LetterDesignator = 'L';
+	if     ((84 >= Lat) && (Lat >= 72))  LetterDesignator = 'X';
+	else if ((72 > Lat) && (Lat >= 64))  LetterDesignator = 'W';
+	else if ((64 > Lat) && (Lat >= 56))  LetterDesignator = 'V';
+	else if ((56 > Lat) && (Lat >= 48))  LetterDesignator = 'U';
+	else if ((48 > Lat) && (Lat >= 40))  LetterDesignator = 'T';
+	else if ((40 > Lat) && (Lat >= 32))  LetterDesignator = 'S';
+	else if ((32 > Lat) && (Lat >= 24))  LetterDesignator = 'R';
+	else if ((24 > Lat) && (Lat >= 16))  LetterDesignator = 'Q';
+	else if ((16 > Lat) && (Lat >= 8))   LetterDesignator = 'P';
+	else if (( 8 > Lat) && (Lat >= 0))   LetterDesignator = 'N';
+	else if (( 0 > Lat) && (Lat >= -8))  LetterDesignator = 'M';
+	else if ((-8 > Lat) && (Lat >= -16)) LetterDesignator = 'L';
 	else if((-16 > Lat) && (Lat >= -24)) LetterDesignator = 'K';
 	else if((-24 > Lat) && (Lat >= -32)) LetterDesignator = 'J';
 	else if((-32 > Lat) && (Lat >= -40)) LetterDesignator = 'H';
@@ -131,22 +131,23 @@ static inline char UTMLetterDesignator(double Lat)
 	else if((-56 > Lat) && (Lat >= -64)) LetterDesignator = 'E';
 	else if((-64 > Lat) && (Lat >= -72)) LetterDesignator = 'D';
 	else if((-72 > Lat) && (Lat >= -80)) LetterDesignator = 'C';
-	else LetterDesignator = 'Z'; //This is here as an error flag to show that the Latitude is outside the UTM limits
-
+        // 'Z' is an error flag, the Latitude is outside the UTM limits
+	else LetterDesignator = 'Z';
 	return LetterDesignator;
 }
 
-
-// Convert lat/long to UTM coords.  Equations from USGS Bulletin 1532 
-//
-// East Longitudes are positive, West longitudes are negative. 
-// North latitudes are positive, South latitudes are negative
-// Lat and Long are in fractional degrees
-//
-//Written by Chuck Gantz- chuck.gantz@globalstar.com
-
+/**
+ * Convert lat/long to UTM coords.  Equations from USGS Bulletin 1532 
+ *
+ * East Longitudes are positive, West longitudes are negative. 
+ * North latitudes are positive, South latitudes are negative
+ * Lat and Long are in fractional degrees
+ *
+ * Written by Chuck Gantz- chuck.gantz@globalstar.com
+ */
 static inline void LLtoUTM(const double Lat, const double Long, 
-			 double &UTMNorthing, double &UTMEasting, char* UTMZone)
+                           double &UTMNorthing, double &UTMEasting,
+                           char* UTMZone)
 {
 	double a = WGS84_A;
 	double eccSquared = UTM_E2;
@@ -156,8 +157,8 @@ static inline void LLtoUTM(const double Lat, const double Long,
 	double eccPrimeSquared;
 	double N, T, C, A, M;
 	
-//Make sure the longitude is between -180.00 .. 179.9
-	double LongTemp = (Long+180)-int((Long+180)/360)*360-180; // -180.00 .. 179.9;
+        //Make sure the longitude is between -180.00 .. 179.9
+	double LongTemp = (Long+180)-int((Long+180)/360)*360-180;
 
 	double LatRad = Lat*RADIANS_PER_DEGREE;
 	double LongRad = LongTemp*RADIANS_PER_DEGREE;
@@ -169,7 +170,7 @@ static inline void LLtoUTM(const double Lat, const double Long,
 	if( Lat >= 56.0 && Lat < 64.0 && LongTemp >= 3.0 && LongTemp < 12.0 )
 		ZoneNumber = 32;
 
-  // Special zones for Svalbard
+        // Special zones for Svalbard
 	if( Lat >= 72.0 && Lat < 84.0 ) 
 	{
 	  if(      LongTemp >= 0.0  && LongTemp <  9.0 ) ZoneNumber = 31;
@@ -177,7 +178,8 @@ static inline void LLtoUTM(const double Lat, const double Long,
 	  else if( LongTemp >= 21.0 && LongTemp < 33.0 ) ZoneNumber = 35;
 	  else if( LongTemp >= 33.0 && LongTemp < 42.0 ) ZoneNumber = 37;
 	 }
-	LongOrigin = (ZoneNumber - 1)*6 - 180 + 3;  //+3 puts origin in middle of zone
+        // +3 puts origin in middle of zone
+	LongOrigin = (ZoneNumber - 1)*6 - 180 + 3; 
 	LongOriginRad = LongOrigin * RADIANS_PER_DEGREE;
 
 	//compute the UTM Zone from the latitude and longitude
@@ -205,17 +207,17 @@ static inline void LLtoUTM(const double Lat, const double Long,
 		UTMNorthing += 10000000.0; //10000000 meter offset for southern hemisphere
 }
 
-
-// Converts UTM coords to lat/long.  Equations from USGS Bulletin 1532 
-//
-// East Longitudes are positive, West longitudes are negative. 
-// North latitudes are positive, South latitudes are negative
-// Lat and Long are in fractional degrees. 
-//
-// Written by Chuck Gantz- chuck.gantz@globalstar.com
-
-static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting, const char* UTMZone,
-			  double& Lat,  double& Long )
+/**
+ * Converts UTM coords to lat/long.  Equations from USGS Bulletin 1532 
+ *
+ * East Longitudes are positive, West longitudes are negative. 
+ * North latitudes are positive, South latitudes are negative
+ * Lat and Long are in fractional degrees. 
+ *
+ * Written by Chuck Gantz- chuck.gantz@globalstar.com
+ */
+static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting,
+                           const char* UTMZone, double& Lat,  double& Long )
 {
 	double k0 = UTM_K0;
 	double a = WGS84_A;

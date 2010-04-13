@@ -14,9 +14,6 @@
 
  */
 
-//#define GPS 0                           // GPS not implemented
-#define GPS 1                           // publish GPS info
-
 #include <angles/angles.h>
 
 #include <art/conversions.h>
@@ -60,6 +57,28 @@ void ArtVehicleModel::setup(void)
   throttle_sub_ =
     node_.subscribe(ns_prefix_ + "throttle/state", qDepth,
                     &ArtVehicleModel::throttleReceived, this, noDelay);
+
+  // set default GPS origin, from SwRI site visit in San Antonio
+  ros::NodeHandle private_nh("~");
+  private_nh.param("latitude",  origin_lat_,   29.446018);
+  private_nh.param("longitude", origin_long_, -98.607024);
+  ROS_INFO("map GPS origin: latitude %.6f, longitude %.6f",
+           origin_lat_, origin_long_);
+
+  // Convert latitude and longitude of map origin to UTM.
+  UTM::LLtoUTM(origin_lat_, origin_long_,
+               origin_northing_, origin_easting_, origin_zone_);
+
+  ROS_INFO("map UTM origin: northing %.2f easting %.2f zone %s",
+           origin_northing_, origin_easting_, origin_zone_);
+
+  // Round UTM origin of map to nearest 10km grid intersection.
+  // Report odometry relative to that location.
+  static double origin_grid = 10000.0;  // 10 km grid
+  map_origin_x_ = rint(origin_easting_/origin_grid) * origin_grid;
+  map_origin_y_ = rint(origin_northing_/origin_grid) * origin_grid;
+
+  ROS_INFO("MapXY origin: (%.f, %.f)", map_origin_x_ , map_origin_y_);
 }
 
 // Servo device interfaces.
@@ -226,41 +245,24 @@ void ArtVehicleModel::update(ros::Time sim_time)
 
 void ArtVehicleModel::publishGPS(ros::Time sim_time)
 {
-#if GPS
-  double UTMe = 0;
-  double UTMn = 0;
-  double car_lat = 0;
-  double car_long = 0;
-  char zone[255];
-
-  // TODO: convert origin latitude and longitude to UTM in setup(),
-  // round to nearest 10km grid intersection.  Set positions relative
-  // to that location.
-  UTM::LLtoUTM(origin_lat_, origin_long_, UTMn, UTMe, zone);
-  UTMe += odomMsg_.pose.pose.position.x;
-  UTMn += odomMsg_.pose.pose.position.y;
-
-  UTM::UTMtoLL(UTMn, UTMe, zone, car_lat, car_long);
-  //std::cerr << zone << std::endl;
-  //std::cerr << "car_x: " << cur_pos.pos.px << std::endl;
-  //std::cerr << "car_y: " << cur_pos.pos.py << std::endl;
-
   applanix::GpsInfo gpsi;
 
   gpsi.header.stamp = sim_time;
   gpsi.header.frame_id = tf_prefix_ + ArtFrames::odom;
 
-  gpsi.latitude   = car_lat;
-  gpsi.longitude  = car_long;
+  // TODO: relocate pose relative to map origin, instead
+  gpsi.utm_e = odomMsg_.pose.pose.position.x + origin_easting_;
+  gpsi.utm_n = odomMsg_.pose.pose.position.y + origin_northing_;
+  //gpsi.utm_e = odomMsg_.pose.pose.position.x + map_origin_x_;
+  //gpsi.utm_n = odomMsg_.pose.pose.position.y + map_origin_y_;
+
+  UTM::UTMtoLL(gpsi.utm_n, gpsi.utm_e, origin_zone_,
+               gpsi.latitude, gpsi.longitude);
+
+  gpsi.zone = origin_zone_;
   gpsi.altitude   = odomMsg_.pose.pose.position.z;
-
-  gpsi.utm_e  = UTMe;
-  gpsi.utm_n  = UTMn;
-  gpsi.zone = zone;
-
   gpsi.quality = applanix::GpsInfo::DGPS_FIX;
   gpsi.num_sats = 9;
 
   gps_pub_.publish(gpsi);
-#endif
 }

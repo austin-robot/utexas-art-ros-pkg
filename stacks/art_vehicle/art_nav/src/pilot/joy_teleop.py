@@ -21,83 +21,71 @@ import rospy
 from art_nav.msg import CarCommand
 from joy.msg import Joy
 
+max_wheel_angle = 29.0                  # degrees
+max_speed = 10.0                        # meters/second
+max_speed_reverse = -3.0                # meters/second
+
 class JoyNode():
     "Vehicle joystick tele-operation node."
 
     def __init__(self):
         "JoyNode constructor"
-        self.carcmd = rospy.Publisher('pilot/cmd', CarCommand)
         self.car_msg = CarCommand()
-        self.car_msg.header.stamp = rospy.Time.now()
         self.car_msg.velocity = 0.0
         self.car_msg.angle = 0.0
+
+        self.carcmd = rospy.Publisher('pilot/cmd', CarCommand)
+        self.joy = rospy.Subscriber('joy', Joy, self.joyCallback)
+        rospy.init_node('joy_teleop')
+
+        self.car_msg.header.stamp = rospy.Time.now()
         self.carcmd.publish(self.car_msg)
-        rospy.Subscriber('joy', Joy, self.joyCallback)
 
     def joyCallback(self, joy):
         "invoked every time a joystick message arrives"
         rospy.logdebug('joystick input\n' + str(joy))
 
-        self.updateStatus()
+        # TODO: add buttons for gear shifter
+        if joy.buttons[1]:
+            # stop car immediately
+            self.car_msg.velocity = 0.0
+        else:
+            # set steering angle
+            self.setAngle(joy.axes[3])
+            # adjust speed
+            self.adjustSpeed(joy.axes[2])
 
-    def updateStatus(self):
-        rospy.loginfo('speed: ' + str(self.car_msg.velocity)
-                       + ' m/s, angle: ' + str(self.car_msg.angle) + ' deg')
-
-    def adjustCarCmd(self, v, a):
         self.car_msg.header.stamp = rospy.Time.now()
-        self.car_msg.velocity += v
-        self.car_msg.angle += a
-        if self.car_msg.angle > 29.0:
-            self.car_msg.angle = 29.0
-        if self.car_msg.angle < -29.0:
-            self.car_msg.angle = -29.0
         self.carcmd.publish(self.car_msg)
-        self.updateStatusBar()
 
-    def center_wheel(self):
-        "center steering wheel"
-        self.adjustCarCmd(0.0, -self.car_msg.angle)
+    def adjustSpeed(self, dv):
+        "adjust speed by dv meters/second"
 
-    def go_left(self):
-        "steer left"
-        self.adjustCarCmd(0.0, 1.0)
+        # never shift gears via speed control
+        if -dv > self.car_msg.velocity:
+            self.car_msg.velocity = 0.0
+        else:
+            self.car_msg.velocity += dv
 
-    def go_left_more(self):
-        "steer more to left"
-        self.adjustCarCmd(0.0, 4.0)
+        # ensure speed limits never exceeded
+        if self.car_msg.velocity > max_speed:
+            self.car_msg.velocity = max_speed
+        if self.car_msg.velocity < max_speed_reverse:
+            self.car_msg.velocity = max_speed_reverse
 
-    def go_left_less(self):
-        "steer a little to left"
-        self.adjustCarCmd(0.0, 0.25)
+    def setAngle(self, turn):
+        "set wheel angle"
+        # use square of turn value to improve sensitivity
+        self.car_msg.angle = turn * turn * max_wheel_angle
 
-    def go_right(self):
-        "steer right"
-        self.adjustCarCmd(0.0, -1.0)
-
-    def go_right_more(self):
-        "steer more to right"
-        self.adjustCarCmd(0.0, -4.0)
-
-    def go_right_less(self):
-        "steer far to right"
-        self.adjustCarCmd(0.0, -0.25)
-
-    def slow_down(self):
-        "go one m/s slower"
-        self.adjustCarCmd(-1.0, 0.0)    # one m/s slower
-
-    def speed_up(self):
-        "go one m/s faster"
-        self.adjustCarCmd(1.0, 0.0)     # one m/s faster
-
-    def stop_car(self):
-        "stop car immediately"
-        self.adjustCarCmd(-self.car_msg.velocity, 0.0)
+        # ensure maximum wheel angle never exceeded
+        if self.car_msg.angle > max_wheel_angle:
+            self.car_msg.angle = max_wheel_angle
+        if self.car_msg.angle < -max_wheel_angle:
+            self.car_msg.angle = -max_wheel_angle
 
 def main():
 
-    rospy.init_node('joy_teleop')
     joynode = JoyNode()
 
     try:

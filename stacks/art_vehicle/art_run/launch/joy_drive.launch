@@ -4,7 +4,7 @@
 <launch>
 
   <!-- start pilot and servo actuators -->
-  <include file="$(find art_run)/launch/pilot_stage.launch" />
+  <include file="$(find art_run)/launch/pilot_drive.launch" />
 
   <node pkg="joy" type="joy_node" name="joy_node" />
   <node pkg="art_nav" type="joy_teleop.py" name="joy_teleop" />

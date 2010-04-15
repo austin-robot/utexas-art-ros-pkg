@@ -25,7 +25,7 @@ from joy.msg import Joy
 
 # global constants
 max_wheel_angle = 29.0                  # degrees
-max_speed = 10.0                        # meters/second
+max_speed = 6.0                         # meters/second
 max_speed_reverse = -3.0                # meters/second
 
 class JoyNode():
@@ -87,6 +87,8 @@ class JoyNode():
 
     def adjustSpeed(self, dv):
         "adjust speed by dv meters/second"
+
+        dv *= 0.3
 
         # take absolute value of velocity
         vabs = self.car_msg.velocity * self.direction

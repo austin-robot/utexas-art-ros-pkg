@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Qt python script to send tele-operation commands to pilot from a joystick
+#  send tele-operation commands to pilot from a joystick
 #
 #   Copyright (C) 2009 Austin Robot Technology
 #
@@ -9,6 +9,8 @@
 #   Author: Jack O'Quin
 #
 # $Id$
+
+## TODO: add timer loop, so the joystick can accelerate smoothly
 
 PKG_NAME = 'art_nav'
 
@@ -21,6 +23,7 @@ import rospy
 from art_nav.msg import CarCommand
 from joy.msg import Joy
 
+# global constants
 max_wheel_angle = 29.0                  # degrees
 max_speed = 10.0                        # meters/second
 max_speed_reverse = -3.0                # meters/second
@@ -31,8 +34,10 @@ class JoyNode():
     def __init__(self):
         "JoyNode constructor"
         self.car_msg = CarCommand()
-        self.car_msg.velocity = 0.0
-        self.car_msg.angle = 0.0
+
+        self.steer = 0                  # steering axis (left)
+        self.speed = 1                  # speed axis (left)
+        self.direction = 1.0            # gear direction (drive)
 
         self.carcmd = rospy.Publisher('pilot/cmd', CarCommand)
         self.joy = rospy.Subscriber('joy', Joy, self.joyCallback)
@@ -43,17 +48,39 @@ class JoyNode():
 
     def joyCallback(self, joy):
         "invoked every time a joystick message arrives"
-        rospy.logdebug('joystick input\n' + str(joy))
+        rospy.logdebug('joystick input:\n' + str(joy))
 
-        # TODO: add buttons for gear shifter
-        if joy.buttons[1]:
-            # stop car immediately
-            self.car_msg.velocity = 0.0
-        else:
+        # handle various buttons (when appropriate)
+        if joy.buttons[0] and self.car_msg.velocity == 0.0:
+            if self.direction != -1.0:
+                self.direction = -1.0       # shift to reverse
+                rospy.loginfo('shifting to reverse')
+
+        elif joy.buttons[1]:
+            if self.car_msg.velocity != 0.0:
+                rospy.logwarn('emergency stop')
+            self.car_msg.velocity = 0.0     # stop car immediately
+
+        elif joy.buttons[2] and self.car_msg.velocity == 0.0:
+            if self.direction != 1.0:
+                self.direction = 1.0        # shift to drive
+                rospy.loginfo('shifting to drive')
+
+        elif joy.buttons[10]:               # select left joystick
+            self.steer = 0                  #  steering axis
+            self.speed = 1                  #  speed axis
+            rospy.loginfo('left joystick selected')
+
+        elif joy.buttons[11]:               # select right joystick
+            self.steer = 3                  #  steering axis
+            self.speed = 2                  #  speed axis
+            rospy.loginfo('right joystick selected')
+
+        else:                               # normal analog control
             # set steering angle
-            self.setAngle(joy.axes[3])
+            self.setAngle(joy.axes[self.steer])
             # adjust speed
-            self.adjustSpeed(joy.axes[2])
+            self.adjustSpeed(joy.axes[self.speed])
 
         self.car_msg.header.stamp = rospy.Time.now()
         self.carcmd.publish(self.car_msg)
@@ -61,36 +88,44 @@ class JoyNode():
     def adjustSpeed(self, dv):
         "adjust speed by dv meters/second"
 
-        # never shift gears via speed control
-        if -dv > self.car_msg.velocity:
-            self.car_msg.velocity = 0.0
-        else:
-            self.car_msg.velocity += dv
+        # take absolute value of velocity
+        vabs = self.car_msg.velocity * self.direction
 
-        # ensure speed limits never exceeded
+        # never shift gears via speed controller, stop at zero
+        if -dv > vabs:
+            vabs = 0.0
+        else:
+            vabs += dv
+
+        self.car_msg.velocity = vabs * self.direction
+
+        # ensure forward and reverse speed limits never exceeded
         if self.car_msg.velocity > max_speed:
             self.car_msg.velocity = max_speed
-        if self.car_msg.velocity < max_speed_reverse:
+        elif self.car_msg.velocity < max_speed_reverse:
             self.car_msg.velocity = max_speed_reverse
 
     def setAngle(self, turn):
         "set wheel angle"
-        # use square of turn value to improve sensitivity
-        self.car_msg.angle = turn * turn * max_wheel_angle
+
+        # use cube of range [-1..1] turn command to improve
+        # sensitivity while retaining sign
+        self.car_msg.angle = turn * turn * turn * max_wheel_angle
 
         # ensure maximum wheel angle never exceeded
         if self.car_msg.angle > max_wheel_angle:
             self.car_msg.angle = max_wheel_angle
-        if self.car_msg.angle < -max_wheel_angle:
+        elif self.car_msg.angle < -max_wheel_angle:
             self.car_msg.angle = -max_wheel_angle
 
 def main():
 
     joynode = JoyNode()
-
+    rospy.loginfo('joystick vehicle controller starting')
     try:
         rospy.spin()
     except rospy.ROSInterruptException: pass
+    rospy.loginfo('joystick vehicle controller finished')
 
 if __name__ == '__main__':
     # run main function and exit

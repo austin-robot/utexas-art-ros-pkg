@@ -21,7 +21,6 @@
 
   <!-- navigation components -->
   <node pkg="art_nav" type="pilot" name="pilot" />
-  <node pkg="art_nav" type="teleop.py" name="teleop" />
 
   <!-- monitoring tools
        <include file="$(find art_run)/launch/monitor.launch" />

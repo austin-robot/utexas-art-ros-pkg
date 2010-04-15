@@ -1,0 +1,11 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch file for driving vehicle from keyboard -->
+
+<launch>
+
+  <!-- start pilot and servo actuators -->
+  <include file="$(find art_run)/launch/pilot_drive.launch" />
+
+  <node pkg="art_nav" type="teleop.py" name="teleop" />
+
+</launch>

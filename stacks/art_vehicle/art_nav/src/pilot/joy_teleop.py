@@ -39,9 +39,9 @@ class JoyNode():
         self.speed = 1                  # speed axis (left)
         self.direction = 1.0            # gear direction (drive)
 
+        rospy.init_node('joy_teleop')
         self.carcmd = rospy.Publisher('pilot/cmd', CarCommand)
         self.joy = rospy.Subscriber('joy', Joy, self.joyCallback)
-        rospy.init_node('joy_teleop')
 
         self.car_msg.header.stamp = rospy.Time.now()
         self.carcmd.publish(self.car_msg)
@@ -86,9 +86,9 @@ class JoyNode():
         self.carcmd.publish(self.car_msg)
 
     def adjustSpeed(self, dv):
-        "adjust speed by dv meters/second"
+        "accelerate dv meters/second/second"
 
-        dv *= 0.3
+        dv *= 0.1
 
         # take absolute value of velocity
         vabs = self.car_msg.velocity * self.direction

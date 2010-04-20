@@ -115,10 +115,7 @@ SpeedControlMatrix::SpeedControlMatrix():
   // frequencies will yield lower deltaV per cycle.
   //
   velpid_ = new Pid("speed", 2.0, 0.0, 32.0);
-
-  // use private node handle to get parameter settings
-  ros::NodeHandle node("~");
-  velpid_->Configure(node);
+  configure();
   reset();
 }
 
@@ -169,6 +166,12 @@ void SpeedControlMatrix::adjust(float speed, float error,
   *throttle_req += throttle_delta;
 }
 
+/** Configure controller parameters. */
+void SpeedControlMatrix::configure(void)
+{
+  velpid_->Configure(node_);
+}
+
 /** Reset speed controller. */
 void SpeedControlMatrix::reset(void)
 {
@@ -195,10 +198,7 @@ SpeedControlPID::SpeedControlPID():
   brake_pid_ = new Pid("brake", -0.12, -0.001, 0.0, 1.0, 0.0, 5000.0);
   throttle_pid_ = new Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0);
 
-  // use private node handle to get parameter settings
-  ros::NodeHandle node("~");
-  brake_pid_->Configure(node);
-  throttle_pid_->Configure(node);
+  configure();
   reset();
 }
 
@@ -263,6 +263,13 @@ void SpeedControlPID::adjust(float speed, float error,
           brake_pid_->Clear();          // reset PID controller
         }
     }
+}
+
+/** Configure controller parameters. */
+void SpeedControlPID::configure(void)
+{
+  brake_pid_->Configure(node_);
+  throttle_pid_->Configure(node_);
 }
 
 /** Reset speed controller. */

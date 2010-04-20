@@ -18,8 +18,6 @@
         SpeedControlPID -- speed control using direct PID of throttle
                            and brake
 
-     \todo use pid directly on both brake and throttle
- 
      \author Jack O'Quin
 
  */
@@ -39,7 +37,11 @@ class SpeedControl
 {
  public:
 
-  SpeedControl() {};
+  SpeedControl()
+  {
+    // initialize private node handle for getting parameter settings
+    node_ = ros::NodeHandle("~");
+  };
 
   /** Adjust speed to match goal.
 
@@ -51,8 +53,13 @@ class SpeedControl
                           updated throttle request (output).
   */
   virtual void adjust(float speed, float error,
-                      float *brake_req, float *throttle_req) {};
-  virtual void reset(void) {};
+                      float *brake_req, float *throttle_req) = 0;
+
+  /** Configure controller parameters. */
+  virtual void configure(void) = 0;
+
+  /** Reset speed controller. */
+  virtual void reset(void) = 0;
 
   virtual void set_brake_position(float position)
   {
@@ -64,6 +71,8 @@ class SpeedControl
   }
 
 protected:
+
+  ros::NodeHandle node_;                // private node handle for parameters
   float brake_position_;
   float throttle_position_;
 };
@@ -77,6 +86,7 @@ class SpeedControlMatrix: public SpeedControl
   virtual ~SpeedControlMatrix();
   virtual void adjust(float speed, float error,
                       float *brake_req, float *throttle_req);
+  virtual void configure(void);
   virtual void reset(void);
 
  private:
@@ -93,6 +103,7 @@ class SpeedControlPID: public SpeedControl
   virtual ~SpeedControlPID();
   virtual void adjust(float speed, float error,
                       float *brake_req, float *throttle_req);
+  virtual void configure(void);
   virtual void reset(void);
 
  private:

@@ -56,8 +56,8 @@ class Pid
     CfgParam(node, "p", &this->kp);
     CfgParam(node, "i", &this->ki);
     CfgParam(node, "d", &this->kd);
-    ROS_INFO("%s gains (%.3f, %.3f, %.3f)",
-             this->name.c_str(), this->kp, this->ki, this->kd);
+    ROS_DEBUG("%s gains (%.3f, %.3f, %.3f)",
+              this->name.c_str(), this->kp, this->ki, this->kd);
     CfgParam(node, "omax", &this->omax);
     CfgParam(node, "omin", &this->omin);
     CfgParam(node, "C", &this->C);
@@ -156,14 +156,17 @@ class Pid
     std::string optname(this->name);
     optname += '/';
     optname += pname;
-    double dvalue;
-    if (node.getParam(optname, dvalue))
+    double dvalue;                      // ROS parameters are double
+    if (node.getParamCached(optname, dvalue))
       {
-        *fvalue = dvalue;
-        ROS_DEBUG("%s is %.3f", optname.c_str(), dvalue);
+        float param_value = dvalue;     // convert to float
+        if (*fvalue != param_value)     // new value?
+          {
+            ROS_INFO("%s changed to %.3f", optname.c_str(), param_value);
+            *fvalue = param_value;
+          }
       }
   }
-  
 
 };
 

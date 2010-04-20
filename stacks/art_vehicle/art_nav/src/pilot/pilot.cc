@@ -608,6 +608,8 @@ int main(int argc, char** argv)
     {
       ros::spinOnce();                  // handle incoming commands
 
+      speed_->configure();              // check for parameter updates
+
       // issue control commands
       speedControl(odom_msg_.twist.twist.linear.x);
       adjustSteering();

@@ -15,7 +15,7 @@ roslib.load_manifest('art_nav')
 roslib.load_manifest('nav_msgs')
 
 import rospy
-from art_nav.msg import CarCommand
+from art_nav.msg import CarCommandStamped
 from nav_msgs.msg import Odometry
 
 have_odom = False;
@@ -35,13 +35,14 @@ def log_pilot_cmd(cmd):
                   + ", angle: " + str(cmd.angle))
 
 def test():
-    topic = rospy.Publisher('pilot/cmd', CarCommand)
+    topic = rospy.Publisher('pilot/cmd', CarCommandStamped)
     rospy.Subscriber('odom', Odometry, log_odometry)
     rospy.init_node('test_pilot')
 
     rospy.loginfo('starting pilot test')
 
-    cmd = CarCommand()                  # pilot command msg
+    cmd = CarCommand()
+    cmdStamped = CarCommandStamped()    # pilot command msg with header
     aDelta = 1.0                        # steering angle change (deg/sec)
     vDelta = 1.0                        # velocity change
 
@@ -60,8 +61,10 @@ def test():
                 cmd.angle += aDelta
 
             log_pilot_cmd(cmd)
-            cmd.header.stamp = rospy.Time.now()
-            topic.publish(cmd)
+
+            cmdStamped.header.stamp = rospy.Time.now()
+            cmdStamped.command = cmd
+            topic.publish(cmdStamped)
 
         rospy.sleep(3.0)
 

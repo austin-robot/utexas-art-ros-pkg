@@ -23,8 +23,9 @@ import roslib;
 roslib.load_manifest(PKG_NAME)
 import rospy
 from art_nav.msg import CarCommand
+from art_nav.msg import CarCommandStamped
 
-carcmd = rospy.Publisher('pilot/cmd', CarCommand)
+topic = rospy.Publisher('pilot/cmd', CarCommandStamped)
 rospy.init_node('teleop')
 
 # set path name for resolving icons
@@ -54,10 +55,10 @@ def pkg_icon(name):
 class MainWindow(QtGui.QMainWindow):
     "Create vehicle tele-operation control window."
 
-    def __init__(self, carcmd):
+    def __init__(self, topic):
         QtGui.QMainWindow.__init__(self)
 
-        self.carcmd = carcmd
+        self.topic = topic
 
         self.resize(350, 250)
         self.setIconSize(QtCore.QSize(32,32))
@@ -142,35 +143,41 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addAction(speed_up)
         toolbar.addAction(go_right)
 
-        self.car_msg = CarCommand()
+        self.car_msg = CarCommandStamped()
         self.car_msg.header.stamp = rospy.Time.now()
-        self.car_msg.velocity = 0.0
-        self.car_msg.angle = 0.0
-        self.carcmd.publish(self.car_msg)
+        self.car_cmd = CarCommand()
+        self.car_cmd.velocity = 0.0
+        self.car_cmd.angle = 0.0
+        self.car_msg.command = self.car_cmd
+        self.topic.publish(self.car_msg)
 
         self.updateStatusBar()
 
     def updateStatusBar(self):
         self.statusBar().showMessage('speed: '
-                                     + str(self.car_msg.velocity)
+                                     + str(self.car_cmd.velocity)
                                      + ' m/s,    angle: '
-                                     + str(self.car_msg.angle)
+                                     + str(self.car_cmd.angle)
                                      + ' deg')
 
     def adjustCarCmd(self, v, a):
+
+        self.car_cmd.velocity += v
+        self.car_cmd.angle += a
+        if self.car_cmd.angle > 29.0:
+            self.car_cmd.angle = 29.0
+        if self.car_cmd.angle < -29.0:
+            self.car_cmd.angle = -29.0
+
         self.car_msg.header.stamp = rospy.Time.now()
-        self.car_msg.velocity += v
-        self.car_msg.angle += a
-        if self.car_msg.angle > 29.0:
-            self.car_msg.angle = 29.0
-        if self.car_msg.angle < -29.0:
-            self.car_msg.angle = -29.0
-        self.carcmd.publish(self.car_msg)
+        self.car_msg.command = self.car_cmd
+        self.topic.publish(self.car_msg)
+
         self.updateStatusBar()
 
     def center_wheel(self):
         "center steering wheel"
-        self.adjustCarCmd(0.0, -self.car_msg.angle)
+        self.adjustCarCmd(0.0, -self.car_cmd.angle)
 
     def go_left(self):
         "steer left"
@@ -206,20 +213,20 @@ class MainWindow(QtGui.QMainWindow):
 
     def stop_car(self):
         "stop car immediately"
-        self.adjustCarCmd(-self.car_msg.velocity, 0.0)
+        self.adjustCarCmd(-self.car_cmd.velocity, 0.0)
 
 
 class QtThread(threading.Thread):
 
-    def __init__(self, carcmd):
-        self.carcmd = carcmd
+    def __init__(self, topic):
+        self.topic = topic
         threading.Thread.__init__(self)
 
     def run(self):
         # run the program
         app = QtGui.QApplication(sys.argv)
         
-        teleop = MainWindow(self.carcmd)
+        teleop = MainWindow(self.topic)
         teleop.show()
 
         # run Qt main loop until window terminates
@@ -235,7 +242,7 @@ if __name__ == '__main__':
     #rospy.loginfo('starting tele-operation')
 
     try:
-        QtThread(carcmd).start()
+        QtThread(topic).start()
         rospy.spin()
     except rospy.ROSInterruptException: pass
 

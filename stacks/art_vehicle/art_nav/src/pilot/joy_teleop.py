@@ -21,6 +21,7 @@ roslib.load_manifest(PKG_NAME)
 
 import rospy
 from art_nav.msg import CarCommand
+from art_nav.msg import CarCommandStamped
 from joy.msg import Joy
 
 # global constants
@@ -33,35 +34,37 @@ class JoyNode():
 
     def __init__(self):
         "JoyNode constructor"
-        self.car_msg = CarCommand()
+        self.car_cmd = CarCommand()
+        self.car_msg = CarCommandStamped()
 
         self.steer = 0                  # steering axis (left)
         self.speed = 1                  # speed axis (left)
         self.direction = 1.0            # gear direction (drive)
 
         rospy.init_node('joy_teleop')
-        self.carcmd = rospy.Publisher('pilot/cmd', CarCommand)
+        self.topic = rospy.Publisher('pilot/cmd', CarCommandStamped)
         self.joy = rospy.Subscriber('joy', Joy, self.joyCallback)
 
         self.car_msg.header.stamp = rospy.Time.now()
-        self.carcmd.publish(self.car_msg)
+        self.car_msg.command = self.car_cmd
+        self.topic.publish(self.car_msg)
 
     def joyCallback(self, joy):
         "invoked every time a joystick message arrives"
         rospy.logdebug('joystick input:\n' + str(joy))
 
         # handle various buttons (when appropriate)
-        if joy.buttons[0] and self.car_msg.velocity == 0.0:
+        if joy.buttons[0] and self.car_cmd.velocity == 0.0:
             if self.direction != -1.0:
                 self.direction = -1.0       # shift to reverse
                 rospy.loginfo('shifting to reverse')
 
         elif joy.buttons[1]:
-            if self.car_msg.velocity != 0.0:
+            if self.car_cmd.velocity != 0.0:
                 rospy.logwarn('emergency stop')
-            self.car_msg.velocity = 0.0     # stop car immediately
+            self.car_cmd.velocity = 0.0     # stop car immediately
 
-        elif joy.buttons[2] and self.car_msg.velocity == 0.0:
+        elif joy.buttons[2] and self.car_cmd.velocity == 0.0:
             if self.direction != 1.0:
                 self.direction = 1.0        # shift to drive
                 rospy.loginfo('shifting to drive')
@@ -83,7 +86,8 @@ class JoyNode():
             self.adjustSpeed(joy.axes[self.speed])
 
         self.car_msg.header.stamp = rospy.Time.now()
-        self.carcmd.publish(self.car_msg)
+        self.car_msg.command = self.car_cmd
+        self.topic.publish(self.car_msg)
 
     def adjustSpeed(self, dv):
         "accelerate dv meters/second/second"
@@ -91,7 +95,7 @@ class JoyNode():
         dv *= 0.1
 
         # take absolute value of velocity
-        vabs = self.car_msg.velocity * self.direction
+        vabs = self.car_cmd.velocity * self.direction
 
         # never shift gears via speed controller, stop at zero
         if -dv > vabs:
@@ -99,26 +103,26 @@ class JoyNode():
         else:
             vabs += dv
 
-        self.car_msg.velocity = vabs * self.direction
+        self.car_cmd.velocity = vabs * self.direction
 
         # ensure forward and reverse speed limits never exceeded
-        if self.car_msg.velocity > max_speed:
-            self.car_msg.velocity = max_speed
-        elif self.car_msg.velocity < max_speed_reverse:
-            self.car_msg.velocity = max_speed_reverse
+        if self.car_cmd.velocity > max_speed:
+            self.car_cmd.velocity = max_speed
+        elif self.car_cmd.velocity < max_speed_reverse:
+            self.car_cmd.velocity = max_speed_reverse
 
     def setAngle(self, turn):
         "set wheel angle"
 
         # use cube of range [-1..1] turn command to improve
         # sensitivity while retaining sign
-        self.car_msg.angle = turn * turn * turn * max_wheel_angle
+        self.car_cmd.angle = turn * turn * turn * max_wheel_angle
 
         # ensure maximum wheel angle never exceeded
-        if self.car_msg.angle > max_wheel_angle:
-            self.car_msg.angle = max_wheel_angle
-        elif self.car_msg.angle < -max_wheel_angle:
-            self.car_msg.angle = -max_wheel_angle
+        if self.car_cmd.angle > max_wheel_angle:
+            self.car_cmd.angle = max_wheel_angle
+        elif self.car_cmd.angle < -max_wheel_angle:
+            self.car_cmd.angle = -max_wheel_angle
 
 def main():
 

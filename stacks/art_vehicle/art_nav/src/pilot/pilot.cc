@@ -26,7 +26,7 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
 
-#include <art_nav/CarCommand.h>
+#include <art_nav/CarCommandStamped.h>
 
 #include <art_servo/BrakeCommand.h>
 #include <art_servo/BrakeState.h>
@@ -58,7 +58,7 @@ tools, it also responds to Twist messages on the cmd_vel topic.
 
 Subscribes:
 
-- \b pilot/cmd [art_nav::CarCommand] velocity and steering angle command
+- \b pilot/cmd [art_nav::CarCommandStamped] velocity and steering angle command
 - \b vel_cmd [geometry_msgs::Twist] standard ROS velocity and angle command
 - \b odom [nav_msgs::Odometry] estimate of robot position and velocity.
 
@@ -118,6 +118,7 @@ namespace
 
   // pilot command messages
   art_nav::CarCommand goal_msg_;
+  ros::Time goal_time_;                 // time of last CarCommand
   geometry_msgs::Twist twist_msg_;
 
   SpeedControl *speed_ = NULL;          // speed control
@@ -188,11 +189,12 @@ void setGoal(const art_nav::CarCommand *command)
     }
 }
 
-void processCommand(const art_nav::CarCommand::ConstPtr &command)
+void processCommand(const art_nav::CarCommandStamped::ConstPtr &msg)
 {
+  goal_time_ = msg->header.stamp;
   ROS_DEBUG("pilot command (v,a) = (%.3f, %.3f)",
-            command->velocity, command->angle);
-  art_nav::CarCommand car_msg = *command;
+            msg->command.velocity, msg->command.angle);
+  art_nav::CarCommand car_msg = msg->command;
   setGoal(&car_msg);
 }
 

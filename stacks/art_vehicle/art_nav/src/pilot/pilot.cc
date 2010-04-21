@@ -25,8 +25,8 @@
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
-
-#include <art_nav/CarCommandStamped.h>
+#include <dynamic_reconfigure/server.h>
+#include <dynamic_reconfigure/SensorLevels.h>
 
 #include <art_servo/BrakeCommand.h>
 #include <art_servo/BrakeState.h>
@@ -42,6 +42,9 @@
 #include <art/hertz.h>
 #include <art/pid2.h>
 #include <art/vehicle.hh>
+
+#include <art_nav/CarCommandStamped.h>
+#include <art_nav/PilotConfig.h>
 
 #include "speed.h"
 
@@ -252,6 +255,11 @@ void processSteering(const art_servo::SteeringState::ConstPtr &steeringIn)
 {
   steering_angle_ = steeringIn->angle;
   ROS_DEBUG("Steering reports angle %.1f (degrees)", steering_angle_);
+}
+
+void reconfig(art_nav::PilotConfig &config, uint32_t level)
+{
+  ROS_INFO_STREAM("pilot dynamic reconfigure, level = " << level);
 }
 
 // Adjust velocity to match goal.
@@ -594,6 +602,12 @@ int main(int argc, char** argv)
       shutdown();
       return 1;
     }
+
+  // declare dynamic reconfigure callback
+  dynamic_reconfigure::Server<art_nav::PilotConfig> srv;
+  dynamic_reconfigure::Server<art_nav::PilotConfig>::CallbackType cb =
+    boost::bind(&reconfig, _1, _2);
+  srv.setCallback(cb);
 
   if (setup(node) != 0)
     {

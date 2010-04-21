@@ -53,9 +53,9 @@ class Pid
   virtual void Configure(const ros::NodeHandle &node)
   {
     // configure PID constants
-    CfgParam(node, "p", &this->kp);
-    CfgParam(node, "i", &this->ki);
-    CfgParam(node, "d", &this->kd);
+    CfgParam(node, "kp", &this->kp);
+    CfgParam(node, "ki", &this->ki);
+    CfgParam(node, "kd", &this->kd);
     ROS_DEBUG("%s gains (%.3f, %.3f, %.3f)",
               this->name.c_str(), this->kp, this->ki, this->kd);
     CfgParam(node, "omax", &this->omax);
@@ -153,13 +153,11 @@ class Pid
   void CfgParam(const ros::NodeHandle &node,
                 const char *pname, float *fvalue)
   {
-    std::string optname(this->name);
-    optname += '/';
-    optname += pname;
-    double dvalue;                      // ROS parameters are double
+    double dvalue;                      // (ROS parameter type is double)
+    std::string optname = this->name + '_' + pname;
     if (node.getParamCached(optname, dvalue))
       {
-        float param_value = dvalue;     // convert to float
+        float param_value = dvalue;     // convert double to float
         if (*fvalue != param_value)     // new value?
           {
             ROS_INFO("%s changed to %.3f", optname.c_str(), param_value);

@@ -259,7 +259,7 @@ void processSteering(const art_servo::SteeringState::ConstPtr &steeringIn)
 
 void reconfig(art_nav::PilotConfig &config, uint32_t level)
 {
-  ROS_INFO_STREAM("pilot dynamic reconfigure, level = " << level);
+  ROS_INFO("pilot dynamic reconfigure, level 0x%x", level);
 }
 
 // Adjust velocity to match goal.

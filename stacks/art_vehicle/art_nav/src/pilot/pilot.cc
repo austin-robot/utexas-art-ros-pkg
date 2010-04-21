@@ -99,12 +99,10 @@ namespace
   ros::Publisher throttle_cmd_;         // throttle command
 
   // configuration
-  double maxspeed_ = 45.0;              // miles per hour (default)
-  bool use_accel_matrix_ = true;        // speed control option
+  art_nav::PilotConfig config_;         // dynamic configuration
 
   // servo control
   float brake_position_ = 1.0;
-  double brake_hold_ = 0.7;             // brake hold setting (when stopped)
   uint8_t shifter_gear_ = art_servo::Shifter::Drive;
   float steering_angle_ = 0.0;
   float throttle_position_ = 0.0;
@@ -133,55 +131,75 @@ static inline float clamp(float value, float lower, float upper)
   return (value > upper? upper: (value < lower? lower: value));
 }
 
-// get node parameters
+/** allocate appropriate speed control subclass for this configuration */
+void allocateSpeedControl(void)
+{
+
+  if (config_.use_accel_matrix)
+    {
+      ROS_INFO("using acceleration matrix for speed control");
+      speed_ = new SpeedControlMatrix();
+    }
+  else
+    {
+      ROS_INFO("using brake and throttle PID for speed control");
+      speed_ = new SpeedControlPID();
+    }
+
+  // initialize brake and throttle positions in speed controller
+  speed_->set_brake_position(brake_position_);
+  speed_->set_throttle_position(throttle_position_);
+}
+
+/** deallocate speed control subclass */
+void deallocateSpeedControl(void)
+{
+  if (speed_)
+    {
+      ROS_DEBUG("stopping pilot speed control");
+      delete speed_;
+      speed_ = NULL;
+    }
+}
+
+/** get node parameters */
 int getParameters(int argc, char *argv[])
 {
   // use private node handle to get parameters
   ros::NodeHandle private_nh("~");
 
-  private_nh.getParam("brake_hold", brake_hold_);
-  brake_hold_ = clamp(brake_hold_, 0.0, 1.0);
-  ROS_INFO(NODE " brake hold setting  %.3f", brake_hold_);
-
-  private_nh.getParam("maxspeed", maxspeed_);
-  ROS_INFO(NODE " max speed (mph)  %.2f", maxspeed_);
-
-  private_nh.getParam("use_accel_matrix", use_accel_matrix_);
-  ROS_INFO("using %s for speed control",
-           use_accel_matrix_? "acceleration matrix": "brake and throttle PID");
-
   // Allocate speed controller.  This needs to happen before setup()
   // starts reading topics.
-  if (use_accel_matrix_)
-    speed_ = new SpeedControlMatrix();
-  else
-    speed_ = new SpeedControlPID();
-
-  // initialize brake and throttle positions in speed controller
-  speed_->set_brake_position(brake_position_);
-  speed_->set_throttle_position(throttle_position_);
+  allocateSpeedControl();
 
   return 0;
 }
 
 void setGoal(const art_nav::CarCommand *command)
 {
-  ROS_DEBUG("setting (velocity ,angle) to (%.3f, %.3f)",
-            command->velocity, command->angle);
+  //ROS_DEBUG("setting (velocity ,angle) to (%.3f, %.3f)",
+  //          command->velocity, command->angle);
+
   if (goal_msg_.velocity != command->velocity)
     {
-      if (maxspeed_ > 0 && command->velocity > maxspeed_)
+      if (config_.maxspeed > 0 && command->velocity > config_.maxspeed)
         {
-          ROS_WARN("excessive speed of %.2f MPH requested",
-                   mps2mph(command->velocity));
-          goal_msg_.velocity = maxspeed_;
+          ROS_WARN("excessive speed of %.2f m/s requested", command->velocity);
+          goal_msg_.velocity = config_.maxspeed;
+        }
+      else if (config_.minspeed < 0 && command->velocity < config_.minspeed)
+        {
+          ROS_WARN("excessive reverse speed of %.2f m/s requested",
+                   command->velocity);
+          goal_msg_.velocity = config_.minspeed;
         }
       else
-        goal_msg_.velocity = command->velocity;
+        {
+          goal_msg_.velocity = command->velocity;
+        }
 
-      ROS_DEBUG("changing speed goal from %.2f MPH to %.2f",
-                mps2mph(goal_msg_.velocity), mps2mph(command->velocity));
-      goal_msg_.velocity = command->velocity;
+      ROS_DEBUG("changing speed goal from %.2f m/s to %.2f",
+                goal_msg_.velocity, command->velocity);
     }
 
   if (goal_msg_.angle != command->angle)
@@ -257,9 +275,34 @@ void processSteering(const art_servo::SteeringState::ConstPtr &steeringIn)
   ROS_DEBUG("Steering reports angle %.1f (degrees)", steering_angle_);
 }
 
-void reconfig(art_nav::PilotConfig &config, uint32_t level)
+/** handle dynamic reconfigure service request
+ *
+ * @param newconfig new configuration from dynamic reconfigure client,
+ *        becomes the service reply message as updated here.
+ * @param level SensorLevels value (0xffffffff on initial call)
+ *
+ * This is done without any locking because I believe it is called in
+ * the same main thread as ros::spinOnce() and all the topic
+ * subscription callbacks. If not, we need a lock.
+ */
+void reconfig(art_nav::PilotConfig &newconfig, uint32_t level)
 {
   ROS_INFO("pilot dynamic reconfigure, level 0x%x", level);
+
+  // need to reallocate speed controller when use_accel_matrix changes
+  bool realloc = (newconfig.use_accel_matrix != config_.use_accel_matrix);
+  
+  if (realloc)
+    {
+      deallocateSpeedControl();
+    }
+
+  config_ = newconfig;
+
+  if (realloc)
+    {
+      allocateSpeedControl();
+    }
 }
 
 // Adjust velocity to match goal.
@@ -319,7 +362,7 @@ void Halt(float cur_speed)
       //
       // TODO: detect motion after stopping and apply more brake.
       brake_msg_.header.stamp = ros::Time::now();
-      brake_msg_.position = brake_hold_;
+      brake_msg_.position = config_.brake_hold;
       brake_cmd_.publish(brake_msg_);
     }
   else
@@ -588,8 +631,7 @@ int setup(ros::NodeHandle node)
 
 void shutdown(void)
 {
-  if (speed_)
-    delete speed_;
+  deallocateSpeedControl();
 }
 
 int main(int argc, char** argv)

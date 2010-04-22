@@ -10,27 +10,28 @@ then
 fi
 
 CMD=$1
-SUBTREE="$2/"
+SUBTREE=$2
 SITE=www.landrobot.com
 BAGS=${ROS_HOME:-~/.ros}/bags
 
 if [ $CMD == "put" ]
 then
-        FROM=~/.ros/bags/$SUBTREE
-        TO=$SITE:/pub/bags/$SUBTREE
+        FROM=$BAGS/$SUBTREE
+        TO=$SITE:/pub/bags
         cd $FROM
         echo "compressing all .bag files"
         gzip *.bag 2>/dev/null
 
 elif [ $CMD == "get" ]
 then
-        TO=~/.ros/bags/$SUBTREE
         FROM=$SITE:/pub/bags/$SUBTREE
+        TO=$BAGS
+        mkdir -p $BAGS    # make sure target exists
 else
         echo "invalid command:" $CMD
         exit 8
 fi
 
-#echo rsync -Phavr $FROM $TO
-echo copying $FROM to $TO
-rsync -Phavr $FROM $TO
+echo rsync -Phavr $FROM $TO
+exec rsync -Phavr $FROM $TO
+

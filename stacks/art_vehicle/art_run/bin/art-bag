@@ -1,0 +1,36 @@
+#!/bin/bash
+# $Id$
+
+if [ "$2" == "" ]
+then
+	echo "usage: `basename $0` [get|put] subtree"
+        echo ""
+        echo "copy bag files to or from www.landrobot.com"
+	exit 9
+fi
+
+CMD=$1
+SUBTREE="$2/"
+SITE=www.landrobot.com
+BAGS=${ROS_HOME:-~/.ros}/bags
+
+if [ $CMD == "put" ]
+then
+        FROM=~/.ros/bags/$SUBTREE
+        TO=$SITE:/pub/bags/$SUBTREE
+        cd $FROM
+        echo "compressing all .bag files"
+        gzip *.bag 2>/dev/null
+
+elif [ $CMD == "get" ]
+then
+        TO=~/.ros/bags/$SUBTREE
+        FROM=$SITE:/pub/bags/$SUBTREE
+else
+        echo "invalid command:" $CMD
+        exit 8
+fi
+
+#echo rsync -Phavr $FROM $TO
+echo copying $FROM to $TO
+rsync -Phavr $FROM $TO

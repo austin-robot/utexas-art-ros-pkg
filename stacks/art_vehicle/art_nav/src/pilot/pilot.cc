@@ -43,7 +43,7 @@
 #include <art/pid2.h>
 #include <art/vehicle.hh>
 
-#include <art_nav/CarCommandStamped.h>
+#include <art_nav/CarCommand.h>
 #include <art_nav/PilotConfig.h>
 
 #include "speed.h"
@@ -61,7 +61,7 @@ tools, it also responds to Twist messages on the cmd_vel topic.
 
 Subscribes:
 
-- \b pilot/cmd [art_nav::CarCommandStamped] velocity and steering angle command
+- \b pilot/cmd [art_nav::CarCommand] velocity and steering angle command
 - \b vel_cmd [geometry_msgs::Twist] standard ROS velocity and angle command
 - \b odom [nav_msgs::Odometry] estimate of robot position and velocity.
 
@@ -118,7 +118,7 @@ namespace
   nav_msgs::Odometry odom_msg_;
 
   // pilot command messages
-  art_nav::CarCommand goal_msg_;
+  art_nav::CarControl goal_msg_;
   ros::Time goal_time_;                 // time of last CarCommand
   geometry_msgs::Twist twist_msg_;
 
@@ -175,7 +175,7 @@ int getParameters(int argc, char *argv[])
   return 0;
 }
 
-void setGoal(const art_nav::CarCommand *command)
+void setGoal(const art_nav::CarControl *command)
 {
   //ROS_DEBUG("setting (velocity ,angle) to (%.3f, %.3f)",
   //          command->velocity, command->angle);
@@ -210,13 +210,13 @@ void setGoal(const art_nav::CarCommand *command)
     }
 }
 
-void processCommand(const art_nav::CarCommandStamped::ConstPtr &msg)
+void processCommand(const art_nav::CarCommand::ConstPtr &msg)
 {
   goal_time_ = msg->header.stamp;
   ROS_DEBUG("pilot command (v,a) = (%.3f, %.3f)",
-            msg->command.velocity, msg->command.angle);
-  art_nav::CarCommand car_msg = msg->command;
-  setGoal(&car_msg);
+            msg->control.velocity, msg->control.angle);
+  art_nav::CarControl car_ctl = msg->control;
+  setGoal(&car_ctl);
 }
 
 // This allows pilot to accept ROS cmd_vel messages
@@ -224,12 +224,12 @@ void processTwist(const geometry_msgs::Twist::ConstPtr &twistIn)
 {
   twist_msg_ = *twistIn;
 
-  // convert to a CarCommand message for setGoal()
-  art_nav::CarCommand carcmd;
-  carcmd.velocity = twistIn->linear.x;
-  carcmd.angle = Steering::steering_angle(carcmd.velocity, twistIn->angular.z);
+  // convert to a CarControl message for setGoal()
+  art_nav::CarControl car_ctl;
+  car_ctl.velocity = twistIn->linear.x;
+  car_ctl.angle = Steering::steering_angle(car_ctl.velocity, twistIn->angular.z);
 
-  setGoal(&carcmd);
+  setGoal(&car_ctl);
 }
 
 void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)

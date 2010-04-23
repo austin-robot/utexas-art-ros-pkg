@@ -13,6 +13,7 @@
   <depend package="std_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="dynamic_reconfigure" />
+  <depend package="rosbagmigration"/>
   <depend package="joy"/>
   <depend package="art_common"/>
   <depend package="art_servo"/>
@@ -22,6 +23,7 @@
 
   <export>
     <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>
+    <rosbagmigration rule_file="migration_rules/art_nav.bmr"/>
   </export>
 
 </package>

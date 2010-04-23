@@ -1,4 +1,4 @@
-# car control command
+# car control command with timestamp
 
-float32 velocity                # forward velocity (m/s), negative is reverse
-float32 angle                   # steering angle (degrees)
+Header     header
+CarControl control

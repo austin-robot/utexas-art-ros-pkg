@@ -22,10 +22,10 @@ from PyQt4 import QtCore
 import roslib;
 roslib.load_manifest(PKG_NAME)
 import rospy
+from art_nav.msg import CarControl
 from art_nav.msg import CarCommand
-from art_nav.msg import CarCommandStamped
 
-topic = rospy.Publisher('pilot/cmd', CarCommandStamped)
+topic = rospy.Publisher('pilot/cmd', CarCommand)
 rospy.init_node('teleop')
 
 # set path name for resolving icons
@@ -143,41 +143,41 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addAction(speed_up)
         toolbar.addAction(go_right)
 
-        self.car_msg = CarCommandStamped()
+        self.car_msg = CarCommand()
         self.car_msg.header.stamp = rospy.Time.now()
-        self.car_cmd = CarCommand()
-        self.car_cmd.velocity = 0.0
-        self.car_cmd.angle = 0.0
-        self.car_msg.command = self.car_cmd
+        self.car_ctl = CarControl()
+        self.car_ctl.velocity = 0.0
+        self.car_ctl.angle = 0.0
+        self.car_msg.control = self.car_ctl
         self.topic.publish(self.car_msg)
 
         self.updateStatusBar()
 
     def updateStatusBar(self):
         self.statusBar().showMessage('speed: '
-                                     + str(self.car_cmd.velocity)
+                                     + str(self.car_ctl.velocity)
                                      + ' m/s,    angle: '
-                                     + str(self.car_cmd.angle)
+                                     + str(self.car_ctl.angle)
                                      + ' deg')
 
     def adjustCarCmd(self, v, a):
 
-        self.car_cmd.velocity += v
-        self.car_cmd.angle += a
-        if self.car_cmd.angle > 29.0:
-            self.car_cmd.angle = 29.0
-        if self.car_cmd.angle < -29.0:
-            self.car_cmd.angle = -29.0
+        self.car_ctl.velocity += v
+        self.car_ctl.angle += a
+        if self.car_ctl.angle > 29.0:
+            self.car_ctl.angle = 29.0
+        if self.car_ctl.angle < -29.0:
+            self.car_ctl.angle = -29.0
 
         self.car_msg.header.stamp = rospy.Time.now()
-        self.car_msg.command = self.car_cmd
+        self.car_msg.control = self.car_ctl
         self.topic.publish(self.car_msg)
 
         self.updateStatusBar()
 
     def center_wheel(self):
         "center steering wheel"
-        self.adjustCarCmd(0.0, -self.car_cmd.angle)
+        self.adjustCarCmd(0.0, -self.car_ctl.angle)
 
     def go_left(self):
         "steer left"
@@ -213,7 +213,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def stop_car(self):
         "stop car immediately"
-        self.adjustCarCmd(-self.car_cmd.velocity, 0.0)
+        self.adjustCarCmd(-self.car_ctl.velocity, 0.0)
 
 
 class QtThread(threading.Thread):

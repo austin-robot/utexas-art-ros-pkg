@@ -12,7 +12,7 @@ import roslib;
 roslib.load_manifest('art_nav')
 
 import rospy
-from art_nav.msg   import CarCommandStamped
+from art_nav.msg   import CarCommand
 from nav_msgs.msg  import Odometry
 from art_servo.msg import BrakeCommand
 from art_servo.msg import BrakeState
@@ -57,7 +57,7 @@ class speedTopics:
     def get_pilot_cmd(self, cmd):
         "ROS callback for /pilot/cmd topic."
         self.plt.set_pilot_cmd(cmd.header.stamp.to_sec(),
-                               cmd.command.velocity)
+                               cmd.control.velocity)
 
     def get_odometry(self, odom):
         "ROS callback for /odom topic."
@@ -90,7 +90,7 @@ class speedTopics:
 
     def get_data(self, verbose=True):
         "Acquire speed topic data until ROS shutdown."
-        rospy.Subscriber('pilot/cmd', CarCommandStamped, self.get_pilot_cmd)
+        rospy.Subscriber('pilot/cmd', CarCommand, self.get_pilot_cmd)
         rospy.Subscriber('odom', Odometry, self.get_odometry)
         rospy.Subscriber('brake/cmd', BrakeCommand, self.get_brake_cmd)
         rospy.Subscriber('brake/state', BrakeState, self.get_brake_state)

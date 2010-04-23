@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# record bag from cameras and velodyne, with corresponding
+#   odometry, GPS and coordinate transforms
+
+exec rosbag record -o $(optenv ROS_HOME ~/.ros)/bags/camera/sensors /velodyne/rawscan /left_front/camera/image_raw/compressed /left_front/camera/camera_info /right_front/camera/image_raw/compressed /right_front/camera/camera_info /odom /gps /tf
+

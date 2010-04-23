@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# record bag from a specific camera, with corresponding
+#   odometry and GPS
+
+BAGS=${ROS_HOME:-~/.ros}/bags
+
+exec rosbag record -a -o $BAGS/training/teleop
+

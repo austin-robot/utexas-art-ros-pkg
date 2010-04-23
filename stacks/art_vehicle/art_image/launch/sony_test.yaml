@@ -1,17 +1,18 @@
 # Example camera parameters (Sony XCD-SX90CR)
 
-#guid: 0800461000821fa2
+guid: 080046100082189c
 video_mode: 1280x960_mono
-encoding: bayer_gbrg8
 fps: 15
+iso_speed: 800
 
-# setting Bayer pattern in the driver
-#bayer_pattern: GBRG
-#bayer_method: Bilinear
+# setting Bayer pattern in the driver, not the pipeline
+#encoding: bayer_gbrg8
+bayer_pattern: GBRG
+bayer_method: Bilinear
 
 # these all default to automatic settings:
 #brightness: 511
 #exposure: 256
 #gain: 150
-shutter: 1000
+#shutter: 1000
 #whitebalance: "2000 2000"

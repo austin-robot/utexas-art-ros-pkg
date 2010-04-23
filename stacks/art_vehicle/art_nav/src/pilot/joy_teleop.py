@@ -10,12 +10,15 @@
 #
 # $Id$
 
-## TODO: add timer loop, so the joystick can accelerate smoothly
+## TODO: make acceleration based speed control (one joystick?)  car
+##       stops when released, goes forward when positive, backward
+##       when negative
 
 PKG_NAME = 'art_nav'
 
 import sys
 import os
+import math
 import roslib;
 roslib.load_manifest(PKG_NAME)
 
@@ -92,7 +95,7 @@ class JoyNode():
     def adjustSpeed(self, dv):
         "accelerate dv meters/second/second"
 
-        dv *= 0.1
+        dv *= 0.05
 
         # take absolute value of velocity
         vabs = self.car_ctl.velocity * self.direction
@@ -116,7 +119,13 @@ class JoyNode():
 
         # use cube of range [-1..1] turn command to improve
         # sensitivity while retaining sign
-        self.car_ctl.angle = turn * turn * turn * max_wheel_angle
+        #self.car_ctl.angle = turn * turn * turn * max_wheel_angle
+        self.car_ctl.angle = math.pow(turn, 5) * max_wheel_angle
+        #self.car_ctl.angle = math.tan(turn) * max_wheel_angle
+        #sign = 1.0
+        #if turn < 0.0:
+        #    sign = -1.0
+        #self.car_ctl.angle = math.log(math.fabs(turn)) * max_wheel_angle * sign
 
         # ensure maximum wheel angle never exceeded
         if self.car_ctl.angle > max_wheel_angle:

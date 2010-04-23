@@ -14,9 +14,13 @@
      \todo check that devices are responding, (optionally) stop if
      they are not
 
-     \todo provide status feedback
+     \todo (optionally) stop if no commands received recently.
+
+     \todo provide state feedback
 
      \todo use pid directly on both brake and throttle
+
+     \todo shift to Park, when appropriate
  
      \author Jack O'Quin
 
@@ -594,7 +598,7 @@ int setup(ros::NodeHandle node)
   ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
 
   // topics to read
-  car_cmd_ = node.subscribe(NODE "/cmd", qDepth, processCommand, noDelay);
+  car_cmd_ = node.subscribe("pilot/cmd", qDepth, processCommand, noDelay);
   twist_cmd_ = node.subscribe("cmd_vel", qDepth, processTwist, noDelay);
   odom_state_ = node.subscribe("odom", qDepth, processOdom, noDelay);
 

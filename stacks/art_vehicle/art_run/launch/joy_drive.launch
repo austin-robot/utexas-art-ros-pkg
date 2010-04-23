@@ -8,6 +8,7 @@
 
   <node pkg="joy" type="joy_node" name="joy_node" >
     <param name="autorepeat_rate" value="20.0" />
+    <param name="deadzone" value="0.0" />
   </node>
   <node pkg="art_nav" type="joy_teleop.py" name="joy_teleop" />
 

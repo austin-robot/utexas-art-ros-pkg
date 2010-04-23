@@ -22,7 +22,7 @@ Run the ART pilot, accepting \b pilot/cmd messages.
 
 Node name: \b pilot
 
-Subscribes:
+\subsubsection sub_topics Subscribes:
 
   - \b pilot/cmd velocity and steering angle command
   - \b vel_cmd standard ROS velocity and angle command
@@ -32,14 +32,27 @@ Subscribes:
   - \b steering/state steering status.
   - \b throttle/state throttle status.
 
-Publishes:
+\subsubsection pub_topics Publishes:
 
   - \b brake/cmd brake commands.
   - \b shifter/cmd shifter commands.
   - \b steering/cmd steering commands.
   - \b throttle/cmd throttle commands.
   
-Parameters: many (TBD)
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~maxspeed" : \b [double] Maximum speed for pilot requests (m/s). min: 0.0, default: 14.0, max: 25.0
+- \b "~minspeed" : \b [double] Minimum speed for pilot requests (in reverse) (m/s). min: -4.0, default: -3.0, max: 0.0
+- \b "~brake_hold" : \b [double] Brake hold command when stopped. min: 0.0, default: 0.7, max: 1.0
+- \b "~use_accel_matrix" : \b [bool] Use acceleration matrix for speed control. min: False, default: True, max: True
+- \b "~brake_kp" : \b [double] Brake PID proportional gain (Kp). min: -10.0, default: -0.12, max: 0.0
+- \b "~brake_ki" : \b [double] Brake PID integral gain (Ki). min: -10.0, default: -0.001, max: 0.0
+- \b "~brake_kd" : \b [double] Brake PID derivative gain (Kd). min: -10.0, default: 0.0, max: 0.0
+- \b "~throttle_kp" : \b [double] Throttle PID proportional gain (Kp). min: 0.0, default: 0.12, max: 10.0
+- \b "~throttle_ki" : \b [double] Throttle PID integral gain (Ki). min: 0.0, default: 0.001, max: 10.0
+- \b "~throttle_kd" : \b [double] Throttle PID derivative gain (Kd). min: 0.0, default: 0.54, max: 10.0
 
 \section teleop Tele-Operation client
 

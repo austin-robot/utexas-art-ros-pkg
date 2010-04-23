@@ -144,8 +144,6 @@ bool getNewData(applanix_data_t *adata)
 {
   static ros::Time last_time;
 
-  ROS_DEBUG("getNewData()");
-
   // read and unpack first packet
   int rc = applanix_->get_packet(adata);
   if (rc != 0)				// none available?
@@ -159,6 +157,8 @@ bool getNewData(applanix_data_t *adata)
   do
     {
       ROS_DEBUG_STREAM("got packet, time: " << adata->time);
+      if (adata->time == ros::Time())
+        ROS_WARN_STREAM("invalid packet time: " << adata->time);
       rc = applanix_->get_packet(adata);
     }
   while (rc == 0);
@@ -176,7 +176,7 @@ bool getNewData(applanix_data_t *adata)
 
 /** Publish GpsInfo message. */
 void publishGPS(const applanix_data_t &adata, double utm_e, double utm_n,
-                ros::Publisher *gps_pub)
+                const char* zone, ros::Publisher *gps_pub)
 {
   applanix::GpsInfo gpsi;
 
@@ -187,7 +187,8 @@ void publishGPS(const applanix_data_t &adata, double utm_e, double utm_n,
   gpsi.altitude   = adata.grp1.alt;
   gpsi.utm_e  = utm_e;
   gpsi.utm_n  = utm_n;
-  // \todo add UTM zone to message
+  gpsi.zone = std::string(zone);
+
   switch (adata.grp1.alignment)
     {
     case ApplStatusFull:
@@ -199,7 +200,8 @@ void publishGPS(const applanix_data_t &adata, double utm_e, double utm_n,
     default:
       gpsi.quality = applanix::GpsInfo::INVALID_FIX;
     }
-  // \todo unpack Applanix grp2 and grp3 data to complete other fields
+
+  /// \todo unpack Applanix grp2 and grp3 data to complete other fields
 
   gps_pub->publish(gpsi);
 }
@@ -231,12 +233,12 @@ bool getOdom(Position::Position3D *odom_pos3d, ros::Time *odom_time,
 
   // Convert latitude and longitude (spherical coordinates) to
   // Universal Transverse Mercator (Cartesian).
-  // TODO: also save zone letter
   double utm_e, utm_n;			// easting, northing (in meters)
-  UTM::UTM(adata.grp1.lat, adata.grp1.lon, &utm_e, &utm_n);
+  char zone[20];
+  UTM::LLtoUTM(adata.grp1.lat, adata.grp1.lon, utm_e, utm_n, zone);
 
   // publish GPS information topic
-  publishGPS(adata, utm_e, utm_n, gps_pub);
+  publishGPS(adata, utm_e, utm_n, zone, gps_pub);
 
   using namespace angles;
     
@@ -327,7 +329,7 @@ void putPose(const Position::Position3D *odom_pos3d,
   odom_msg.twist.twist.angular.y = odom_pos3d->vel.pitch;
   odom_msg.twist.twist.angular.z = odom_pos3d->vel.yaw;
 
-  // \todo figure covariances of Pose and Twist
+  /// \todo figure covariances of Pose and Twist
 
   odom_pub->publish(odom_msg);
 }
@@ -411,7 +413,7 @@ int main(int argc, char** argv)
   if (0 != getParameters(argc, argv))
     return 9;
 
-  // \todo make this a class w/constructor to initialize
+  // make this a class w/constructor to initialize?
   memset(&adata, 0, sizeof(adata));
   adata.grp1.alignment = ApplStatusInvalid; // no valid solution yet
 
@@ -441,8 +443,6 @@ int main(int argc, char** argv)
   // main loop
   while(ros::ok())
     {
-      ROS_DEBUG(NODE ": looping");
-
       if (getOdom(&odom_pos3d, &odom_time, &gps_pub))
         {
           // publish transform and odometry only when there are new
@@ -451,9 +451,6 @@ int main(int argc, char** argv)
         }
 
       ros::spinOnce();                  // handle incoming messages
-
-      ROS_DEBUG(NODE ": end cycle");
-
       cycle.sleep();                    // sleep until next cycle
     }
 

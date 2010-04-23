@@ -168,9 +168,14 @@ bool getNewData(applanix_data_t *adata)
     return false;
   // see if device is returning valid data yet
   if (adata->grp1.alignment == ApplStatusInvalid)
-    return false;			// no valid solution yet
+    {
+      ROS_WARN("Applanix alignment invalid");
+      return false;			// no valid solution yet
+    }
 
   last_time = adata->time;              // remember time of last update
+  //if (adata->time == ros::Time())
+  //  ROS_WARN_STREAM("invalid last time: " << adata->time);
   return true;
 }
 

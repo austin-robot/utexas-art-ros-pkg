@@ -66,7 +66,7 @@ void DevApplanix::unpack_grp1(applanix_data_t *adata, GRP1_MSG *msg)
 
 void DevApplanix::unpack_grp4(applanix_data_t *adata, GRP4_MSG *msg) 
 {
-  ROS_DEBUG("Group 4 message %d b %d\n",sizeof(GRP4_MSG),sizeof(ushort));
+  //ROS_DEBUG("Group 4 message %d b %d\n",sizeof(GRP4_MSG),sizeof(ushort));
   ROS_DEBUG("  Status Data 0x%x IMU 0x%x IMU type 0x%x",
             msg->data.datastatus, msg->data.imustatus, msg->data.imutype);
 #if 0 // need to figure out how to interpret these fields
@@ -191,13 +191,14 @@ int DevApplanix::get_packet(applanix_data_t *adata)
       int rc = read_packet(&packet_time);
       if (rc != 0)			// no data received?
 	{
-          ROS_DEBUG(DEVICE " partial packet received (%u bytes)",
+          ROS_DEBUG(DEVICE " partial packet received (%lu bytes)",
                     buffer_length);
 	  return rc;
 	}
     }
 
   // have a full packet in the buffer
+  // \todo fix for 64-bit
   ROS_DEBUG(DEVICE " %*.*s %d packet, size %d",
             sizeof(hdr->grpstart), sizeof(hdr->grpstart), hdr->grpstart,
             hdr->groupnum, hdr->bytecount);
@@ -266,8 +267,9 @@ int DevApplanixPCAP::read_packet(ros::Time *time)
       if (header->len > sizeof(packet_buffer)-buffer_length)
         {
           // TODO Save this packet for next time?
-          ROS_WARN("PCAP packet (size %u) overflows buffer (%u left)",
-                   header->len, sizeof(packet_buffer)-buffer_length);
+          ROS_WARN_STREAM("PCAP packet (size " << header->len
+                          << ") overflows buffer (" <<
+                          sizeof(packet_buffer)-buffer_length <<" left)");
           return EAGAIN;                // buffer too full
         }
 

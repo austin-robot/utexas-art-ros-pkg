@@ -3,9 +3,10 @@
 
 if [ "$2" == "" ]
 then
-	echo "usage: `basename $0` [get|put] subtree"
+	echo "usage: `basename $0` [get|put] subtree [-n]"
         echo ""
         echo "copy bag files to or from www.landrobot.com"
+        echo "do not actually perform the copy if -n specified"
 	exit 9
 fi
 
@@ -13,6 +14,7 @@ CMD=$1
 SUBTREE=$2
 SITE=www.landrobot.com
 BAGS=${ROS_HOME:-~/.ros}/bags
+DRY_RUN=$3
 
 if [ $CMD == "put" ]
 then
@@ -32,6 +34,5 @@ else
         exit 8
 fi
 
-echo rsync -Phavr $FROM $TO
-exec rsync -Phavr $FROM $TO
-
+echo rsync $DRY_RUN -Phrv $FROM $TO
+exec rsync $DRY_RUN -Phrv $FROM $TO

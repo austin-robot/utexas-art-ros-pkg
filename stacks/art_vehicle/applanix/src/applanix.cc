@@ -191,8 +191,8 @@ int DevApplanix::get_packet(applanix_data_t *adata)
       int rc = read_packet(&packet_time);
       if (rc != 0)			// no data received?
 	{
-          ROS_DEBUG(DEVICE " partial packet received (%lu bytes)",
-                    buffer_length);
+          ROS_DEBUG_STREAM(DEVICE " partial packet received ("
+                           << buffer_length << " bytes)");
 	  return rc;
 	}
     }

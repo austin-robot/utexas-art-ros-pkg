@@ -5,5 +5,5 @@
 
 BAGS=${ROS_HOME:-~/.ros}/bags
 
-exec rosbag record -a -o $BAGS/training/teleop
+exec rosbag record -a -o $BAGS/speed/teleop
 

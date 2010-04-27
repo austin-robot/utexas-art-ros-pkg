@@ -58,17 +58,17 @@ car
 
 
 # create a robot
-car
-(
-  name "robot2"
-  color "yellow"
-  pose [9.46 -15.515 90.000]
-# MGR: Ugliness, I'll fix this later
-# Offset between MapLanes and Stage, so the follow_lanes controller works...
-  localization_origin [-9.6 -5.0 0.0 0.0]
-  localization "gps"
-  sick_laser( samples 181 laser_sample_skip 4 origin [3.075 0.0 0.0 0] )
-)
+#car
+#(
+#  name "robot2"
+#  color "yellow"
+#  pose [9.46 -15.515 90.000]
+## MGR: Ugliness, I'll fix this later
+## Offset between MapLanes and Stage, so the follow_lanes controller works...
+#  localization_origin [-9.6 -5.0 0.0 0.0]
+#  localization "gps"
+#  sick_laser( samples 181 laser_sample_skip 4 origin [3.075 0.0 0.0 0] )
+#)
 
 
 # create a robot
@@ -89,7 +89,8 @@ car
  name "robot4"
   color "blue"
   pose [-35.967 59.908 180.000]
-  localization_origin [0.0 0.0 0.0 0.0]
+ # localization_origin [0.0 0.0 0.0 0.0]
+ localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
   localization "gps"
   sick_laser( samples 181 laser_sample_skip 4 origin [3.075 0.0 0] )
 )

@@ -4,8 +4,7 @@
 <launch>
   <!-- stage simulator for ART vehicle -->
   <node pkg="simulator_art" type="artstage" name="artstage"
-        cwd="node"
-        args="$(optenv WORLD ../world/site_visit_3.world)"/>
+        args="$(find simulator_art)/world/$(optenv WORLD swri_site_visit.world)"/>
   <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
 
   <!-- Launch pilot with null servo actuators.  NOTE: this comes

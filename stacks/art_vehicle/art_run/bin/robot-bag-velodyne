@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# record bag from velodyne, with corresponding
+#   odometry, GPS and coordinate transforms
+
+
+BAGS=${ROS_HOME:-~/.ros}/bags
+
+exec rosbag record -a -o $BAGS/velodyne/velodyne
+

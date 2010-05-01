@@ -187,15 +187,10 @@ SpeedControlPID::SpeedControlPID():
   // Allocate brake and throttle PID classes with default parameters,
   // then configure control constants.
   //
-  // Constants used by Jesse Tannahill's pilot prototype:
+  // Throttle gains came from Jesse Tannahill's pilot prototype.
+  // Brake gains selected by experiment
   //
-  //   brake: (using -error as input)
-  //     kp = 0.12, ki = 0.001, kd = 0, omax = 1.0, omin = 0.0, C = 5000
-  //
-  //   throttle:
-  //     kp = 0.12, ki = 0.001, kd = 0.54, omax = 0.4, omin = 0.0, C = 5000
-  //
-  brake_pid_ = new Pid("brake", -0.12, -0.001, 0.0, 1.0, 0.0, 5000.0);
+  brake_pid_ = new Pid("brake", -0.2, -0.02, -1.6, 1.0, 0.0, 5000.0);
   throttle_pid_ = new Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0);
 
   configure();
@@ -232,7 +227,7 @@ void SpeedControlPID::adjust(float speed, float error,
       *throttle_req = 0.0;
       
       // If requesting brake off, switch to throttle control.
-      //
+#if 1
       // Must check reported brake position, too.  Otherwise there
       // will be considerable overlap, applying throttle while the
       // brake is still on.  That can cause mechanical damage to the
@@ -243,6 +238,16 @@ void SpeedControlPID::adjust(float speed, float error,
           braking_ = false;             // using throttle now
           throttle_pid_->Clear();       // reset PID controller
         }
+#else
+      // Allow more overlap, to damp the oscillations that occur when
+      // switching back and forth between throttle and brake.
+      if ((*brake_req < EPSILON_BRAKE))
+        {
+          *brake_req = 0.0;             // brake off
+          braking_ = false;             // using throttle now
+          throttle_pid_->Clear();       // reset PID controller
+        }
+#endif
     }
   else
     {
@@ -251,7 +256,7 @@ void SpeedControlPID::adjust(float speed, float error,
       *brake_req = 0.0;
 
       // If requesting throttle off, switch to brake control.
-      //
+
       // Since throttle responds much faster than brake, it will reach
       // idle before the brake really starts engaging.  So, not
       // checking throttle_position_ here is an option, which reduces

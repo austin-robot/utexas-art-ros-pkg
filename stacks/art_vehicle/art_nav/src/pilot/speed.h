@@ -30,7 +30,11 @@
 
 // epsilon values for brake and throttle requests
 #define EPSILON_BRAKE 0.01
+#if 0
 #define EPSILON_THROTTLE 0.02
+#else
+#define EPSILON_THROTTLE 0.01
+#endif
 
 /** Virtual base speed controller class */
 class SpeedControl

@@ -18,8 +18,6 @@
 
      \todo provide state feedback
 
-     \todo use pid directly on both brake and throttle
-
      \todo shift to Park, when appropriate
  
      \author Jack O'Quin

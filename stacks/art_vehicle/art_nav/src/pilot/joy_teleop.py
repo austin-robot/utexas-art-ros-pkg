@@ -40,7 +40,7 @@ class JoyNode():
         self.car_ctl = CarControl()
         self.car_msg = CarCommand()
 
-        self.steer = 0                  # steering axis (left)
+        self.steer = 3                  # steering axis (right)
         self.speed = 1                  # speed axis (left)
         self.direction = 1.0            # gear direction (drive)
 

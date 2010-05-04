@@ -22,7 +22,7 @@ then
         TO=$SITE:/pub/bags
         cd $FROM
         echo "compressing all .bag files"
-        gzip *.bag 2>/dev/null
+        gzip --rsyncable -v *.bag */*.bag 2>/dev/null
 
 elif [ $CMD == "get" ]
 then
@@ -34,5 +34,5 @@ else
         exit 8
 fi
 
-echo rsync $DRY_RUN -Phrv $FROM $TO
-exec rsync $DRY_RUN -Phrv $FROM $TO
+echo rsync $DRY_RUN -Phrvc $FROM $TO
+exec rsync $DRY_RUN -Phrvc $FROM $TO

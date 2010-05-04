@@ -6,7 +6,7 @@
  *  $Id$
  */
 
-#undef USE_VOLTAGE_POLYNOMIAL
+#define USE_VOLTAGE_POLYNOMIAL 1
 
 #include <ros/ros.h>
 

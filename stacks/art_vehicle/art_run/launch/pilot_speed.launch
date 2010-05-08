@@ -1,0 +1,23 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch file for pilot controlling vehicle speed, human steering -->
+
+<launch>
+  <!-- servo actuators -->
+  <node pkg="art_servo" type="brake" name="brake">
+    <param name="~port" value="/dev/brake"/>
+  </node>
+  <node pkg="art_servo" type="ioadr" name="ioadr">
+    <param name="~port" value="/dev/ioadr8x"/>
+  </node>
+  <node pkg="art_servo" type="ioadr" name="shifter">
+    <param name="~port" value="/dev/shifter"/>
+  </node>
+  <node pkg="art_servo" type="throttle" name="throttle">
+    <param name="~port" value="/dev/throttle"/>
+  </node>
+
+  <!-- navigation components -->
+  <node pkg="applanix" type="odometry" name="odometry" />
+  <node pkg="art_nav" type="pilot" name="pilot" />
+
+</launch>

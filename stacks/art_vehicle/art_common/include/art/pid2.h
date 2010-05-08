@@ -126,6 +126,19 @@ class Pid
     starting=true;
   }
 
+  /** @brief Copy the error history from another PID
+   *
+   *  @param pid The PID controller that has the history to copy
+   */
+  void CopyHistory(const Pid* pid)
+  {
+    // These values do not depend on the constants of the other PID,
+    // so they're safe to copy
+    this->dstate = pid->dstate;
+    this->istate = pid->istate;
+    // Check if we were called on an unused PID for whatever reason
+    this->starting = pid->starting;
+  }
   
  protected:
 
@@ -165,6 +178,7 @@ class Pid
           }
       }
   }
+
 
 };
 

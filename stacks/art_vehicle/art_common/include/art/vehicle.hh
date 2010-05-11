@@ -77,6 +77,12 @@ namespace ArtVehicle
   const float rear_SICK_pitch = 0.0;		// (approximately)
   const float rear_SICK_yaw = M_PI;	        // (approximately)
 
+  const float camera_front_right_px=velodyne_px+0.127; // (approx)
+  const float camera_front_right_py=velodyne_py-0.089; // (approx)
+  const float camera_front_right_pz=velodyne_pz-0.216;   // (approximately)
+  const float camera_front_right_yaw=-0.4974;// (-28.5 deg approx)
+  const float camera_front_right_pitch=0.0; // (assumed)
+  const float camera_front_right_roll=0.0; // (assumed)
 
   // Compute vehicle turning radius.  This is the distance from the
   // center of curvature to the vehicle origin in the middle of the

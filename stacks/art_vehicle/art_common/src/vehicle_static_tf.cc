@@ -103,6 +103,11 @@ int main(int argc, char** argv)
                   rear_SICK_px, rear_SICK_py, rear_SICK_pz,
                   rear_SICK_roll, rear_SICK_pitch, rear_SICK_yaw);
 
+      // Front Right Camera
+      broadcastTF(&tf_broadcaster, ArtFrames::front_right_camera,
+                  front_right_camera_px, front_right_camera_py, front_right_camera_pz,
+                  front_right_camera_roll, front_right_camera_pitch, front_right_camera_yaw);
+
       ros::spinOnce();                  // handle incoming messages
       cycle.sleep();                    // sleep until next cycle
     }

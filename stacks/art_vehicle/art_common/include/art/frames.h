@@ -33,6 +33,7 @@ namespace ArtFrames
   const std::string velodyne =  "velodyne";
   const std::string front_sick = "front_sick";
   const std::string rear_sick = "rear_sick";
+  const std::string front_right_camera = "front_right_camera";
 
   class VehicleRelative
   {

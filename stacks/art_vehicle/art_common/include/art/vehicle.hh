@@ -55,7 +55,8 @@ namespace ArtVehicle
 
   const float velodyne_px = 0.393; // (approximately)
   const float velodyne_py=0.278;   // (approximately)
-  const float velodyne_pz=2.2;   // 2.25 was first approximate
+  const float velodyne_pz=2.4;     // changed to 2.4 because of cams
+         // 2.25 was first approxima
 				 // measurement, but 2.2 as after a
 				 // plane fit to the data (when
 				 // getting roll and pitch)
@@ -77,12 +78,12 @@ namespace ArtVehicle
   const float rear_SICK_pitch = 0.0;		// (approximately)
   const float rear_SICK_yaw = M_PI;	        // (approximately)
 
-  const float camera_front_right_px=velodyne_px+0.127; // (approx)
-  const float camera_front_right_py=velodyne_py-0.089; // (approx)
-  const float camera_front_right_pz=velodyne_pz-0.216;   // (approximately)
-  const float camera_front_right_yaw=-0.4974;// (-28.5 deg approx)
-  const float camera_front_right_pitch=0.0; // (assumed)
-  const float camera_front_right_roll=0.0; // (assumed)
+  const float front_right_camera_px=velodyne_px+0.127; // (approx)
+  const float front_right_camera_py=velodyne_py-0.089; // (approx)
+  const float front_right_camera_pz=velodyne_pz-0.216;   // (approximately)
+  const float front_right_camera_yaw=-0.4974;// (-28.5 deg approx)
+  const float front_right_camera_pitch=0.0; // (assumed)
+  const float front_right_camera_roll=0.0; // (assumed)
 
   // Compute vehicle turning radius.  This is the distance from the
   // center of curvature to the vehicle origin in the middle of the

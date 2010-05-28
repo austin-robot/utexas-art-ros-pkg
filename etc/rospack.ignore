@@ -5,3 +5,4 @@ bin
 build
 deps.gv
 lib
+msg_gen

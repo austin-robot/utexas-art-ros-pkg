@@ -13,6 +13,7 @@
   <depend package="std_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="dynamic_reconfigure" />
+  <depend package="driver_base" />
   <depend package="rosbagmigration"/>
   <depend package="joy"/>
   <depend package="art_common"/>

@@ -9,13 +9,13 @@ define car position
 (
   # actual size in meters
   # (need height so it shows up on laser scans)
-  size3 [4.8 2.12 2.0]
+  size [4.8 2.12 2.0]
 
   wheelbase 2.33918
 
   # the car rotates about the rear axle, behind the center of area
   # it seems front of the car is neg - y-offset should be pos
-  origin [1.3 0.0 0]
+  origin [1.3 0.0 0 0]
 
   # car-like steering
   drive "car"

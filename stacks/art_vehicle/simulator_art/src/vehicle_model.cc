@@ -214,8 +214,8 @@ void ArtVehicleModel::update(ros::Time sim_time)
 
   // Also publish the ground truth pose and velocity, correcting for
   // Stage's screwed-up coord system.
-  Stg::stg_pose_t gpose = stgp_->GetGlobalPose();
-  Stg::stg_velocity_t gvel = stgp_->GetGlobalVelocity();
+  Stg::Pose gpose = stgp_->GetGlobalPose();
+  Stg::Velocity gvel = stgp_->GetGlobalVelocity();
   tf::Quaternion gposeQ;
   gposeQ.setRPY(0.0, 0.0, gpose.a-M_PI/2.0);
   tf::Transform gt(gposeQ, tf::Point(gpose.y, -gpose.x, 0.0));

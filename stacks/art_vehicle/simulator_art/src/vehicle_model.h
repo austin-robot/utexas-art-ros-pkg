@@ -44,7 +44,7 @@ class ArtVehicleModel
 public:
     
   // Constructor
-  ArtVehicleModel(Stg::StgModelPosition *stgPos,
+  ArtVehicleModel(Stg::ModelPosition *stgPos,
                   tf::TransformBroadcaster *tfBroad,
                   std::string ns_prefix)
   {
@@ -69,7 +69,7 @@ private:
   void ModelAcceleration(geometry_msgs::Twist *odomVel, ros::Time sim_time);
 
   // Stage interfaces
-  Stg::StgModelPosition *stgp_;
+  Stg::ModelPosition *stgp_;
 
   // ROS interfaces
   ros::NodeHandle node_;                // simulation node handle

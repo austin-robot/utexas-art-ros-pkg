@@ -46,6 +46,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <signal.h>
 
 
 // libstage
@@ -74,7 +75,7 @@ class StageNode
   private:
     // Messages that we'll send or receive
     sensor_msgs::LaserScan *laserMsgs;
-    roslib::Clock clockMsg_;
+    roslib::Clock clockMsg;
 
     // roscpp-related bookkeeping
     ros::NodeHandle n_;
@@ -83,8 +84,8 @@ class StageNode
     boost::mutex msg_lock;
 
     // The models that we're interested in
-    std::vector<Stg::StgModelLaser *> lasermodels;
-    std::vector<Stg::StgModelPosition *> positionmodels;
+    std::vector<Stg::ModelLaser *> lasermodels;
+    std::vector<Stg::ModelPosition *> positionmodels;
     std::vector<ros::Publisher> laser_pubs_;
     ros::Publisher clock_pub_;
 
@@ -93,7 +94,15 @@ class StageNode
 
     // A helper function that is executed for each stage model.  We use it
     // to search for models of interest.
-    static void ghfunc(gpointer key, Stg::StgModel* mod, StageNode* node);
+    static void ghfunc(Stg::Model* mod, StageNode* node);
+
+    static bool s_update(Stg::World* world, StageNode* node)
+    {
+      node->WorldCallback();
+      // We return false to indicate that we want to be called again (an
+      // odd convention, but that's the way that Stage works).
+      return false;
+    }
 
     // Appends the given robot ID to the given message name.  If omitRobotID
     // is true, an unaltered copy of the name is returned.
@@ -117,12 +126,15 @@ class StageNode
     // 0 on success (both models subscribed), -1 otherwise.
     int SubscribeModels();
 
-    // Do one update of the simulator.  May pause if the next update time
+    // Our callback
+    void WorldCallback();
+    
+    // Do one update of the world.  May pause if the next update time
     // has not yet arrived.
-    void Update();
+    bool UpdateWorld();
 
     // The main simulator object
-    Stg::StgWorld* world;
+    Stg::World* world;
 };
 
 // since stage_art is single-threaded, this is OK. revisit if that changes!
@@ -140,21 +152,26 @@ StageNode::mapName(const char *name, size_t robotID)
 }
 
 void
-StageNode::ghfunc(gpointer key,
-                  Stg::StgModel* mod,
-                  StageNode* node)
+StageNode::ghfunc(Stg::Model* mod, StageNode* node)
 {
-  if (dynamic_cast<Stg::StgModelLaser *>(mod))
-    node->lasermodels.push_back(dynamic_cast<Stg::StgModelLaser *>(mod));
+  if (dynamic_cast<Stg::ModelLaser *>(mod))
+    node->lasermodels.push_back(dynamic_cast<Stg::ModelLaser *>(mod));
 
+#if 0  // newer version
+  if (dynamic_cast<Stg::ModelPosition *>(mod))
+    node->positionmodels.push_back(dynamic_cast<Stg::ModelPosition *>(mod));
+#else  // earlier version
   // only use the first position model
-  if (dynamic_cast<Stg::StgModelPosition *>(mod)
+  if (dynamic_cast<Stg::ModelPosition *>(mod)
       && node->positionmodels.size() == 0)
-    node->positionmodels.push_back(dynamic_cast<Stg::StgModelPosition *>(mod));
+    node->positionmodels.push_back(dynamic_cast<Stg::ModelPosition *>(mod));
+#endif
 }
 
 StageNode::StageNode(int argc, char** argv, bool gui, const char* fname)
 {
+  ROS_INFO_STREAM("libstage version " << Stg::Version());
+
   this->sim_time.fromSec(0.0);
 
   // We'll check the existence of the world file, because libstage doesn't
@@ -171,14 +188,21 @@ StageNode::StageNode(int argc, char** argv, bool gui, const char* fname)
   Stg::Init( &argc, &argv );
 
   if(gui)
-    this->world = new Stg::StgWorldGui(800, 700, "Stage (ART)");
+    this->world = new Stg::WorldGui(800, 700, "Stage (ART)");
   else
-    this->world = new Stg::StgWorld();
+    this->world = new Stg::World();
 
-  this->world->Update();
+  
+  // Apparently an Update is needed before the Load to avoid crashes on
+  // startup on some systems.
+  this->UpdateWorld();
   this->world->Load(fname);
 
-  this->world->ForEachModel((GHFunc)ghfunc, this);
+  // We add our callback here, after the Update, so avoid our callback
+  // being invoked before we're ready.
+  this->world->AddUpdateCallback((Stg::stg_world_callback_t)s_update, this);
+
+  this->world->ForEachDescendant((Stg::stg_model_callback_t)ghfunc, this);
 
   size_t numRobots = positionmodels.size();
   ROS_INFO_STREAM("found " << numRobots << " position model(s) in the file");
@@ -186,8 +210,13 @@ StageNode::StageNode(int argc, char** argv, bool gui, const char* fname)
   /// \todo support more than one simulated robot
   if (numRobots != 1)
   {
+#if 0
     ROS_FATAL("artstage currently only simulates one position model");
     ROS_BREAK();
+#endif
+    size_t numRobots = positionmodels.size();
+    ROS_INFO("found %u position/laser pair%s in the file", 
+             (unsigned int)numRobots, (numRobots==1) ? "" : "s");
   }
 
   this->laserMsgs = new sensor_msgs::LaserScan[numRobots];
@@ -214,14 +243,18 @@ StageNode::SubscribeModels()
   for (size_t r = 0; r < this->positionmodels.size(); r++)
   {
     if(this->lasermodels[r])
+    {
       this->lasermodels[r]->Subscribe();
+    }
     else
     {
       ROS_ERROR("no laser");
       return(-1);
     }
     if(this->positionmodels[r])
+    {
       this->positionmodels[r]->Subscribe();
+    }
     else
     {
       ROS_ERROR("no position");
@@ -246,29 +279,34 @@ StageNode::~StageNode()
     delete vehicleModels_[r];
 }
 
-void
-StageNode::Update()
+bool
+StageNode::UpdateWorld()
 {
-  // wait until time for next update
-  this->world->PauseUntilNextUpdateTime();
+  return this->world->UpdateAll();
+}
+
+void
+StageNode::WorldCallback()
+{
   boost::mutex::scoped_lock lock(msg_lock);
 
-  // let the simulator update (it will sleep if there's time)
-  this->world->Update();
-
-  // publish simulated time from Stage
   this->sim_time.fromSec(world->SimTimeNow() / 1e6);
-  this->clockMsg_.clock = sim_time;
-  this->clock_pub_.publish(this->clockMsg_);
+  // We're not allowed to publish clock==0, because it used as a special
+  // value in parts of ROS, #4027.
+  if(this->sim_time.sec == 0 && this->sim_time.nsec == 0)
+  {
+    ROS_DEBUG("Skipping initial simulation step, to avoid publishing clock==0");
+    return;
+  }
 
   // Get latest laser data
   for (size_t r = 0; r < this->lasermodels.size(); r++)
   {
-    Stg::stg_laser_sample_t* samples = this->lasermodels[r]->GetSamples();
-    if(samples)
+    std::vector<Stg::ModelLaser::Sample> samples = this->lasermodels[r]->GetSamples();
+    if(samples.size())
     {
       // Translate into ROS message format and publish
-      Stg::stg_laser_cfg_t cfg = this->lasermodels[r]->GetConfig();
+      Stg::ModelLaser::Config cfg = this->lasermodels[r]->GetConfig();
       this->laserMsgs[r].angle_min = -cfg.fov/2.0;
       this->laserMsgs[r].angle_max = +cfg.fov/2.0;
       this->laserMsgs[r].angle_increment = cfg.fov/(double)(cfg.sample_count-1);
@@ -294,6 +332,16 @@ StageNode::Update()
   {
     vehicleModels_[r]->update(this->sim_time);
   }
+
+  this->clockMsg.clock = sim_time;
+  this->clock_pub_.publish(this->clockMsg);
+}
+
+static bool quit = false;
+void
+sigint_handler(int num)
+{
+  quit = true;
 }
 
 int 
@@ -338,10 +386,20 @@ main(int argc, char** argv)
   // spawn a thread to read incoming ROS messages
   boost::thread t = boost::thread::thread(boost::bind(&ros::spin));
 
+  // TODO: get rid of this fixed-duration sleep, using some Stage builtin
+  // PauseUntilNextUpdate() functionality.
+  ros::WallRate r(10.0);
+
   // run stage update loop in the main thread
   while(ros::ok() && !sn.world->TestQuit())
   {
-    sn.Update();
+    if(gui)
+      Fl::wait(r.expectedCycleTime().toSec());
+    else
+    {
+      sn.UpdateWorld();
+      r.sleep();
+    }
   }
   t.join();
 

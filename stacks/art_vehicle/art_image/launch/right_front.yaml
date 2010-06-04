@@ -1,13 +1,12 @@
 # Right front camera on car (Sony XCD-SX90CR)
 
 guid: 0800461000821a6a
-video_mode: 1280x960_mono
+video_mode: 1280x960_mono8
 fps: 15
 iso_speed: 800
 
 # setting Bayer pattern in the driver
-#encoding: bayer_gbrg8
-bayer_pattern: GBRG
+bayer_pattern: gbrg
 bayer_method: Bilinear
 
 # these all default to automatic settings:

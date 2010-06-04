@@ -1,13 +1,12 @@
 # Right-most roof-mounted camera on car (Sony XCD-SX90CR)
 
 guid: 080046100082189c
-video_mode: 1280x960_mono
+video_mode: 1280x960_mono8
 fps: 15
 iso_speed: 800
 
 # setting Bayer pattern in the driver, not the pipeline
-#encoding: bayer_gbrg8
-bayer_pattern: GBRG
+bayer_pattern: gbrg
 bayer_method: Bilinear
 
 # these all default to automatic settings:

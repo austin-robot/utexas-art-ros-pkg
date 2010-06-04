@@ -6,7 +6,8 @@
 <launch>
 
   <!-- name node (and topic) after parameter file -->
-  <node pkg="camera1394" type="camera1394" name="left_front" >
+  <node ns="left_front" pkg="camera1394"
+        type="camera1394_node" name="left_front" >
     <rosparam file="$(find art_image)/launch/left_front.yaml" /> 
   </node>
 

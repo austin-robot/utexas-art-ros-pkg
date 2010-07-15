@@ -20,7 +20,7 @@
         SpeedControlPID -- speed control using direct PID of throttle
                            and brake
 
-     \author Jack O'Quin
+     \author Jack O'Quin, David Kraft-Ishihama
 
  */
 """
@@ -33,17 +33,13 @@ import roslib
 roslib.load_manifest('art_nav')
 
 import rospy
-from art import pid2
+#from art import pid2
 
 EPSILON_BRAKE = 0.01
-if (False) : EPSILON_THROTTLE = 0.02
-else : EPSILON_THROTTLE = 0.01
+EPSILON_THROTTLE = 0.01
 
-from art import conversions
-from art import hertz
-
-import speed
-import time
+#from art_common.msg import conversions
+#from art_common.msg import hertz
 
 class SpeedControl :
   def __init__(self) :
@@ -63,7 +59,7 @@ class SpeedControl :
 ###############################
 
   # acceleration matrix dimensions
-DELTAS = 13
+N_DELTAS = 13
 DELTA_0 = (N_DELTAS-1)/2 # middle row: delta == 0
 N_SPEEDS = 6
 
@@ -78,8 +74,8 @@ N_SPEEDS = 6
   # so their effect builds up quickly.
 
 #each pair of tuples is (brake, throttle)
-accel_matrix =
-    ( #              0        <=4       <=8       <=16      <=32      more  
+accel_matrix = (
+      #              0        <=4       <=8       <=16      <=32      more  
       ((1000,-90), (12,-30), (12,-30), (12,-40), (12,-50),(20,-70)),#-32
       ((1000,-60), ( 6,-20), ( 6,-20), ( 6,-30), ( 6,-40),(10,-55)),#-16
       ((1000,-40), ( 4,-15), ( 4,-15), ( 4,-20), ( 4,-30),( 7,-40)),#-8
@@ -121,7 +117,7 @@ def speed_col(mph) :
   col_limits = [0.0, 4.0, 8.0, 16.0, 32.0, 64.0]
 
   while col < len(col_limits) :
-    if (mph <= col_limits[col])
+    if (mph <= col_limits[col]) :
       return col
     col += 1
 
@@ -133,7 +129,7 @@ def speed_col(mph) :
 class SpeedControlMatrix (SpeedControl):
   def __init__(self) :
     SpeedControl.__init__(self)
-    self.velpid_ = new Pid("speed", 2.0, 0.0, 32.0)
+    self.velpid_ = Pid("speed", 2.0, 0.0, 32.0)
     self.configure()
     self.reset()
 
@@ -173,8 +169,8 @@ class SpeedControlPID (SpeedControl) :
   def __init__(self) :
     SpeedControl.__init__(self)
     self.braking_ = True
-    self.brake_pid_ = new Pid("brake", -0.2, -0.02, -1.6, 1.0, 0.0, 5000.0)
-    self.throttle_pid_ = new Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0)
+    self.brake_pid_ = Pid("brake", -0.2, -0.02, -1.6, 1.0, 0.0, 5000.0)
+    self.throttle_pid_ = Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0)
 
     self.configure()
     self.reset()
@@ -191,7 +187,8 @@ class SpeedControlPID (SpeedControl) :
       # will be considerable overlap, applying throttle while the
       # brake is still on.  That can cause mechanical damage to the
       # transmission.
-        if ((self.brake_position_ < EPSILON_BRAKE) && (brake_req < pilot.EPSILON_BRAKE)) :
+        if ((self.brake_position_ < EPSILON_BRAKE)
+            and (brake_req < pilot.EPSILON_BRAKE)) :
           brake_req = 0.0              # brake off
           self.braking_ = False             # using throttle now
           self.throttle_pid.Clear()       # reset PID controller
@@ -199,7 +196,7 @@ class SpeedControlPID (SpeedControl) :
       else :     
         # Allow more overlap, to damp the oscillations that occur when
         # switching back and forth between throttle and brake.
-        if (brake_req < EPSILON_BRAKE)
+        if (brake_req < EPSILON_BRAKE) :
           brake_req = 0.0;                  # brake off
           self.braking_ = False             # using throttle now
           self.throttle_pid_.Clear()      # reset PID controller

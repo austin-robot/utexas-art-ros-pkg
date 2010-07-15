@@ -164,11 +164,11 @@ def setGoal(command) :
     # rospy.logdebug("setting (velocity ,angle) to (%.3f, %.3f)", command.velocity, command.angle)
 
     if (goal_msg_.velocity != command.velocity) :
-      if (config_.maxspeed > 0 && command.velocity > config_.maxspeed) :
+      if (config_.maxspeed > 0 and command.velocity > config_.maxspeed) :
         rospy.logwarn("excessive speed of %.3f m/s requested", command.velocity)
         goal_msg_.velocity = config_.maxspeed
         
-      elif (config_.minspeed < 0 && command.velocity < config_.minspeed) :
+      elif (config_.minspeed < 0 and command.velocity < config_.minspeed) :
         rospy_logwarn("excessive reverse speed of %.2f m/s requested",  command.velocity)
         goal_msg_.velocity = config_.minspeed
         
@@ -179,7 +179,7 @@ def setGoal(command) :
       rospy.logdebug("changing speed goal from %.2f m/s to %.2f", goal_msg_.velocity, command.velocity)
     
 
-    if (goal_msg_.angle != command.angle)
+    if (goal_msg_.angle != command.angle):
       rospy.logdebuf("changing steering angle from %.3f to %.3f (degrees)", goal_msg_.angle, command.angle)
       goal_msg_.angle = command.angle
        
@@ -355,10 +355,10 @@ Backward = 2
 
  # speed_range
 def speed_range(speed) :
-    if (speed > Epsilon.speed)		# moving forward?
+    if (speed > Epsilon.speed):		# moving forward?
       return Forward
 
-    if (speed >= -Epsilon.speed)	# close to zero?
+    if (speed >= -Epsilon.speed):	# close to zero?
       return Stopped
 
     return Backward
@@ -410,7 +410,7 @@ def speedControl(speed) :
         speed_.reset()
     elif shifting_state == shiftReverse :
       # make sure the transmission actually shifted
-      if (shifter_gear_ != art_servo.Shifter.Reverse)
+      if (shifter_gear_ != art_servo.Shifter.Reverse) :
 	# repeat shift command until it works
         shifter_msg_.header.stamp = rospy.Time.now()
         shifter_msg_.gear = art_servo.Shifter.Reverse
@@ -544,7 +544,7 @@ def main(argv) :
 
       cycle.sleep()                   # sleep until next cycle
 
-  return 0
+    return 0
 
 if __name__ == '__main__':
     try:

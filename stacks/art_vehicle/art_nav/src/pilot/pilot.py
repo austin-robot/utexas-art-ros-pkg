@@ -2,7 +2,7 @@
 
 """
 /*
- *  Copyright (C) 2005, 2007, 2009 Austin Robot Technology
+ *  Copyright (C) 2010, Austin Robot Technology
  *
  *  License: Modified BSD Software License Agreement
  * 
@@ -23,7 +23,7 @@
 
      \todo shift to Park, when appropriate
  
-     \author Jack O'Quin
+     \author Jack O'Quin, David Kraft-Ishihama
 
 """
 
@@ -40,7 +40,7 @@ roslib.load_manifest('art_nav')
 import rospy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from dynamic_reconfigure.msg import server
+from dynamic_reconfigure import server
 from dynamic_reconfigure.msg import SensorLevels
 
 from art_servo.msg import BrakeCommand
@@ -50,18 +50,19 @@ from art_servo.msg import SteeringCommand
 from art_servo.msg import SteeringState
 from art_servo.msg import ThrottleCommand
 from art_servo.msg import ThrottleState
-from art_servo.msg import steering
 
-from art import conversions
-from art import epsilon
-from art import hertz
-from art import pid2
-from art import vehicle
+#from art_common.msg import conversions
+#from art_common.msg import epsilon
+#from art_common.msg import hertz
+#from art_common.msg import vehicle
 
-from art_nav import CarCommand
-from art_nav import PilotConfig
+#from art_servo import steering
+#from art_common import pid2
 
-import speed
+from art_nav.msg import CarCommand
+from art_nav.cfg import PilotConfig
+
+#import speed
 
 NODE = 'pilot'
 
@@ -115,7 +116,7 @@ config_ = None              # Pilot config: dynamic configuration
 
   # servo control
 brake_position_ = 1.0
-shifter_gear_ = art_servo.Shifter.Drive
+shifter_gear_ = Shifter.Drive
 steering_angle_ = 0.0
 throttle_position_ = 0.0
 
@@ -402,7 +403,7 @@ def speedControl(speed) :
       elif (Stopped == cur_range and Backward == goal_range) :
 	shifting_state = ShiftReverse
         shifter_msg_.header.stamp = rospy.Time.now()
-        shifter_msg_.gear = art_servo.Shifter.Reverse
+        shifter_msg_.gear = Shifter.Reverse
         shifter_cmd_.publish(shifter_msg_)
         shift_time_ = rospy.Time.now()
       else :
@@ -410,17 +411,17 @@ def speedControl(speed) :
         speed_.reset()
     elif shifting_state == shiftReverse :
       # make sure the transmission actually shifted
-      if (shifter_gear_ != art_servo.Shifter.Reverse) :
+      if (shifter_gear_ != Shifter.Reverse) :
 	# repeat shift command until it works
         shifter_msg_.header.stamp = rospy.Time.now()
-        shifter_msg_.gear = art_servo.Shifter.Reverse
+        shifter_msg_.gear = Shifter.Reverse
         shifter_cmd_.publish(shifter_msg_)
         shift_time_ = rospy.Time.now()
         tospy.logdebug("repeated shift command at %.6f", shift_time_.toSec())
       # make sure the relay was set long enough
       elif ((rospy.Time.now().toSec() - shift_time_.toSec()) >= shift_duration) :
 	shifter_msg_.header.stamp = rospy.Time.now();
-        shifter_msg_.gear = art_servo.Shifter.Reset
+        shifter_msg_.gear = Shifter.Reset
         shifter_cmd_.publish(shifter_msg_)
 	if (Backward == goal_range) :
 	  shifting_state = Reverse
@@ -432,7 +433,7 @@ def speedControl(speed) :
 	else : # Dang!  we want to go forward now
 	  shifting_state = ShiftDrive
           shifter_msg_.header.stamp = rospy.Time.now()
-          shifter_msg_.gear = art_servo.Shifter.Drive
+          shifter_msg_.gear = Shifter.Drive
           shifter_cmd_.publish(shifter_msg_)
 	  shift_time_ = rospy.Time.now()
 
@@ -443,7 +444,7 @@ def speedControl(speed) :
       elif (Stopped == cur_range and Forward == goal_range) :
 	shifting_state = ShiftDrive
         shifter_msg_.header.stamp = rospy.Time.now()
-        shifter_msg_.gear = art_servo.Shifter.Drive
+        shifter_msg_.gear = Shifter.Drive
         shifter_cmd_.publish(shifter_msg_)
 	shift_time_ = rospy.Time.now()
       else :
@@ -452,10 +453,10 @@ def speedControl(speed) :
 
     elif shifting_state == ShiftDrive :
       # make sure the transmission actually shifted
-      if (shifter_gear_ != art_servo.Shifter.Drive) :
+      if (shifter_gear_ != Shifter.Drive) :
 	# repeat shift command until it works
         shifter_msg_.header.stamp = rospy.Time.now();
-        shifter_msg_.gear = art_servo.Shifter.Drive
+        shifter_msg_.gear = Shifter.Drive
         shifter_cmd_.publish(shifter_msg_)
 	shift_time_ = rospy.Time.now()
         rospy.logdebug("repeated shift command at %.6f", shift_time_.toSec())
@@ -463,7 +464,7 @@ def speedControl(speed) :
       # make sure the relay was set long enough
       elif ((rospy.Time.now().toSec() - shift_time_.toSec()) >= shift_duration) :
 	shifter_msg_.header.stamp = rospy.Time.now()
-        shifter_msg_.gear = art_servo.Shifter.Reset
+        shifter_msg_.gear = Shifter.Reset
         shifter_cmd_.publish(shifter_msg_)
 	if (Forward == goal_range) :
 	  shifting_state = Drive
@@ -475,7 +476,7 @@ def speedControl(speed) :
 	else : # Dang!  we want to go backward now
 	  shifting_state = ShiftReverse
           shifter_msg_.header.stamp = rospy.Time.now()
-          shifter_msg_.gear = art_servo.Shifter.Reverse
+          shifter_msg_.gear = Shifter.Reverse
           shifter_cmd_.publish(shifter_msg_)
 	  shift_time_ = rospy.Time.now()
     yield

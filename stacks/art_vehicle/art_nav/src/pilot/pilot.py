@@ -60,9 +60,12 @@ from art_servo.msg import ThrottleState
 #from art_common import pid2
 
 from art_nav.msg import CarCommand
+from art_nav.msg import CarControl
 from art_nav.cfg import PilotConfig
 
 #import speed
+
+import sys
 
 NODE = 'pilot'
 
@@ -112,7 +115,7 @@ steering_cmd_ = None        # Publisher: steering command
 throttle_cmd_ = None        # Publisher: throttle command
 
   # configuration
-config_ = None              # Pilot config: dynamic configuration
+config_ = PilotConfig       # Pilot config: dynamic configuration
 
   # servo control
 brake_position_ = 1.0
@@ -131,9 +134,10 @@ shift_time_ = rospy.Time()  # time last shift requested
 odom_msg_ = Odometry()
 
   # pilot command messages
-goal_msg_ = art_nav.CarControl()
+goal_msg_ = CarControl()
 goal_time_ = rospy.Time()   # time of last CarCommand
 twist_msg_ = Twist()
+speed_ = None
 
  # clamp value to range: [lower, upper]
 def clamp (value, lower, upper) :
@@ -141,12 +145,15 @@ def clamp (value, lower, upper) :
 
 def allocateSpeedControl() :
     # allocate appropriate speed control subclass for this configuration #
-    if (config_.use_accel_matrix) :
-      rospy.loginfo("using acceleration matrix for speed control")
-      speed_ = speed.SpeedControlMatrix()
-    else :
-      rospy.loginfo("using brake and throttle PID for speed control")
-      speed_ = speed.SpeedControlPID()
+    #if (config_.use_accel_matrix) :
+    #  rospy.loginfo("using acceleration matrix for speed control")
+    #  speed_ = speed.SpeedControlMatrix()
+    #else :
+    #  rospy.loginfo("using brake and throttle PID for speed control")
+    #  speed_ = speed.SpeedControlPID()
+
+    rospy.loginfo("using brake and throttle PID for speed control")
+    speed_ = speed.SpeedControlPID()
 
     # initialize brake and throttle positions in speed controller
     speed_.set_brake_position(brake_position_)
@@ -165,17 +172,18 @@ def setGoal(command) :
     # rospy.logdebug("setting (velocity ,angle) to (%.3f, %.3f)", command.velocity, command.angle)
 
     if (goal_msg_.velocity != command.velocity) :
-      if (config_.maxspeed > 0 and command.velocity > config_.maxspeed) :
-        rospy.logwarn("excessive speed of %.3f m/s requested", command.velocity)
-        goal_msg_.velocity = config_.maxspeed
+      #if (config_.maxspeed > 0 and command.velocity > config_.maxspeed) :
+      #  rospy.logwarn("excessive speed of %.3f m/s requested", command.velocity)
+      #  goal_msg_.velocity = config_.maxspeed
+      #  
+      #elif (config_.minspeed < 0 and command.velocity < config_.minspeed) :
+      #  rospy_logwarn("excessive reverse speed of %.2f m/s requested",  command.velocity)
+      #  goal_msg_.velocity = config_.minspeed
+      #  
+      #else :
+      #  goal_msg_.velocity = command.velocity
         
-      elif (config_.minspeed < 0 and command.velocity < config_.minspeed) :
-        rospy_logwarn("excessive reverse speed of %.2f m/s requested",  command.velocity)
-        goal_msg_.velocity = config_.minspeed
-        
-      else :
-        goal_msg_.velocity = command.velocity
-        
+      goal_msg_.velocity = command.velocity
 
       rospy.logdebug("changing speed goal from %.2f m/s to %.2f", goal_msg_.velocity, command.velocity)
     
@@ -249,12 +257,12 @@ def reconfig(newconfig, level) :
     rospy.loginfo("pilot dynamic reconfigure, level 0x%x", level)
 
     # need to reallocate speed controller when use_accel_matrix changes
-    realloc = (newconfig.use_accel_matrix != config_.use_accel_matrix)
-
-    config_ = newconfig
-
-    if (realloc) :
-      allocateSpeedControl()
+    #realloc = (newconfig.use_accel_matrix != config_.use_accel_matrix)
+    #
+    #config_ = newconfig
+    #
+    #if (realloc) :
+    #  allocateSpeedControl()
 
  # Adjust velocity to match goal.
  #
@@ -306,7 +314,8 @@ def Halt(cur_speed) :
       #
       # TODO: detect motion after stopping and apply more brake.
       brake_msg_.header.stamp = rospy.Time.now()
-      brake_msg_.position = config_.brake_hold
+      #brake_msg_.position = config_.brake_hold
+      brake_msg_.position = 0.7
       brake_cmd_.publish(brake_msg_)
     else :
       # Stop the moving vehicle very quickly.

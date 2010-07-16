@@ -19,6 +19,8 @@ roslib.load_manifest(PKG_NAME)
 import rospy
 import math
 
+FLT_MAX = 1e100                         # really large floating point value
+
 #/** @brief PID (Proportional, Integral, Derivative) control output. */
 class Pid:
 
@@ -94,8 +96,8 @@ class Pid:
         # already pushing as hard as it can.
         self.istate = self.istate + error
         tracking = C*(PID_out-PID_control)
-        if ((self.istate > 0 && -tracking > self.istate)
-            or (self.istate < 0 && -tracking < self.istate)):
+        if ((self.istate > 0 and -tracking > self.istate)
+            or (self.istate < 0 and -tracking < self.istate)):
             self.istate = 0
         else:
             self.istate = self.istate + tracking
@@ -138,9 +140,7 @@ class Pid:
          *           (already set to default value).
          */
         """
-
-        # (ROS parameter type is double)
-        std::string optname = self.name + '_' + pname
+        optname = self.name + '_' + pname
         if (node.getParamCached(optname, fvalue)):
 
             param_value = dvalue         # convert double to float

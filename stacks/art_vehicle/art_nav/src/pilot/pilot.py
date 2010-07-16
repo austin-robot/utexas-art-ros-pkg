@@ -493,13 +493,20 @@ def speedControl(speed) :
  # setup
 def setup() :
   # topics to read
-  car_cmd_ = rospy.Subscriber("pilot/cmd", CarCommand, processCommand, tcp_nodelay=True)
-  twist_cmd_ = rospy.Subscriber("cmd_vel", Twist, processTwist, tcp_nodelay=True)
-  odom_state_ = rospy.Subscriber("odom", Odometry, processOdom, tcp_nodelay=True)
-  brake_state_ = rospy.Subscriber("brake/state", BrakeState, processBrake, tcp_nodelay=True)
-  shifter_state_ = rospy.Subscriber("shifter/state", Shifter, processShifter, tcp_nodelay=True)
-  steering_state_ = rospy.Subscriber("steering/state", SteeringState, processSteering, tcp_nodelay=True)
-  throttle_state_ = rospy.Subscriber("throttle/state", ThrottleState, processThrottle, tcp_nodelay=True)
+  car_cmd_ = rospy.Subscriber("pilot/cmd", CarCommand,
+                              processCommand, tcp_nodelay=True)
+  twist_cmd_ = rospy.Subscriber("cmd_vel", Twist,
+                                processTwist, tcp_nodelay=True)
+  odom_state_ = rospy.Subscriber("odom", Odometry,
+                                 processOdom, tcp_nodelay=True)
+  brake_state_ = rospy.Subscriber("brake/state", BrakeState,
+                                  processBrake, tcp_nodelay=True)
+  shifter_state_ = rospy.Subscriber("shifter/state", Shifter,
+                                    processShifter, tcp_nodelay=True)
+  steering_state_ = rospy.Subscriber("steering/state", SteeringState,
+                                     processSteering, tcp_nodelay=True)
+  throttle_state_ = rospy.Subscriber("throttle/state", ThrottleState,
+                                     processThrottle, tcp_nodelay=True)
   
   # initialize servo command interfaces and messages
   brake_cmd_ = rospy.Publisher("brake/cmd", BrakeCommand)
@@ -536,7 +543,7 @@ def main(argv) :
     dynamic_reconfigure::Server<art_nav::PilotConfig>::CallbackType cb =  boost::bind(&reconfig, _1, _2);
     srv.setCallback(cb);
     """
-    if (setup(node) != 0) : return 2
+    if (setup() != 0) : return 2
 
     cycle = rospy.Rate(HERTZ_PILOT)        # set driver cycle rate
 

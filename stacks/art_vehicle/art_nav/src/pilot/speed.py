@@ -129,7 +129,7 @@ def speed_col(mph) :
 class SpeedControlMatrix (SpeedControl):
   def __init__(self) :
     SpeedControl.__init__(self)
-    self.velpid_ = Pid("speed", 2.0, 0.0, 32.0)
+    self.velpid_ = pid.Pid("speed", 2.0, 0.0, 32.0)
     self.configure()
     self.reset()
 
@@ -143,7 +143,8 @@ class SpeedControlMatrix (SpeedControl):
     brake_delta = (accel_matrix[row][col][0] / HERTZ_PILOT) / 100.0
     throttle_delta = (accel_matrix[row][col][1] / HERTZ_PILOT) / 100.0
 
-    rospy.logdebug("accel_matrix[%d][%d] contains {%.3f, %.3f}", row, col, brake_delta, throttle_delta)
+    rospy.logdebug("accel_matrix[%d][%d] contains {%.3f, %.3f}",
+                   row, col, brake_delta, throttle_delta)
 
     # Do not add braking unless nearly idle throttle was previously
     # requested, or throttle unless the brake is nearly off.
@@ -169,8 +170,10 @@ class SpeedControlPID (SpeedControl) :
   def __init__(self) :
     SpeedControl.__init__(self)
     self.braking_ = True
-    self.brake_pid_ = Pid("brake", -0.2, -0.02, -1.6, 1.0, 0.0, 5000.0)
-    self.throttle_pid_ = Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0)
+    self.brake_pid_ = pid.Pid("brake", -0.2, -0.02, -1.6,
+                              1.0, 0.0, 5000.0)
+    self.throttle_pid_ = pid.Pid("throttle", 0.12, 0.001, 0.54,
+                                 0.4, 0.0, 5000.0)
 
     self.configure()
     self.reset()
@@ -191,7 +194,7 @@ class SpeedControlPID (SpeedControl) :
             and (brake_req < pilot.EPSILON_BRAKE)) :
           brake_req = 0.0              # brake off
           self.braking_ = False             # using throttle now
-          self.throttle_pid.Clear()       # reset PID controller
+          self.throttle_pid_.Clear()        # reset PID controller
         
       else :     
         # Allow more overlap, to damp the oscillations that occur when
@@ -203,7 +206,7 @@ class SpeedControlPID (SpeedControl) :
     
     else :
       # controlling with throttle:
-      throttle_req = self.throttle_pid.Update(error, speed);
+      throttle_req = self.throttle_pid_.Update(error, speed);
       brake_req = 0.0
 
       # If requesting throttle off, switch to brake control.
@@ -215,7 +218,7 @@ class SpeedControlPID (SpeedControl) :
       if (throttle_req < EPSILON_THROTTLE) :
           throttle_req = 0.0           # throttle off
           self.braking_ = true         # using brake now
-          self.brake_pid.Clear()         # reset PID controller   
+          self.brake_pid_.Clear()      # reset PID controller   
 
     return (throttle_req, brake_req)
 

@@ -47,13 +47,13 @@ class Pid:
         self.CfgParam(node, "kp", self.kp)
         self.CfgParam(node, "ki", self.ki)
         self.CfgParam(node, "kd", self.kd)
-        rospy.debug("%s gains (%.3f, %.3f, %.3f)",
-                    self.name.c_str(), self.kp, self.ki, self.kd)
+        rospy.logdebug("%s gains (%.3f, %.3f, %.3f)",
+                       self.name.c_str(), self.kp, self.ki, self.kd)
         self.CfgParam(node, "omax", self.omax)
         self.CfgParam(node, "omin", self.omin)
         self.CfgParam(node, "C", self.C)
-        rospy.debug("%s output range [%.1f, %.1f]",
-                    self.name.c_str(), self.omin, self.omax)
+        rospy.logdebug("%s output range [%.1f, %.1f]",
+                       self.name.c_str(), self.omin, self.omax)
   
     def Update(self, error, output):
         """ @brief Update PID control output.
@@ -79,8 +79,8 @@ class Pid:
         i = self.ki * self.istate       # integrator state
         PID_control = (p + i - d)
 
-        rospy.debug("%s PID: %.3f = %.3f + %.3f - %.3f",
-                    self.name.c_str(), PID_control, p, i, d)
+        rospy.logdebug("%s PID: %.3f = %.3f + %.3f - %.3f",
+                       self.name.c_str(), PID_control, p, i, d)
 
         PID_out=PID_control
 
@@ -105,9 +105,10 @@ class Pid:
         if (math.isnan(self.istate) or math.isinf(self.istate)):
             self.istate=0
 
-        rospy.debug("%s istate = %.3f, PID_out: %.3f, "
-                    + "C*(PID_out-PID_control):%.3f",
-                    self.name, self.istate, PID_out, C*(PID_out-PID_control))
+        rospy.logdebug("%s istate = %.3f, PID_out: %.3f, "
+                       + "C*(PID_out-PID_control):%.3f",
+                       self.name, self.istate, PID_out,
+                       C*(PID_out-PID_control))
 
         return PID_out
 

@@ -40,20 +40,20 @@ class Pid:
         self.C = C                      # tracker to adapt integral
         self.Clear()
   
-    def Configure(self, node):
+    def Configure(self):
         "@brief Configure PID parameters"
 
         # configure PID constants
-        self.CfgParam(node, "kp", self.kp)
-        self.CfgParam(node, "ki", self.ki)
-        self.CfgParam(node, "kd", self.kd)
-        rospy.logdebug("%s gains (%.3f, %.3f, %.3f)",
-                       self.name.c_str(), self.kp, self.ki, self.kd)
-        self.CfgParam(node, "omax", self.omax)
-        self.CfgParam(node, "omin", self.omin)
-        self.CfgParam(node, "C", self.C)
-        rospy.logdebug("%s output range [%.1f, %.1f]",
-                       self.name.c_str(), self.omin, self.omax)
+        # CfgParam was changed to return the new value.
+        # I've made a slight modification so that this function catches the return value.
+        self.kp = self.CfgParam("kp", self.kp)
+        self.ki = self.CfgParam("ki", self.ki)
+        self.kd = self.CfgParam("kd", self.kd)
+        rospy.logdebug("%s gains (%.3f, %.3f, %.3f)", self.name, self.kp, self.ki, self.kd)
+        self.omax = self.CfgParam("omax", self.omax)
+        self.omin = self.CfgParam("omin", self.omin)
+        self.C = self.CfgParam("C", self.C);
+        rospy.logdebug("%s output range [%.1f, %.1f]", self.name, self.omin, self.omax)
   
     def Update(self, error, output):
         """ @brief Update PID control output.
@@ -132,14 +132,16 @@ class Pid:
         # Check if we were called on an unused PID for whatever reason
         self.starting = pid.starting
   
-    def CfgParam(self, node, pname, fvalue):
+    def CfgParam(self, pname, fvalue):
         """
         /** @brief Configure one PID parameter
-         *  @param node node handle for parameter server
+         *  @param node node handle for parameter server -- #NOTE: Removed by David
          *  @param pname base name for this parameter
          *  @returns parameter value, if defined
          *           (already set to default value).
          */
+        """
+        # Original program logic
         """
         optname = self.name + '_' + pname
         if (node.getParamCached(optname, fvalue)):
@@ -149,4 +151,20 @@ class Pid:
 
                 rospy.info("%s changed to %.3f", optname, param_value)
                 fvalue = param_value
+        return fvalue
+        """
+        
+        # The original program logic used something called a NodeHandle,
+        # supported by roscpp. However, rospy appears to have no such thing. 
+        # Also, when this function is called, the variables in the function
+        # call are passed by value, so this function has to return the new
+        # value and the calling function has to catch the return value.
+        # So I've changed both functions a bit.
+
+        optname = self.name + '_' + pname
+        if (rospy.has_param(optname)) :
+          param_value = rospy.get_param(optname)
+          if (fvalue != param_value) :
+            rospy.loginfo("%s changed to %.3f", optname, param_value)
+            fvalue = param_value
         return fvalue

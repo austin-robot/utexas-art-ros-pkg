@@ -36,6 +36,7 @@
 
 import roslib
 roslib.load_manifest('art_nav')
+import math
 
 import rospy
 from nav_msgs.msg import Odometry
@@ -57,7 +58,7 @@ from art_servo.msg import ThrottleState
 #from art_common.msg import vehicle
 
 #from art_servo import steering
-#from art_common import pid2
+#from art_common import pid
 
 from art_nav.msg import CarCommand
 from art_nav.msg import CarControl
@@ -139,19 +140,19 @@ goal_time_ = rospy.Time()   # time of last CarCommand
 twist_msg_ = Twist()
 speed_ = None
 
+  # Constants
+METERS_PER_MILE_ = art_common.conversions.METERS_PER_MILE
+SECONDS_PER_HOUR_ = art_common.conversions.SECONDS_PER_HOUR
+EPSILON_SPEED_ = art_common.epsilon.speed
+HERTZ_PILOT_ = art_common.hertz.HERTZ_PILOT
+VEHICLE_ID_ = art_common.vehicle.frame_id
+
+
  # clamp value to range: [lower, upper]
 def clamp (value, lower, upper) :
     return min(max(lower, value), upper)
 
 def allocateSpeedControl() :
-    # allocate appropriate speed control subclass for this configuration #
-    #if (config_.use_accel_matrix) :
-    #  rospy.loginfo("using acceleration matrix for speed control")
-    #  speed_ = speed.SpeedControlMatrix()
-    #else :
-    #  rospy.loginfo("using brake and throttle PID for speed control")
-    #  speed_ = speed.SpeedControlPID()
-
     rospy.loginfo("using brake and throttle PID for speed control")
     speed_ = speed.SpeedControlPID()
 
@@ -189,7 +190,7 @@ def setGoal(command) :
     
 
     if (goal_msg_.angle != command.angle):
-      rospy.logdebuf("changing steering angle from %.3f to %.3f (degrees)", goal_msg_.angle, command.angle)
+      rospy.logdebug("changing steering angle from %.3f to %.3f (degrees)", goal_msg_.angle, command.angle)
       goal_msg_.angle = command.angle
        
 
@@ -258,9 +259,9 @@ def reconfig(newconfig, level) :
 
     # need to reallocate speed controller when use_accel_matrix changes
     #realloc = (newconfig.use_accel_matrix != config_.use_accel_matrix)
-    #
+    # 
     #config_ = newconfig
-    #
+    # 
     #if (realloc) :
     #  allocateSpeedControl()
 
@@ -269,19 +270,15 @@ def reconfig(newconfig, level) :
  #  cur_speed	absolute value of current velocity in m/sec
  #  speed_delta	difference between that and our immediate goal
 def adjustVelocity(cur_speed, error) :
-    
     throttle_msg_.position, brake_msg_.position = speed_.adjust(cur_speed, error, throttle_msg_.position, brake_msg_.position)
-
     brake_msg_.position = clamp(brake_msg_.position, 0.0, 1.0)
-    if (fabsf(brake_msg_.position - brake_position_) > EPSILON_BRAKE) :
-    # Do I need to replace fabsf(x) with math.fabs(x)?
+ 
+   if (math.fabs(brake_msg_.position - brake_position_) > EPSILON_BRAKE) :
       brake_msg_.header.stamp = rospy.Time.now()
       brake_cmd_.publish(brake_msg_)
     
-
     throttle_msg_.position = clamp(throttle_msg_.position, 0.0, 1.0)
-    if (fabsf(throttle_msg_.position - throttle_position_) > EPSILON_THROTTLE) :
-    # Do I need to replace fabsf(x) with math.fabs(x)?
+    if (math.fabs(throttle_msg_.position - throttle_position_) > EPSILON_THROTTLE) :
       throttle_msg_.header.stamp = rospy.Time.now()
       throttle_cmd_.publish(throttle_msg_)
     
@@ -365,10 +362,10 @@ Backward = 2
 
  # speed_range
 def speed_range(speed) :
-    if (speed > Epsilon.speed):		# moving forward?
+    if (speed > EPSILON_SPEED_):	# moving forward?
       return Forward
 
-    if (speed >= -Epsilon.speed):	# close to zero?
+    if (speed >= -EPSILON_SPEED_):	# close to zero?
       return Stopped
 
     return Backward
@@ -510,19 +507,19 @@ def setup() :
   
   # initialize servo command interfaces and messages
   brake_cmd_ = rospy.Publisher("brake/cmd", BrakeCommand)
-  brake_msg_.header.frame_id = ArtVehicle.frame_id
+  brake_msg_.header.frame_id = VEHICLE_ID_
   brake_msg_.request = art_servo.BrakeCommand.Absolute
   brake_msg_.position = 1.0
 
   shifter_cmd_ = rospy.Publisher("shifter/cmd", Shifter)
-  shifter_msg_.header.frame_id = ArtVehicle.frame_id
+  shifter_msg_.header.frame_id = VEHICLE_ID_
 
   steering_cmd_ = rospy.Publisher("steering/cmd", SteeringCommand)
-  steering_msg_.header.frame_id = ArtVehicle.frame_id
+  steering_msg_.header.frame_id = VEHICLE_ID_
   steering_msg_.request = art_servo.SteeringCommand.Degrees
 
   throttle_cmd_ = rospy.Publisher("throttle/cmd", ThrottleCommand)
-  throttle_msg_.header.frame_id = ArtVehicle.frame_id
+  throttle_msg_.header.frame_id = VEHICLE_ID_
   throttle_msg_.request = art_servo.ThrottleCommand.Absolute
   throttle_msg_.position = 0.0
   
@@ -543,9 +540,12 @@ def main(argv) :
     dynamic_reconfigure::Server<art_nav::PilotConfig>::CallbackType cb =  boost::bind(&reconfig, _1, _2);
     srv.setCallback(cb);
     """
+      # This next command is what it looks like I need for dynamic reconfiguration
+    # srv = dynamic_reconfigure.Server(None, reconfig)
+
     if (setup() != 0) : return 2
 
-    cycle = rospy.Rate(HERTZ_PILOT)        # set driver cycle rate
+    cycle = rospy.Rate(HERTZ_PILOT_)        # set driver cycle rate
 
     # Main loop
     while not rospy.is_shutdown():
@@ -562,6 +562,18 @@ def main(argv) :
       cycle.sleep()                   # sleep until next cycle
 
     return 0
+
+# Conversions.h was converted to a ROS message file.
+# Since I can't define these functions in that file, I've defined
+# it here to avoid changing the code above.
+#
+# Should I avoid usage of these functions? Maybe Conversions should
+# have been converted to a python file instead.
+def mph2mps(mph) :
+    return mph * METERS_PER_MILE_ / SECONDS_PER_HOUR_
+
+def mps2mph(mps) :
+    return mps * SECONDS_PER_HOUR_ / METERS_PER_MILE_
 
 if __name__ == '__main__':
     try:

@@ -1,5 +1,8 @@
 <!-- -*- mode: XML -*- -->
-<!-- launch file for pilot driving real vehicle -->
+<!-- launch file for pilot driving real vehicle
+
+     Pass PILOT_NODE=pilot.py in environment to run Python version.
+  -->
 
 <launch>
   <!-- servo actuators -->
@@ -21,6 +24,6 @@
 
   <!-- navigation components -->
   <node pkg="applanix" type="odometry" name="odometry" />
-  <node pkg="art_nav" type="pilot" name="pilot" />
+  <node pkg="art_nav" type="$(optenv PILOT_NODE pilot)" name="pilot" />
 
 </launch>

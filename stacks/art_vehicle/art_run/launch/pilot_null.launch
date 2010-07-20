@@ -1,5 +1,8 @@
 <!-- -*- mode: XML -*- -->
-<!-- launch file for pilot with null servo interfaces -->
+<!-- launch file for pilot with null servo interfaces
+
+     Pass PILOT_NODE=pilot.py in environment to run Python version.
+  -->
 
 <launch>
   <!-- simulated servo actuators -->
@@ -20,7 +23,7 @@
   </node>
 
   <!-- navigation components -->
-  <node pkg="art_nav" type="pilot" name="pilot" />
+  <node pkg="art_nav" type="$(optenv PILOT_NODE pilot)" name="pilot" />
 
   <!-- monitoring tools
        <include file="$(find art_run)/launch/monitor.launch" />

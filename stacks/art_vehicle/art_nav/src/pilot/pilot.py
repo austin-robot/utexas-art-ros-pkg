@@ -52,18 +52,16 @@ from art_servo.msg import SteeringState
 from art_servo.msg import ThrottleCommand
 from art_servo.msg import ThrottleState
 
-#from art_common.msg import conversions
-#from art_common.msg import epsilon
-#from art_common.msg import hertz
-#from art_common.msg import vehicle
-
-#from art_servo import steering
-#from art_common import pid
+from art_common.msg import conversions
+from art_common.msg import epsilon
+from art_common.msg import hertz
+from art_common.msg import vehicle
 
 from art_nav.msg import CarCommand
 from art_nav.msg import CarControl
 from art_nav.cfg import PilotConfig
 
+import steering
 import speed
 
 import sys
@@ -141,11 +139,10 @@ twist_msg_ = Twist()
 speed_ = None
 
   # Constants
-METERS_PER_MILE_ = art_common.conversions.METERS_PER_MILE
-SECONDS_PER_HOUR_ = art_common.conversions.SECONDS_PER_HOUR
-EPSILON_SPEED_ = art_common.epsilon.speed
-HERTZ_PILOT_ = art_common.hertz.HERTZ_PILOT
-VEHICLE_ID_ = art_common.vehicle.frame_id
+METERS_PER_MILE_ = conversions.METERS_PER_MILE
+SECONDS_PER_HOUR_ = conversions.SECONDS_PER_HOUR
+EPSILON_SPEED_ = epsilon.speed
+VEHICLE_ID_ = vehicle.frame_id
 
 
  # clamp value to range: [lower, upper]
@@ -153,6 +150,7 @@ def clamp (value, lower, upper) :
     return min(max(lower, value), upper)
 
 def allocateSpeedControl() :
+    global speed_
     rospy.loginfo("using brake and throttle PID for speed control")
     speed_ = speed.SpeedControlPID()
 
@@ -210,7 +208,7 @@ def processTwist(twistIn) :
     # convert to a CarControl message for setGoal()
     car_ctl = art_nav.CarControl()
     car_ctl.velocity = twistIn.linear.x
-    car_ctl.angle = Steering.steering_angle(car_ctl.velocity, twistIn.angular.z)
+    car_ctl.angle = steering.steering_angle(car_ctl.velocity, twistIn.angular.z)
 
     setGoal(car_ctl)
     
@@ -273,14 +271,14 @@ def adjustVelocity(cur_speed, error) :
     throttle_msg_.position, brake_msg_.position = speed_.adjust(cur_speed, error, throttle_msg_.position, brake_msg_.position)
     brake_msg_.position = clamp(brake_msg_.position, 0.0, 1.0)
  
-   if (math.fabs(brake_msg_.position - brake_position_) > EPSILON_BRAKE) :
-      brake_msg_.header.stamp = rospy.Time.now()
-      brake_cmd_.publish(brake_msg_)
+    if (math.fabs(brake_msg_.position - brake_position_) > EPSILON_BRAKE) :
+        brake_msg_.header.stamp = rospy.Time.now()
+        brake_cmd_.publish(brake_msg_)
     
     throttle_msg_.position = clamp(throttle_msg_.position, 0.0, 1.0)
     if (math.fabs(throttle_msg_.position - throttle_position_) > EPSILON_THROTTLE) :
-      throttle_msg_.header.stamp = rospy.Time.now()
-      throttle_cmd_.publish(throttle_msg_)
+        throttle_msg_.header.stamp = rospy.Time.now()
+        throttle_cmd_.publish(throttle_msg_)
     
 
  # Halt -- soft version of hardware E-Stop.
@@ -508,7 +506,7 @@ def setup() :
   # initialize servo command interfaces and messages
   brake_cmd_ = rospy.Publisher("brake/cmd", BrakeCommand)
   brake_msg_.header.frame_id = VEHICLE_ID_
-  brake_msg_.request = art_servo.BrakeCommand.Absolute
+  brake_msg_.request = BrakeCommand.Absolute
   brake_msg_.position = 1.0
 
   shifter_cmd_ = rospy.Publisher("shifter/cmd", Shifter)
@@ -516,11 +514,11 @@ def setup() :
 
   steering_cmd_ = rospy.Publisher("steering/cmd", SteeringCommand)
   steering_msg_.header.frame_id = VEHICLE_ID_
-  steering_msg_.request = art_servo.SteeringCommand.Degrees
+  steering_msg_.request = SteeringCommand.Degrees
 
   throttle_cmd_ = rospy.Publisher("throttle/cmd", ThrottleCommand)
   throttle_msg_.header.frame_id = VEHICLE_ID_
-  throttle_msg_.request = art_servo.ThrottleCommand.Absolute
+  throttle_msg_.request = ThrottleCommand.Absolute
   throttle_msg_.position = 0.0
   
   return 0
@@ -540,12 +538,12 @@ def main(argv) :
     dynamic_reconfigure::Server<art_nav::PilotConfig>::CallbackType cb =  boost::bind(&reconfig, _1, _2);
     srv.setCallback(cb);
     """
-      # This next command is what it looks like I need for dynamic reconfiguration
+    # This next command is what it looks like I need for dynamic reconfiguration
     # srv = dynamic_reconfigure.Server(None, reconfig)
 
     if (setup() != 0) : return 2
 
-    cycle = rospy.Rate(HERTZ_PILOT_)        # set driver cycle rate
+    cycle = rospy.Rate(hertz.HERTZ_PILOT) # set driver cycle rate
 
     # Main loop
     while not rospy.is_shutdown():

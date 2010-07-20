@@ -24,8 +24,8 @@ from art_common.msg import vehicle
 # Constants: #
 steer_speed_min = 3.8	            # minimum speed for calculation #
 			            # (experimentally verified) #
-WHEELBASE_ = art_common.vehicle.wheelbase
-MAX_STEER_DEGREES_ = art_common.vehicle.max_steer_degrees
+WHEELBASE_ = vehicle.wheelbase
+MAX_STEER_DEGREES_ = vehicle.max_steer_degrees
 
 # Determine steering angle (in degrees) for a given speed and yawrate.
 #  
@@ -52,7 +52,7 @@ MAX_STEER_DEGREES_ = art_common.vehicle.max_steer_degrees
 #      r = v/y
 #
 def steering_angle(v, y) :
-    steer_radians = math.atan(ArtVehicle.WHEELBASE_ * y,v)
+    steer_radians = math.atan(WHEELBASE_ * y,v)
     steer_degrees = math.degrees(steer_radians)
 
     steer_degrees = min(steer_degrees, MAX_STEER_DEGREES_)
@@ -65,6 +65,6 @@ def steering_angle(v, y) :
 #
 
 def angle_to_yaw(v, angle) :
-    return v * math.tan(math.radians(angle)) / WHEELBASE
+    return v * math.tan(math.radians(angle)) / WHEELBASE_
 
 maximum_yaw = angle_to_yaw(steer_speed_min, MAX_STEER_DEGREES_)

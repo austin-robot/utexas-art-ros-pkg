@@ -342,17 +342,14 @@ cur_degrees = 360.0     # (an impossible value)
 def adjustSteering() :
     # Since cur_degrees was originally intended to be a static
     # variable and Python has no concept of static variables,
-    # I've turned this function into a generator.
-    #while True :
-      # Set the steering angle in degrees.
-      global cur_degrees
-      if (cur_degrees != goal_msg_.angle) :
-        rospy.logdebug("requesting steering angle = %.1f (degrees)", goal_msg_.angle)
-        steering_msg_.header.stamp = rospy.Time.now()
-        steering_msg_.angle = goal_msg_.angle
-        steering_cmd_.publish(steering_msg_)
-        cur_degrees = goal_msg_.angle
-      #yield
+    # I've using global variables instead.
+    global cur_degrees
+    if (cur_degrees != goal_msg_.angle) :
+      rospy.logdebug("requesting steering angle = %.1f (degrees)", goal_msg_.angle)
+      steering_msg_.header.stamp = rospy.Time.now()
+      steering_msg_.angle = goal_msg_.angle
+      steering_cmd_.publish(steering_msg_)
+      cur_degrees = goal_msg_.angle
  
 # These assignments are meant to replace the enumeration used in the
 # C++ version of Pilot.
@@ -393,8 +390,7 @@ shifting_state = 0x01
 def speedControl(speed) :
   
   # Note: Python has no concept of static variables.
-  #       To get static variable behavior out of this function,
-  #       I have turned it into a generator.
+  #       I've replaced the static variables with global variables.
     global shifting_state
     global shift_duration
 

@@ -80,7 +80,7 @@ class Pid:
         PID_control = (p + i - d)
 
         rospy.logdebug("%s PID: %.3f = %.3f + %.3f - %.3f",
-                       self.name.c_str(), PID_control, p, i, d)
+                       self.name, PID_control, p, i, d)
 
         PID_out=PID_control
 
@@ -95,7 +95,7 @@ class Pid:
         # The C term reduces the integral when the controller is
         # already pushing as hard as it can.
         self.istate = self.istate + error
-        tracking = C*(PID_out-PID_control)
+        tracking = self.C*(PID_out-PID_control)
         if ((self.istate > 0 and -tracking > self.istate)
             or (self.istate < 0 and -tracking < self.istate)):
             self.istate = 0
@@ -108,7 +108,7 @@ class Pid:
         rospy.logdebug("%s istate = %.3f, PID_out: %.3f, "
                        + "C*(PID_out-PID_control):%.3f",
                        self.name, self.istate, PID_out,
-                       C*(PID_out-PID_control))
+                       self.C*(PID_out-PID_control))
 
         return PID_out
 
@@ -159,8 +159,7 @@ class Pid:
         # Also, when this function is called, the variables in the function
         # call are passed by value, so this function has to return the new
         # value and the calling function has to catch the return value.
-        # So I've changed both functions a bit.
-
+        # So I've changed both functions a bit.        
         optname = self.name + '_' + pname
         if (rospy.has_param(optname)) :
           param_value = rospy.get_param(optname)

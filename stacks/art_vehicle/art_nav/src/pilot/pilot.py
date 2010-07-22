@@ -143,7 +143,7 @@ METERS_PER_MILE_ = conversions.METERS_PER_MILE
 SECONDS_PER_HOUR_ = conversions.SECONDS_PER_HOUR
 EPSILON_SPEED_ = epsilon.speed
 VEHICLE_ID_ = vehicle.frame_id
-
+HERTZ_PILOT_ = hertz.HERTZ_PILOT
 
  # clamp value to range: [lower, upper]
 def clamp (value, lower, upper) :
@@ -271,12 +271,12 @@ def adjustVelocity(cur_speed, error) :
     throttle_msg_.position, brake_msg_.position = speed_.adjust(cur_speed, error, throttle_msg_.position, brake_msg_.position)
     brake_msg_.position = clamp(brake_msg_.position, 0.0, 1.0)
  
-    if (math.fabs(brake_msg_.position - brake_position_) > EPSILON_BRAKE) :
+    if (math.fabs(brake_msg_.position - brake_position_) > speed.EPSILON_BRAKE) :
         brake_msg_.header.stamp = rospy.Time.now()
         brake_cmd_.publish(brake_msg_)
     
     throttle_msg_.position = clamp(throttle_msg_.position, 0.0, 1.0)
-    if (math.fabs(throttle_msg_.position - throttle_position_) > EPSILON_THROTTLE) :
+    if (math.fabs(throttle_msg_.position - throttle_position_) > speed.EPSILON_THROTTLE) :
         throttle_msg_.header.stamp = rospy.Time.now()
         throttle_cmd_.publish(throttle_msg_)
     
@@ -302,7 +302,7 @@ def Halt(cur_speed) :
       adjustVelocity(cur_speed, -cur_speed)
       return
     
-    elif (cur_speed < Epsilon.speed) :
+    elif (cur_speed < EPSILON_SPEED_) :
       # Already stopped.  Ease up on the brake to reduce strain on
       # the actuator.  Brake hold position *must* be adequate to
       # prevent motion, even on a hill.
@@ -337,20 +337,22 @@ def Halt(cur_speed) :
  # level, because navigator monitors our actual course and will
  # request any steering changes needed to reach its goal.
  #
+
+cur_degrees = 360.0     # (an impossible value)
 def adjustSteering() :
-    cur_degrees = 360.0     # (an impossible value)
     # Since cur_degrees was originally intended to be a static
     # variable and Python has no concept of static variables,
     # I've turned this function into a generator.
-    while True :
+    #while True :
       # Set the steering angle in degrees.
+      global cur_degrees
       if (cur_degrees != goal_msg_.angle) :
         rospy.logdebug("requesting steering angle = %.1f (degrees)", goal_msg_.angle)
         steering_msg_.header.stamp = rospy.Time.now()
         steering_msg_.angle = goal_msg_.angle
         steering_cmd_.publish(steering_msg_)
         cur_degrees = goal_msg_.angle
-      yield
+      #yield
  
 # These assignments are meant to replace the enumeration used in the
 # C++ version of Pilot.
@@ -385,13 +387,17 @@ ShiftReverse	= 0x20		# Shifting into Reverse
  #  one of the transmission shift relays set for one second, before
  #  the vehicle can begin moving in the opposite direction.
  #
+shift_duration = 1.0 # hold relay one second
+shifting_state = 0x01
+
 def speedControl(speed) :
-  shift_duration = 1.0 # hold relay one second
-  shifting_state = Drive
+  
   # Note: Python has no concept of static variables.
   #       To get static variable behavior out of this function,
   #       I have turned it into a generator.
-  while True :
+    global shifting_state
+    global shift_duration
+
     goal = goal_msg_.velocity       # goal velocity
     error = goal - speed
 
@@ -421,7 +427,7 @@ def speedControl(speed) :
         shifter_msg_.gear = Shifter.Reverse
         shifter_cmd_.publish(shifter_msg_)
         shift_time_ = rospy.Time.now()
-        tospy.logdebug("repeated shift command at %.6f", shift_time_.toSec())
+        rospy.logdebug("repeated shift command at %.6f", shift_time_.toSec())
       # make sure the relay was set long enough
       elif ((rospy.Time.now().toSec() - shift_time_.toSec()) >= shift_duration) :
 	shifter_msg_.header.stamp = rospy.Time.now();
@@ -483,11 +489,23 @@ def speedControl(speed) :
           shifter_msg_.gear = Shifter.Reverse
           shifter_cmd_.publish(shifter_msg_)
 	  shift_time_ = rospy.Time.now()
-    yield
+
 
  # setup
 def setup() :
   # topics to read
+  global car_cmd_
+  global twist_cmd_
+  global odom_state_
+  global brake_state_
+  global shifter_state_
+  global steering_state_
+  global throttle_state_
+  global brake_cmd_
+  global shifter_cmd_
+  global steering_cmd_
+  global throttle_cmd_
+
   car_cmd_ = rospy.Subscriber("pilot/cmd", CarCommand,
                               processCommand, tcp_nodelay=True)
   twist_cmd_ = rospy.Subscriber("cmd_vel", Twist,

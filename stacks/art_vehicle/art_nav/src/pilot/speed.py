@@ -67,7 +67,7 @@ class SpeedControlPID (SpeedControl) :
   def adjust(self, speed, error, throttle_req, brake_req) :
     if self.braking_ :
       ### controlling with brake: ###
-      brake_req = brake_pid_.Update(error, speed)
+      brake_req = self.brake_pid_.Update(error, speed)
       throttle_req = 0.0
       
       # If requesting brake off, switch to throttle control.
@@ -77,7 +77,7 @@ class SpeedControlPID (SpeedControl) :
       # brake is still on.  That can cause mechanical damage to the
       # transmission.
         if ((self.brake_position_ < EPSILON_BRAKE)
-            and (brake_req < pilot.EPSILON_BRAKE)) :
+            and (brake_req < EPSILON_BRAKE)) :
           brake_req = 0.0              # brake off
           self.braking_ = False             # using throttle now
           self.throttle_pid_.Clear()       # reset PID controller

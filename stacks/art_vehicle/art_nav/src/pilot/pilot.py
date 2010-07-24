@@ -127,7 +127,7 @@ shifter_msg_ = Shifter()
 steering_msg_ = SteeringCommand()
 throttle_msg_ = ThrottleCommand()
 
-shift_time_ = rospy.Time()  # time last shift requested
+shift_time_ = rospy.Time(0.0)           # time last shift requested
 
   # Odometry data
 odom_msg_ = Odometry()
@@ -167,8 +167,10 @@ def getParameters(argv) :
 
  # setGoal
 def setGoal(command) :
+    global goal_msg_
     
-    # rospy.logdebug("setting (velocity ,angle) to (%.3f, %.3f)", command.velocity, command.angle)
+    # rospy.logdebug("setting (velocity ,angle) to (%.3f, %.3f)",
+    #                command.velocity, command.angle)
 
     if (goal_msg_.velocity != command.velocity) :
       #if (config_.maxspeed > 0 and command.velocity > config_.maxspeed) :
@@ -176,7 +178,8 @@ def setGoal(command) :
       #  goal_msg_.velocity = config_.maxspeed
       #  
       #elif (config_.minspeed < 0 and command.velocity < config_.minspeed) :
-      #  rospy_logwarn("excessive reverse speed of %.2f m/s requested",  command.velocity)
+      #  rospy_logwarn("excessive reverse speed of %.2f m/s requested",
+      #                command.velocity)
       #  goal_msg_.velocity = config_.minspeed
       #  
       #else :
@@ -184,25 +187,29 @@ def setGoal(command) :
         
       goal_msg_.velocity = command.velocity
 
-      rospy.logdebug("changing speed goal from %.2f m/s to %.2f", goal_msg_.velocity, command.velocity)
+      rospy.logdebug("changing speed goal from %.2f m/s to %.2f",
+                     goal_msg_.velocity, command.velocity)
     
 
     if (goal_msg_.angle != command.angle):
-      rospy.logdebug("changing steering angle from %.3f to %.3f (degrees)", goal_msg_.angle, command.angle)
+      rospy.logdebug("changing steering angle from %.3f to %.3f (degrees)",
+                     goal_msg_.angle, command.angle)
       goal_msg_.angle = command.angle
-       
 
 
  # processCommand
 def processCommand(msg) :
+    global goal_time_
     goal_time_ = msg.header.stamp
-    rospy.logdebug("pilot command (v,a) = (%.3f, %.3f)", msg.control.velocity, msg.control.angle)
+    rospy.logdebug("pilot command (v,a) = (%.3f, %.3f)",
+                   msg.control.velocity, msg.control.angle)
     car_ctl = msg.control
     setGoal(car_ctl)
     
 
  # This allows pilot to accept ROS cmd_vel messages
 def processTwist(twistIn) :
+    global twist_msg_
     twist_msg_ = twistIn
 
     # convert to a CarControl message for setGoal()
@@ -215,30 +222,43 @@ def processTwist(twistIn) :
 
  # processOdom
 def processOdom(odomIn) :
-    rospy.logdebug("Odometry pose: (%.3f, %.3f, %.3f), (%.3f, %.3f, %.3f)", odomIn.pose.pose.position.x,  odomIn.pose.pose.position.y, odomIn.pose.pose.position.z, odomIn.twist.twist.linear.x, odomIn.twist.twist.linear.y, odomIn.twist.twist.linear.z)
+    global odom_msg_
+    rospy.logdebug("Odometry pose: (%.3f, %.3f, %.3f), (%.3f, %.3f, %.3f)",
+                   odomIn.pose.pose.position.x,
+                   odomIn.pose.pose.position.y,
+                   odomIn.pose.pose.position.z,
+                   odomIn.twist.twist.linear.x,
+                   odomIn.twist.twist.linear.y,
+                   odomIn.twist.twist.linear.z)
     odom_msg_ = odomIn
-    rospy.logdebug("current velocity = %.3f m/sec, (%02.f mph)", odom_msg_.twist.twist.linear.x, mps2mph(odom_msg_.twist.twist.linear.x))
+    rospy.logdebug("current velocity = %.3f m/sec, (%02.f mph)",
+                   odom_msg_.twist.twist.linear.x,
+                   mps2mph(odom_msg_.twist.twist.linear.x))
     
 
  # processBrake
 def processBrake(brakeIn) :
+    global brake_position_
     brake_position_ = brakeIn.position
     speed_.set_brake_position(brake_position_)
     rospy.logdebug("Brake reports position %.3f", brake_position_)
 
  # processThrottle
 def processThrottle(throttleIn) :
+    global throttle_position_
     throttle_position_ = throttleIn.position
     speed_.set_throttle_position(throttle_position_)
     rospy.logdebug("Throttle reports position %.3f", throttle_position_)
     
  # processShifter
 def processShifter(shifterIn) :
+    global shifter_gear_
     shifter_gear_ = shifterIn.gear
     rospy.logdebug("Shifter reports gear %d", shifter_gear_)
 
  # processSteering
 def processSteering(steeringIn) :
+    global steering_angle_
     steering_angle_ = steeringIn.angle
     rospy.logdebug("Steering reports angle %.1f (degrees)", steering_angle_)
     
@@ -253,6 +273,7 @@ def processSteering(steeringIn) :
  # subscription callbacks. If not, we need a lock.
  
 def reconfig(newconfig, level) :
+    global config_
     rospy.loginfo("pilot dynamic reconfigure, level 0x%x", level)
 
     # need to reallocate speed controller when use_accel_matrix changes
@@ -268,7 +289,10 @@ def reconfig(newconfig, level) :
  #  cur_speed	absolute value of current velocity in m/sec
  #  speed_delta	difference between that and our immediate goal
 def adjustVelocity(cur_speed, error) :
-    throttle_msg_.position, brake_msg_.position = speed_.adjust(cur_speed, error, throttle_msg_.position, brake_msg_.position)
+    throttle_msg_.position,
+    brake_msg_.position = speed_.adjust(cur_speed, error,
+                                        throttle_msg_.position,
+                                        brake_msg_.position)
     brake_msg_.position = clamp(brake_msg_.position, 0.0, 1.0)
  
     if (math.fabs(brake_msg_.position - brake_position_) > speed.EPSILON_BRAKE) :
@@ -276,7 +300,8 @@ def adjustVelocity(cur_speed, error) :
         brake_cmd_.publish(brake_msg_)
     
     throttle_msg_.position = clamp(throttle_msg_.position, 0.0, 1.0)
-    if (math.fabs(throttle_msg_.position - throttle_position_) > speed.EPSILON_THROTTLE) :
+    if (math.fabs(throttle_msg_.position - throttle_position_)
+        > speed.EPSILON_THROTTLE) :
         throttle_msg_.header.stamp = rospy.Time.now()
         throttle_cmd_.publish(throttle_msg_)
     
@@ -345,7 +370,8 @@ def adjustSteering() :
     # I've using global variables instead.
     global cur_degrees
     if (cur_degrees != goal_msg_.angle) :
-      rospy.logdebug("requesting steering angle = %.1f (degrees)", goal_msg_.angle)
+      rospy.logdebug("requesting steering angle = %.1f (degrees)",
+                     goal_msg_.angle)
       steering_msg_.header.stamp = rospy.Time.now()
       steering_msg_.angle = goal_msg_.angle
       steering_cmd_.publish(steering_msg_)
@@ -393,6 +419,7 @@ def speedControl(speed) :
   #       I've replaced the static variables with global variables.
     global shifting_state
     global shift_duration
+    global shift_time_
 
     goal = goal_msg_.velocity       # goal velocity
     error = goal - speed
@@ -552,7 +579,8 @@ def main(argv) :
     """
     # declare dynamic reconfigure callback
     dynamic_reconfigure::Server<art_nav::PilotConfig> srv;
-    dynamic_reconfigure::Server<art_nav::PilotConfig>::CallbackType cb =  boost::bind(&reconfig, _1, _2);
+    dynamic_reconfigure::Server<art_nav::PilotConfig>::CallbackType
+            cb =  boost::bind(&reconfig, _1, _2);
     srv.setCallback(cb);
     """
     # This next command is what it looks like I need for dynamic reconfiguration

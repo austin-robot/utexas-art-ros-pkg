@@ -400,7 +400,8 @@ def speedControl(speed) :
     cur_range = speed_range(speed)
     goal_range = speed_range(goal)
 
-    rospy.logdebug("Shifting state: 0x%02x, speed: %.3f m/s, goal: %.3f", shifting_state, speed, goal)
+    rospy.logdebug("Shifting state: 0x%02x, speed: %.3f m/s, goal: %.3f",
+                   shifting_state, speed, goal)
 
     if shifting_state == Drive :
       # TODO: make sure shifter relays are off now
@@ -415,7 +416,7 @@ def speedControl(speed) :
       else :
 	Halt(speed)
         speed_.reset()
-    elif shifting_state == shiftReverse :
+    elif shifting_state == ShiftReverse :
       # make sure the transmission actually shifted
       if (shifter_gear_ != Shifter.Reverse) :
 	# repeat shift command until it works
@@ -423,9 +424,10 @@ def speedControl(speed) :
         shifter_msg_.gear = Shifter.Reverse
         shifter_cmd_.publish(shifter_msg_)
         shift_time_ = rospy.Time.now()
-        rospy.logdebug("repeated shift command at %.6f", shift_time_.toSec())
+        rospy.logdebug("repeated shift command at %.6f", shift_time_.to_sec())
       # make sure the relay was set long enough
-      elif ((rospy.Time.now().toSec() - shift_time_.toSec()) >= shift_duration) :
+      elif ((rospy.Time.now().to_sec() - shift_time_.to_sec())
+            >= shift_duration) :
 	shifter_msg_.header.stamp = rospy.Time.now();
         shifter_msg_.gear = Shifter.Reset
         shifter_cmd_.publish(shifter_msg_)
@@ -465,10 +467,11 @@ def speedControl(speed) :
         shifter_msg_.gear = Shifter.Drive
         shifter_cmd_.publish(shifter_msg_)
 	shift_time_ = rospy.Time.now()
-        rospy.logdebug("repeated shift command at %.6f", shift_time_.toSec())
+        rospy.logdebug("repeated shift command at %.6f", shift_time_.to_sec())
 	
       # make sure the relay was set long enough
-      elif ((rospy.Time.now().toSec() - shift_time_.toSec()) >= shift_duration) :
+      elif ((rospy.Time.now().to_sec() - shift_time_.to_sec())
+            >= shift_duration) :
 	shifter_msg_.header.stamp = rospy.Time.now()
         shifter_msg_.gear = Shifter.Reset
         shifter_cmd_.publish(shifter_msg_)

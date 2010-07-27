@@ -22,7 +22,7 @@ import math
 FLT_MAX = 1e100                         # really large floating point value
 
 #/** @brief PID (Proportional, Integral, Derivative) control output. */
-class Pid:
+class Pid(object):
 
     def __init__(self, ctlname, kp=1.0, ki=0.0, kd=0.0,
               omax=FLT_MAX, omin=-FLT_MAX, C=0.0):
@@ -44,16 +44,20 @@ class Pid:
         "@brief Configure PID parameters"
 
         # configure PID constants
+
         # CfgParam was changed to return the new value.
-        # I've made a slight modification so that this function catches the return value.
+        # I've made a slight modification so that this function
+        # catches the return value.
         self.kp = self.CfgParam("kp", self.kp)
         self.ki = self.CfgParam("ki", self.ki)
         self.kd = self.CfgParam("kd", self.kd)
-        rospy.logdebug("%s gains (%.3f, %.3f, %.3f)", self.name, self.kp, self.ki, self.kd)
+        rospy.logdebug("%s gains (%.3f, %.3f, %.3f)",
+                       self.name, self.kp, self.ki, self.kd)
         self.omax = self.CfgParam("omax", self.omax)
         self.omin = self.CfgParam("omin", self.omin)
         self.C = self.CfgParam("C", self.C);
-        rospy.logdebug("%s output range [%.1f, %.1f]", self.name, self.omin, self.omax)
+        rospy.logdebug("%s output range [%.1f, %.1f]",
+                       self.name, self.omin, self.omax)
   
     def Update(self, error, output):
         """ @brief Update PID control output.

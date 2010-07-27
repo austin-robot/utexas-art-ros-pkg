@@ -42,7 +42,7 @@ EPSILON_THROTTLE = 0.01
 import speed
 import time
 
-class SpeedControl :
+class SpeedControl(object) :
   def __init__(self) :
     self.brake_position_ = 0.0
     self.throttle_position_ = 0.0

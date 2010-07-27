@@ -103,7 +103,7 @@ class SpeedControlPID (SpeedControl) :
       # latency when slowing down.
       if (throttle_req < EPSILON_THROTTLE) :
           throttle_req = 0.0           # throttle off
-          self.braking_ = true         # using brake now
+          self.braking_ = True         # using brake now
           self.brake_pid_.Clear()         # reset PID controller   
 
     return (throttle_req, brake_req)

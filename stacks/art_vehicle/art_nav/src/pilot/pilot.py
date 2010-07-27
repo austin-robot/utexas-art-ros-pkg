@@ -173,6 +173,10 @@ def setGoal(command) :
     #                command.velocity, command.angle)
 
     if (goal_msg_.velocity != command.velocity) :
+
+      rospy.logdebug("changing speed goal from %.2f m/s to %.2f",
+                     goal_msg_.velocity, command.velocity)
+
       #if (config_.maxspeed > 0 and command.velocity > config_.maxspeed) :
       #  rospy.logwarn("excessive speed of %.3f m/s requested", command.velocity)
       #  goal_msg_.velocity = config_.maxspeed
@@ -186,9 +190,6 @@ def setGoal(command) :
       #  goal_msg_.velocity = command.velocity
         
       goal_msg_.velocity = command.velocity
-
-      rospy.logdebug("changing speed goal from %.2f m/s to %.2f",
-                     goal_msg_.velocity, command.velocity)
     
 
     if (goal_msg_.angle != command.angle):
@@ -289,10 +290,9 @@ def reconfig(newconfig, level) :
  #  cur_speed	absolute value of current velocity in m/sec
  #  speed_delta	difference between that and our immediate goal
 def adjustVelocity(cur_speed, error) :
-    throttle_msg_.position,
-    brake_msg_.position = speed_.adjust(cur_speed, error,
-                                        throttle_msg_.position,
-                                        brake_msg_.position)
+    throttle_msg_.position, brake_msg_.position = speed_.adjust(cur_speed, error,
+                                                                throttle_msg_.position,
+                                                                brake_msg_.position)
     brake_msg_.position = clamp(brake_msg_.position, 0.0, 1.0)
  
     if (math.fabs(brake_msg_.position - brake_position_) > speed.EPSILON_BRAKE) :
@@ -567,7 +567,7 @@ def setup() :
   
   return 0
 
- # main
+# main
 def main(argv) :
     # The main function is the part I'm most unsure about.
     # Does the structure need to change?

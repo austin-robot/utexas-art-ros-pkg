@@ -184,6 +184,9 @@ void setGoal(const art_nav::CarControl *command)
 
   if (goal_msg_.velocity != command->velocity)
     {
+      ROS_DEBUG("changing speed goal from %.2f m/s to %.2f",
+                goal_msg_.velocity, command->velocity);
+
       if (config_.maxspeed > 0 && command->velocity > config_.maxspeed)
         {
           ROS_WARN("excessive speed of %.2f m/s requested", command->velocity);
@@ -199,9 +202,6 @@ void setGoal(const art_nav::CarControl *command)
         {
           goal_msg_.velocity = command->velocity;
         }
-
-      ROS_DEBUG("changing speed goal from %.2f m/s to %.2f",
-                goal_msg_.velocity, command->velocity);
     }
 
   if (goal_msg_.angle != command->angle)

@@ -1,0 +1,11 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch file for driving simulated vehicle from keyboard -->
+
+<launch>
+
+  <!-- start pilot and servo actuators -->
+  <include file="$(find art_run)/launch/pilot_stage.launch" />
+
+  <node pkg="android_link" type="link_teleop.py" name="link_teleop" />
+
+</launch>

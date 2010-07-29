@@ -138,13 +138,6 @@ goal_time_ = rospy.Time()   # time of last CarCommand
 twist_msg_ = Twist()
 speed_ = None
 
-  # Constants
-METERS_PER_MILE_ = conversions.METERS_PER_MILE
-SECONDS_PER_HOUR_ = conversions.SECONDS_PER_HOUR
-EPSILON_SPEED_ = epsilon.speed
-VEHICLE_ID_ = vehicle.frame_id
-HERTZ_PILOT_ = hertz.HERTZ_PILOT
-
  # clamp value to range: [lower, upper]
 def clamp (value, lower, upper) :
     return min(max(lower, value), upper)
@@ -327,7 +320,7 @@ def Halt(cur_speed) :
       adjustVelocity(cur_speed, -cur_speed)
       return
     
-    elif (cur_speed < EPSILON_SPEED_) :
+    elif (cur_speed < epsilon.speed) :
       # Already stopped.  Ease up on the brake to reduce strain on
       # the actuator.  Brake hold position *must* be adequate to
       # prevent motion, even on a hill.
@@ -385,10 +378,10 @@ Backward = 2
 
  # speed_range
 def speed_range(speed) :
-    if (speed > EPSILON_SPEED_):	# moving forward?
+    if (speed > epsilon.speed):         # moving forward?
       return Forward
 
-    if (speed >= -EPSILON_SPEED_):	# close to zero?
+    if (speed >= -epsilon.speed):	# close to zero?
       return Stopped
 
     return Backward
@@ -549,19 +542,19 @@ def setup() :
   
   # initialize servo command interfaces and messages
   brake_cmd_ = rospy.Publisher("brake/cmd", BrakeCommand)
-  brake_msg_.header.frame_id = VEHICLE_ID_
+  brake_msg_.header.frame_id = vehicle.frame_id
   brake_msg_.request = BrakeCommand.Absolute
   brake_msg_.position = 1.0
 
   shifter_cmd_ = rospy.Publisher("shifter/cmd", Shifter)
-  shifter_msg_.header.frame_id = VEHICLE_ID_
+  shifter_msg_.header.frame_id = vehicle.frame_id
 
   steering_cmd_ = rospy.Publisher("steering/cmd", SteeringCommand)
-  steering_msg_.header.frame_id = VEHICLE_ID_
+  steering_msg_.header.frame_id = vehicle.frame_id
   steering_msg_.request = SteeringCommand.Degrees
 
   throttle_cmd_ = rospy.Publisher("throttle/cmd", ThrottleCommand)
-  throttle_msg_.header.frame_id = VEHICLE_ID_
+  throttle_msg_.header.frame_id = vehicle.frame_id
   throttle_msg_.request = ThrottleCommand.Absolute
   throttle_msg_.position = 0.0
   
@@ -613,10 +606,10 @@ def main(argv) :
 # Should I avoid usage of these functions? Maybe Conversions should
 # have been converted to a python file instead.
 def mph2mps(mph) :
-    return mph * METERS_PER_MILE_ / SECONDS_PER_HOUR_
+    return mph * conversions.METERS_PER_MILE / conversions.SECONDS_PER_HOUR
 
 def mps2mph(mps) :
-    return mps * SECONDS_PER_HOUR_ / METERS_PER_MILE_
+    return mps * conversions.SECONDS_PER_HOUR / conversions.METERS_PER_MILE
 
 if __name__ == '__main__':
     try:

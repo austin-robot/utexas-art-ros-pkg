@@ -214,7 +214,7 @@ def processTwist(twistIn) :
     twist_msg_ = twistIn
 
     # convert to a CarControl message for setGoal()
-    car_ctl = art_nav.CarControl()
+    car_ctl = CarControl()
     car_ctl.velocity = twistIn.linear.x
     car_ctl.angle = steering.steering_angle(car_ctl.velocity, twistIn.angular.z)
 

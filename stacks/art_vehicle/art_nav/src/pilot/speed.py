@@ -39,8 +39,6 @@ import pid
 EPSILON_BRAKE = 0.01
 EPSILON_THROTTLE = 0.01
 
-import speed
-import time
 
 class SpeedControl(object) :
   def __init__(self) :

@@ -17,7 +17,6 @@
 PKG_NAME = 'art_nav'
 
 import sys
-import os
 import math
 import roslib;
 roslib.load_manifest(PKG_NAME)
@@ -133,8 +132,10 @@ class JoyNode():
         elif self.car_ctl.angle < -max_wheel_angle:
             self.car_ctl.angle = -max_wheel_angle
 
-def main():
+joynode = None
 
+def main():
+    global joynode
     joynode = JoyNode()
     rospy.loginfo('joystick vehicle controller starting')
     try:

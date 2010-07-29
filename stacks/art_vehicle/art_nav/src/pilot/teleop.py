@@ -14,7 +14,7 @@ PKG_NAME = 'art_nav'
 
 import sys
 import os
-import signal
+#import signal
 import threading
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -25,7 +25,7 @@ import rospy
 from art_nav.msg import CarControl
 from art_nav.msg import CarCommand
 
-topic = rospy.Publisher('pilot/cmd', CarCommand)
+g_topic = rospy.Publisher('pilot/cmd', CarCommand)
 rospy.init_node('teleop')
 
 # set path name for resolving icons
@@ -64,9 +64,9 @@ class MainWindow(QtGui.QMainWindow):
         self.setIconSize(QtCore.QSize(32,32))
         self.setWindowTitle('Vehicle Tele-Operation')
 
-        exit = QtGui.QAction(QtGui.QIcon(pkg_icon('exit')), 'Exit', self)
-        exit.setShortcut('Ctrl+Q')
-        self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
+        qexit = QtGui.QAction(QtGui.QIcon(pkg_icon('exit')), 'Exit', self)
+        qexit.setShortcut('Ctrl+Q')
+        self.connect(qexit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
         center_wheel = QtGui.QAction(QtGui.QIcon(pkg_icon('go-first')),
                             'center wheel', self)
@@ -117,8 +117,8 @@ class MainWindow(QtGui.QMainWindow):
 
 
         menubar = self.menuBar()
-        file = menubar.addMenu('&File')
-        file.addAction(exit)
+        mfile = menubar.addMenu('&File')
+        mfile.addAction(qexit)
 
         speed = menubar.addMenu('&Speed')
         speed.addAction(slow_down)
@@ -135,7 +135,7 @@ class MainWindow(QtGui.QMainWindow):
         wheel.addAction(go_right_more)
 
         toolbar = self.addToolBar('Controls')
-        toolbar.addAction(exit)
+        toolbar.addAction(qexit)
         toolbar.addAction(center_wheel)
         toolbar.addAction(go_left)
         toolbar.addAction(slow_down)
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     #rospy.loginfo('starting tele-operation')
 
     try:
-        QtThread(topic).start()
+        QtThread(g_topic).start()
         rospy.spin()
     except rospy.ROSInterruptException: pass
 

@@ -146,6 +146,8 @@ def allocateSpeedControl() :
     global speed_
     rospy.loginfo("using brake and throttle PID for speed control")
     speed_ = speed.SpeedControlPID()
+    #rospy.loginfo("using reinforcement learning for speed control")
+    #speed_ = speed.SpeedControlRL()
 
     # initialize brake and throttle positions in speed controller
     speed_.set_brake_position(brake_position_)

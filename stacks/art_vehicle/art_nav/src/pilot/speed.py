@@ -118,26 +118,66 @@ class SpeedControlPID (SpeedControl) :
 
 # TODO: Finish working on this SpeedControl subclass
 class SpeedControlRL (SpeedControl) :
-  def __init__ (self) :
+  def __init__ (self, training=True) :
     SpeedControl.__init__(self)
+    self.training = training
+    self.epsilon = 0.5
+    self.alpha = 0.5
+    self.gamma = 1.0
+    self.weight = {}
+    for action in self.legalActions() :
+      self.weight[action] = {}    
+    self.previousState = {}
+    self.currentState = {}
+    self.action = None
 
   def adjust(self, speed, error, throttle_req, brake_req) :
+    if self.training :
+      # TODO: Update the currentState and previousState variables before calling self.update()
+      self.update()
     #error = goal - speed
     # if speed > goal, then error < 0, brake
     # if speed < goal, then error > 0, accelerate
-    if error < 0 :
+
+    if error > 0 :
       throttle_req = 1.0
       brake_req = 0.0
-    elif error > 0 :
+    if error < 0 :
       throttle_req = 0.0
       brake_req = 1.0
-    else :
-      throttle_req = 0.0
-      brake_req = 0.0
+
     return throttle_req, brake_req
 
+  def update(self) :
+    # This should be complete
+    reward = self.reward()
+    correction = (reward + self.gamma * self.getValue(self.currentState)) - self.getQValue(self.previousState, self.action)
+    for key in self.currentState.keys() :
+      self.weight[self.action][key] = self.weight[self.action].get(key, 0.0) + self.alpha * correction * self.currentState[key]
+    return
+
+  #TODO: Define reward function
+  def reward(self) :
+    return 0.0
+
+  def legalActions(self) :
+    actions = []
+    temp = -1.0
+    while temp <= -1.0 :
+      actions += [temp]
+      temp += 0.25
+    return actions
+
+  def getQValue(self, state, action) :
+    sum = 0.0
+    for key in state.keys() :
+      sum += state.get(key) * self.weight[action].setdefault(key, 0.0)
+    return sum
+    
+  def getValue(self, state) :
+    return max([self.getQValue(state, action) for action in self.legalActions()])
+
   def configure(self) :
-    # Do some reinforcement learning updates
     return
 
   def reset(self) :

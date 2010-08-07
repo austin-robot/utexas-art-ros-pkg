@@ -74,9 +74,11 @@ void ArtVehicleModel::setup(void)
 
   // Round UTM origin of map to nearest 10km grid intersection.
   // Report odometry relative to that location.
-  static double origin_grid = 10000.0;  // 10 km grid
-  map_origin_x_ = rint(origin_easting_/origin_grid) * origin_grid;
-  map_origin_y_ = rint(origin_northing_/origin_grid) * origin_grid;
+  const double origin_grid = 10000.0;   // 10 km grid
+  map_origin_x_ = origin_easting_ - (rint(origin_easting_/origin_grid)
+                                     * origin_grid);
+  map_origin_y_ = origin_northing_ - (rint(origin_northing_/origin_grid)
+                                      * origin_grid);
 
   ROS_INFO("MapXY origin: (%.f, %.f)", map_origin_x_ , map_origin_y_);
 }
@@ -191,9 +193,8 @@ void ArtVehicleModel::update(ros::Time sim_time)
 
   // Get latest position data from Stage
   // Translate into ROS message format and publish
-  // TODO: relocate x and y relative to UTM origin
-  odomMsg_.pose.pose.position.x = stgp_->est_pose.x;
-  odomMsg_.pose.pose.position.y = stgp_->est_pose.y;
+  odomMsg_.pose.pose.position.x = stgp_->est_pose.x + map_origin_x_;
+  odomMsg_.pose.pose.position.y = stgp_->est_pose.y + map_origin_y_;
   odomMsg_.pose.pose.orientation =
     tf::createQuaternionMsgFromYaw(stgp_->est_pose.a);
 
@@ -250,11 +251,11 @@ void ArtVehicleModel::publishGPS(ros::Time sim_time)
   gpsi.header.stamp = sim_time;
   gpsi.header.frame_id = tf_prefix_ + ArtFrames::odom;
 
-  // TODO: relocate pose relative to map origin, instead
-  gpsi.utm_e = odomMsg_.pose.pose.position.x + origin_easting_;
-  gpsi.utm_n = odomMsg_.pose.pose.position.y + origin_northing_;
-  //gpsi.utm_e = odomMsg_.pose.pose.position.x + map_origin_x_;
-  //gpsi.utm_n = odomMsg_.pose.pose.position.y + map_origin_y_;
+  // relocate pose relative to map origin
+  gpsi.utm_e = (odomMsg_.pose.pose.position.x
+                - map_origin_x_ + origin_easting_);
+  gpsi.utm_n = (odomMsg_.pose.pose.position.y
+                - map_origin_y_ + origin_northing_);
 
   UTM::UTMtoLL(gpsi.utm_n, gpsi.utm_e, origin_zone_,
                gpsi.latitude, gpsi.longitude);

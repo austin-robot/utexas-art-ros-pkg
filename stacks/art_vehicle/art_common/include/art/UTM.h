@@ -30,7 +30,7 @@
 namespace UTM
 {
   // Grid granularity for rounding UTM coordinates to generate MapXY.
-  static double grid_size = 10000.0;    // 10 km grid
+  const double grid_size = 100000.0;    // 100 km grid
 
 // WGS84 Parameters
 #define WGS84_A		6378137.0		// major axis

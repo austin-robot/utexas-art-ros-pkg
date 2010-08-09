@@ -86,7 +86,6 @@ bool GlobalToLocal(Position::Pose3D *current)
 {
   // original pose when started (global coordinates)
   static Position::Pose3D map_origin;
-  static double origin_grid = 10000.0;  // 10 km grid
   static bool first_pose_received = false;
 
   ROS_DEBUG("Global data (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)",
@@ -98,13 +97,13 @@ bool GlobalToLocal(Position::Pose3D *current)
   if (initial_pose)
     {
       // Initial conditions. Compute map origin from starting point
-      // using a 10km grid so we can offset future data points from
+      // using a UTM grid so we can offset future data points from
       // there. If the driver restarts within the same region, it will
       // pick the same origin.
 
       map_origin = *current;
-      map_origin.x = rint(map_origin.x/origin_grid) * origin_grid;
-      map_origin.y = rint(map_origin.y/origin_grid) * origin_grid;
+      map_origin.x = rint(map_origin.x/UTM::grid_size) * UTM::grid_size;
+      map_origin.y = rint(map_origin.y/UTM::grid_size) * UTM::grid_size;
       map_origin.z = 0.0;               // leave elevations alone
 
       first_pose_received = true;

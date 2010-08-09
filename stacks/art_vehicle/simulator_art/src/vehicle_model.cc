@@ -68,18 +68,17 @@ void ArtVehicleModel::setup(void)
   // Convert latitude and longitude of map origin to UTM.
   UTM::LLtoUTM(origin_lat_, origin_long_,
                origin_northing_, origin_easting_, origin_zone_);
+  ROS_INFO("Map origin UTM: %s, %.2f, %.2f",
+           origin_zone_, origin_easting_, origin_northing_);
 
-  ROS_INFO("map UTM origin: northing %.2f easting %.2f zone %s",
-           origin_northing_, origin_easting_, origin_zone_);
+  // Round UTM origin of map to nearest UTM grid intersection.
+  double grid_x = (rint(origin_easting_/UTM::grid_size) * UTM::grid_size);
+  double grid_y = (rint(origin_northing_/UTM::grid_size) * UTM::grid_size);
+  ROS_INFO("UTM grid origin: (%.f, %.f)", grid_x , grid_y);
 
-  // Round UTM origin of map to nearest 10km grid intersection.
-  // Report odometry relative to that location.
-  const double origin_grid = 10000.0;   // 10 km grid
-  map_origin_x_ = origin_easting_ - (rint(origin_easting_/origin_grid)
-                                     * origin_grid);
-  map_origin_y_ = origin_northing_ - (rint(origin_northing_/origin_grid)
-                                      * origin_grid);
-
+  // Report stage-generated odometry relative to that location.
+  map_origin_x_ = origin_easting_ - grid_x;
+  map_origin_y_ = origin_northing_ - grid_y;
   ROS_INFO("MapXY origin: (%.f, %.f)", map_origin_x_ , map_origin_y_);
 }
 

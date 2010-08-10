@@ -2,7 +2,11 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b The road map publishes a road map for the ART autonomous vehicle to
-follow.
+This package provides a C++ API for working with road map and
+coordinate representations. These classes are exported in an \b artmap
+library.
+
+There is also a ROS node that publishes a road map for the ART
+autonomous vehicle to follow, plus some related test utilities.
 
 */

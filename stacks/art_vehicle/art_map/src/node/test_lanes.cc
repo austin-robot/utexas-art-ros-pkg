@@ -35,6 +35,14 @@
 #include <art_map/zones.hh>
 #include <art_map/ZoneOps.h>
 
+/** @file
+
+ @brief utility to print RNDF lane information.
+
+ @author Jack O'Quin, Patrick Beeson
+
+*/
+
 // TODO These should go in a header somewhere
 static int32_t bottom_left  = art_map::ArtQuadrilateral::bottom_left;
 static int32_t top_left     = art_map::ArtQuadrilateral::top_left;
@@ -58,10 +66,10 @@ Graph* graph = NULL;
 
 float centerx,centery;
 #define CMD "rndf_lanes: "		// message prefix
-  
+
+/** build road map graph from Road Network Definition File */  
 bool build_RNDF()
 {
-
   rndf = new RNDF(rndf_name);
   
   if (!rndf->is_valid) {
@@ -160,6 +168,7 @@ bool build_RNDF()
   return true;
 }
 
+/** parse command line arguments */
 void parse_args(int argc, char *argv[])
 {
   bool print_usage = false;
@@ -254,7 +263,7 @@ void parse_args(int argc, char *argv[])
   rndf_name = argv[optind];
 }
 
-// taken (slightly modified) from <art/LanesProxy.hh>
+/** Print polygon data in human-readable format */
 void PrintPolygons(const art_map::ArtLanes &ldata)
 {
   uint32_t count = ldata.polygons.size();
@@ -300,6 +309,7 @@ void PrintPolygons(const art_map::ArtLanes &ldata)
     }
 }
 
+/** write polygon data to space-delimited file */
 void OutputPolygons(const art_map::ArtLanes &ldata)
 {
   uint32_t count = ldata.polygons.size();
@@ -319,7 +329,7 @@ void OutputPolygons(const art_map::ArtLanes &ldata)
   a_file.close();
 }
 
-
+/** main program */
 int main(int argc, char *argv[]) 
 {
   int rc;
@@ -347,7 +357,8 @@ int main(int argc, char *argv[])
   rc = mapl->getAllLanes(&lanedata);
   if (rc < 0)
     {
-      std::cout << "error getting all polygons!  "<<-rc << " too many polygons to fit in Player message)\n";
+      std::cout << "error getting all polygons!  " << -rc
+                << " too many polygons to fit in Player message)\n";
     }
   
   if (print_polys)

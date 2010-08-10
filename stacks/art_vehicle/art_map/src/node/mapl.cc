@@ -36,13 +36,16 @@ Subscribes:
 
 Publishes:
 
-- @b map/local [art_map::ArtLanes] local area map lanes
+- @b roadmap_global [art_map::ArtLanes] global road map lanes (latched topic)
+- @b roadmap_local [art_map::ArtLanes] local area road map lanes
+
+These data are published for the \b /map frame of reference.
 
 @author Jack O'Quin, Patrick Beeson
 
 */
 
-// The class for the driver
+/** ROS node class for road map driver. */
 class MapLanesDriver
 {
 public:
@@ -69,27 +72,25 @@ private:
   void publishLocalMap(void);
 
   // parameters:
-  double range_;                        // range of lanes to report
-  double poly_size_;			// max size of polygons
+  double range_;                ///< radius of local lanes to report (m)
+  double poly_size_;            ///< maximum polygon size (m)
+  std::string rndf_name_;       ///< Road Network Definition File name
 
-  // Odometry and GPS
-  ros::Subscriber gps_topic_;           // GPS topic
-  applanix::GpsInfo gps_msg_;           // last GPS message received
-  ros::Subscriber odom_topic_;          // odometry topic
-  nav_msgs::Odometry odom_msg_;         // last Odometry message received
-
-  Graph *graph_;                        // graph object (used by MapLanes)
-  MapLanes* map_;
-  bool initial_position_;
+  // topics and messages
+  ros::Subscriber gps_topic_;        // GPS topic
+  applanix::GpsInfo gps_msg_;        // last GPS message received
+  ros::Subscriber odom_topic_;       // odometry topic
+  nav_msgs::Odometry odom_msg_;      // last Odometry message received
 
   ros::Publisher roadmap_global_;       // global road map publisher
   ros::Publisher roadmap_local_;        // local road map publisher
 
-  // Road Network Definition File
-  std::string rndf_name_;
+  Graph *graph_;                  ///< graph object (used by MapLanes)
+  MapLanes* map_;                 ///< MapLanes object instance
+  bool initial_position_;         ///< true if initial odometry received
 };
 
-// constructor
+/** constructor */
 MapLanesDriver::MapLanesDriver(void)
 {
   initial_position_ = false;
@@ -198,7 +199,7 @@ void MapLanesDriver::publishLocalMap(void)
   roadmap_local_.publish(lane_data);
 }
 
-/** Spin function for device thread */
+/** Spin function for driver thread */
 void MapLanesDriver::Spin() 
 {
   publishGlobalMap();                   // publish global map once at start
@@ -263,6 +264,7 @@ bool MapLanesDriver::buildRoadMap(void)
   return true;
 }
 
+/** main program */
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "maplanes");

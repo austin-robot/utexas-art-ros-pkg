@@ -1,0 +1,14 @@
+rosbuild_add_library(artmap
+  FilteredPolygon.cc
+  DrawLanes.cc
+  gaussian.cc
+  Graph.cc
+  KF.cc
+  MapLanes.cc
+  Matrix.cc
+  rotate_translate_transform.cc
+  PolyOps.cc
+  RNDF.cc
+  SmoothCurve.cc
+  VisualLanes.cc
+  ZoneOps.cc)

@@ -1,0 +1,26 @@
+<package>
+  <description brief="ART road map">
+
+     ART autonomous vehicle road map.
+
+  </description>
+  <author>David Li, Patrick Beeson, Bartley Gillen, Tarun Nimmagadda,
+          Mickey Ristroph, Michael Quinlan, Jack O'Quin </author>
+  <license>BSD</license>
+  <review status="experimental" notes=""/>
+  <url>http://ros.org/wiki/art_map</url>
+
+  <depend package="angles"/>
+  <depend package="applanix"/>
+  <depend package="art_common"/>
+  <depend package="art_nav"/>
+  <depend package="geometry_msgs"/>
+  <depend package="tf"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>
+  </export>
+
+</package>
+
+

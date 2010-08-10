@@ -1,0 +1,116 @@
+RNDF_name	large.rndf
+num_segments	4
+num_zones	1
+format_version	1.0
+creation_date	23-Sep-07
+
+/* Road D */
+segment	1
+num_lanes	2
+lane	1.1
+num_waypoints	4
+checkpoint	1.1.3	2
+exit	1.1.1	3.1.1
+exit	1.1.4	1.2.14	/* U-turn to lane 1.2 */
+1.1.1	30.385707	-97.731700
+1.1.2	30.385655	-97.731590
+1.1.3	30.385346	-97.730959
+1.1.4	30.385112	-97.730492
+end_lane
+lane	1.2
+num_waypoints	4
+checkpoint	1.2.15	1
+stop	1.2.17
+exit	1.2.16	3.1.1
+exit	1.2.17	4.2.8
+exit	1.2.17	2.2.1
+exit	1.2.17	4.1.3
+1.2.14	30.385148	-97.730498
+1.2.15	30.385429	-97.731067
+1.2.16	30.385693	-97.731592
+1.2.17	30.385746	-97.731705
+end_lane
+end_segment
+
+/* General Construction Bullpen stub -- both lanes together */
+segment	2
+num_lanes	2
+lane	2.1
+num_waypoints	2
+stop	2.1.2
+2.1.1	30.385823	-97.731941
+2.1.2	30.385801	-97.731867
+end_lane
+lane	2.2
+checkpoint	2.2.2	12
+num_waypoints	2
+2.2.1	30.385801	-97.731867
+2.2.2	30.385823	-97.731941
+end_lane
+end_segment
+
+/* Texas Advanced Pavement Test Center */
+/* TODO: add a zone here */
+segment	3
+num_lanes	2
+lane	3.1
+num_waypoints	6
+checkpoint	3.1.5	9
+exit	3.1.6	3.2.1
+3.1.1	30.385742	-97.731611
+3.1.2	30.385836	-97.731485
+3.1.3	30.386018	-97.731242
+3.1.4	30.385968	-97.731177
+3.1.5	30.385873	-97.731217
+3.1.6	30.385787	-97.731249
+end_lane
+lane	3.2
+num_waypoints	6
+checkpoint	3.2.2	10
+stop	3.2.6
+exit	3.2.6	1.2.17
+exit	3.2.6	1.1.2
+3.2.1	30.385777	-97.731211
+3.2.2	30.385920	-97.731152
+3.2.3	30.385998	-97.731120
+3.2.4	30.386059	-97.731228
+3.2.5	30.385936	-97.731396
+3.2.6	30.385753	-97.731634
+end_lane
+end_segment
+
+/* Neils Thompson Dr. -- both lanes share the East side of the street. */
+segment	4
+num_lanes	2
+lane	4.1
+num_waypoints	6
+checkpoint	4.1.5	8
+stop	4.1.2
+exit	4.1.2	1.1.1
+exit	4.1.2	2.2.1
+exit	4.1.5	4.2.5	/* U-turn back to intersection */
+4.1.1	30.385514	-97.731873
+4.1.2	30.385651	-97.731834
+4.1.3	30.385843	-97.731768
+4.1.4	30.386136	-97.731628
+4.1.5	30.386424	-97.731484
+4.1.6	30.386729	-97.731353
+end_lane
+lane	4.2
+num_waypoints	6
+checkpoint	4.2.6	7
+checkpoint	4.2.9	11
+stop	4.2.7
+exit	4.2.7	1.1.1
+exit	4.2.7	2.2.1
+exit	4.2.9	4.1.1
+4.2.4	30.386657	-97.731394
+4.2.5	30.386389	-97.731529
+4.2.6	30.386148	-97.731669
+4.2.7	30.385852	-97.731806
+4.2.8	30.385651	-97.731878
+4.2.9	30.385510	-97.731915
+end_lane
+end_segment
+
+end_file

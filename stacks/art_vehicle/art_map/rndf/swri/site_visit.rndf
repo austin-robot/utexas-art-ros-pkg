@@ -1,0 +1,142 @@
+/*Southwest Research Insitute Urban Challenge Site Visit Course*/	
+/*Shifted points 1.1.7, 1.1.8, 1.2.12, 1.2.13 to meet 10m requirement between waypoints*/
+/*Reduced lane 2.2 from 15ft to 12ft*/
+/*Moved Stub Two to eliminate sharp turn*/
+RNDF_name	SwRI_Site_Visit_RNDF 
+num_segments	3
+num_zones	0
+format_version	2.2
+creation_date	25-Apr-07
+segment	1	
+num_lanes	2	
+segment_name	Main_Loop	
+lane	1.1	
+num_waypoints	19		
+lane_width	15
+left_boundary	solid_yellow	
+checkpoint	1.1.3	1
+checkpoint	1.1.8	2
+checkpoint	1.1.12	3
+checkpoint	1.1.17	4
+stop	1.1.19
+exit	1.1.19	1.1.1	
+exit	1.1.19	2.1.1
+exit	1.1.19	3.1.1
+1.1.1	29.445998	-98.607030
+1.1.2	29.445993	-98.607185
+1.1.3	29.445977	-98.607372
+1.1.4	29.445960	-98.607560
+1.1.5	29.445961	-98.607712
+1.1.6	29.446061	-98.607827
+1.1.7	29.446151	-98.607827
+1.1.8	29.446242	-98.607827
+1.1.9	29.446421	-98.607837
+1.1.10	29.446518	-98.607722
+1.1.11	29.446518	-98.607559
+1.1.12	29.446518	-98.607401
+1.1.13	29.446518	-98.607243
+1.1.14	29.446519	-98.607095
+1.1.15	29.446422	-98.606976
+1.1.16	29.446330	-98.606975
+1.1.17	29.446238	-98.606975
+1.1.18	29.446137	-98.606975
+1.1.19	29.446045	-98.606975
+end_lane		
+lane	1.2	
+num_waypoints	19		
+lane_width	15	
+left_boundary	solid_yellow	
+checkpoint	1.2.3	5
+checkpoint	1.2.8	6
+checkpoint	1.2.12	7
+checkpoint	1.2.17	8
+stop	1.2.19
+exit	1.2.19	1.2.1	
+exit	1.2.19	2.1.1
+exit	1.2.19	3.1.1
+1.2.1	29.446045	-98.606928
+1.2.2	29.446137	-98.606928
+1.2.3	29.446237	-98.606927
+1.2.4	29.446330	-98.606927
+1.2.5	29.446422	-98.606928
+1.2.6	29.446560	-98.607095
+1.2.7	29.446559	-98.607243
+1.2.8	29.446560	-98.607400
+1.2.9	29.446560	-98.607558
+1.2.10	29.446560	-98.607722
+1.2.11	29.446420	-98.607885
+1.2.12	29.446242	-98.607874
+1.2.13	29.446151	-98.607874
+1.2.14	29.446061	-98.607874
+1.2.15	29.445919	-98.607713
+1.2.16	29.445919	-98.607561
+1.2.17	29.445935	-98.607373
+1.2.18	29.445952	-98.607185
+1.2.19	29.445956	-98.607030
+end_lane		
+end_segment	
+segment	2	
+num_lanes	2
+segment_name	Stub_One	
+lane	2.1	
+num_waypoints	3		
+lane_width	15	
+left_boundary	solid_yellow
+checkpoint	2.1.2	9
+exit	2.1.3	2.2.1
+2.1.1	29.445909	-98.606976
+2.1.2	29.445771	-98.607049
+2.1.3	29.445761	-98.607268
+end_lane
+lane	2.2	
+num_waypoints	3		
+lane_width	12	
+left_boundary	solid_yellow
+checkpoint	2.2.2	10
+stop	2.2.3
+exit	2.2.3	1.1.1
+exit	2.2.3	1.2.1
+exit	2.2.3	3.1.1
+2.2.1	29.445723	-98.607269
+2.2.2	29.445735	-98.607030
+2.2.3	29.445909	-98.606933
+end_lane	
+end_segment
+segment	3	
+num_lanes	2
+segment_name	Stub_Two	
+lane	3.1	
+num_waypoints	8		
+lane_width	12	
+left_boundary	solid_yellow
+checkpoint	3.1.4	11
+exit	3.1.8	3.2.1
+3.1.1	29.445969	-98.606877
+3.1.2	29.445968	-98.606722
+3.1.3	29.445967	-98.606566
+3.1.4	29.445942	-98.606416
+3.1.5	29.445861	-98.606294
+3.1.6	29.445741	-98.606225
+3.1.7	29.445607	-98.606219
+3.1.8	29.445473	-98.606219
+end_lane
+lane	3.2	
+num_waypoints	8		
+lane_width	12	
+left_boundary	solid_yellow
+checkpoint	3.2.5	12
+stop	3.2.8
+exit	3.2.8	1.1.1
+exit	3.2.8	1.2.1
+exit	3.2.8	2.1.1
+3.2.1	29.445472	-98.606180
+3.2.2	29.445606	-98.606179
+3.2.3	29.445750	-98.606187
+3.2.4	29.445883	-98.606263
+3.2.5	29.445974	-98.606400
+3.2.6	29.446002	-98.606562
+3.2.7	29.446002	-98.606723
+3.2.8	29.446003	-98.606877
+end_lane	
+end_segment
+end_file

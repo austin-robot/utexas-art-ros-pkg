@@ -14,9 +14,11 @@
 #include <iostream>
 
 #include <ros/ros.h>
+#include <tf/tf.h>
 
 #include <art/hertz.h>
 #include <nav_msgs/Odometry.h>
+#include <visualization_msgs/MarkerArray.h>
 
 #include <art_map/ArtLanes.h>
 #include <art_map/Graph.h>
@@ -36,12 +38,17 @@ Publishes:
 
 - @b roadmap_global [art_map::ArtLanes] global road map lanes (latched topic)
 - @b roadmap_local [art_map::ArtLanes] local area road map lanes
+- @b mapmarks_global [visualization_msgs::MarkerArray] markers for map
+     visualization
 
 These data are published for the \b /map frame of reference.
 
 @author Jack O'Quin, Patrick Beeson
 
 */
+
+/** /map frame of reference */
+static const std::string g_map_frame = "/map";
 
 /** ROS node class for road map driver. */
 class MapLanesDriver
@@ -67,6 +74,8 @@ private:
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void publishGlobalMap(void);
   void publishLocalMap(void);
+  void publishMapMarks(ros::Publisher &pub,
+                       const art_map::ArtLanes &lane_data);
 
   // parameters:
   double range_;                ///< radius of local lanes to report (m)
@@ -79,6 +88,7 @@ private:
 
   ros::Publisher roadmap_global_;       // global road map publisher
   ros::Publisher roadmap_local_;        // local road map publisher
+  ros::Publisher mapmarks_global_;      // global visualization markers
 
   Graph *graph_;                  ///< graph object (used by MapLanes)
   MapLanes* map_;                 ///< MapLanes object instance
@@ -120,9 +130,12 @@ int MapLanesDriver::Setup(ros::NodeHandle node)
   roadmap_local_ =
     node.advertise<art_map::ArtLanes>("roadmap_local", qDepth);
 
-  // Use latched publisher for global road map topic
+  // Use latched publisher for global road map and visualization topics
   roadmap_global_ =
     node.advertise<art_map::ArtLanes>("roadmap_global", 1, true);
+  mapmarks_global_ =
+    node.advertise<visualization_msgs::MarkerArray>("mapmarks_global",
+                                                    1, true);
 
   return 0;
 }
@@ -147,6 +160,61 @@ void MapLanesDriver::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
     }
 }
 
+/** @brief Publish map visualization
+ *
+ *  Converts polygon data into an array of rviz visualization
+ *  markers.
+ *
+ *  @param pub topic to publish
+ *  @param lane_data polygons to publish
+ */
+void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
+                                      const art_map::ArtLanes &lane_data)
+{
+  visualization_msgs::MarkerArray msg;
+  std::string topic_name = pub.getTopic();
+  ros::Time now = ros::Time::now();
+  ros::Duration life;
+#if 0 // TODO: fix unresolved external reference to isLatched()
+  if (!pub.isLatched())
+    life = ros::Duration(HERTZ_MAPLANES);
+#endif
+
+  for (uint32_t i = 0; i < lane_data.polygons.size(); ++i)
+    {
+      visualization_msgs::Marker mark;
+      mark.header.stamp = now;
+      mark.header.frame_id = g_map_frame;
+
+      mark.ns = topic_name;
+      mark.id = (int32_t) i;
+      mark.type = visualization_msgs::Marker::ARROW;
+      mark.action = visualization_msgs::Marker::ADD;
+
+      mark.pose.position = lane_data.polygons[i].midpoint;
+      mark.pose.orientation = 
+        tf::createQuaternionMsgFromYaw(lane_data.polygons[i].heading);
+
+      // Set the scale of the marker -- 1x1x1 here means 1m on a side
+      mark.scale.x = 1.0;
+      mark.scale.y = 1.0;
+      mark.scale.z = 1.0;
+
+      // set the color, alpha must be nonzero
+      mark.color.r = 0.0f;
+      mark.color.g = 1.0f;
+      mark.color.b = 0.0f;
+      mark.color.a = 1.0;
+
+      mark.lifetime = life;
+
+      // Add this polygon to the vector of markers to publish
+      msg.markers.push_back(mark);
+    }
+
+  pub.publish(msg);
+}
+
 /** Publish global road map */
 void MapLanesDriver::publishGlobalMap(void)
 {
@@ -159,11 +227,13 @@ void MapLanesDriver::publishGlobalMap(void)
 
   // the map is in the /map frame of reference with present time
   lane_data.header.stamp = ros::Time::now();
-  lane_data.header.frame_id = "/map";
+  lane_data.header.frame_id = g_map_frame;
 
   ROS_INFO_STREAM("publishing " <<  lane_data.polygons.size()
                   <<" global roadmap polygons");
   roadmap_global_.publish(lane_data);
+
+  publishMapMarks(mapmarks_global_, lane_data);
 }
 
 /** Publish current local road map */
@@ -179,7 +249,7 @@ void MapLanesDriver::publishLocalMap(void)
   // the map is in the /map frame of reference with time of the
   // latest odometry message
   lane_data.header.stamp = odom_msg_.header.stamp;
-  lane_data.header.frame_id = "/map";
+  lane_data.header.frame_id = g_map_frame;
 
   ROS_DEBUG_STREAM("publishing " <<  lane_data.polygons.size()
                    <<" local roadmap polygons");

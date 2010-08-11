@@ -16,6 +16,7 @@
   <depend package="art_nav"/>
   <depend package="geometry_msgs"/>
   <depend package="tf"/>
+  <depend package="visualization_msgs"/>
 
   <export>
     <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>

@@ -38,7 +38,7 @@ Publishes:
 
 - @b roadmap_global [art_map::ArtLanes] global road map lanes (latched topic)
 - @b roadmap_local [art_map::ArtLanes] local area road map lanes
-- @b mapmarks_global [visualization_msgs::MarkerArray] markers for map
+- @b mapmarks_global_array [visualization_msgs::MarkerArray] markers for map
      visualization
 
 These data are published for the \b /map frame of reference.
@@ -134,7 +134,7 @@ int MapLanesDriver::Setup(ros::NodeHandle node)
   roadmap_global_ =
     node.advertise<art_map::ArtLanes>("roadmap_global", 1, true);
   mapmarks_global_ =
-    node.advertise<visualization_msgs::MarkerArray>("mapmarks_global",
+    node.advertise<visualization_msgs::MarkerArray>("mapmarks_global_array",
                                                     1, true);
 
   return 0;

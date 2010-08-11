@@ -14,10 +14,9 @@
 #include <iostream>
 
 #include <ros/ros.h>
-#include <nav_msgs/Odometry.h>
 
 #include <art/hertz.h>
-#include <applanix/GpsInfo.h>
+#include <nav_msgs/Odometry.h>
 
 #include <art_map/ArtLanes.h>
 #include <art_map/Graph.h>
@@ -31,7 +30,6 @@
 
 Subscribes:
 
-- @b gps [applanix::GpsInfo] robot latitude and longitude estimate.
 - @b odom [nav_msgs::Odometry] estimate of robot position and velocity.
 
 Publishes:
@@ -67,7 +65,6 @@ public:
 private:
 
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
-  void processGPS(const applanix::GpsInfo::ConstPtr &gpsIn);
   void publishGlobalMap(void);
   void publishLocalMap(void);
 
@@ -77,8 +74,6 @@ private:
   std::string rndf_name_;       ///< Road Network Definition File name
 
   // topics and messages
-  ros::Subscriber gps_topic_;        // GPS topic
-  applanix::GpsInfo gps_msg_;        // last GPS message received
   ros::Subscriber odom_topic_;       // odometry topic
   nav_msgs::Odometry odom_msg_;      // last Odometry message received
 
@@ -118,8 +113,6 @@ int MapLanesDriver::Setup(ros::NodeHandle node)
   static int qDepth = 1;
   ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
 
-  gps_topic_ = node.subscribe("gps", qDepth, &MapLanesDriver::processGPS,
-                              this, noDelay);
   odom_topic_ = node.subscribe("odom", qDepth, &MapLanesDriver::processOdom,
                                this, noDelay);
 
@@ -141,12 +134,6 @@ int MapLanesDriver::Shutdown()
   // Stop and join the driver thread
   ROS_INFO("shutting down maplanes");
   return 0;
-}
-
-/** Handle GPS input */
-void MapLanesDriver::processGPS(const applanix::GpsInfo::ConstPtr &gpsIn)
-{
-  gps_msg_ = *gpsIn;
 }
 
 /** Handle odometry input */

@@ -70,6 +70,7 @@ private:
   void publishGlobalMap(void);
   void publishLocalMap(void);
   void publishMapMarks(ros::Publisher &pub,
+                       const std::string &map_name,
                        const art_map::ArtLanes &lane_data);
 
   // parameters:
@@ -170,10 +171,19 @@ void MapLanesDriver::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
  *  @param lane_data polygons to publish
  */
 void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
-                                      const art_map::ArtLanes &lane_data)
+                                     const std::string &map_name,
+                                     const art_map::ArtLanes &lane_data)
 {
   visualization_msgs::MarkerArray msg;
-  std::string topic_name = pub.getTopic();
+  geometry_msgs::Vector3 scale;         // map marker scale
+  scale.x = 1.0;
+  scale.y = 1.0;
+  scale.z = 1.0;
+  std_msgs::ColorRGBA color;            // map marker color
+  color.r = 0.0;
+  color.g = 1.0;
+  color.b = 0.0;
+  color.a = 1.0;
   ros::Time now = ros::Time::now();
   ros::Duration life = ros::Duration(); // publish permanent markers
 #if 0 // TODO: fix unresolved external reference to isLatched()
@@ -187,26 +197,18 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
       mark.header.stamp = now;
       mark.header.frame_id = frame_id_;
 
-      mark.ns = topic_name;
+      mark.ns = map_name;
       mark.id = (int32_t) i;
       mark.type = visualization_msgs::Marker::ARROW;
       mark.action = visualization_msgs::Marker::ADD;
 
+      //mark.pose.position.x = i - 1.0;
       mark.pose.position = lane_data.polygons[i].midpoint;
       mark.pose.orientation = 
         tf::createQuaternionMsgFromYaw(lane_data.polygons[i].heading);
 
-      // Set the scale of the marker -- 1x1x1 here means 1m on a side
-      mark.scale.x = 1.0;
-      mark.scale.y = 1.0;
-      mark.scale.z = 1.0;
-
-      // set the color, alpha must be nonzero
-      mark.color.r = 0.0f;
-      mark.color.g = 1.0f;
-      mark.color.b = 0.0f;
-      mark.color.a = 1.0;
-
+      mark.scale = scale;
+      mark.color = color;
       mark.lifetime = life;
 
       // Add this polygon to the vector of markers to publish
@@ -234,7 +236,7 @@ void MapLanesDriver::publishGlobalMap(void)
                   <<" global roadmap polygons");
   roadmap_global_.publish(lane_data);
 
-  publishMapMarks(mapmarks_global_, lane_data);
+  publishMapMarks(mapmarks_global_, "roadmap_global", lane_data);
 }
 
 /** Publish current local road map */

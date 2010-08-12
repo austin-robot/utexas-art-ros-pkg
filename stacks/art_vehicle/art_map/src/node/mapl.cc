@@ -38,17 +38,12 @@ Publishes:
 
 - @b roadmap_global [art_map::ArtLanes] global road map lanes (latched topic)
 - @b roadmap_local [art_map::ArtLanes] local area road map lanes
-- @b mapmarks_global_array [visualization_msgs::MarkerArray] markers for map
-     visualization
-
-These data are published for the \b /map frame of reference.
+- @b visualization_marker_array [visualization_msgs::MarkerArray]
+     markers for map visualization
 
 @author Jack O'Quin, Patrick Beeson
 
 */
-
-/** /map frame of reference */
-static const std::string g_map_frame = "/map";
 
 /** ROS node class for road map driver. */
 class MapLanesDriver
@@ -81,6 +76,7 @@ private:
   double range_;                ///< radius of local lanes to report (m)
   double poly_size_;            ///< maximum polygon size (m)
   std::string rndf_name_;       ///< Road Network Definition File name
+  std::string frame_id_;        ///< frame ID of map (default "/map")
 
   // topics and messages
   ros::Subscriber odom_topic_;       // odometry topic
@@ -102,6 +98,12 @@ MapLanesDriver::MapLanesDriver(void)
 
   // use private node handle to get parameters
   ros::NodeHandle nh("~");
+
+  frame_id_ = "/map";
+  if (nh.getParam("frame_id", frame_id_))
+    {
+      ROS_INFO_STREAM("map frame ID = " << frame_id_);
+    }
 
   nh.param("range", range_, 80.0);
   ROS_INFO("range to publish = %.0f meters", range_);
@@ -133,9 +135,8 @@ int MapLanesDriver::Setup(ros::NodeHandle node)
   // Use latched publisher for global road map and visualization topics
   roadmap_global_ =
     node.advertise<art_map::ArtLanes>("roadmap_global", 1, true);
-  mapmarks_global_ =
-    node.advertise<visualization_msgs::MarkerArray>("mapmarks_global_array",
-                                                    1, true);
+  mapmarks_global_ = node.advertise <visualization_msgs::MarkerArray>
+    ("visualization_marker_array", 1, true);
 
   return 0;
 }
@@ -174,7 +175,7 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
   visualization_msgs::MarkerArray msg;
   std::string topic_name = pub.getTopic();
   ros::Time now = ros::Time::now();
-  ros::Duration life;
+  ros::Duration life = ros::Duration(); // publish permanent markers
 #if 0 // TODO: fix unresolved external reference to isLatched()
   if (!pub.isLatched())
     life = ros::Duration(HERTZ_MAPLANES);
@@ -184,7 +185,7 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
     {
       visualization_msgs::Marker mark;
       mark.header.stamp = now;
-      mark.header.frame_id = g_map_frame;
+      mark.header.frame_id = frame_id_;
 
       mark.ns = topic_name;
       mark.id = (int32_t) i;
@@ -227,7 +228,7 @@ void MapLanesDriver::publishGlobalMap(void)
 
   // the map is in the /map frame of reference with present time
   lane_data.header.stamp = ros::Time::now();
-  lane_data.header.frame_id = g_map_frame;
+  lane_data.header.frame_id = frame_id_;
 
   ROS_INFO_STREAM("publishing " <<  lane_data.polygons.size()
                   <<" global roadmap polygons");
@@ -249,7 +250,7 @@ void MapLanesDriver::publishLocalMap(void)
   // the map is in the /map frame of reference with time of the
   // latest odometry message
   lane_data.header.stamp = odom_msg_.header.stamp;
-  lane_data.header.frame_id = g_map_frame;
+  lane_data.header.frame_id = frame_id_;
 
   ROS_DEBUG_STREAM("publishing " <<  lane_data.polygons.size()
                    <<" local roadmap polygons");

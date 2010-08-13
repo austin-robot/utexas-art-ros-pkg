@@ -15,6 +15,7 @@
   <depend package="art_common"/>
   <depend package="art_nav"/>
   <depend package="geometry_msgs"/>
+  <depend package="roscpp"/>
   <depend package="tf"/>
   <depend package="visualization_msgs"/>
 

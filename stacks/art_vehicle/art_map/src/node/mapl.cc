@@ -71,6 +71,7 @@ private:
   void publishLocalMap(void);
   void publishMapMarks(ros::Publisher &pub,
                        const std::string &map_name,
+                       ros::Duration life,
                        const art_map::ArtLanes &lane_data);
 
   // parameters:
@@ -172,6 +173,7 @@ void MapLanesDriver::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
  */
 void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
                                      const std::string &map_name,
+                                     ros::Duration life,
                                      const art_map::ArtLanes &lane_data)
 {
   visualization_msgs::MarkerArray msg;
@@ -185,11 +187,6 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
   color.b = 0.0;
   color.a = 1.0;
   ros::Time now = ros::Time::now();
-  ros::Duration life = ros::Duration(); // publish permanent markers
-#if 0 // TODO: fix unresolved external reference to isLatched()
-  if (!pub.isLatched())
-    life = ros::Duration(HERTZ_MAPLANES);
-#endif
 
   for (uint32_t i = 0; i < lane_data.polygons.size(); ++i)
     {
@@ -202,7 +199,6 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
       mark.type = visualization_msgs::Marker::ARROW;
       mark.action = visualization_msgs::Marker::ADD;
 
-      //mark.pose.position.x = i - 1.0;
       mark.pose.position = lane_data.polygons[i].midpoint;
       mark.pose.orientation = 
         tf::createQuaternionMsgFromYaw(lane_data.polygons[i].heading);
@@ -236,7 +232,9 @@ void MapLanesDriver::publishGlobalMap(void)
                   <<" global roadmap polygons");
   roadmap_global_.publish(lane_data);
 
-  publishMapMarks(mapmarks_global_, "roadmap_global", lane_data);
+  // publish latched global map with permanent duration
+  publishMapMarks(mapmarks_global_, "roadmap_global",
+                  ros::Duration(), lane_data);
 }
 
 /** Publish current local road map */

@@ -196,7 +196,8 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
       mark.header.stamp = now;
       mark.header.frame_id = frame_id_;
 
-      mark.ns = map_name;
+      // publish polygon centers
+      mark.ns = "polygons_" + map_name;
       mark.id = (int32_t) i;
       mark.type = visualization_msgs::Marker::ARROW;
       mark.action = visualization_msgs::Marker::ADD;
@@ -211,6 +212,44 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
 
       // Add this polygon to the vector of markers to publish
       msg.markers.push_back(mark);
+
+      if (!lane_data.polygons[i].is_transition)
+        {
+          // publish lane boundaries (experimental)
+          //
+          // It is almost certainly more efficient to collect the
+          // right and left lane boundaries for each lane as two
+          // strips, then publish them as separate LINE_STRIP
+          // markers. This LINE_LIST version is an experiment to see
+          // how it looks (pretty good).
+          mark.ns = "lanes_" + map_name ;
+          mark.id = (int32_t) i;
+          mark.type = visualization_msgs::Marker::LINE_LIST;
+          mark.action = visualization_msgs::Marker::ADD;
+
+          // reset Pose in the marker
+          mark.pose = geometry_msgs::Pose();
+
+          // define lane boundary points: first left (0, 1), then right (2, 3)
+          for (uint32_t j = 0;
+               j < lane_data.polygons[i].poly.points.size(); ++j)
+            {
+              // convert Point32 message to Point (there should be a
+              // better way)
+              geometry_msgs::Point p;
+              p.x = lane_data.polygons[i].poly.points[j].x;
+              p.y = lane_data.polygons[i].poly.points[j].y;
+              p.z = lane_data.polygons[i].poly.points[j].z;
+              mark.points.push_back(p);
+            }
+
+          mark.scale.x = 0.1;               // 10cm lane boundaries
+          //mark.color = color;
+          //mark.lifetime = life;
+
+          // Add these boundaries to the vector of markers to publish
+          msg.markers.push_back(mark);
+        }
     }
 
   pub.publish(msg);
@@ -235,7 +274,7 @@ void MapLanesDriver::publishGlobalMap(void)
   roadmap_global_.publish(lane_data);
 #if 0 // only publish local map (for now)
   // publish global map with permanent duration
-  publishMapMarks(mapmarks_, "roadmap_global", ros::Duration(), lane_data);
+  publishMapMarks(mapmarks_, "global_roadmap", ros::Duration(), lane_data);
 #endif
 }
 
@@ -259,7 +298,7 @@ void MapLanesDriver::publishLocalMap(void)
   roadmap_local_.publish(lane_data);
 
   // publish local map with temporary duration
-  publishMapMarks(mapmarks_, "roadmap_local",
+  publishMapMarks(mapmarks_, "local_roadmap",
                   ros::Duration(HERTZ_MAPLANES), lane_data);
 }
 

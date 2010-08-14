@@ -86,7 +86,7 @@ private:
 
   ros::Publisher roadmap_global_;       // global road map publisher
   ros::Publisher roadmap_local_;        // local road map publisher
-  ros::Publisher mapmarks_global_;      // global visualization markers
+  ros::Publisher mapmarks_;             // rviz visualization markers
 
   Graph *graph_;                  ///< graph object (used by MapLanes)
   MapLanes* map_;                 ///< MapLanes object instance
@@ -137,8 +137,8 @@ int MapLanesDriver::Setup(ros::NodeHandle node)
   // Use latched publisher for global road map and visualization topics
   roadmap_global_ =
     node.advertise<art_map::ArtLanes>("roadmap_global", 1, true);
-  mapmarks_global_ = node.advertise <visualization_msgs::MarkerArray>
-    ("visualization_marker_array", 1, true);
+  mapmarks_ = node.advertise <visualization_msgs::MarkerArray>
+    ("visualization_marker_array", 1);
 
   return 0;
 }
@@ -163,12 +163,14 @@ void MapLanesDriver::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
     }
 }
 
-/** @brief Publish map visualization
+/** @brief Publish map visualization markers
  *
  *  Converts polygon data into an array of rviz visualization
  *  markers.
  *
  *  @param pub topic to publish
+ *  @param map_name marker namespace
+ *  @param life lifespan for these markers
  *  @param lane_data polygons to publish
  */
 void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
@@ -231,10 +233,10 @@ void MapLanesDriver::publishGlobalMap(void)
   ROS_INFO_STREAM("publishing " <<  lane_data.polygons.size()
                   <<" global roadmap polygons");
   roadmap_global_.publish(lane_data);
-
-  // publish latched global map with permanent duration
-  publishMapMarks(mapmarks_global_, "roadmap_global",
-                  ros::Duration(), lane_data);
+#if 0 // only publish local map (for now)
+  // publish global map with permanent duration
+  publishMapMarks(mapmarks_, "roadmap_global", ros::Duration(), lane_data);
+#endif
 }
 
 /** Publish current local road map */
@@ -255,6 +257,10 @@ void MapLanesDriver::publishLocalMap(void)
   ROS_DEBUG_STREAM("publishing " <<  lane_data.polygons.size()
                    <<" local roadmap polygons");
   roadmap_local_.publish(lane_data);
+
+  // publish local map with temporary duration
+  publishMapMarks(mapmarks_, "roadmap_local",
+                  ros::Duration(HERTZ_MAPLANES), lane_data);
 }
 
 /** Spin function for driver thread */

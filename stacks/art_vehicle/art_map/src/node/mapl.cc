@@ -217,11 +217,11 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
         {
           // publish lane boundaries (experimental)
           //
-          // It is almost certainly more efficient to collect the
-          // right and left lane boundaries for each lane as two
-          // strips, then publish them as separate LINE_STRIP
-          // markers. This LINE_LIST version is an experiment to see
-          // how it looks (pretty good).
+          // It is almost certainly more efficient for rviz rendering
+          // to collect the right and left lane boundaries for each
+          // lane as two strips, then publish them as separate
+          // LINE_STRIP markers. This LINE_LIST version is an
+          // experiment to see how it looks (pretty good).
           mark.ns = "lanes_" + map_name ;
           mark.id = (int32_t) i;
           mark.type = visualization_msgs::Marker::LINE_LIST;
@@ -249,6 +249,48 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
 
           // Add these boundaries to the vector of markers to publish
           msg.markers.push_back(mark);
+        }
+
+      if (lane_data.polygons[i].contains_way)
+        {
+          visualization_msgs::Marker wp;
+          wp.header.stamp = now;
+          wp.header.frame_id = frame_id_;
+
+          // publish way-points
+          wp.ns = "waypoints_" + map_name;
+          wp.id = (int32_t) i;
+          wp.type = visualization_msgs::Marker::CYLINDER;
+          wp.action = visualization_msgs::Marker::ADD;
+
+          wp.pose.position = lane_data.polygons[i].midpoint;
+          wp.pose.orientation = 
+            tf::createQuaternionMsgFromYaw(lane_data.polygons[i].heading);
+
+          wp.scale.x = 1.0;
+          wp.scale.y = 1.0;
+          wp.scale.z = 0.1;
+          wp.lifetime = life;
+
+          wp.color.a = 0.8;     // way-points are slightly transparent
+          if (lane_data.polygons[i].is_stop)
+            {
+              // make stop way-points red
+              wp.color.r = 1.0;
+              wp.color.g = 0.0;
+              wp.color.b = 0.0;
+            }
+          else
+            {
+              // make other way-points yellow
+              wp.color.r = 1.0;
+              wp.color.g = 1.0;
+              wp.color.b = 0.0;
+            }
+
+
+          // Add this way-point to the vector of markers to publish
+          msg.markers.push_back(wp);
         }
     }
 

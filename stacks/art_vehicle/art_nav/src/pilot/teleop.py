@@ -81,11 +81,13 @@ class MainWindow(QtGui.QMainWindow):
 
         go_left_more = QtGui.QAction('steer left more', self)
         go_left_more.setShortcut(QtGui.QKeySequence.SelectPreviousWord)
-        self.connect(go_left_more, QtCore.SIGNAL('triggered()'), self.go_left_more)
+        self.connect(go_left_more, QtCore.SIGNAL('triggered()'),
+                     self.go_left_more)
 
         go_left_less = QtGui.QAction('steer left less', self)
         go_left_less.setShortcut(QtGui.QKeySequence.MoveToPreviousWord)
-        self.connect(go_left_less, QtCore.SIGNAL('triggered()'), self.go_left_less)
+        self.connect(go_left_less, QtCore.SIGNAL('triggered()'),
+                     self.go_left_less)
 
         slow_down = QtGui.QAction(QtGui.QIcon(pkg_icon('go-down')),
                             'slow down', self)
@@ -104,11 +106,13 @@ class MainWindow(QtGui.QMainWindow):
 
         go_right_less = QtGui.QAction('steer right less', self)
         go_right_less.setShortcut(QtGui.QKeySequence.MoveToNextWord)
-        self.connect(go_right_less, QtCore.SIGNAL('triggered()'), self.go_right_less)
+        self.connect(go_right_less, QtCore.SIGNAL('triggered()'),
+                     self.go_right_less)
 
         go_right_more = QtGui.QAction('steer right more', self)
         go_right_more.setShortcut(QtGui.QKeySequence.SelectNextWord)
-        self.connect(go_right_more, QtCore.SIGNAL('triggered()'), self.go_right_more)
+        self.connect(go_right_more, QtCore.SIGNAL('triggered()'),
+                     self.go_right_more)
 
         stop_car = QtGui.QAction(QtGui.QIcon(pkg_icon('go-bottom')),
                                  'stop car', self)

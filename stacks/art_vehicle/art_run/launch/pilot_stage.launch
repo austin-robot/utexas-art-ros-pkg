@@ -4,8 +4,18 @@
 <launch>
   <!-- stage simulator for ART vehicle -->
   <node pkg="simulator_art" type="artstage" name="artstage"
-        args="$(find simulator_art)/world/$(optenv WORLD prc_large.world)"/>
+        args="$(find simulator_art)/world/$(optenv WORLD prc_large).world">
+    <rosparam
+       file="$(find simulator_art)/world/$(optenv WORLD prc_large).yaml"/>
+  </node>
   <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
+
+  <!-- start maplanes node with corresponding RNDF -->
+  <node pkg="art_map" type="maplanes" name="maplanes">
+    <param name="rndf"
+           value="$(find art_map)/rndf/$(optenv WORLD prc_large).rndf"/>
+    <param name="frame_id" value="/odom" />
+  </node>
 
   <!-- Launch pilot with null servo actuators.  NOTE: this comes
        *after* artstage has established simulated /clock time.

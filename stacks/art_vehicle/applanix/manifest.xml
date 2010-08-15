@@ -20,7 +20,7 @@
   <rosdep name="libpcap"/>
 
   <export>
-    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"
+    <cpp cflags="-I${prefix}/include"
          lflags="-lpcap"/>
   </export>
 

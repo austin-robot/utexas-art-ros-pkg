@@ -23,7 +23,7 @@
   <rosdep name="PyQt4"/>
 
   <export>
-    <cpp cflags="-I${prefix}/include -I${prefix}/msg/cpp"/>
+    <cpp cflags="-I${prefix}/include"/>
     <rosbagmigration rule_file="migration_rules/art_nav.bmr"/>
   </export>
 

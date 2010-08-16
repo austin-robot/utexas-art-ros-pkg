@@ -25,10 +25,6 @@
   <!-- navigation components -->
   <node pkg="art_nav" type="$(optenv PILOT_NODE pilot)" name="pilot" />
 
-  <!-- monitoring tools
-       <include file="$(find art_run)/launch/monitor.launch" />
-   -->
-
   <!-- comment out, not working
   <node pkg="rxtools" type="rxplot" name="steering_plot"
         args="/steering/state/angle"/>

@@ -8,9 +8,18 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/art_run</url>
+
+  <!-- comment out until package added to utexas-art-ros-pkg:
+  <depend package="android_link" />
+  -->
   <depend package="applanix"/>
-  <depend package="art_servo"/>
+  <depend package="art_common"/>
+  <depend package="art_image" />
+  <depend package="art_map"/>
   <depend package="art_nav"/>
+  <depend package="art_servo"/>
+  <depend package="joy" />
+  <depend package="rosbag" />
   <depend package="rxtools"/>
   <depend package="simulator_art"/>
   <depend package="velodyne_common"/>

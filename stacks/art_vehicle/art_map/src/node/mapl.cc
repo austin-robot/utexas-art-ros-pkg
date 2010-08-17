@@ -88,6 +88,10 @@ private:
   ros::Publisher roadmap_local_;        // local road map publisher
   ros::Publisher mapmarks_;             // rviz visualization markers
 
+  // this vector is only used while publishMapMarks() is running
+  // we define it here to avoid memory allocation on every cycle
+  visualization_msgs::MarkerArray marks_msg_;
+
   Graph *graph_;                  ///< graph object (used by MapLanes)
   MapLanes* map_;                 ///< MapLanes object instance
   bool initial_position_;         ///< true if initial odometry received
@@ -178,7 +182,6 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
                                      ros::Duration life,
                                      const art_map::ArtLanes &lane_data)
 {
-  visualization_msgs::MarkerArray msg;
   geometry_msgs::Vector3 scale;         // map marker scale
   scale.x = 1.0;
   scale.y = 1.0;
@@ -190,6 +193,7 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
   color.a = 1.0;
   ros::Time now = ros::Time::now();
 
+  marks_msg_.markers.clear();
   for (uint32_t i = 0; i < lane_data.polygons.size(); ++i)
     {
       visualization_msgs::Marker mark;
@@ -211,7 +215,7 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
       mark.lifetime = life;
 
       // Add this polygon to the vector of markers to publish
-      msg.markers.push_back(mark);
+      marks_msg_.markers.push_back(mark);
 
       if (!lane_data.polygons[i].is_transition)
         {
@@ -248,7 +252,7 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
           //mark.lifetime = life;
 
           // Add these boundaries to the vector of markers to publish
-          msg.markers.push_back(mark);
+          marks_msg_.markers.push_back(mark);
         }
 
       if (lane_data.polygons[i].contains_way)
@@ -288,13 +292,12 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
               wp.color.b = 0.0;
             }
 
-
           // Add this way-point to the vector of markers to publish
-          msg.markers.push_back(wp);
+          marks_msg_.markers.push_back(wp);
         }
     }
 
-  pub.publish(msg);
+  pub.publish(marks_msg_);
 }
 
 /** Publish global road map */

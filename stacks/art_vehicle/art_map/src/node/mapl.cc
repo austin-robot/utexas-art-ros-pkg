@@ -182,6 +182,9 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
                                      ros::Duration life,
                                      const art_map::ArtLanes &lane_data)
 {
+  if (pub.getNumSubscribers() == 0)     // no subscribers?
+    return;
+
   geometry_msgs::Vector3 scale;         // map marker scale
   scale.x = 1.0;
   scale.y = 1.0;

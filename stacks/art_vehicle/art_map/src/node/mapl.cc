@@ -185,15 +185,11 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
   if (pub.getNumSubscribers() == 0)     // no subscribers?
     return;
 
-  geometry_msgs::Vector3 scale;         // map marker scale
-  scale.x = 1.0;
-  scale.y = 1.0;
-  scale.z = 1.0;
-  std_msgs::ColorRGBA color;            // map marker color
-  color.r = 0.0;
-  color.g = 1.0;
-  color.b = 0.0;
-  color.a = 1.0;
+  std_msgs::ColorRGBA green;            // green map markers
+  green.r = 0.0;
+  green.g = 1.0;
+  green.b = 0.0;
+  green.a = 1.0;
   ros::Time now = ros::Time::now();
 
   marks_msg_.markers.clear();
@@ -213,8 +209,10 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
       mark.pose.orientation = 
         tf::createQuaternionMsgFromYaw(lane_data.polygons[i].heading);
 
-      mark.scale = scale;
-      mark.color = color;
+      mark.scale.x = 1.0;
+      mark.scale.y = 1.0;
+      mark.scale.z = 1.0;
+      mark.color = green;
       mark.lifetime = life;
 
       // Add this polygon to the vector of markers to publish
@@ -222,6 +220,10 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
 
       if (!lane_data.polygons[i].is_transition)
         {
+          visualization_msgs::Marker lane;
+          lane.header.stamp = now;
+          lane.header.frame_id = frame_id_;
+
           // publish lane boundaries (experimental)
           //
           // It is almost certainly more efficient for rviz rendering
@@ -229,13 +231,10 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
           // lane as two strips, then publish them as separate
           // LINE_STRIP markers. This LINE_LIST version is an
           // experiment to see how it looks (pretty good).
-          mark.ns = "lanes_" + map_name ;
-          mark.id = (int32_t) i;
-          mark.type = visualization_msgs::Marker::LINE_LIST;
-          mark.action = visualization_msgs::Marker::ADD;
-
-          // reset Pose in the marker
-          mark.pose = geometry_msgs::Pose();
+          lane.ns = "lanes_" + map_name ;
+          lane.id = (int32_t) i;
+          lane.type = visualization_msgs::Marker::LINE_LIST;
+          lane.action = visualization_msgs::Marker::ADD;
 
           // define lane boundary points: first left (0, 1), then right (2, 3)
           for (uint32_t j = 0;
@@ -247,15 +246,15 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
               p.x = lane_data.polygons[i].poly.points[j].x;
               p.y = lane_data.polygons[i].poly.points[j].y;
               p.z = lane_data.polygons[i].poly.points[j].z;
-              mark.points.push_back(p);
+              lane.points.push_back(p);
             }
 
-          mark.scale.x = 0.1;               // 10cm lane boundaries
-          //mark.color = color;
-          //mark.lifetime = life;
+          lane.scale.x = 0.1;               // 10cm lane boundaries
+          lane.color = green;
+          lane.lifetime = life;
 
           // Add these boundaries to the vector of markers to publish
-          marks_msg_.markers.push_back(mark);
+          marks_msg_.markers.push_back(lane);
         }
 
       if (lane_data.polygons[i].contains_way)

@@ -37,9 +37,8 @@ namespace
 {
   /// These are *static* transforms, so it's safe to post-date them
   //  into the future.  Otherwise, some transform listeners will see
-  //  old data at times. The extra 10% duration ensures an overlap
-  //  between successive messages.
-  ros::Duration transform_post_date_(1.1/HERTZ_VEHICLE_TF);
+  //  old data at times.
+  ros::Duration transform_post_date_(1.0/HERTZ_VEHICLE_TF);
 
   // class for generating vehicle-relative frame IDs
   ArtFrames::VehicleRelative vr_;

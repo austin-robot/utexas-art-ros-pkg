@@ -2,24 +2,29 @@
 <!-- launch file for pilot with stage simulation -->
 
 <launch>
+  <!-- define use_sim_time first to avoid races as nodes start up -->
+  <param name="use_sim_time" value="true" />
+
   <!-- stage simulator for ART vehicle -->
   <node pkg="simulator_art" type="artstage" name="artstage"
         args="$(find simulator_art)/world/$(optenv WORLD prc_large).world">
     <rosparam
        file="$(find simulator_art)/world/$(optenv WORLD prc_large).yaml"/>
   </node>
+
+  <!-- static transforms (including identity tf for /map to /odom) -->
   <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
+  <node pkg="tf" type="static_transform_publisher" name="odom_is_map"
+        args="0 0 0 0 0 0 /map /odom 1000" />
 
   <!-- start maplanes node with corresponding RNDF -->
   <node pkg="art_map" type="maplanes" name="maplanes">
     <param name="rndf"
            value="$(find art_map)/rndf/$(optenv WORLD prc_large).rndf"/>
-    <param name="frame_id" value="/odom" />
+    <param name="frame_id" value="/map" />
   </node>
 
-  <!-- Launch pilot with null servo actuators.  NOTE: this comes
-       *after* artstage has established simulated /clock time.
-  -->
+  <!-- Launch pilot with null servo actuators. -->
   <include file="$(find art_run)/launch/pilot_null.launch"/>
 
 </launch>

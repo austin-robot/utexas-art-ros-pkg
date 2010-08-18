@@ -29,7 +29,7 @@
 #define HERTZ_SICKFAST		10
 #define HERTZ_STEERING		20
 #define HERTZ_THROTTLE		20
-#define HERTZ_VEHICLE_TF	0.1
+#define HERTZ_VEHICLE_TF	5
 #define HERTZ_VELODYNE_PROC	10
 
 #endif // _HERTZ_H

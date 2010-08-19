@@ -140,10 +140,10 @@ art_nav::Order CmdrFSM::control(const art_nav::NavigatorState *_navstate)
   // do state transition
   prev = state;
   state = xp->next;
-  if ((state != prev.Value()) && verbose)
-    logc(5) << "Commander state changing from " << prev.Name()
-	    << " to " << state.Name()
-	    << ", event = " << event.Name() << "\n";
+  if ((state != prev.Value()))
+    ROS_DEBUG_STREAM("Commander state changing from " << prev.Name()
+                     << " to " << state.Name()
+                     << ", event = " << event.Name());
 
   // perform transition action, returning next order
   action_t action = xp->action;
@@ -173,7 +173,7 @@ CmdrEvent CmdrFSM::current_event()
       if (current_way == cmdr->goal.id)
 	cmdr->next_checkpoint();
       // needed to get from Init to Road state
-      logc(5) << "Calling EnterLane event"<<"\n";
+      ROS_INFO("Calling EnterLane event");
       return CmdrEvent::EnterLane;
     }
   
@@ -198,8 +198,8 @@ CmdrEvent CmdrFSM::current_event()
 	  cmdr->graph->get_node_by_index(first_edge.startnode_index);
 	if (current_node == NULL)
 	  {
-	    logc(5) << "node " << first_edge.startnode_index
-		    << " is not in the RNDF graph\n";
+	    ROS_INFO_STREAM("node " << first_edge.startnode_index
+                            << " is not in the RNDF graph");
 	    return CmdrEvent::Fail;
 	  }
 	
@@ -223,8 +223,8 @@ CmdrEvent CmdrFSM::current_event()
 	    cmdr->graph->get_node_by_index(first_edge.endnode_index);
 	  if (current_node == NULL)
 	    {
-	      logc(5) << "node " << first_edge.endnode_index
-		      << " is not in the RNDF graph\n";
+	      ROS_INFO_STREAM("node " << first_edge.endnode_index
+                              << " is not in the RNDF graph");
 	      return CmdrEvent::Fail;
 	    }
 	  
@@ -238,9 +238,9 @@ CmdrEvent CmdrFSM::current_event()
 	    new_goal2=true;
 	}	
 
-      logc(3) << "current waypoint changed from "
-	      << old_way.name().str
-	      << " to " << current_way.name().str << "\n";
+      ROS_INFO_STREAM("current waypoint changed from "
+                      << old_way.name().str
+                      << " to " << current_way.name().str);
     }
   
   bool finished=false;
@@ -278,8 +278,7 @@ CmdrEvent CmdrFSM::current_event()
     }
   
   // log event selected and input states
-  if (verbose)
-    logc(5) << "Current event = " << event.Name() << "\n";
+  ROS_DEBUG_STREAM("Current event = " << event.Name());
   
   return event;
 }
@@ -293,14 +292,14 @@ CmdrEvent CmdrFSM::current_event()
 
 art_nav::Order CmdrFSM::ActionError(CmdrEvent event)
 {
-  logc(5) << "Invalid Commander event " << event.Name()
-	  << " in state " << prev.Name() << "\n";
+  ROS_INFO_STREAM("Invalid Commander event " << event.Name()
+                  << " in state " << prev.Name());
   return ActionFail(event);
 }
 
 art_nav::Order CmdrFSM::ActionFail(CmdrEvent event)
 {
-  logc(5) << "ERROR: mission failure!\n";
+  ROS_INFO("ERROR: mission failure!");
   art_nav::Order abort_order;
   abort_order.behavior.value = art_nav::Behavior::Abort;
   return abort_order;
@@ -309,7 +308,7 @@ art_nav::Order CmdrFSM::ActionFail(CmdrEvent event)
 
 art_nav::Order CmdrFSM::ActionWait(CmdrEvent event)
 {
-  logc(5) << "No replan.  Just wait it out.\n";
+  ROS_INFO("No replan.  Just wait it out.");
   return cmdr->prepare_order(art_nav::Behavior::Go);
 }
 
@@ -341,13 +340,13 @@ art_nav::Order CmdrFSM::ActionInRoad(CmdrEvent event)
 
 art_nav::Order CmdrFSM::ActionToDone(CmdrEvent event)
 {
-  logc(5) << "Mission completed!\n";
+  ROS_INFO("Mission completed!");
   return ActionInDone(event);
 }
 
 art_nav::Order CmdrFSM::ActionToRoad(CmdrEvent event)
 {
-  logc(5) << "On the road.\n";
+  ROS_INFO("On the road.");
   return ActionInRoad(event);
 }
 
@@ -355,7 +354,7 @@ art_nav::Order CmdrFSM::ActionToRoad(CmdrEvent event)
 
 art_nav::Order CmdrFSM::BlockedInRoad(CmdrEvent event)
 {
-  logc(5) << "Road blocked, making a new plan.\n";
+  ROS_INFO("Road blocked, making a new plan.");
 
   cmdr->blockages->add_block(navstate.replan_waypt);
 
@@ -367,7 +366,7 @@ art_nav::Order CmdrFSM::BlockedInRoad(CmdrEvent event)
 
 art_nav::Order CmdrFSM::ReplanInRoad(CmdrEvent event)
 {
-  logc(5) << "Making new plan.\n";
+  ROS_INFO("Making new plan.");
   
   navstate.last_waypt=navstate.replan_waypt;
 
@@ -379,7 +378,7 @@ art_nav::Order CmdrFSM::ReplanInRoad(CmdrEvent event)
 
 art_nav::Order CmdrFSM::InitToRoad(CmdrEvent event)
 {
-  logc(5) << "On the road, making initial plan.\n";
+  ROS_INFO("On the road, making initial plan.");
   
   if (cmdr->replan_route() == false)
     return ActionFail(event);

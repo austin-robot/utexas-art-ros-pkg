@@ -24,7 +24,6 @@
 #include <art/epsilon.h>
 #include <art/conversions.h>
 #include <art_map/zones.h>
-#include <art_nav/Logging.h>
 
 class Path
 {
@@ -155,17 +154,17 @@ public:
 
   void print(const Graph& graph)
   {
-    logc(5) << "===============" << "\n";
+    ROS_INFO("===============");
     for (unsigned i = 0; i < path.size(); i++)
       {
 	if (i==0)
-	  logc(5) << "route [" << i << "] is "
-		  << graph.get_node_by_index(path.at(i).startnode_index)->id.name().str << "\n";
-	logc(5) << "route [" << i+1 << "] is "
-		<< graph.get_node_by_index(path.at(i).endnode_index)->id.name().str << "\n";
-	
+	  ROS_INFO_STREAM("route [" << i << "] is "
+                          << graph.get_node_by_index(path.at(i).startnode_index)->id.name().str);
+
+	ROS_INFO_STREAM("route [" << i+1 << "] is "
+                        << graph.get_node_by_index(path.at(i).endnode_index)->id.name().str);
       }
-    logc(5) << "================" << "\n";
+    ROS_INFO("================");
   }
 
 

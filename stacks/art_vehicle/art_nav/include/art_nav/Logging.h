@@ -9,6 +9,8 @@
 #include <fstream>
 #include <iostream>
 
+#warning DEPRECATED: use ROS_INFO(), ROS_DEBUG() instead.
+
 ///@brief Logging class to give message notices
 ///
 ///@par Usage:

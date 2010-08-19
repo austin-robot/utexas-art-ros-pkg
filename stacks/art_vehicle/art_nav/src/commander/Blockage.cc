@@ -1,6 +1,4 @@
 #include "Blockage.h"
-#include <art_nav/Logging.h>
-
 
 void Blockages::pop_oldest()
 {
@@ -42,7 +40,7 @@ void Blockages::pop_block(uint index){
   
   block oblock=blocks.at(index);
   
-  logc(3) << "Unblocking block #"<<index<<"\n";
+  ROS_INFO_STREAM("Unblocking block #" << index);
 
   for (uint i=0; i< oblock.added_blocks.size(); i++)
     for (uint j=0; j< b_graph->edges_size; j++)
@@ -51,7 +49,10 @@ void Blockages::pop_block(uint index){
 	  (b_graph->edges.at(j).endnode_index ==
 	   oblock.added_blocks.at(i).endnode_index))
 	{
-	  logc(3) << "Unblocking edge between "<<b_graph->nodes[b_graph->edges.at(j).startnode_index].id.name().str<<" and "<<b_graph->nodes[b_graph->edges.at(j).endnode_index].id.name().str<<"\n";
+	  ROS_INFO_STREAM("Unblocking edge between "
+                          <<b_graph->nodes[b_graph->edges.at(j).startnode_index].id.name().str
+                          <<" and "
+                          <<b_graph->nodes[b_graph->edges.at(j).endnode_index].id.name().str);
 	  b_graph->edges.at(j).blocked=false;
 	  break;
 	}
@@ -63,7 +64,10 @@ void Blockages::pop_block(uint index){
 	  (b_graph->edges.at(j).endnode_index ==
 	   oblock.added_edges.at(i).endnode_index))
 	{
-	  logc(3) << "Deleting edge between "<<b_graph->nodes[b_graph->edges.at(j).startnode_index].id.name().str<<" and "<<b_graph->nodes[b_graph->edges.at(j).endnode_index].id.name().str<<"\n";
+	  ROS_INFO_STREAM("Deleting edge between "
+                          <<b_graph->nodes[b_graph->edges.at(j).startnode_index].id.name().str
+                          <<" and "
+                          <<b_graph->nodes[b_graph->edges.at(j).endnode_index].id.name().str);
 	  b_graph->edges.erase(b_graph->edges.begin()+j);
 	  b_graph->edges_size--;
 	  break;
@@ -116,14 +120,20 @@ void Blockages::add_block(ElementID other_lane_way)
 	    {
 	      b_graph->edges.at(i).blocked=true;
 	      new_block.added_blocks.push_back(b_graph->edges[i]);
-	      logc(3) << "Blocking edge between "<<b_graph->nodes[b_graph->edges.at(i).startnode_index].id.name().str<<" and "<<b_graph->nodes[b_graph->edges.at(i).endnode_index].id.name().str<<"\n";
+	      ROS_INFO_STREAM("Blocking edge between "
+                              <<b_graph->nodes[b_graph->edges.at(i).startnode_index].id.name().str
+                              <<" and "
+                              <<b_graph->nodes[b_graph->edges.at(i).endnode_index].id.name().str);
 	      if (b_graph->edges.at(i).startnode_index == other_lane_other_side_index)
 		exists_other_lane_connection=true;
 	    }
 	  if ((b_graph->edges.at(i).endnode_index == e1.endnode_index) &&
 	      (b_graph->edges.at(i).startnode_index == e1.startnode_index))
 	    {
-	      logc(3) << "Blocking edge between "<<b_graph->nodes[e1.startnode_index].id.name().str<<" and "<<b_graph->nodes[e1.endnode_index].id.name().str<<"\n";
+	      ROS_INFO_STREAM("Blocking edge between "
+                              <<b_graph->nodes[e1.startnode_index].id.name().str
+                              <<" and "
+                              <<b_graph->nodes[e1.endnode_index].id.name().str);
 	      b_graph->edges.at(i).blocked=true;
 	      new_block.added_blocks.push_back(b_graph->edges[i]);
 	    }
@@ -137,8 +147,10 @@ void Blockages::add_block(ElementID other_lane_way)
   new_edge.speed_max=DEFAULT_ZONE_SPEED;
   new_edge.blocked=false;
   
-  logc(3) << "Adding edge between "<<b_graph->nodes[new_edge.startnode_index].id.name().str<<" and ";
-  logc(3)<<b_graph->nodes[new_edge.endnode_index].id.name().str<<"\n";
+  ROS_INFO_STREAM("Adding edge between "
+                  <<b_graph->nodes[new_edge.startnode_index].id.name().str
+                  <<" and "
+                  <<b_graph->nodes[new_edge.endnode_index].id.name().str);
 
   new_block.added_edges.push_back(new_edge);
   b_graph->edges.push_back(new_edge);
@@ -149,7 +161,10 @@ void Blockages::add_block(ElementID other_lane_way)
       new_edge.startnode_index=other_lane_other_side_index;
       new_edge.endnode_index=e1.endnode_index;
       new_block.added_edges.push_back(new_edge);
-      logc(3) << "Adding edge between "<<b_graph->nodes[new_edge.startnode_index].id.name().str<<" and "<<b_graph->nodes[new_edge.endnode_index].id.name().str<<"\n";
+      ROS_INFO_STREAM("Adding edge between "
+                      <<b_graph->nodes[new_edge.startnode_index].id.name().str
+                      <<" and "
+                      <<b_graph->nodes[new_edge.endnode_index].id.name().str);
       b_graph->edges.push_back(new_edge);
       b_graph->edges_size++;
     }

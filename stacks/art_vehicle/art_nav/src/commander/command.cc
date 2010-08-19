@@ -111,7 +111,7 @@ bool Commander::next_checkpoint(void)
 //
 // on entry: route contains one or more waypoints starting at current one
 //
-art_nav::Order Commander::prepare_order(uint16_t behavior)
+art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
 {
   order.behavior.value = behavior;
   ROS_INFO_STREAM("order.behavior = " << NavBehavior(order.behavior).Name());

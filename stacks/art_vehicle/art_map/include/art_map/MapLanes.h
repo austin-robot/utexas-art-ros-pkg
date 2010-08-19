@@ -32,9 +32,9 @@
 #include <art_map/Graph.h>
 #include <art_map/PolyOps.h>
 #include <art_map/RNDF.h>
-#include <art_map/SmoothCurve.hh>
+#include <art_map/SmoothCurve.h>
 #include <art_map/types.h>
-#include <art_map/zones.hh>
+#include <art_map/zones.h>
 
 #define MIN_POLY_SIZE 2.5
 

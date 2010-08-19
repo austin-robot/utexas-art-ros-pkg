@@ -32,7 +32,7 @@
 #include <art_map/ArtLanes.h>
 #include <art_map/euclidean_distance.h>
 #include <art_map/MapLanes.h>
-#include <art_map/zones.hh>
+#include <art_map/zones.h>
 #include <art_map/ZoneOps.h>
 
 /** @file

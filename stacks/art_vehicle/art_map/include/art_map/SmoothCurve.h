@@ -13,8 +13,8 @@
 
  */
 
-#ifndef __SMOOTHCURVE_HH__
-#define __SMOOTHCURVE_HH__
+#ifndef __SMOOTHCURVE_H__
+#define __SMOOTHCURVE_H__
 
 #include <vector>
 

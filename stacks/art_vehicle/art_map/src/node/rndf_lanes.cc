@@ -29,7 +29,7 @@
 
 #include <art_map/euclidean_distance.h>
 #include <art_map/MapLanes.h>
-#include <art_map/zones.hh>
+#include <art_map/zones.h>
 
 //#include <art/lanes.h>
 //#include <art/ZoneOps.h>

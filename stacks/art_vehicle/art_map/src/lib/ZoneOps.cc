@@ -8,7 +8,6 @@
 
 #include <art_map/ZoneOps.h>
 #include <art_map/RNDF.h>
-#include <art_map/zones.hh>
 #include <art_map/types.h>
 #include <art_map/RNDF.h>
 #include <art_map/coordinates.h>

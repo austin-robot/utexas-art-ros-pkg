@@ -4,7 +4,7 @@
 **/
 //////////////////////////////////////////////////////////////////////
 
-#include <art_map/rotate_translate_transform.hh>
+#include <art_map/rotate_translate_transform.h>
 #include <math.h>
 
 /**

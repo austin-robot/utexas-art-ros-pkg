@@ -4,9 +4,9 @@
 #include <vector>
 
 #include <art_map/coordinates.h>
-#include <art_map/zones.hh>
-#include <art_map/RNDF.h>
 #include <art_map/Graph.h>
+#include <art_map/RNDF.h>
+#include <art_map/zones.h>
 
 //#include <art/evg-thin.hh>
 //#include <art/datatypes.hh>

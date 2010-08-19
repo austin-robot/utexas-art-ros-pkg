@@ -21,10 +21,9 @@
 
 #include <art_map/gaussian.h>
 #include <art_map/MapLanes.h>
-#include <art_map/SmoothCurve.hh>
 #include <art_map/euclidean_distance.h>
 
-#include <art_map/rotate_translate_transform.hh>
+#include <art_map/rotate_translate_transform.h>
 
 // intial_latlong specifies whether rndf waypoints and initial
 // coordinates are specified in lat/long or map_XY. The boolean

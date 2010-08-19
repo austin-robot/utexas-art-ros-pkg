@@ -4,8 +4,8 @@ Written and maintained by Patrick Beeson (pbeeson@cs.utexas.edu)
 **/
 //////////////////////////////////////////////////////////////////////
 
-#ifndef rotate_translate_transform_hh
-#define rotate_translate_transform_hh
+#ifndef rotate_translate_transform_h
+#define rotate_translate_transform_h
 
 
 // TODO: move posetype to <art/types.hh> and replace MapPose with it

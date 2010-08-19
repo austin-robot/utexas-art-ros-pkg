@@ -1,4 +1,4 @@
-#include <art_map/SmoothCurve.hh>
+#include <art_map/SmoothCurve.h>
 
 
 SmoothCurve::SmoothCurve(const std::vector<Point2f>& ctrl, 

@@ -14,8 +14,8 @@
 
  */
 
-#ifndef __ZONES_HH__
-#define __ZONES_HH__
+#ifndef __ZONES_H__
+#define __ZONES_H__
 
 #define PLAYER_OPAQUE_MAX_SIZE            1048576
 
@@ -72,4 +72,4 @@ typedef struct zones_msg {
 
 #endif
 
-#endif /* __ZONES_HH__ */
+#endif /* __ZONES_H__ */

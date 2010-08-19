@@ -118,10 +118,10 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
   ROS_INFO_STREAM("goal = "<<goal.id.name().str);
 
   // include next two checkpoints for monitoring purposes
-  order.chkpt[0] = goal;
-  order.chkpt[1] = goal2;
+  order.chkpt[0] = goal.toWayPoint();
+  order.chkpt[1] = goal2.toWayPoint();
 
-  for (unsigned i = 0; i < N_ORDER_WAYPTS; ++i)
+  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
     {
       WayPointEdge curr_edge;
       
@@ -132,7 +132,7 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
 	
 	if (curr_edge.distance<0) {
 	  ROS_FATAL("Route is completely empty..");
-	  order.behavior = NavBehavior::Abort;
+	  order.behavior.value = NavBehavior::Abort;
 	  return order;
 	}
 
@@ -146,7 +146,7 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
 	
 	if (curr_edge.distance<0) {
 	  ROS_FATAL("Route is completely empty..");
-	  order.behavior = NavBehavior::Abort;
+	  order.behavior.value = NavBehavior::Abort;
 	  return order;
 	}
 	
@@ -159,24 +159,24 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
 	{
 	  ROS_WARN_STREAM("plan waypt (id: " << next_node->id.name().str
                           << ") is not in the RNDF graph");
-	  order.behavior = NavBehavior::Abort;
+	  order.behavior.value = NavBehavior::Abort;
 	  return order;
 	}
      
-      order.waypt[i]=*next_node;
+      order.waypt[i] = next_node->toWayPoint();
 
-      if (order.waypt[i].id == goal.id)
+      if (ElementID(order.waypt[i].id) == goal.id)
 	{
 	  // this is a goalpoint
 	  order.waypt[i].is_goal = true;
-	  if (order.waypt[i].id == goal2.id) // last goalpoint?
+	  if (ElementID(order.waypt[i].id) == goal2.id) // last goalpoint?
 	    order.waypt[i].is_stop = true; // tell navigator to stop there
 	}
       
       ROS_INFO_STREAM("waypt[" << i << "] = "
-                      << order.waypt[i].id.name().str
-                      << " (" << order.waypt[i].map.x
-                      << ", " << order.waypt[i].map.y
+                      << ElementID(order.waypt[i].id).name().str
+                      << " (" << order.waypt[i].mapxy.x
+                      << ", " << order.waypt[i].mapxy.y
                       << ") E" << order.waypt[i].is_entry
                       << ", G" << order.waypt[i].is_goal
                       << ", P" << order.waypt[i].is_spot
@@ -196,7 +196,7 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
   order.replan_num=replan_num;
   order.next_uturn=-1;
 
-  for (unsigned i = 0; i < N_ORDER_WAYPTS-1; ++i)
+  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS-1; ++i)
     if (order.waypt[i].id.seg == order.waypt[i+1].id.seg
 	&& order.waypt[i].id.lane != order.waypt[i+1].id.lane &&
 	!order.waypt[i].is_lane_change)
@@ -223,7 +223,7 @@ bool Commander::replan_route()
   if (current == NULL)
     {
       ROS_WARN_STREAM("last_waypt "
-                      << ElementID(navstate->last_waypt.name().str)
+                      << ElementID(navstate->last_waypt).name().str
                       << " is not in the RNDF graph");
       return false;
     }

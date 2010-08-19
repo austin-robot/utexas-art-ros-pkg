@@ -21,6 +21,7 @@
 #include <art/epsilon.h>
 #include <art_map/coordinates.h>
 #include <art_map/MapID.h>
+#include <art_map/WayPoint.h>
 
 /** @brief global ART types definitions. */
 
@@ -61,6 +62,16 @@ public:
     seg = mid.seg;
     lane = mid.lane;
     pt = mid.pt;
+  };
+
+  /** Convert ElementID to MapID message. */
+  art_map::MapID toMapID()
+  {
+    art_map::MapID mid;
+    mid.seg = this->seg;
+    mid.lane = this->lane;
+    mid.pt = this->pt;
+    return mid;
   };
 
   waypt_name_t lane_name(void) const
@@ -151,33 +162,59 @@ public:
   int checkpoint_id;			//< checkpoint ID or zero
   float lane_width;
   
-
   // constructor
   WayPointNode(){ clear();};
   WayPointNode(const MapXY &point) : map(point) { clear();};
-  void clear(){
-    is_entry = is_exit = is_goal = is_spot = is_stop = is_perimeter = is_lane_change = false;
+
+  // public methods
+  void clear()
+  {
+    is_entry = is_exit = is_goal = is_spot = is_stop = false;
+    is_perimeter = is_lane_change = false;
     checkpoint_id = index = 0;
     lane_width=0;
     id = ElementID();
   };
-  bool operator<(const WayPointNode &that){
+
+  bool operator<(const WayPointNode &that)
+  {
     return (this->id < that.id);
   };
-  bool operator==(const WayPointNode &that){
-  	return (
-		this->ll == that.ll &&
-		this->map == that.map &&
-		this->id == that.id &&
-		this->index == that.index &&
-		this->lane_width == that.lane_width &&
-		this->is_entry == that.is_entry &&
-		this->is_exit == that.is_exit &&
-		this->is_goal == that.is_goal &&
-		this->is_spot == that.is_spot &&
-		this->is_perimeter == that.is_perimeter &&
-		this->checkpoint_id == that.checkpoint_id		
-		);
+
+  bool operator==(const WayPointNode &that)
+  {
+    return (this->ll == that.ll &&
+            this->map == that.map &&
+            this->id == that.id &&
+            this->index == that.index &&
+            this->lane_width == that.lane_width &&
+            this->is_entry == that.is_entry &&
+            this->is_exit == that.is_exit &&
+            this->is_goal == that.is_goal &&
+            this->is_spot == that.is_spot &&
+            this->is_perimeter == that.is_perimeter &&
+            this->checkpoint_id == that.checkpoint_id);
+  };
+
+  /** Convert WayPointNode to WayPoint message. */
+  art_map::WayPoint toWayPoint(void)
+  {
+    art_map::WayPoint wp;
+    wp.latitude = this->ll.latitude;
+    wp.longitude = this->ll.longitude;
+    wp.mapxy.x = this->map.x;
+    wp.mapxy.y = this->map.y;
+    wp.id = this->id.toMapID();
+    wp.index = this->index;
+    wp.lane_width = this->lane_width;
+    wp.is_entry = this->is_entry;
+    wp.is_exit = this->is_exit;
+    wp.is_goal = this->is_goal;
+    wp.is_spot = this->is_spot;
+    wp.is_perimeter = this->is_perimeter;
+    wp.checkpoint_id = this->checkpoint_id;
+    wp.lane_width = this->lane_width;
+    return wp;
   };
 
   
@@ -214,7 +251,8 @@ public:
     speed_max = speed_min = 0;
     is_implicit=false;
   };
-  bool operator==(const WayPointEdge &that){
+  bool operator==(const WayPointEdge &that)
+  {
   	return (this->startnode_index == that.startnode_index &&
 		this->endnode_index == that.endnode_index &&
 		this->distance == that.distance &&

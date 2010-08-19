@@ -1,8 +1,8 @@
 # commander order for the navigator
 # $Id$
 
-uint32 N_ORDER_WAYPTS = 5		# number of way-points in order
-uint32 N_ORDER_CHKPTS = 2		# number of checkpoints in order
+uint32 N_WAYPTS = 5     		# number of way-points in order
+uint32 N_CHKPTS = 2             	# number of checkpoints in order
 
 Behavior behavior			# requested behavior
 art_map/WayPoint[5] waypt       	# way-point array

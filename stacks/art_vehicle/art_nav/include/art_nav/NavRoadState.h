@@ -18,7 +18,7 @@
 #ifndef __NAV_ROAD_STATE_H__
 #define __NAV_ROAD_STATE_H__
 
-#include <art/FSMstate.h>
+#include <art_nav/FSMstate.h>
 
 class NavRoadState: FSMstate
 {

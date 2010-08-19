@@ -13,3 +13,5 @@ uint16 WaitPass  = 8
 uint16 WaitStop  = 9
 uint16 Zone      = 10
 uint16 N_states  = 11
+
+uint16 state

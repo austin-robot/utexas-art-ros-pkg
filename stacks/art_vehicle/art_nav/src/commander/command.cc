@@ -1,4 +1,7 @@
+// $Id$
+
 #include <art_nav/GraphSearch.h>
+#include <art_nav/NavEstopState.h>
 
 #include "command.h"
 #include "FSM.h"
@@ -43,7 +46,7 @@ Commander::~Commander()
 //
 // input: current Navigator state
 // output: next Navigator order, finished when behavior is DONE.
-Order Commander::command(const nav_state_msg_t &_navstate)
+art_nav::Order Commander::command(const art_nav::NavigatorState &_navstate)
 {
   navstate = &_navstate;
   
@@ -51,18 +54,18 @@ Order Commander::command(const nav_state_msg_t &_navstate)
   order.min_speed = 0.0;
 
   // handle initial startup sequence
-  if (navstate->estop_state != NavEstopState::Run)
+  if (NavEstopState(navstate->estop) != NavEstopState::Run)
     {
       // do nothing if Navigator not running
-      logc(5) << "Waiting for Navigator to enter Run state.\n";
-      order.behavior = NavBehavior::None;
+      ROS_DEBUG("Waiting for Navigator to enter Run state.");
+      order.behavior.value = NavBehavior::None;
       return order;
     }
-  else if (navstate->last_waypt == ElementID())
+  else if (ElementID(navstate->last_waypt) == ElementID())
     {
       // initialize navigator if last_waypt not set yet
-      logc(5) << "Waiting for Navigator to find initial waypoint.\n";
-      order.behavior = NavBehavior::Initialize;
+      ROS_DEBUG("Waiting for Navigator to find initial waypoint.");
+      order.behavior.value = NavBehavior::Initialize;
       return order;
     }
 
@@ -108,11 +111,11 @@ bool Commander::next_checkpoint(void)
 //
 // on entry: route contains one or more waypoints starting at current one
 //
-Order Commander::prepare_order(NavBehavior::nav_behavior_t behavior)
+art_nav::Order Commander::prepare_order(uint16_t behavior)
 {
-  order.behavior = behavior;
-  logc(0) << "order.behavior = " << order.behavior.Name() << "\n";
-  logc(3) << "goal = "<<goal.id.name().str<<"\n";
+  order.behavior.value = behavior;
+  ROS_INFO_STREAM("order.behavior = " << NavBehavior(order.behavior).Name());
+  ROS_INFO_STREAM("goal = "<<goal.id.name().str);
 
   // include next two checkpoints for monitoring purposes
   order.chkpt[0] = goal;
@@ -128,7 +131,7 @@ Order Commander::prepare_order(NavBehavior::nav_behavior_t behavior)
 	curr_edge=route->at(0);
 	
 	if (curr_edge.distance<0) {
-	  logc(5) << "Route is completely empty..\n";
+	  ROS_FATAL("Route is completely empty..");
 	  order.behavior = NavBehavior::Abort;
 	  return order;
 	}
@@ -142,7 +145,7 @@ Order Commander::prepare_order(NavBehavior::nav_behavior_t behavior)
 	curr_edge=route->at(i-1);
 	
 	if (curr_edge.distance<0) {
-	  logc(5) << "Route is completely empty..\n";
+	  ROS_FATAL("Route is completely empty..");
 	  order.behavior = NavBehavior::Abort;
 	  return order;
 	}
@@ -154,8 +157,8 @@ Order Commander::prepare_order(NavBehavior::nav_behavior_t behavior)
       
       if (next_node==NULL)
 	{
-	  logc(5) << "plan waypt (id: " << next_node->id.name().str
-		  << ") is not in the RNDF graph\n";
+	  ROS_WARN_STREAM("plan waypt (id: " << next_node->id.name().str
+                          << ") is not in the RNDF graph");
 	  order.behavior = NavBehavior::Abort;
 	  return order;
 	}
@@ -170,17 +173,16 @@ Order Commander::prepare_order(NavBehavior::nav_behavior_t behavior)
 	    order.waypt[i].is_stop = true; // tell navigator to stop there
 	}
       
-      logc(3) << "waypt[" << i << "] = "
-	      << order.waypt[i].id.name().str
-	      << " (" << order.waypt[i].map.x
-	      << ", " << order.waypt[i].map.y
-	      << ") E" << order.waypt[i].is_entry
-	      << ", G" << order.waypt[i].is_goal
-	      << ", P" << order.waypt[i].is_spot
-	      << ", S" << order.waypt[i].is_stop
-	      << ", X" << order.waypt[i].is_exit
-	      << ", Z" << order.waypt[i].is_perimeter
-	      << "\n";
+      ROS_INFO_STREAM("waypt[" << i << "] = "
+                      << order.waypt[i].id.name().str
+                      << " (" << order.waypt[i].map.x
+                      << ", " << order.waypt[i].map.y
+                      << ") E" << order.waypt[i].is_entry
+                      << ", G" << order.waypt[i].is_goal
+                      << ", P" << order.waypt[i].is_spot
+                      << ", S" << order.waypt[i].is_stop
+                      << ", X" << order.waypt[i].is_exit
+                      << ", Z" << order.waypt[i].is_perimeter);
     }
   
   for (uint i=0; i<zones.size(); i++)
@@ -188,8 +190,8 @@ Order Commander::prepare_order(NavBehavior::nav_behavior_t behavior)
 	zones[i].zone_id==order.waypt[1].id.seg)
       order.max_speed=fmin(speedlimit,zones[i].speed_limit);
 
-  logc(3) << "Max speed = " << order.max_speed << " m/s \n";
-  logc(0) << "Min speed = " << order.min_speed << " m/s \n";
+  ROS_INFO_STREAM("Max speed = " << order.max_speed << " m/s");
+  ROS_INFO_STREAM("Min speed = " << order.min_speed << " m/s");
 
   order.replan_num=replan_num;
   order.next_uturn=-1;
@@ -203,9 +205,8 @@ Order Commander::prepare_order(NavBehavior::nav_behavior_t behavior)
 	break;
       }
 
-  logc(3) << "Next uturn = " << order.next_uturn << "\n";
-
-  logc(3) << "Replan num = " << order.replan_num << "\n";
+  ROS_INFO_STREAM("Next uturn = " << order.next_uturn);
+  ROS_INFO_STREAM("Replan num = " << order.replan_num);
   
   return order;
 }
@@ -221,8 +222,9 @@ bool Commander::replan_route()
   current= graph->get_node_by_id(navstate->last_waypt);
   if (current == NULL)
     {
-      logc(5) << "last_waypt " << navstate->last_waypt.name().str
-	      << " is not in the RNDF graph\n";
+      ROS_WARN_STREAM("last_waypt "
+                      << ElementID(navstate->last_waypt.name().str)
+                      << " is not in the RNDF graph");
       return false;
     }
   
@@ -240,17 +242,17 @@ bool Commander::replan_route()
     {
       if (!blockages->empty())
 	{
-	  logc(10) << "ERROR: no path found. Removing blockage and trying again\n";
+	  ROS_ERROR("No path found. Removing blockage and trying again");
 	  blockages->pop_oldest();
 	  replan_num--;
 	  return replan_route();
 	}
       else 
 	{ 
-	  logc(10) << "ERROR: no path found to next checkpoint\n";
-	  logc(10) << "       Attempted to find a path between "
-		   << current->id.name().str << " and "
-		   << goal.id.name().str << "\n";
+	  ROS_ERROR("No path found to next checkpoint");
+	  ROS_ERROR_STREAM(" Attempted to find a path between "
+                           << current->id.name().str << " and "
+                           << goal.id.name().str);
 	  return false;
 	}
     }
@@ -269,17 +271,17 @@ bool Commander::replan_route()
       {
 	if (!blockages->empty())
 	  {
-	    logc(10) << "ERROR: no path found. Removing blockage and trying again\n";
+	    ROS_ERROR("No path found. Removing blockage and trying again");
 	    blockages->pop_oldest();
 	    replan_num--;
 	    return replan_route();
 	  }
 	else 
 	  { 
-	    logc(10) << "ERROR: no path found to next checkpoint\n";
-	    logc(10) << "       Attempted to find a path between "
-		     << current->id.name().str << " and "
-		     << goal.id.name().str << "\n";
+	    ROS_ERROR_STREAM("No path found to next checkpoint");
+	    ROS_ERROR_STREAM("Attempted to find a path between "
+                             << current->id.name().str << " and "
+                             << goal.id.name().str);
 	    return false;
 	  }
       }
@@ -316,14 +318,14 @@ void Commander::set_checkpoint_goals(void)
       else
 	goal2 = goal;
       
-      if (verbose)
-	logc(2) << "goal checkpoints: "
-		<< goal.id.name().str << ", "
-		<< goal2.id.name().str << "\n";
+      ROS_DEBUG_STREAM("goal checkpoints: "
+                       << goal.id.name().str << ", "
+                       << goal2.id.name().str);
     }
   else
     {
-      logc(2) << "bad goal checkpoint: "
-	      << goal_id.name().str << ", no such way-point node.\n";
+      ROS_WARN_STREAM("bad goal checkpoint: "
+                      << goal_id.name().str
+                      << ", no such way-point node.");
     }
 }

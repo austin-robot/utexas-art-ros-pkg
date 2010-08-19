@@ -18,7 +18,8 @@
 #ifndef __NAV_ESTOP_STATE_H__
 #define __NAV_ESTOP_STATE_H__
 
-#include <art/FSMstate.h>
+#include <art_nav/EstopState.h>
+#include <art_nav/FSMstate.h>
 
 class NavEstopState: FSMstate
 {
@@ -43,6 +44,11 @@ public:
     this->state = istate;
   }
 
+  NavEstopState(const art_nav::EstopState &estop_msg)
+  {
+    this->state = (NavEstopState::state_t) estop_msg.state;
+  }
+
   ~NavEstopState();
 
   state_t Value(void) const
@@ -65,6 +71,11 @@ public:
   void operator=(const NavEstopState::state_t &newstate)
   {
     this->state = newstate;
+  }
+
+  void operator=(uint16_t value)
+  {
+    this->state = (NavEstopState::state_t) value;
   }
 
   bool operator==(const NavEstopState &compare) const

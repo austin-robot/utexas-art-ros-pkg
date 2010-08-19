@@ -18,6 +18,8 @@
 #ifndef __NAV_BEHAVIORS_H__
 #define __NAV_BEHAVIORS_H__
 
+#include <art_nav/Behavior.h>
+
 class NavBehavior
 {
 public:
@@ -59,6 +61,11 @@ public:
   NavBehavior(nav_behavior_t &ibehavior)
   {
     this->behavior = ibehavior;
+  }
+
+  NavBehavior(const art_nav::Behavior &behavior_msg)
+  {
+    this->behavior = (nav_behavior_t) behavior_msg.value;
   }
 
   ~NavBehavior();

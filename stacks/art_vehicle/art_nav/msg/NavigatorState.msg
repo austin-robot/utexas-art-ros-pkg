@@ -3,8 +3,8 @@
 
 Header header
 
-EstopState estop_state
-RoadState road_state
+EstopState estop
+RoadState road
 
 art_map/MapID last_waypt		# last way-point reached
 art_map/MapID replan_waypt		# next way-point for replan

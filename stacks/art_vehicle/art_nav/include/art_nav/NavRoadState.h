@@ -19,6 +19,7 @@
 #define __NAV_ROAD_STATE_H__
 
 #include <art_nav/FSMstate.h>
+#include <art_nav/RoadState.h>
 
 class NavRoadState: FSMstate
 {
@@ -69,6 +70,11 @@ public:
   NavRoadState(state_t &istate)
   {
     this->state = istate;
+  }
+
+  NavRoadState(const art_nav::RoadState &msg)
+  {
+    this->state = (NavRoadState::state_t) msg.state;
   }
 
   ~NavRoadState();

@@ -7,10 +7,16 @@
 
 #include <iostream>
 
+#include <ros/ros.h>
+
+#include <art/hertz.h>
 #include <art_map/ZoneOps.h>
 #include <applanix/applanix_info.h>
 
 using namespace applanix_info;          // defines gps_info
+
+#include <art_nav/NavEstopState.h>
+#include <art_nav/NavRoadState.h>
 
 #include "command.h"
 
@@ -79,6 +85,7 @@ using namespace applanix_info;          // defines gps_info
 
 art_nav::NavigatorState navdata;
 
+#if 0 // comment out Player interfaces: will replace with ROS versions
 // proably should move to NavigatorProxy()
 art_nav::NavigatorState get_nav_state(PlayerCc::OpaqueProxy *nav)
 {
@@ -86,7 +93,7 @@ art_nav::NavigatorState get_nav_state(PlayerCc::OpaqueProxy *nav)
   if (nav->GetCount() != data_size)
     {
       // error in message size
-      logc(10) << "ERROR: Navigator message size is incorrect\n";
+      ROS_INFO_STREAM(10) << "ERROR: Navigator message size is incorrect\n";
     }
   
   // get data packet
@@ -97,7 +104,7 @@ art_nav::NavigatorState get_nav_state(PlayerCc::OpaqueProxy *nav)
       || hdr.subtype != NAVIGATOR_MESSAGE_STATE_DATA)
     {
       // wrong message type
-      logc(10) << 
+      ROS_INFO_STREAM(10) << 
 	"ERROR: Execute received the wrong message type from Navigator\n";
     }
   return navdata;
@@ -106,7 +113,7 @@ art_nav::NavigatorState get_nav_state(PlayerCc::OpaqueProxy *nav)
 gps_info get_gps_state(PlayerCc::OpaqueProxy *gps) {
   if (gps->GetCount() > sizeof(gps_info)) {
     // error in message size
-    logc(10) << "ERROR: GPS opqaue message size is incorrect\n";
+    ROS_INFO_STREAM(10) << "ERROR: GPS opqaue message size is incorrect\n";
   }
   
   gps_info pos;
@@ -118,34 +125,15 @@ gps_info get_gps_state(PlayerCc::OpaqueProxy *gps) {
 }
 
 
-// send order to navigator driver
-// Probably should move to NavigatorProxy()
-void PutOrder(PlayerCc::OpaqueProxy *nav, Order order, player_opaque_data_t &opaque)
-{
-  order_message_t ocmd;
-  ocmd.od = order;
-
-  // format opaque message
-
-  art_message_header_t msghdr;
-  msghdr.type = NAVIGATOR_MESSAGE;
-  msghdr.subtype = NAVIGATOR_MESSAGE_ORDER;
-
-  memcpy(opaque.data, &msghdr, sizeof(msghdr));
-  memcpy(opaque.data+sizeof(msghdr), &ocmd, sizeof(ocmd));
-  nav->SendCmd(&opaque);
-
-}
-
 void SendZones(PlayerCc::OpaqueProxy *nav, const ZonePerimeterList &zones) {
   
-  /*  logc(10) << "Number of Zones: " << zones.size() << "\n";
+  /*  ROS_INFO_STREAM(10) << "Number of Zones: " << zones.size() << "\n";
   for(unsigned i = 0; i < zones.size(); i++) {
-    logc(10) << "Zone ID: " << zones[i].zone_id << " Perimeter: ";
+    ROS_INFO_STREAM(10) << "Zone ID: " << zones[i].zone_id << " Perimeter: ";
     for(unsigned j = 0; j < zones[i].perimeter_points.size(); j++) {
-      logc(10) << "("<<zones[i].perimeter_points[j].map.x <<", "<<zones[i].perimeter_points[j].map.y << "), ";
+      ROS_INFO_STREAM(10) << "("<<zones[i].perimeter_points[j].map.x <<", "<<zones[i].perimeter_points[j].map.y << "), ";
     }
-    logc(10) << "\n";
+    ROS_INFO_STREAM(10) << "\n";
     }*/
   
 
@@ -153,7 +141,7 @@ void SendZones(PlayerCc::OpaqueProxy *nav, const ZonePerimeterList &zones) {
   ZoneOps::package_zone_list_into_opaque(zones, opaque);
 
   //art_message_header_t *art_hdr = (art_message_header_t*) opaque.data;
-  //logc(10)<<"Sending opaque: Type: "<<art_hdr->type<<" Subtype: "<<art_hdr->subtype<<"\n";
+  //ROS_INFO_STREAM(10)<<"Sending opaque: Type: "<<art_hdr->type<<" Subtype: "<<art_hdr->subtype<<"\n";
 
   nav->SendCmd(&opaque);
   if (opaque.data != NULL)
@@ -163,50 +151,30 @@ void SendZones(PlayerCc::OpaqueProxy *nav, const ZonePerimeterList &zones) {
   for(int i = 0; i < 100000; i++)
     j += i * (i%2==0)?-1:1;
 
-  logc(10) << "Stuff to eat up cycles: "<<j<<"\n";*/
+  ROS_INFO_STREAM(10) << "Stuff to eat up cycles: "<<j<<"\n";*/
 }
+#endif
 
-
-class Startup {
+class CommanderNode
+{
 public:
-  Startup() {
-    _hostname = PlayerCc::PLAYER_HOSTNAME;
+  CommanderNode()
+  {
     _mission_file = "mission_state";
     load_mission=false;
-    _port = PlayerCc::PLAYER_PORTNUM;
     _startrun = false;
     _verbose = 1;
     _speedlimit = 7.5;
     //_speedlimit = 5.5;			// for Area A test
 
-    robot = NULL;
-    nav = NULL;
-    maplane = NULL;
-    gps = NULL;
-    pos2d = NULL;
-
     rndf = NULL;
     mdf = NULL;
     graph = NULL;
     mission = NULL;
-
-    opaque.data_count = (sizeof(art_message_header_t)
-			 + sizeof(order_message_t));
-    opaque.data = new uint8_t[opaque.data_count];
   }
 
-  ~Startup() {
-
-    if (nav != NULL)
-      delete nav;
-    if (maplane != NULL)
-      delete maplane;
-    if (gps != NULL)
-      delete gps;
-    if (pos2d != NULL)
-      delete pos2d;
-    if (robot != NULL)
-      delete robot;
+  ~CommanderNode()
+  {
     if (rndf != NULL)
       delete rndf;
     if (mdf != NULL)
@@ -215,10 +183,10 @@ public:
       delete graph;
     if (mission != NULL)
       delete mission;
-    delete [] opaque.data;
   }
 
-  bool parse_args(int argc, char** argv) {
+  bool parse_args(int argc, char** argv)
+  {
 
     // set the flags
     const char* optflags = "h:l:p:m:rv?";
@@ -230,15 +198,9 @@ public:
       {
 	switch(ch)
 	  {
-	  case 'h':				// hostname
-	    _hostname = optarg;
-	    break;
 	  case 'l':				// hostname
 	    _mission_file = optarg;
 	    load_mission=true;
-	    break;
-	  case 'p':				// port
-	    _port = atoi(optarg);
 	    break;
 	  case 'r':				// run
 	    _startrun = true;
@@ -283,15 +245,13 @@ public:
 	print_usage(argc, argv);
 	return false;
       }
-    
-    for (int i=0; i< argc; i++)
-      logc(10) << argv[i] <<" ";
-    logc(10)<<"\n";
 
     return true;
   }
 
-  bool initialize_player() {
+#if 0 // replace with ROS version
+  bool initialize_player()
+  {
     
     // we throw exceptions on creation if we fail
     bool connected=false;
@@ -354,12 +314,12 @@ public:
       }
 
     while (!gps->IsValid() || !pos2d->IsValid()) {
-      logc(10) << "Waiting for initial lat/long info\n";
+      ROS_INFO_STREAM(10) << "Waiting for initial lat/long info\n";
       try {
 	robot->Read();
       }
       catch (PlayerCc::PlayerError e) {
-	logc(10) << "Cannot read initial gps info from odometry...stopping\n";
+	ROS_INFO_STREAM(10) << "Cannot read initial gps info from odometry...stopping\n";
 	return false;
       }
     }
@@ -368,7 +328,7 @@ public:
     
     if (!graph->rndf_is_gps())
       {
-	logc(10) << 
+	ROS_INFO_STREAM(10) << 
 	  "RNDF seems too large to be composed of GPS waypoints...stopping\n";
 	return false;	
       }
@@ -379,12 +339,12 @@ public:
     graph->find_implicit_edges();
 
     while (!nav->IsValid()) {
-      logc(10) << "Waiting for navigator to publish info\n";
+      ROS_INFO_STREAM(10) << "Waiting for navigator to publish info\n";
       try {
 	robot->Read();
       }
       catch (PlayerCc::PlayerError e) {
-	logc(10) << "Cannot read initial info from navigator...stopping\n";
+	ROS_INFO_STREAM(10) << "Cannot read initial info from navigator...stopping\n";
 	return false;
       }
     }
@@ -393,7 +353,7 @@ public:
 
     while (true)
       {
-	logc(2) << "Trying to send zones...\n";
+	ROS_INFO_STREAM(2) << "Trying to send zones...\n";
 	SendZones(nav, zones);
 	
 	// this blocks until new data comes; nominally 10Hz by default
@@ -401,7 +361,7 @@ public:
 	  robot->Read();
 	}
 	catch (PlayerCc::PlayerError e) {
-	  logc(10) << "Cannot read info from Player...stopping\n";
+	  ROS_INFO_STREAM(10) << "Cannot read info from Player...stopping\n";
 	  return false;
 	}    
 	
@@ -409,42 +369,37 @@ public:
 	
 	if(navState.have_zones) 
 	  {
-	    logc(2) << "Navigator has received zones.\n";
+	    ROS_INFO_STREAM(2) << "Navigator has received zones.\n";
 	    break;
 	  }
       }
     
     return true;    
   }
-  
-  bool build_RNDF() {
+#endif // old Player code
+
+  bool build_RNDF()
+  {
 
     rndf = new RNDF(_rndf_filename);
   
-    if (!rndf->is_valid) {
-      logc(10)<< "RNDF not valid\n";
-      return false;;
-    }
+    if (!rndf->is_valid)
+      {
+        ROS_FATAL("RNDF not valid");
+        return false;;
+      }
 
     mdf = new MDF(_mdf_filename);
 
-    if (!mdf->is_valid) {
-      logc(10)<<"MDF not valid\n";
-      return false;;
-    }
+    if (!mdf->is_valid)
+      {
+        ROS_FATAL("MDF not valid");
+        return false;;
+      }
 
     graph = new Graph();
     rndf->populate_graph(*graph);
     
-    if (graph->nodes_size > MAX_NODE_SIZE ||
-	graph->edges_size > MAX_EDGE_SIZE) {
-      logc(10) << "Graph too big. Currently lanes.h sets MAX_NODE_SIZE to be "
-	       << MAX_NODE_SIZE<<" but really is "<<graph->nodes_size
-	       << "and MAX_EDGE size to be "<<MAX_EDGE_SIZE<<" but really is "
-	       <<graph->edges_size<<".\n";
-      return false;
-    }
-
     mdf->add_speed_limits(*graph);
     mission = new Mission(*mdf);
 
@@ -453,99 +408,88 @@ public:
 	mission->clear();
 	if (!mission->load(_mission_file.c_str(), *graph))
 	  {
-	    logc(10)<<"Unable to load stored mission file. "
-		    <<_mission_file<<" is missing or corrupt\n";
+	    ROS_FATAL_STREAM("Unable to load stored mission file, "
+                             <<_mission_file<<" is missing or corrupt");
 	    return false;
 	  }
-	logc(8)<<"Loaded stored mission from "<<_mission_file<<"\n";
+	ROS_INFO_STREAM("Loaded stored mission from "<<_mission_file);
       }
     else
       {
 	if (!mission->populate_elementid(*graph))
 	  {
-	    logc(10)<<"Mission IDs not same size as Element IDs\n";
+	    ROS_FATAL("Mission IDs not same size as Element IDs");
 	    return false;
 	  }
-	logc(8)<<"Running full mission from MDF\n";
+	ROS_INFO("Running full mission from MDF");
       }
     
     
     if (mission->remaining_points() < 1) {
-      logc(10)<<"No checkpoints left\n";
+      ROS_FATAL("No checkpoints left");
       return false;
     }
 
     return true;
   }
 
-
-  bool run() {
-
-    //set up the previous time for cycle benchmarking
-    timeval time;
   
-    if (_startrun) {
-      logc(10) << "ordering navigator to RUN" << "\n";
-      Order run_order;
-      memset(&run_order, 0, sizeof(run_order));
-      run_order.behavior = NavBehavior::Run;
-      PutOrder(nav, run_order, opaque);
-    }
+  /** send order to navigator driver */
+  void putOrder(art_nav::Order order)
+  {
+  }
+
+  /** main spin loop */
+  bool spin()
+  {
+    if (_startrun)
+      {
+        ROS_INFO("ordering navigator to RUN");
+        art_nav::Order run_order;
+        run_order.behavior.value = NavBehavior::Run;
+        putOrder(run_order);
+      }
 
     // initialize Commander class
     Commander commander(_verbose, _speedlimit, graph, mission, zones);
 
+    ros::Rate cycle(HERTZ_COMMANDER);
+
     // loop until end of mission
-    while (true)
+    while(ros::ok())
       {
-	//print how long this commander cycle took
-	gettimeofday(&time, NULL);
-	logc(0) << "Commander cycle started at "
-		<< std::setprecision(16) 
-		<< time.tv_sec + (time.tv_usec/1000000.0)
-		<< "\n";
-
-	art_nav::NavigatorState navState = get_nav_state(nav);
-
-	if (_verbose) {
-	  logc(2) << "navstate = " << navState.estop_state.Name()
-		  << ", " << navState.road_state.Name()
-		  << ", last_waypt = " << navState.last_waypt.name().str
-		  << ", replan_waypt = " << navState.replan_waypt.name().str
-		  << ", L" << navState.lane_blocked
-		  << " R" << navState.road_blocked
-		  << " S" << navState.stopped
-		  << " Z" << navState.have_zones
-		  << "\n";
-	}
-	
+        ROS_DEBUG_STREAM("navstate = "
+                         << NavEstopState(navState_.estop).Name()
+                         << ", " << NavRoadState(navState_.road).Name()
+                         << ", last_waypt = "
+                         << ElementID(navState_.last_waypt).name().str
+                         << ", replan_waypt = "
+                         << ElementID(navState_.replan_waypt).name().str
+                         << ", L" << navState_.lane_blocked
+                         << " R" << navState_.road_blocked
+                         << " S" << navState_.stopped
+                         << " Z" << navState_.have_zones);
 
 	// exit loop when Navigator has shut down
-	if (navState.estop_state == NavEstopState::Done) {
-	  logc(5) << "Estop Done. Stopping.\n";
-	  break;
-	}
+	if (navState_.estop.state == NavEstopState::Done)
+          {
+            ROS_INFO("Estop Done. Stopping.");
+            break;
+          }
 
-	logc(2) << "Calling command" << "\n";
 	// generate navigator order for this cycle
-	Order next_order= commander.command(navState);
+	ROS_DEBUG("Calling command");
+        art_nav::Order next_order= commander.command(navState_);
 	
 	// send next order to Navigator, if any
-	if (next_order.behavior != NavBehavior::None)
-	  PutOrder(nav, next_order, opaque);
+	if (next_order.behavior.value != NavBehavior::None)
+	  putOrder(next_order);
 
-	// this blocks until new data comes; nominally 10Hz by default
-	try { 
-	  robot->Read();
-	}
-	catch (PlayerCc::PlayerError e) {
-	  logc(10) << "Cannot read info from Player...stopping\n";
-	  return false;
-	}
-	
+        cycle.sleep();                  // sleep until next cycle
+
       }	//end of mission while loop
 
-    logc(10) << "Robot shut down." << "\n";
+    ROS_INFO("Robot shut down.");
     return true;
   };
   
@@ -558,13 +502,8 @@ public:
     std::cerr << "same directory as player, if these are relative file names."
 	      << std::endl << std::endl;
     std::cerr << "Where [options] can be:" << std::endl;
-    
-    std::cerr << "  -h <hostname>  hostname to connect to (default "
-	      << _hostname << ")" << std::endl;
     std::cerr << "  -l <filename>  load mission file if restarting mission " 
 	      << _mission_file << ")" << std::endl;
-    std::cerr << "  -p <port>      port where Player will listen (default "
-	      << _port << ")" << std::endl;
     std::cerr << "  -r             start running robot immediately"
 	      << std::endl;
     std::cerr << "  -m <speed>     absolute maximum speed (default "
@@ -577,10 +516,8 @@ public:
 
   
 private:
-  std::string _hostname;
   std::string _mission_file;
   bool load_mission;
-  int _port;
   bool _startrun; 
   float _speedlimit;
   const char* _rndf_filename;
@@ -597,36 +534,36 @@ private:
   MDF *mdf;
   Graph* graph;
   Mission* mission;
-
   ZonePerimeterList zones;
+
+  art_nav::NavigatorState navState_;
 };
 
-
+/** main program */
 int main(int argc, char **argv)
 {
-  timeval time;
+  ros::init(argc, argv, "commander");
+  ros::NodeHandle node;
 
-  gettimeofday(&time, NULL);
-  logc(0) << "commander run at "
-	  << std::setprecision(16) 
-	  << time.tv_sec + (time.tv_usec/1000000.0)
-	  << "\n";
+  ROS_INFO("commander starting");
 
-  Startup start;
+  CommanderNode cmdr;
   
-  if (!start.parse_args(argc,argv))
+  if (!cmdr.parse_args(argc,argv))
     {
       std::cerr<<"\n";
       exit(1);    
     }
 
-  if (!start.build_RNDF())
+  if (!cmdr.build_RNDF())
     exit(2);
 
-  if (!start.initialize_player())
+#if 0
+  if (!cmdr.initialize_player())
     exit(3);
+#endif
 
-  if (!start.run())
+  if (!cmdr.spin())
     exit(4);
 
   return 0;

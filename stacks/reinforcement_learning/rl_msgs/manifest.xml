@@ -1,6 +1,6 @@
 <package>
   <description brief="rl_msgs">
-    Provides the set of ROS messages to be passed between RL agent node and environment nodes.
+    Provides the set of ROS messages to be passed between reinforcement learning (RL) agent nodes and environment nodes.
 
   </description>
   <author>Michael Quinlan</author>

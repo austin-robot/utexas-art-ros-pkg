@@ -1,7 +1,6 @@
 <package>
   <description brief="rl_msgs">
-
-     rl_msgs
+    Provides the set of ROS messages to be passed between RL agent node and environment nodes.
 
   </description>
   <author>Michael Quinlan</author>

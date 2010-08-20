@@ -33,9 +33,8 @@ bool Mission::compare(const Mission &that){
   bool ids_match = checkpoint_ids == that.checkpoint_ids;
   bool eids_match = true;
   for (uint i = 0; i < (uint) checkpoint_elementid.size(); i++)
-    eids_match = eids_match && checkpoint_elementid[i] == that.checkpoint_elementid[i];
-  //printf("CHECKPOINT IDS %s\n", ids_match?"MATCH":"DO NOT MATCH");
-  //printf("CHECKPOINT Element IDS %s\n", eids_match?"MATCH":"DO NOT MATCH");
+    eids_match = (eids_match
+                  && checkpoint_elementid[i] == that.checkpoint_elementid[i]);
   return (ids_match && eids_match);
 };
 
@@ -52,11 +51,12 @@ bool Mission::populate_elementid(const Graph& graph)
       }
     }
   }
-  if (checkpoint_elementid.size() != checkpoint_ids.size()){
-    printf("[%ld] != [%ld]\n", checkpoint_elementid.size(), 
-	   checkpoint_ids.size());
-    return false;
-  }
+  if (checkpoint_elementid.size() != checkpoint_ids.size())
+    {
+      ROS_WARN_STREAM("[" << checkpoint_elementid.size() << "] != ["
+                      << checkpoint_ids.size() << "]");
+      return false;
+    }
   else
     return true;
 };
@@ -103,7 +103,7 @@ ElementID Mission::next_checkpoint_elementid(){
 void Mission::save(const char* fName){
   FILE* f = fopen(fName,"wb");
   fprintf(f, "MISSION-STATE\n");
-  fprintf(f, "Number %ld\n", checkpoint_ids.size());
+  fprintf(f, "Number %ld\n", (long) checkpoint_ids.size());
   for (int i = 0; i < (int)checkpoint_ids.size(); i++)
     fprintf(f, "Id %d\n", checkpoint_ids[i]);
   for (int i = 0; i < (int)checkpoint_elementid.size(); i++){
@@ -118,7 +118,7 @@ bool Mission::load(const char* fName, const Graph& graph){
   std::ifstream mission_file;
   mission_file.open(fName);
   if (!mission_file){
-    printf("Error in opening Mission Log file\n");
+    ROS_ERROR("Error in opening Mission Log file");
     return false;
   }
   
@@ -134,8 +134,6 @@ bool Mission::load(const char* fName, const Graph& graph){
       sscanf(lineread.c_str(), "%s", token_char);
       token.assign(token_char);
 
-      //      printf("Token: |%s|\n", token.c_str());
-      
       if (line_number == 1){
 	if (!(token.compare("MISSION-STATE") == 0)) return false;
       }
@@ -171,7 +169,7 @@ bool Mission::load(const char* fName, const Graph& graph){
       if (graph.nodes[i].checkpoint_id == checkpoint_ids.at(j)) 
 	if (checkpoint_elementid.at(j)!=graph.nodes[i].id)
 	  {
-	    printf("Checkpoint has improper element ID\n");
+	    ROS_ERROR("Checkpoint has improper element ID");
 	    return false;
 	  }
     }

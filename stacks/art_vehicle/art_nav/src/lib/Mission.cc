@@ -53,7 +53,7 @@ bool Mission::populate_elementid(const Graph& graph)
     }
   }
   if (checkpoint_elementid.size() != checkpoint_ids.size()){
-    printf("[%d] != [%d]\n", checkpoint_elementid.size(), 
+    printf("[%ld] != [%ld]\n", checkpoint_elementid.size(), 
 	   checkpoint_ids.size());
     return false;
   }
@@ -103,7 +103,7 @@ ElementID Mission::next_checkpoint_elementid(){
 void Mission::save(const char* fName){
   FILE* f = fopen(fName,"wb");
   fprintf(f, "MISSION-STATE\n");
-  fprintf(f, "Number %d\n", checkpoint_ids.size());
+  fprintf(f, "Number %ld\n", checkpoint_ids.size());
   for (int i = 0; i < (int)checkpoint_ids.size(); i++)
     fprintf(f, "Id %d\n", checkpoint_ids[i]);
   for (int i = 0; i < (int)checkpoint_elementid.size(); i++){

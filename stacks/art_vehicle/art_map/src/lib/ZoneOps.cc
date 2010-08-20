@@ -657,7 +657,7 @@ ZonePerimeter ZoneOps::build_zone_perimeter_from_zone(Graph &graph,
 
 void ZoneOps::print_zone_list(const ZonePerimeterList &zones)
 {
-  printf("Number of Zones: %d\n", zones.size());
+  printf("Number of Zones: %ld\n", zones.size());
   for(unsigned i = 0; i < zones.size(); i++)
     print_zone(zones[i]);
 }

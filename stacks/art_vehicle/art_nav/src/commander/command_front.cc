@@ -1,9 +1,14 @@
-//
-// Commander node ROS front end
-//
-//  Author:  Patrick Beeson, Jack O'Quin
-//
+/*
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ *
+ *  Author:  Patrick Beeson, Jack O'Quin
+ */
 
+// Commander node ROS front end
 
 #include <iostream>
 

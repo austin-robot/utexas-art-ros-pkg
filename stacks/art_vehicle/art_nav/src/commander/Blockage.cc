@@ -1,3 +1,13 @@
+/*
+ *  Base class for finite state machine events
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
+
 #include "Blockage.h"
 
 void Blockages::pop_oldest()

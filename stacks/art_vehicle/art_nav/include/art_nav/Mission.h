@@ -1,4 +1,12 @@
-//Tarun Nimmagadda
+/* -*- mode: C++ -*-
+ *
+ *  Copyright (C) 2007, Tarun Nimmagadda
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
+
 //The University of Texas at Austin
 //This file defines the Mission Data Structure
 

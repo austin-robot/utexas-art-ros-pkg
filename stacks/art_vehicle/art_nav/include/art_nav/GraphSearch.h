@@ -1,7 +1,13 @@
-/*
-  Graph search algorithms, for use by Commander, or whoever.
-  Mickey Ristroph
-*/
+/* -*- mode: C++ -*-
+ *
+ *  Copyright (C) 2007, Mickey Ristroph
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ * 
+ *  Graph search algorithms, for use by Commander, or whoever.
+ */
 
 #ifndef __GRAPHSEARCH_h__
 #define __GRAPHSEARCH_h__

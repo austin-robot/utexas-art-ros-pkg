@@ -1,3 +1,13 @@
+/* -*- mode: C++ -*-
+ *
+ *  Copyright (C) 2009, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ *
+ *  Author: Patrick Beeson, Jack O'Quin
+ */
 #ifndef __command_h__
 #define __command_h__
 

@@ -1,25 +1,21 @@
-//
-// Navigator behaviors
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/* -*- mode: C++ -*-
+ * 
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ *
+ *  Author: Jack O'Quin
+ */
 
 #ifndef __NAV_BEHAVIORS_H__
 #define __NAV_BEHAVIORS_H__
 
+#include <ostream>
 #include <art_nav/Behavior.h>
 
+/** ART vehicle navigator behaviors */
 class NavBehavior
 {
 public:
@@ -38,7 +34,7 @@ public:
     } nav_behavior_t;
 
   // return behavior name as a C string
-  const char *Name(void)
+  const char *Name(void) const
   {
     static const char *behavior_name[N_behaviors] =
       {
@@ -108,5 +104,12 @@ public:
 private:
   nav_behavior_t behavior;
 };
+
+///* provide print method for this class */
+//std::ostream& operator<<(std::ostream &out, const NavBehavior &behavior)
+//  {
+//    out << behavior.Name();
+//    return out;
+//  }
 
 #endif // __NAV_BEHAVIORS_H__

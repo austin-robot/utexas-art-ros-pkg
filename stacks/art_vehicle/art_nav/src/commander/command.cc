@@ -1,4 +1,12 @@
-// $Id$
+/*
+ *  ART vehicle commander class definition.
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ * $Id$
+ */
 
 #include <art_nav/GraphSearch.h>
 #include <art_nav/NavEstopState.h>
@@ -64,7 +72,7 @@ art_nav::Order Commander::command(const art_nav::NavigatorState &_navstate)
   else if (ElementID(navstate->last_waypt) == ElementID())
     {
       // initialize navigator if last_waypt not set yet
-      ROS_DEBUG("Waiting for Navigator to find initial waypoint.");
+      ROS_DEBUG("Waiting for Navigator to find initial way-point.");
       order.behavior.value = NavBehavior::Initialize;
       return order;
     }

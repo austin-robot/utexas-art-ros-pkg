@@ -1,3 +1,14 @@
+/* -*- mode: C++ -*-
+ *
+ *  Base class for finite state machine events
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
+
 #ifndef __BLOCKAGE_h__
 #define __BLOCKAGE_h__
 

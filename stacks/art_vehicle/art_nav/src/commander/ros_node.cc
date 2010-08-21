@@ -20,6 +20,8 @@
 
 using namespace applanix_info;          // defines gps_info
 
+#include <art_nav/NavigatorState.h>
+
 #include <art_nav/NavEstopState.h>
 #include <art_nav/NavRoadState.h>
 
@@ -82,6 +84,9 @@ class CommanderNode
 public:
   CommanderNode()
   {
+    verbose_ = 1;
+    nav_state_received_ = false;
+
     // use private node handle to get parameters
     ros::NodeHandle nh("~");
 
@@ -116,9 +121,6 @@ public:
 
     nh.param("start_run", startrun_, false);
 
-    // default command line parameters
-    verbose_ = 1;
-
     // class objects
     rndf_ = new RNDF(rndf_name_);
     mdf_ = new MDF(mdf_name_);
@@ -134,6 +136,26 @@ public:
       delete mission_;
     delete mdf_;
     delete rndf_;
+  }
+
+  /** Set up ROS topics */
+  int setup(ros::NodeHandle node)
+  {   
+    static int qDepth = 1;
+    nav_state_topic_ = node.subscribe("navigator/state", qDepth,
+                                      &CommanderNode::processNavState, this);
+    return 0;
+  }
+
+  /** Process navigator state input */
+  void processNavState(const art_nav::NavigatorState::ConstPtr &nst)
+  {
+    nav_state_msg_ = *nst;
+    if (nav_state_received_ == false)
+      {
+        ROS_INFO("initial navigator state received");
+        nav_state_received_ = true;
+      }
   }
 
   bool parse_args(int argc, char** argv)
@@ -170,19 +192,6 @@ public:
       }
 
     return true;
-  }
-
-  bool wait_for_input()
-  {
-    // Wait for initial GPS interface
-
-    // Wait for initial odometry
-
-    // Wait for initial GPS
-
-    // Wait for navigator to publish state
-    
-    return true;    
   }
 
   bool build_graph()
@@ -314,6 +323,23 @@ public:
     std::cerr << "  -?             print this help message"
 	      << std::endl;
   }
+
+  /** wait until all required input topics available */
+  bool wait_for_input()
+  {
+    ROS_INFO("Waiting for navigator input");
+    ros::Rate cycle(HERTZ_COMMANDER);
+    while(ros::ok())
+      {
+        if (nav_state_received_)
+          {
+            ROS_INFO("Navigator input received");
+            return true;                // navigator running
+          }
+        cycle.sleep();
+      }
+    return false;                       // node shut down
+  }
   
 private:
 
@@ -325,6 +351,11 @@ private:
   std::string rndf_name_;
   std::string mdf_name_;
   int verbose_;
+
+  // topics and messages
+  ros::Subscriber nav_state_topic_;       // navigator state topic
+  art_nav::NavigatorState nav_state_msg_; // last received
+  bool nav_state_received_;
 
   RNDF *rndf_;
   MDF *mdf_;
@@ -363,4 +394,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-

@@ -150,7 +150,7 @@ public:
     nav_state_topic_ = node.subscribe("navigator/state", qDepth,
                                       &CommanderNode::processNavState, this);
     nav_cmd_pub_ = 
-      node.advertise<art_nav::NavigatorCommand>("navigator/command", qDepth);
+      node.advertise<art_nav::NavigatorCommand>("navigator/cmd", qDepth);
     return true;
   }
 

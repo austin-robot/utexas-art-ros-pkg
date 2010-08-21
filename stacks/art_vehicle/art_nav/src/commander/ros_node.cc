@@ -90,6 +90,12 @@ public:
     ros::NodeHandle nh("~");
 
     // ROS parameters (in alphabetical order)
+    frame_id_ = "/map";
+    if (nh.getParam("frame_id", frame_id_))
+      {
+        ROS_INFO_STREAM("map frame ID = " << frame_id_);
+      }
+
     nh.param("mdf", mdf_name_, std::string(""));
     ROS_INFO_STREAM("MDF: " << mdf_name_);
       
@@ -138,12 +144,14 @@ public:
   }
 
   /** Set up ROS topics */
-  int setup(ros::NodeHandle node)
+  bool setup(ros::NodeHandle node)
   {   
     static int qDepth = 1;
     nav_state_topic_ = node.subscribe("navigator/state", qDepth,
                                       &CommanderNode::processNavState, this);
-    return 0;
+    nav_cmd_pub_ = 
+      node.advertise<art_nav::NavigatorCommand>("navigator/command", qDepth);
+    return true;
   }
 
   /** Process navigator state input */
@@ -249,9 +257,14 @@ public:
   }
 
   
-  /** send order to navigator driver */
+  /** send order in command to navigator driver */
   void putOrder(art_nav::Order order)
   {
+    art_nav::NavigatorCommand cmd;
+    cmd.header.stamp = ros::Time::now();
+    cmd.header.frame_id = frame_id_;
+    cmd.order = order;
+    nav_cmd_pub_.publish(cmd);
   }
 
   /** main spin loop */
@@ -349,10 +362,12 @@ private:
   std::string rndf_name_;
   std::string mdf_name_;
   int verbose_;
+  std::string frame_id_;        ///< frame ID of map (default "/map")
 
   // topics and messages
   ros::Subscriber nav_state_topic_;       // navigator state topic
   art_nav::NavigatorState nav_state_msg_; // last received
+  ros::Publisher nav_cmd_pub_;            // navigator command topic
 
   RNDF *rndf_;
   MDF *mdf_;
@@ -375,19 +390,24 @@ int main(int argc, char **argv)
   if (!cmdr.parse_args(argc,argv))
     {
       std::cerr<<"\n";
-      exit(1);    
+      return 1;    
     }
+
+  // set up ROS topics
+  if (!cmdr.setup(node))
+    return 2;
 
   // build the road map graph
   if (!cmdr.build_graph())
-    exit(2);
+    return 3;
 
   // wait for input topics
   if (!cmdr.wait_for_input())
-    exit(3);
+    return 4;
 
+  // keep invoking commander until mission completed
   if (!cmdr.spin())
-    exit(4);
+    return 5;
 
   return 0;
 }

@@ -15,11 +15,6 @@
 #include <art_map/PolyOps.h>
 #include <art_map/Graph.h>
 
-//#include <art/GraphSearch.h>
-//#include <art/evg-thin.hh>
-//#include <art/datatypes.hh>
-//#include <art/fileio.hh>
-
 ZoneManager::ZoneManager(const ZonePerimeter &_zone,
 			 float _safety_radius,
 			 float _scale,
@@ -35,15 +30,6 @@ ZoneManager::ZoneManager(const ZonePerimeter &_zone,
   ll(_lower_left),
   ur(_upper_right),
   scale(fmax(_scale, sqrt((fabs(ur.x-ll.x)*fabs(ur.y-ll.y))/(_max_cells))))
-#if 0 // no EVG thin
-  gmanager(scale, ll, ur),
-  thin(gmanager.grid,
-       1, // distance_min
-       FLT_MAX, // distance_max
-       false, // no pruning
-       true, // use "robot close"
-       0, 0) // robot location, will be overwritten
-#endif
 {
   
   perimeter_points.clear();
@@ -54,16 +40,6 @@ ZoneManager::ZoneManager(const ZonePerimeter &_zone,
 					 %zone.perimeter_points.size()).map);
     ZoneOps::add_densely(perimeter_points, before, point, scale/3);
   }
-  
-  /*  FILE *fh = fopen("/tmp/perimeter.node","w");
-  fprintf(fh, "%d 2 0 0\n", perimeter_points.size());
-  for(int i = 0; i < (int) perimeter_points.size(); i++) {
-    fprintf(fh, "%d %.8f %.8f\n",
-	    i, 
-	    perimeter_points[i].x,
-	    perimeter_points[i].y);
-  }
-  fclose(fh); */
 }
 
 #if 0
@@ -268,18 +244,6 @@ int ZoneOps::voronoi_from_evg_thin(WayPointNodeList &nodes,
     // divide by ten to make sure
     add_densely(points, before, point, scale/3);
   }
-  
-  /*
-  FILE *fh = fopen("/tmp/perimeter.node","w");
-  fprintf(fh, "%d 2 0 0\n", points.size());
-  for(int i = 0; i < (int) points.size(); i++) {
-    fprintf(fh, "%d %.8f %.8f\n",
-	    i, 
-	    points[i].x,
-	    points[i].y);
-  }
-  fclose(fh);
-  */
 
   expand_bounding_box(points, ll, ur);
   
@@ -657,7 +621,7 @@ ZonePerimeter ZoneOps::build_zone_perimeter_from_zone(Graph &graph,
 
 void ZoneOps::print_zone_list(const ZonePerimeterList &zones)
 {
-  printf("Number of Zones: %ld\n", zones.size());
+  ROS_DEBUG_STREAM("Number of Zones: " << zones.size());
   for(unsigned i = 0; i < zones.size(); i++)
     print_zone(zones[i]);
 }

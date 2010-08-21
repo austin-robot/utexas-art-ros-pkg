@@ -94,8 +94,17 @@ public:
     if (load_mission_)
       ROS_INFO_STREAM("mission state file: " << mission_file_);
 
-    nh.param("rndf", rndf_name_, std::string(""));
-    ROS_INFO_STREAM("RNDF: " << rndf_name_);
+    rndf_name_ = "";
+    std::string rndf_param;
+    if (nh.searchParam("rndf", rndf_param))
+      {
+        nh.param(rndf_param, rndf_name_, std::string(""));
+        ROS_INFO_STREAM("RNDF: " << rndf_name_);
+      }
+    else
+      {
+        ROS_ERROR("RNDF not defined");
+      }
 
     nh.param("speed_limit", speed_limit_, 7.5);
     if (speed_limit_ < 0)

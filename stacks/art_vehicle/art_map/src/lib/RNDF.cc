@@ -36,15 +36,14 @@ RNDF::RNDF(std::string rndfname, bool verbose)
   number_of_segments = number_of_zones = -1;
   is_valid=true;
   
-  if (verbose) printf("RNDF Parser Begins\n");
-  
   std::ifstream rndf_file;
   rndf_file.open(rndfname.c_str());
-  if (!rndf_file){
-    printf("Error in opening RNDF file\n");
-    is_valid=false;
-    return;
-  }
+  if (!rndf_file)
+    {
+      ROS_ERROR_STREAM("Error opening RNDF \"" << rndfname << "\"");
+      is_valid = false;
+      return;
+    }
   
   //Parser State
   line_number = 0;

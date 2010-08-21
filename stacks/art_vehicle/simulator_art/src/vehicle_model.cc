@@ -20,7 +20,6 @@
 #include <art/epsilon.h>
 #include <art/frames.h>
 #include <art/UTM.h>
-#include <art/vehicle.hh>
 
 #include <art_servo/BrakeState.h>
 #include <art_servo/Shifter.h>

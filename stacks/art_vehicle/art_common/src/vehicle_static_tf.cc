@@ -11,8 +11,8 @@
 #include <tf/transform_broadcaster.h>
 
 #include <art/frames.h>
-#include <art/hertz.h>
-#include <art/vehicle.hh>
+#include <art_common/ArtHertz.h>
+#include <art_common/ArtVehicle.h>
 
 /**  \file
 
@@ -38,7 +38,7 @@ namespace
   /// These are *static* transforms, so it's safe to post-date them
   //  into the future.  Otherwise, some transform listeners will see
   //  old data at times.
-  ros::Duration transform_post_date_(1.0/HERTZ_VEHICLE_TF);
+  ros::Duration transform_post_date_(1.0/art_common::ArtHertz::VEHICLE_TF);
 
   // class for generating vehicle-relative frame IDs
   ArtFrames::VehicleRelative vr_;
@@ -78,34 +78,50 @@ int main(int argc, char** argv)
   tf::TransformBroadcaster tf_broadcaster;
   vr_.getPrefixParam();                 // get vehicle-relative tf prefix
 
-  ros::Rate cycle(HERTZ_VEHICLE_TF);    // set driver cycle rate
+  ros::Rate cycle(art_common::ArtHertz::VEHICLE_TF); // set driver cycle rate
   
   ROS_INFO(NODE ": starting main loop");
 
   // main loop
   while(ros::ok())
     {
-      using namespace ArtVehicle;
+      using namespace art_common;
 
       // Velodyne 3D LIDAR
       broadcastTF(&tf_broadcaster, ArtFrames::velodyne,
-                  velodyne_px, velodyne_py, velodyne_pz,
-                  velodyne_roll, velodyne_pitch, velodyne_yaw);
+                  ArtVehicle::velodyne_px,
+                  ArtVehicle::velodyne_py,
+                  ArtVehicle::velodyne_pz,
+                  ArtVehicle::velodyne_roll,
+                  ArtVehicle::velodyne_pitch,
+                  ArtVehicle::velodyne_yaw);
 
       // Front Sick LIDAR
       broadcastTF(&tf_broadcaster, ArtFrames::front_sick,
-                  front_SICK_px, front_SICK_py, front_SICK_pz,
-                  front_SICK_roll, front_SICK_pitch, front_SICK_yaw);
+                  ArtVehicle::front_SICK_px,
+                  ArtVehicle::front_SICK_py,
+                  ArtVehicle::front_SICK_pz,
+                  ArtVehicle::front_SICK_roll,
+                  ArtVehicle::front_SICK_pitch,
+                  ArtVehicle::front_SICK_yaw);
 
       // Rear Sick LIDAR
       broadcastTF(&tf_broadcaster, ArtFrames::rear_sick,
-                  rear_SICK_px, rear_SICK_py, rear_SICK_pz,
-                  rear_SICK_roll, rear_SICK_pitch, rear_SICK_yaw);
+                  ArtVehicle::rear_SICK_px,
+                  ArtVehicle::rear_SICK_py,
+                  ArtVehicle::rear_SICK_pz,
+                  ArtVehicle::rear_SICK_roll,
+                  ArtVehicle::rear_SICK_pitch,
+                  ArtVehicle::rear_SICK_yaw);
 
       // Front Right Camera
       broadcastTF(&tf_broadcaster, ArtFrames::front_right_camera,
-                  front_right_camera_px, front_right_camera_py, front_right_camera_pz,
-                  front_right_camera_roll, front_right_camera_pitch, front_right_camera_yaw);
+                  ArtVehicle::front_right_camera_px,
+                  ArtVehicle::front_right_camera_py,
+                  ArtVehicle::front_right_camera_pz,
+                  ArtVehicle::front_right_camera_roll,
+                  ArtVehicle::front_right_camera_pitch,
+                  ArtVehicle::front_right_camera_yaw);
 
       ros::spinOnce();                  // handle incoming messages
       cycle.sleep();                    // sleep until next cycle

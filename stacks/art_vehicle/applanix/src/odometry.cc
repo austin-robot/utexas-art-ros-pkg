@@ -48,7 +48,7 @@ data are in the \b /odom frame of reference.
 #include <art_servo/Shifter.h>
 
 #include <art/frames.h>
-#include <art/hertz.h>
+#include <art_common/ArtHertz.h>
 #include <art/Position.h>
 #include <art/UTM.h>
 #include <applanix/applanix_info.h>
@@ -440,7 +440,7 @@ int main(int argc, char** argv)
   if (rc != 0)				// device init failed?
     return 2;
 
-  ros::Rate cycle(HERTZ_APPLANIX);      // set driver cycle rate
+  ros::Rate cycle(art_common::ArtHertz::APPLANIX); // set driver cycle rate
   
   ROS_INFO(NODE ": starting main loop");
 

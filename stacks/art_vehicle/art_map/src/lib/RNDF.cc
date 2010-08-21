@@ -10,12 +10,12 @@
 #include <string>
 #include <cstdlib>
 #include <art/conversions.h>
-#include <art/vehicle.hh>
+#include <art_common/ArtVehicle.h>
 #include <art/epsilon.h>
 #include <art_map/RNDF.h>
 
-#define DEFAULT_LANE_WIDTH (ArtVehicle::width+1)
-#define DEFAULT_SPOT_WIDTH (ArtVehicle::width+1)
+#define DEFAULT_LANE_WIDTH (art_common::ArtVehicle::width+1)
+#define DEFAULT_SPOT_WIDTH (art_common::ArtVehicle::width+1)
 #define DEFAULT_LANE_SPEED mph2mps(30)
 
 enum RNDF_PARSE_STATE {COMMENT, GENERAL, SEGMENTS, LANES,

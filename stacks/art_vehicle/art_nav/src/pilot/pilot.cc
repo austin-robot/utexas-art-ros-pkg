@@ -43,7 +43,7 @@
 #include <art/epsilon.h>
 #include <art_common/ArtHertz.h>
 #include <art/pid2.h>
-#include <art/vehicle.hh>
+#include <art_common/ArtVehicle.h>
 
 #include <art_nav/CarCommand.h>
 #include <art_nav/PilotConfig.h>
@@ -610,21 +610,21 @@ int setup(ros::NodeHandle node)
 
   // initialize servo command interfaces and messages
   brake_cmd_ = node.advertise<art_servo::BrakeCommand>("brake/cmd", qDepth);
-  brake_msg_.header.frame_id = ArtVehicle::frame_id;
+  brake_msg_.header.frame_id = art_common::ArtVehicle::frame_id;
   brake_msg_.request = art_servo::BrakeCommand::Absolute;
   brake_msg_.position = 1.0;
 
   shifter_cmd_ = node.advertise<art_servo::Shifter>("shifter/cmd", qDepth);
-  shifter_msg_.header.frame_id = ArtVehicle::frame_id;
+  shifter_msg_.header.frame_id = art_common::ArtVehicle::frame_id;
 
   steering_cmd_ =
     node.advertise<art_servo::SteeringCommand>("steering/cmd", qDepth);
-  steering_msg_.header.frame_id = ArtVehicle::frame_id;
+  steering_msg_.header.frame_id = art_common::ArtVehicle::frame_id;
   steering_msg_.request = art_servo::SteeringCommand::Degrees;
 
   throttle_cmd_ =
     node.advertise<art_servo::ThrottleCommand>("throttle/cmd", qDepth);
-  throttle_msg_.header.frame_id = ArtVehicle::frame_id;
+  throttle_msg_.header.frame_id = art_common::ArtVehicle::frame_id;
   throttle_msg_.request = art_servo::ThrottleCommand::Absolute;
   throttle_msg_.position = 0.0;
 

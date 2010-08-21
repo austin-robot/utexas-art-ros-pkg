@@ -19,4 +19,3 @@ float64 SICKFAST        = 10.0
 float64 STEERING        = 20.0
 float64 THROTTLE        = 20.0
 float64 VEHICLE_TF      = 5.0
-float64 VELODYNE_PROC   = 10.0

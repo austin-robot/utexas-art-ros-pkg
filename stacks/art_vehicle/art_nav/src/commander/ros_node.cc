@@ -130,34 +130,6 @@ gps_info get_gps_state(PlayerCc::OpaqueProxy *gps) {
 }
 
 
-void SendZones(PlayerCc::OpaqueProxy *nav, const ZonePerimeterList &zones) {
-  
-  /*  ROS_INFO_STREAM(10) << "Number of Zones: " << zones.size() << "\n";
-  for(unsigned i = 0; i < zones.size(); i++) {
-    ROS_INFO_STREAM(10) << "Zone ID: " << zones[i].zone_id << " Perimeter: ";
-    for(unsigned j = 0; j < zones[i].perimeter_points.size(); j++) {
-      ROS_INFO_STREAM(10) << "("<<zones[i].perimeter_points[j].map.x <<", "<<zones[i].perimeter_points[j].map.y << "), ";
-    }
-    ROS_INFO_STREAM(10) << "\n";
-    }*/
-  
-
-  player_opaque_data_t opaque;
-  ZoneOps::package_zone_list_into_opaque(zones, opaque);
-
-  //art_message_header_t *art_hdr = (art_message_header_t*) opaque.data;
-  //ROS_INFO_STREAM(10)<<"Sending opaque: Type: "<<art_hdr->type<<" Subtype: "<<art_hdr->subtype<<"\n";
-
-  nav->SendCmd(&opaque);
-  if (opaque.data != NULL)
-    delete [] opaque.data;
-  /*
-  int j = 0;
-  for(int i = 0; i < 100000; i++)
-    j += i * (i%2==0)?-1:1;
-
-  ROS_INFO_STREAM(10) << "Stuff to eat up cycles: "<<j<<"\n";*/
-}
 #endif
 
 class CommanderNode
@@ -165,29 +137,29 @@ class CommanderNode
 public:
   CommanderNode()
   {
-    _mission_file = "mission_state";
-    load_mission=false;
-    _startrun = false;
-    _verbose = 1;
-    _speedlimit = 7.5;
-    //_speedlimit = 5.5;			// for Area A test
+    mission_file_ = "mission_state";
+    load_mission_=false;
+    startrun_ = false;
+    verbose_ = 1;
+    speedlimit_ = 7.5;
+    //speedlimit_ = 5.5;			// for Area A test
 
-    rndf = NULL;
-    mdf = NULL;
-    graph = NULL;
-    mission = NULL;
+    rndf_ = NULL;
+    mdf_ = NULL;
+    graph_ = NULL;
+    mission_ = NULL;
   }
 
   ~CommanderNode()
   {
-    if (rndf != NULL)
-      delete rndf;
-    if (mdf != NULL)
-      delete mdf;
-    if (graph != NULL)
-      delete graph;
-    if (mission != NULL)
-      delete mission;
+    if (rndf_ != NULL)
+      delete rndf_;
+    if (mdf_ != NULL)
+      delete mdf_;
+    if (graph_ != NULL)
+      delete graph_;
+    if (mission_ != NULL)
+      delete mission_;
   }
 
   bool parse_args(int argc, char** argv)
@@ -204,17 +176,17 @@ public:
 	switch(ch)
 	  {
 	  case 'l':				// hostname
-	    _mission_file = optarg;
-	    load_mission=true;
+	    mission_file_ = optarg;
+	    load_mission_=true;
 	    break;
 	  case 'r':				// run
-	    _startrun = true;
+	    startrun_ = true;
 	    break;
 	  case 'm': 
-	    _speedlimit = atof(optarg);
+	    speedlimit_ = atof(optarg);
 	    break;
 	  case 'v':				// extra verbosity
-	    _verbose++;
+	    verbose_++;
 	      break;
 	  case '?': // help
 	  default:  // unknown
@@ -223,7 +195,7 @@ public:
 	  }
       }
 
-    if (_speedlimit < 0)
+    if (speedlimit_ < 0)
       {
 	std::cerr << "ERROR: Maximum speed must be >= 0" << std::endl;
 	return false;
@@ -239,9 +211,9 @@ public:
 	return false;
       }
   
-    _rndf_filename = argv[optind++];  
+    rndf_name_ = argv[optind++];  
 
-    _mdf_filename = argv[optind++];
+    mdf_name_ = argv[optind++];
 
     if (optind < argc)
       {
@@ -331,17 +303,17 @@ public:
     
     gps_info pos = get_gps_state(gps);
     
-    if (!graph->rndf_is_gps())
+    if (!graph_->rndf_is_gps())
       {
 	ROS_INFO_STREAM(10) << 
 	  "RNDF seems too large to be composed of GPS waypoints...stopping\n";
 	return false;	
       }
     
-    graph->find_mapxy(pos, pos2d->GetXPos(), pos2d->GetYPos());
-    maplane->SendRNDF(graph);
+    graph_->find_mapxy(pos, pos2d->GetXPos(), pos2d->GetYPos());
+    maplane->SendRNDF(graph_);
     
-    graph->find_implicit_edges();
+    graph_->find_implicit_edges();
 
     while (!nav->IsValid()) {
       ROS_INFO_STREAM(10) << "Waiting for navigator to publish info\n";
@@ -354,13 +326,10 @@ public:
       }
     }
     
-    zones = ZoneOps::build_zone_list_from_rndf(*rndf, *graph);    
+    zones_ = ZoneOps::build_zone_list_from_rndf(*rndf_, *graph_);    
 
     while (true)
       {
-	ROS_INFO_STREAM(2) << "Trying to send zones...\n";
-	SendZones(nav, zones);
-	
 	// this blocks until new data comes; nominally 10Hz by default
 	try { 
 	  robot->Read();
@@ -386,42 +355,42 @@ public:
   bool build_RNDF()
   {
 
-    rndf = new RNDF(_rndf_filename);
+    rndf_ = new RNDF(rndf_name_);
   
-    if (!rndf->is_valid)
+    if (!rndf_->is_valid)
       {
         ROS_FATAL("RNDF not valid");
         return false;;
       }
 
-    mdf = new MDF(_mdf_filename);
+    mdf_ = new MDF(mdf_name_);
 
-    if (!mdf->is_valid)
+    if (!mdf_->is_valid)
       {
         ROS_FATAL("MDF not valid");
         return false;;
       }
 
-    graph = new Graph();
-    rndf->populate_graph(*graph);
+    graph_ = new Graph();
+    rndf_->populate_graph(*graph_);
     
-    mdf->add_speed_limits(*graph);
-    mission = new Mission(*mdf);
+    mdf_->add_speed_limits(*graph_);
+    mission_ = new Mission(*mdf_);
 
-    if (load_mission) 
+    if (load_mission_) 
       {
-	mission->clear();
-	if (!mission->load(_mission_file.c_str(), *graph))
+	mission_->clear();
+	if (!mission_->load(mission_file_.c_str(), *graph_))
 	  {
 	    ROS_FATAL_STREAM("Unable to load stored mission file, "
-                             <<_mission_file<<" is missing or corrupt");
+                             <<mission_file_<<" is missing or corrupt");
 	    return false;
 	  }
-	ROS_INFO_STREAM("Loaded stored mission from "<<_mission_file);
+	ROS_INFO_STREAM("Loaded stored mission from "<<mission_file_);
       }
     else
       {
-	if (!mission->populate_elementid(*graph))
+	if (!mission_->populate_elementid(*graph_))
 	  {
 	    ROS_FATAL("Mission IDs not same size as Element IDs");
 	    return false;
@@ -430,7 +399,7 @@ public:
       }
     
     
-    if (mission->remaining_points() < 1) {
+    if (mission_->remaining_points() < 1) {
       ROS_FATAL("No checkpoints left");
       return false;
     }
@@ -447,7 +416,7 @@ public:
   /** main spin loop */
   bool spin()
   {
-    if (_startrun)
+    if (startrun_)
       {
         ROS_INFO("ordering navigator to RUN");
         art_nav::Order run_order;
@@ -456,7 +425,7 @@ public:
       }
 
     // initialize Commander class
-    Commander commander(_verbose, _speedlimit, graph, mission, zones);
+    Commander commander(verbose_, speedlimit_, graph_, mission_, zones_);
 
     ros::Rate cycle(HERTZ_COMMANDER);
 
@@ -500,19 +469,17 @@ public:
   
   void print_usage(int argc, char** argv)
   {
-    std::cerr << "usage:  " << *argv << " [options] RNDF MDF"
+    std::cerr << "usage:  rosrun art_nav commander [options] <RNDF> <MDF>"
 	      << std::endl << std::endl;
-    std::cerr << "The RNDF and MDF names are required.  Run " 
-	      << *argv << " in the" << std::endl;
-    std::cerr << "same directory as player, if these are relative file names."
+    std::cerr << "The <RNDF> and <MDF> file names are required." 
 	      << std::endl << std::endl;
-    std::cerr << "Where [options] can be:" << std::endl;
+    std::cerr << "Options:" << std::endl;
     std::cerr << "  -l <filename>  load mission file if restarting mission " 
-	      << _mission_file << ")" << std::endl;
+	      << mission_file_ << ")" << std::endl;
     std::cerr << "  -r             start running robot immediately"
 	      << std::endl;
     std::cerr << "  -m <speed>     absolute maximum speed (default "
-	      << _speedlimit << " m/s)" << std::endl;
+	      << speedlimit_ << " m/s)" << std::endl;
     std::cerr << "  -v             verbose messages (-vv for more)"
 	      << std::endl;
     std::cerr << "  -?             print this help message"
@@ -521,26 +488,21 @@ public:
 
   
 private:
-  std::string _mission_file;
-  bool load_mission;
-  bool _startrun; 
-  float _speedlimit;
-  const char* _rndf_filename;
-  const char* _mdf_filename;
-  int _verbose;
 
-  // PlayerCc::PlayerClient* robot;
-  // PlayerCc::OpaqueProxy* nav;
-  // ArtProxy::LanesProxy *maplane;
-  // PlayerCc::OpaqueProxy* gps;
-  // PlayerCc::Position2dProxy* pos2d;
+  // parameters
+  std::string mission_file_;
+  bool load_mission_;
+  bool startrun_; 
+  float speedlimit_;
+  const char* rndf_name_;
+  const char* mdf_name_;
+  int verbose_;
 
-  RNDF *rndf;
-  MDF *mdf;
-  Graph* graph;
-  Mission* mission;
-  ZonePerimeterList zones;
-
+  RNDF *rndf_;
+  MDF *mdf_;
+  Graph* graph_;
+  Mission* mission_;
+  ZonePerimeterList zones_;
   art_nav::NavigatorState navState_;
 };
 

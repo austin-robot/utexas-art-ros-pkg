@@ -19,27 +19,17 @@ Commander::Commander(int verbosity, float limit,
 		     const ZonePerimeterList& _zones) 
 {
   route = new Path();
-
   route->clear();
-
   speedlimit=limit;
-  
   zones=_zones;
-
   verbose = verbosity;
   fsm = new CmdrFSM(this, verbose);
-
   graph = _graph;
   mission = _mission;
-
   blockages = new Blockages(graph, route);
-
-  memset(&order, 0, sizeof(order));
-
+  memset(&order, 0, sizeof(order));     // TODO: better reset?
   set_checkpoint_goals();
-
   replan_num=0;
-
 }
 
 Commander::~Commander()

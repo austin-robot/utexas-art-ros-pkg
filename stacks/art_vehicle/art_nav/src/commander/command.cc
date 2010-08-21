@@ -34,22 +34,25 @@ Commander::Commander(int verbosity, double limit,
 
 Commander::~Commander()
 {
+  delete blockages;
   delete fsm;
   delete route;
 }
 
 
 
-// main command entry point -- called once per cycle
-//
-// input: current Navigator state
-// output: next Navigator order, finished when behavior is DONE.
+/** main command entry point -- called once per cycle
+ *
+ * @param _navstate has current Navigator state
+ * @return next Navigator order, finished when behavior is DONE.
+*/
 art_nav::Order Commander::command(const art_nav::NavigatorState &_navstate)
 {
-  navstate = &_navstate;
-  
-  order.max_speed = 0.0;
-  order.min_speed = 0.0;
+  navstate = &_navstate;       // save state pointer in class variable
+
+  order = art_nav::Order();             // begin with empty order
+  //order.max_speed = 0.0;
+  //order.min_speed = 0.0;
 
   // handle initial startup sequence
   if (NavEstopState(navstate->estop) != NavEstopState::Run)

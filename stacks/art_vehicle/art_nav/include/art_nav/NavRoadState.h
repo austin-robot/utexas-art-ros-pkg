@@ -24,10 +24,10 @@ public:
   // Navigator road states
   typedef enum
     {
+      Init,
       Block,
       Evade,
       Follow,
-      Init,
       Pass,
       Uturn,
       WaitCross,
@@ -43,10 +43,10 @@ public:
   {
     static const char *state_name[N_states] =
       {
+	"Init",
 	"Block",
 	"Evade",
 	"Follow",
-	"Init",
 	"Pass",
 	"Uturn",
 	"WaitCross",

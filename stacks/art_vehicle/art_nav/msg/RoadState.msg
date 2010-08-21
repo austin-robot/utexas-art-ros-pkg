@@ -1,10 +1,10 @@
 # Navigator Road state values
 # $Id$
 
-uint16 Block     = 0
-uint16 Evade     = 1
-uint16 Follow    = 2
-uint16 Init      = 3
+uint16 Init      = 0
+uint16 Block     = 1
+uint16 Evade     = 2
+uint16 Follow    = 3
 uint16 Pass      = 4
 uint16 Uturn     = 5
 uint16 WaitCross = 6

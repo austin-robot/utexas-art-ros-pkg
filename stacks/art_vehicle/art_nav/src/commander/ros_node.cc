@@ -287,18 +287,17 @@ public:
       {
         ros::spinOnce();                  // handle incoming messages
 
-        // ROS_DEBUG_STREAM:
-        ROS_INFO_STREAM("navstate = "
+        ROS_DEBUG_STREAM("navstate = "
                          << NavEstopState(navState_.estop).Name()
                          << ", " << NavRoadState(navState_.road).Name()
                          << ", last_waypt = "
                          << ElementID(navState_.last_waypt).name().str
                          << ", replan_waypt = "
                          << ElementID(navState_.replan_waypt).name().str
-                         << ", L" << navState_.lane_blocked
-                         << " R" << navState_.road_blocked
-                         << " S" << navState_.stopped
-                         << " Z" << navState_.have_zones);
+                         << ", L" << (bool) navState_.lane_blocked
+                         << " R" << (bool) navState_.road_blocked
+                         << " S" << (bool) navState_.stopped
+                         << " Z" << (bool) navState_.have_zones);
 
 	// exit loop when Navigator has shut down
 	if (navState_.estop.state == NavEstopState::Done)
@@ -308,8 +307,7 @@ public:
           }
 
 	// generate navigator order for this cycle
-	ROS_DEBUG("Calling command");
-        art_nav::Order next_order= commander.command(navState_);
+        art_nav::Order next_order = commander.command(navState_);
 	
 	// send next order to Navigator, if any
 	if (next_order.behavior.value != NavBehavior::None)

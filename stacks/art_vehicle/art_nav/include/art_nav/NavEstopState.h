@@ -25,9 +25,9 @@ public:
   // navigator E-stop control states
   typedef enum
     {
-      Done,				// mission finished (disabled)
-      Pause,				// E-stop pause
+      Pause,				// E-stop pause (initial state)
       Run,				// E-stop run enabled
+      Done,				// mission finished (disabled)
       N_states
     } state_t;
 
@@ -58,9 +58,9 @@ public:
   {
     static const char *state_name[N_states] =
       {
-	"Done",
 	"Pause",
 	"Run",
+	"Done",
       };
     return state_name[this->state];
   }

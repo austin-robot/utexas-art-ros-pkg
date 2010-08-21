@@ -6,5 +6,7 @@
 # to emphasize its role in the system and the fact that its origin is
 # relative to the map for this run.
 
+# $Id$
+
 float32 x
 float32 y

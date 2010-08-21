@@ -52,10 +52,10 @@ from art_servo.msg import SteeringState
 from art_servo.msg import ThrottleCommand
 from art_servo.msg import ThrottleState
 
+from art_common.msg import ArtHertz
+from art_common.msg import ArtVehicle
 from art_common.msg import conversions
 from art_common.msg import epsilon
-from art_common.msg import hertz
-from art_common.msg import vehicle
 
 from art_nav.msg import CarCommand
 from art_nav.msg import CarControl
@@ -544,19 +544,19 @@ def setup() :
   
   # initialize servo command interfaces and messages
   brake_cmd_ = rospy.Publisher("brake/cmd", BrakeCommand)
-  brake_msg_.header.frame_id = vehicle.frame_id
+  brake_msg_.header.frame_id = ArtVehicle.frame_id
   brake_msg_.request = BrakeCommand.Absolute
   brake_msg_.position = 1.0
 
   shifter_cmd_ = rospy.Publisher("shifter/cmd", Shifter)
-  shifter_msg_.header.frame_id = vehicle.frame_id
+  shifter_msg_.header.frame_id = ArtVehicle.frame_id
 
   steering_cmd_ = rospy.Publisher("steering/cmd", SteeringCommand)
-  steering_msg_.header.frame_id = vehicle.frame_id
+  steering_msg_.header.frame_id = ArtVehicle.frame_id
   steering_msg_.request = SteeringCommand.Degrees
 
   throttle_cmd_ = rospy.Publisher("throttle/cmd", ThrottleCommand)
-  throttle_msg_.header.frame_id = vehicle.frame_id
+  throttle_msg_.header.frame_id = ArtVehicle.frame_id
   throttle_msg_.request = ThrottleCommand.Absolute
   throttle_msg_.position = 0.0
   
@@ -583,7 +583,7 @@ def main(argv) :
 
     if (setup() != 0) : return 2
 
-    cycle = rospy.Rate(hertz.HERTZ_PILOT) # set driver cycle rate
+    cycle = rospy.Rate(ArtHertz.PILOT) # set driver cycle rate
 
     # Main loop
     while not rospy.is_shutdown():

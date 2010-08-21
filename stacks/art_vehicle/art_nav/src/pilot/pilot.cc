@@ -41,7 +41,7 @@
 
 #include <art/conversions.h>
 #include <art/epsilon.h>
-#include <art/hertz.h>
+#include <art_common/ArtHertz.h>
 #include <art/pid2.h>
 #include <art/vehicle.hh>
 
@@ -659,7 +659,7 @@ int main(int argc, char** argv)
       return 2;
     }
 
-  ros::Rate cycle(HERTZ_PILOT);         // set driver cycle rate
+  ros::Rate cycle(art_common::ArtHertz::PILOT); // set driver cycle rate
 
   // Main loop
   while(ros::ok())

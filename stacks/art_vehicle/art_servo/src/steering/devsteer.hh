@@ -45,9 +45,9 @@ Training mode collects data while a human driver operates the vehicle.
 #include <stdint.h>
 #include <math.h>
 
-#include <art/vehicle.hh>
 #include <art/conversions.h>		// A/D conversion
 #include <art_servo/steering.h>		// public steering interface
+#include <art_common/ArtVehicle.h>
 
 #include "../servo.h"
 
@@ -122,10 +122,10 @@ public:
 // limit position value to normal range
 static inline float limit_travel(float position)
 {
-  if (position > ArtVehicle::max_steer_degrees)
-    position = ArtVehicle::max_steer_degrees;
-  else if (position < -ArtVehicle::max_steer_degrees)
-    position = -ArtVehicle::max_steer_degrees;
+  if (position > art_common::ArtVehicle::max_steer_degrees)
+    position = art_common::ArtVehicle::max_steer_degrees;
+  else if (position < -art_common::ArtVehicle::max_steer_degrees)
+    position = -art_common::ArtVehicle::max_steer_degrees;
   return position;
 }
 

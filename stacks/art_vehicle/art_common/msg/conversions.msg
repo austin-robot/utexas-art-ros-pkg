@@ -5,7 +5,7 @@
 #
 #  License: Modified BSD Software License Agreement
 #
-#  $Id: conversions.h 16 2010-01-24 04:32:54Z jack.oquin $
+#  $Id$
 #
 
 #  @file

@@ -8,7 +8,7 @@
 
 #include <ros/ros.h>
 
-#include <art/hertz.h>
+#include <art_common/ArtHertz.h>
 #include <art/conversions.h>
 
 #include <art_servo/Shifter.h>
@@ -419,7 +419,7 @@ void IOadr::GetSetRelays(void)
 
 void IOadr::Main()
 {
-  ros::Rate cycle(HERTZ_IOADR);         // set driver cycle rate
+  ros::Rate cycle(art_common::ArtHertz::IOADR); // set driver cycle rate
 
   // Main loop; grab messages off our queue and republish them via ROS
   while(ros::ok())

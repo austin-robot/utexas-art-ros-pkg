@@ -13,7 +13,7 @@
 
 #include <sys/time.h>
 #include <time.h>
-#include <art/hertz.h>
+#include <art_common/ArtHertz.h>
 
 /** @brief driver timer class. */
 class DriverTimer
@@ -47,7 +47,7 @@ class DriverTimer
       return false;			// timer not set
 
     // decrement time remaining by the duration of one cycle
-    time_remaining -= (1.0 / HERTZ_STEERING);
+    time_remaining -= (1.0 / art_common::ArtHertz::STEERING);
     return (time_remaining <= 0.0);
   }
 

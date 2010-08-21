@@ -14,7 +14,7 @@
 # has the functions this file needs to do its job.
 
 import math
-from art_common.msg import vehicle
+from art_common.msg import ArtVehicle
 
 ## @brief 
 #
@@ -24,8 +24,8 @@ from art_common.msg import vehicle
 # Constants: #
 steer_speed_min = 3.8	            # minimum speed for calculation #
 			            # (experimentally verified) #
-WHEELBASE_ = vehicle.wheelbase
-MAX_STEER_DEGREES_ = vehicle.max_steer_degrees
+WHEELBASE_ = ArtVehicle.wheelbase
+MAX_STEER_DEGREES_ = ArtVehicle.max_steer_degrees
 
 # Determine steering angle (in degrees) for a given speed and yawrate.
 #  

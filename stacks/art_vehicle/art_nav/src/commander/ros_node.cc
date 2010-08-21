@@ -14,7 +14,7 @@
 
 #include <ros/ros.h>
 
-#include <art/hertz.h>
+#include <art_common/ArtHertz.h>
 #include <art_map/ZoneOps.h>
 #include <applanix/applanix_info.h>
 
@@ -280,7 +280,7 @@ public:
     // initialize Commander class
     Commander commander(verbose_, speed_limit_, graph_, mission_, zones_);
 
-    ros::Rate cycle(HERTZ_COMMANDER);
+    ros::Rate cycle(art_common::ArtHertz::COMMANDER);
 
     // loop until end of mission
     while(ros::ok())
@@ -338,7 +338,7 @@ public:
   bool wait_for_input()
   {
     ROS_INFO("Waiting for navigator input");
-    ros::Rate cycle(HERTZ_COMMANDER);
+    ros::Rate cycle(art_common::ArtHertz::COMMANDER);
     while(ros::ok())
       {
         ros::spinOnce();                // handle incoming messages

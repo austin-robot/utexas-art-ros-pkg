@@ -11,6 +11,8 @@
 #ifndef _VEHICLE_HH_
 #define _VEHICLE_HH_
 
+#warning DEPRECATED: use art_common/ArtVehicle message, instead
+
 /**  @file
    
      @brief ART vehicle dimensions.

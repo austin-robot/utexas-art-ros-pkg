@@ -1,4 +1,5 @@
 # Route Network Definition File lane marking
+# $Id$
 
 int16 DOUBLE_YELLOW = 0
 int16 SOLID_YELLOW = 1

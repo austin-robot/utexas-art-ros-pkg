@@ -85,7 +85,6 @@ public:
   CommanderNode()
   {
     verbose_ = 1;
-    nav_state_received_ = false;
 
     // use private node handle to get parameters
     ros::NodeHandle nh("~");
@@ -150,12 +149,11 @@ public:
   /** Process navigator state input */
   void processNavState(const art_nav::NavigatorState::ConstPtr &nst)
   {
-    nav_state_msg_ = *nst;
-    if (nav_state_received_ == false)
+    if (nav_state_msg_.header.stamp == ros::Time())
       {
         ROS_INFO("initial navigator state received");
-        nav_state_received_ = true;
       }
+    nav_state_msg_ = *nst;
   }
 
   bool parse_args(int argc, char** argv)
@@ -331,7 +329,7 @@ public:
     ros::Rate cycle(HERTZ_COMMANDER);
     while(ros::ok())
       {
-        if (nav_state_received_)
+        if (nav_state_msg_.header.stamp != ros::Time())
           {
             ROS_INFO("Navigator input received");
             return true;                // navigator running
@@ -355,7 +353,6 @@ private:
   // topics and messages
   ros::Subscriber nav_state_topic_;       // navigator state topic
   art_nav::NavigatorState nav_state_msg_; // last received
-  bool nav_state_received_;
 
   RNDF *rndf_;
   MDF *mdf_;

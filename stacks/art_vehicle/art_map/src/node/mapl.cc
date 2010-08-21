@@ -16,7 +16,7 @@
 #include <ros/ros.h>
 #include <tf/tf.h>
 
-#include <art/hertz.h>
+#include <art_common/ArtHertz.h>
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/MarkerArray.h>
 
@@ -355,7 +355,7 @@ void MapLanesDriver::publishLocalMap(void)
 
   // publish local map with temporary duration
   publishMapMarks(mapmarks_, "local_roadmap",
-                  ros::Duration(HERTZ_MAPLANES), lane_data);
+                  ros::Duration(art_common::ArtHertz::MAPLANES), lane_data);
 }
 
 /** Spin function for driver thread */
@@ -363,7 +363,7 @@ void MapLanesDriver::Spin()
 {
   publishGlobalMap();                   // publish global map once at start
 
-  ros::Rate cycle(HERTZ_MAPLANES);      // set driver cycle rate
+  ros::Rate cycle(art_common::ArtHertz::MAPLANES); // set driver cycle rate
 
   // Loop publishing MapLanes state until driver Shutdown().
   while(ros::ok())

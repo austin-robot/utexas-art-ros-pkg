@@ -25,7 +25,9 @@ using namespace applanix_info;          // defines gps_info
 
 #include "command.h"
 
-/** @brief ART vehicle commander client
+/** @file
+
+    @brief ART vehicle commander client
 
     @section Synopsis
 
@@ -48,9 +50,7 @@ using namespace applanix_info;          // defines gps_info
     @section Options
 
     @verbatim
-    -h <host>	player host name (default "localhost")
     -m <speed>	maximum vehicle speed in m/s (default 7.5)
-    -p <port>	player host port (default 6665)
     -q		quiet (no verbose messages)
     -r		run vehicle immediately
     -s		start anywhere, even outside RNDF
@@ -64,8 +64,7 @@ using namespace applanix_info;          // defines gps_info
     $ commander example.rndf example.mdf
     @endverbatim
 
-    Connect to the robot vehicle at "localhost" port 6665.  Send
-    navigation commands to "opaque:0".  Path names for the rndf and
+    Connect to the robot vehicle.  Path names for the rndf and
     mdf files are required.
 
     @verbatim
@@ -74,76 +73,23 @@ using namespace applanix_info;          // defines gps_info
 
     Start running the robot vehicle immediately.
 
-    @verbatim
-    $ commander -d2 -h remotehost -i3 example.rndf example.mdf
-    @endverbatim
-
-    Connect to the robot vehicle at "remotehost" port 6665.  Send
-    navigation commands to "opaque:3".  Produce verbose debug output.
-
     @author Patrick Beeson, Jack O'Quin
 */
-/** @} */
 
-//const  uint data_size=sizeof(art_message_header_t) + sizeof(nav_state_msg_t);
-//uint8_t data[data_size];
-
-art_nav::NavigatorState navdata;
-
-#if 0 // comment out Player interfaces: will replace with ROS versions
-// proably should move to NavigatorProxy()
-art_nav::NavigatorState get_nav_state(PlayerCc::OpaqueProxy *nav)
-{
-  
-  if (nav->GetCount() != data_size)
-    {
-      // error in message size
-      ROS_INFO_STREAM(10) << "ERROR: Navigator message size is incorrect\n";
-    }
-  
-  // get data packet
-  nav->GetData(data);
-  memcpy(&hdr, data, sizeof(art_message_header_t));
-  memcpy(&navdata, data+sizeof(art_message_header_t), sizeof(art_nav::NavigatorState));
-  if (hdr.type != NAVIGATOR_MESSAGE
-      || hdr.subtype != NAVIGATOR_MESSAGE_STATE_DATA)
-    {
-      // wrong message type
-      ROS_INFO_STREAM(10) << 
-	"ERROR: Execute received the wrong message type from Navigator\n";
-    }
-  return navdata;
-}
-
-gps_info get_gps_state(PlayerCc::OpaqueProxy *gps) {
-  if (gps->GetCount() > sizeof(gps_info)) {
-    // error in message size
-    ROS_INFO_STREAM(10) << "ERROR: GPS opqaue message size is incorrect\n";
-  }
-  
-  gps_info pos;
-  
-  // get data packet
-  gps->GetData((uint8_t*) &pos);
-  
-  return pos;
-}
-
-
-#endif
 
 class CommanderNode
 {
 public:
   CommanderNode()
   {
+    // default parameters
     mission_file_ = "mission_state";
     load_mission_=false;
     startrun_ = false;
     verbose_ = 1;
     speedlimit_ = 7.5;
-    //speedlimit_ = 5.5;			// for Area A test
 
+    // class objects
     rndf_ = NULL;
     mdf_ = NULL;
     graph_ = NULL;
@@ -226,159 +172,49 @@ public:
     return true;
   }
 
-#if 0 // replace with ROS version
-  bool initialize_player()
+  bool initialize_node()
   {
-    
-    // we throw exceptions on creation if we fail
-    bool connected=false;
 
-    while (!connected)
-      try {
-	robot = new PlayerCc::PlayerClient(_hostname, _port);
-	connected=true;
-      }
-      catch (PlayerCc::PlayerError e) {
-	//std::cerr << "Waiting to for Player connection" << std::endl;
-	sleep(3);
-      }
+    // Wait for initial GPS interface
 
-    robot->SetReplaceRule(true);
-    robot->SetDataMode(PLAYER_DATAMODE_PULL);
-    
-    connected=false;
-    while (!connected)
-      try {
-	nav = new PlayerCc::OpaqueProxy(robot, 0);
-	connected=true;
-      }
-      catch (PlayerCc::PlayerError e) {
-	//std::cerr << "Waiting to for Navigator interface" << std::endl;
-	sleep(3);
-      }
+    // Wait for initial odometry
 
-    connected=false;
-    while (!connected)
-      try {
-	maplane = new ArtProxy::LanesProxy(robot);
-	connected=true;
-      }
-      catch (PlayerCc::PlayerError e) {
-	//std::cerr << "Waiting to for MapLanes interface" << std::endl;
-	sleep(3);
-      }
+    // Wait for initial GPS
 
-    connected=false;
-    while (!connected)
-      try {
-	gps = new PlayerCc::OpaqueProxy(robot, 99);
-	connected=true;
-      }
-      catch (PlayerCc::PlayerError e) {
-	//std::cerr << "Waiting to for initial GPS interface" << std::endl;
-	sleep(3);
-      }
-
-    connected=false;
-    while (!connected)
-      try {
-	pos2d = new PlayerCc::Position2dProxy(robot, 0);
-	connected=true;
-      }
-      catch (PlayerCc::PlayerError e) {
-	//std::cerr << "Waiting for initial Position2d interface" << std::endl;
-	sleep(3);
-      }
-
-    while (!gps->IsValid() || !pos2d->IsValid()) {
-      ROS_INFO_STREAM(10) << "Waiting for initial lat/long info\n";
-      try {
-	robot->Read();
-      }
-      catch (PlayerCc::PlayerError e) {
-	ROS_INFO_STREAM(10) << "Cannot read initial gps info from odometry...stopping\n";
-	return false;
-      }
-    }
-    
-    gps_info pos = get_gps_state(gps);
-    
-    if (!graph_->rndf_is_gps())
-      {
-	ROS_INFO_STREAM(10) << 
-	  "RNDF seems too large to be composed of GPS waypoints...stopping\n";
-	return false;	
-      }
-    
-    graph_->find_mapxy(pos, pos2d->GetXPos(), pos2d->GetYPos());
-    maplane->SendRNDF(graph_);
-    
-    graph_->find_implicit_edges();
-
-    while (!nav->IsValid()) {
-      ROS_INFO_STREAM(10) << "Waiting for navigator to publish info\n";
-      try {
-	robot->Read();
-      }
-      catch (PlayerCc::PlayerError e) {
-	ROS_INFO_STREAM(10) << "Cannot read initial info from navigator...stopping\n";
-	return false;
-      }
-    }
-    
-    zones_ = ZoneOps::build_zone_list_from_rndf(*rndf_, *graph_);    
-
-    while (true)
-      {
-	// this blocks until new data comes; nominally 10Hz by default
-	try { 
-	  robot->Read();
-	}
-	catch (PlayerCc::PlayerError e) {
-	  ROS_INFO_STREAM(10) << "Cannot read info from Player...stopping\n";
-	  return false;
-	}    
-	
-	art_nav::NavigatorState navState = get_nav_state(nav);
-	
-	if(navState.have_zones) 
-	  {
-	    ROS_INFO_STREAM(2) << "Navigator has received zones.\n";
-	    break;
-	  }
-      }
+    // Wait for navigator to publish state
     
     return true;    
   }
-#endif // old Player code
 
-  bool build_RNDF()
+  bool build_graph()
   {
-
     rndf_ = new RNDF(rndf_name_);
-  
     if (!rndf_->is_valid)
       {
         ROS_FATAL("RNDF not valid");
         return false;;
       }
 
-    mdf_ = new MDF(mdf_name_);
+    graph_ = new Graph();
+    rndf_->populate_graph(*graph_);
+    graph_->find_mapxy();
+    graph_->find_implicit_edges();
+    //zones_ = ZoneOps::build_zone_list_from_rndf(*rndf_, *graph_);    
 
+    // Fill in mission data
+    mdf_ = new MDF(mdf_name_);
     if (!mdf_->is_valid)
       {
         ROS_FATAL("MDF not valid");
         return false;;
       }
 
-    graph_ = new Graph();
-    rndf_->populate_graph(*graph_);
-    
     mdf_->add_speed_limits(*graph_);
     mission_ = new Mission(*mdf_);
 
     if (load_mission_) 
       {
+        // Load state of previously started mission
 	mission_->clear();
 	if (!mission_->load(mission_file_.c_str(), *graph_))
 	  {
@@ -390,6 +226,7 @@ public:
       }
     else
       {
+        // No started mission
 	if (!mission_->populate_elementid(*graph_))
 	  {
 	    ROS_FATAL("Mission IDs not same size as Element IDs");
@@ -398,11 +235,11 @@ public:
 	ROS_INFO("Running full mission from MDF");
       }
     
-    
-    if (mission_->remaining_points() < 1) {
-      ROS_FATAL("No checkpoints left");
-      return false;
-    }
+    if (mission_->remaining_points() < 1)
+      {
+        ROS_FATAL("No checkpoints left");
+        return false;
+      }
 
     return true;
   }
@@ -416,7 +253,7 @@ public:
   /** main spin loop */
   bool spin()
   {
-    if (startrun_)
+    if (startrun_)                      // -r option specified?
       {
         ROS_INFO("ordering navigator to RUN");
         art_nav::Order run_order;
@@ -432,7 +269,8 @@ public:
     // loop until end of mission
     while(ros::ok())
       {
-        ROS_DEBUG_STREAM("navstate = "
+        // ROS_DEBUG_STREAM:
+        ROS_INFO_STREAM("navstate = "
                          << NavEstopState(navState_.estop).Name()
                          << ", " << NavRoadState(navState_.road).Name()
                          << ", last_waypt = "
@@ -522,13 +360,12 @@ int main(int argc, char **argv)
       exit(1);    
     }
 
-  if (!cmdr.build_RNDF())
+  // build the road map graph
+  if (!cmdr.build_graph())
     exit(2);
 
-#if 0
-  if (!cmdr.initialize_player())
+  if (!cmdr.initialize_node())
     exit(3);
-#endif
 
   if (!cmdr.spin())
     exit(4);

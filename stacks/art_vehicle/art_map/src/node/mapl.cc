@@ -117,8 +117,17 @@ MapLanesDriver::MapLanesDriver(void)
   nh.param("poly_size", poly_size_, MIN_POLY_SIZE);
   ROS_INFO("polygon size = %.0f meters", poly_size_);
 
-  nh.param("rndf", rndf_name_, std::string(""));
-  ROS_INFO_STREAM("RNDF name = " << rndf_name_);
+  rndf_name_ = "";
+  std::string rndf_param;
+  if (nh.searchParam("rndf", rndf_param))
+    {
+      nh.param(rndf_param, rndf_name_, std::string(""));
+      ROS_INFO_STREAM("RNDF: " << rndf_name_);
+    }
+  else
+    {
+      ROS_ERROR("RNDF not defined");
+    }
 
   // create the MapLanes class
   map_ = new MapLanes(range_);

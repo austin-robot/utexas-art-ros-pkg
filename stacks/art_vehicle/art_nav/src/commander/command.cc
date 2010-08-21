@@ -14,14 +14,14 @@
 #include "command.h"
 #include "FSM.h"
 
-Commander::Commander(int verbosity, float limit, 
+Commander::Commander(int verbosity, double limit, 
 		     Graph* _graph, Mission* _mission,
 		     const ZonePerimeterList& _zones) 
 {
   route = new Path();
   route->clear();
-  speedlimit=limit;
-  zones=_zones;
+  speedlimit = limit;
+  zones = _zones;
   verbose = verbosity;
   fsm = new CmdrFSM(this, verbose);
   graph = _graph;
@@ -29,7 +29,7 @@ Commander::Commander(int verbosity, float limit,
   blockages = new Blockages(graph, route);
   memset(&order, 0, sizeof(order));     // TODO: better reset?
   set_checkpoint_goals();
-  replan_num=0;
+  replan_num = 0;
 }
 
 Commander::~Commander()

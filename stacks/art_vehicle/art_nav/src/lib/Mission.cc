@@ -113,7 +113,8 @@ void Mission::save(const char* fName){
   fclose (f);
 }
 
-bool Mission::load(const char* fName, const Graph& graph){
+bool Mission::load(const char* fName, const Graph& graph)
+{
   int number_of_checkpoints = 0;
   std::ifstream mission_file;
   mission_file.open(fName);

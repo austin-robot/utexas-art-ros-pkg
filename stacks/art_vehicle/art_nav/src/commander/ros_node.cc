@@ -82,56 +82,67 @@ class CommanderNode
 public:
   CommanderNode()
   {
-    // default parameters
-    mission_file_ = "mission_state";
-    load_mission_=false;
-    startrun_ = false;
+    // use private node handle to get parameters
+    ros::NodeHandle nh("~");
+
+    // ROS parameters (in alphabetical order)
+    nh.param("mdf", mdf_name_, std::string(""));
+    ROS_INFO_STREAM("MDF: " << mdf_name_);
+      
+    nh.param("mission_state", mission_file_, std::string(""));
+    load_mission_ = (mission_file_ != std::string(""));
+    if (load_mission_)
+      ROS_INFO_STREAM("mission state file: " << mission_file_);
+
+    nh.param("rndf", rndf_name_, std::string(""));
+    ROS_INFO_STREAM("RNDF: " << rndf_name_);
+
+    nh.param("speed_limit", speed_limit_, 7.5);
+    if (speed_limit_ < 0)
+      {
+	ROS_ERROR("Maximum speed must be >= 0");
+        speed_limit_ = 7.5;
+      }
+    ROS_INFO_STREAM("Maximum speed: " << speed_limit_);
+
+    nh.param("start_run", startrun_, false);
+
+    // default command line parameters
     verbose_ = 1;
-    speedlimit_ = 7.5;
 
     // class objects
-    rndf_ = NULL;
-    mdf_ = NULL;
+    rndf_ = new RNDF(rndf_name_);
+    mdf_ = new MDF(mdf_name_);
     graph_ = NULL;
     mission_ = NULL;
   }
 
   ~CommanderNode()
   {
-    if (rndf_ != NULL)
-      delete rndf_;
-    if (mdf_ != NULL)
-      delete mdf_;
     if (graph_ != NULL)
       delete graph_;
     if (mission_ != NULL)
       delete mission_;
+    delete mdf_;
+    delete rndf_;
   }
 
   bool parse_args(int argc, char** argv)
   {
 
     // set the flags
-    const char* optflags = "h:l:p:m:rv?";
+    const char* optflags = "rv?";
     int ch;
-    std::cerr<<"\n";
 
     // use getopt to parse the flags
     while(-1 != (ch = getopt(argc, argv, optflags)))
       {
 	switch(ch)
 	  {
-	  case 'l':				// hostname
-	    mission_file_ = optarg;
-	    load_mission_=true;
-	    break;
-	  case 'r':				// run
+	  case 'r':                     // start run immediately
 	    startrun_ = true;
-	    break;
-	  case 'm': 
-	    speedlimit_ = atof(optarg);
-	    break;
-	  case 'v':				// extra verbosity
+	      break;
+	  case 'v':                     // extra verbosity
 	    verbose_++;
 	      break;
 	  case '?': // help
@@ -140,26 +151,6 @@ public:
 	    return false;
 	  }
       }
-
-    if (speedlimit_ < 0)
-      {
-	std::cerr << "ERROR: Maximum speed must be >= 0" << std::endl;
-	return false;
-      }
-
-
-    if (optind >= argc-1)
-      {
-	std::cerr << "ERROR: RNDF or MDF names missing. \nOR they were read "
-		  << "as values to another option with a missing argument.\n" 
-		  << std::endl;
-	print_usage(argc, argv);
-	return false;
-      }
-  
-    rndf_name_ = argv[optind++];  
-
-    mdf_name_ = argv[optind++];
 
     if (optind < argc)
       {
@@ -172,9 +163,8 @@ public:
     return true;
   }
 
-  bool initialize_node()
+  bool wait_for_input()
   {
-
     // Wait for initial GPS interface
 
     // Wait for initial odometry
@@ -188,7 +178,6 @@ public:
 
   bool build_graph()
   {
-    rndf_ = new RNDF(rndf_name_);
     if (!rndf_->is_valid)
       {
         ROS_FATAL("RNDF not valid");
@@ -202,7 +191,6 @@ public:
     //zones_ = ZoneOps::build_zone_list_from_rndf(*rndf_, *graph_);    
 
     // Fill in mission data
-    mdf_ = new MDF(mdf_name_);
     if (!mdf_->is_valid)
       {
         ROS_FATAL("MDF not valid");
@@ -262,7 +250,7 @@ public:
       }
 
     // initialize Commander class
-    Commander commander(verbose_, speedlimit_, graph_, mission_, zones_);
+    Commander commander(verbose_, speed_limit_, graph_, mission_, zones_);
 
     ros::Rate cycle(HERTZ_COMMANDER);
 
@@ -307,23 +295,16 @@ public:
   
   void print_usage(int argc, char** argv)
   {
-    std::cerr << "usage:  rosrun art_nav commander [options] <RNDF> <MDF>"
-	      << std::endl << std::endl;
-    std::cerr << "The <RNDF> and <MDF> file names are required." 
+    std::cerr << "usage:  rosrun art_nav commander [options]"
 	      << std::endl << std::endl;
     std::cerr << "Options:" << std::endl;
-    std::cerr << "  -l <filename>  load mission file if restarting mission " 
-	      << mission_file_ << ")" << std::endl;
     std::cerr << "  -r             start running robot immediately"
 	      << std::endl;
-    std::cerr << "  -m <speed>     absolute maximum speed (default "
-	      << speedlimit_ << " m/s)" << std::endl;
     std::cerr << "  -v             verbose messages (-vv for more)"
 	      << std::endl;
     std::cerr << "  -?             print this help message"
 	      << std::endl;
   }
-
   
 private:
 
@@ -331,9 +312,9 @@ private:
   std::string mission_file_;
   bool load_mission_;
   bool startrun_; 
-  float speedlimit_;
-  const char* rndf_name_;
-  const char* mdf_name_;
+  double speed_limit_;
+  std::string rndf_name_;
+  std::string mdf_name_;
   int verbose_;
 
   RNDF *rndf_;
@@ -364,7 +345,8 @@ int main(int argc, char **argv)
   if (!cmdr.build_graph())
     exit(2);
 
-  if (!cmdr.initialize_node())
+  // wait for input topics
+  if (!cmdr.wait_for_input())
     exit(3);
 
   if (!cmdr.spin())

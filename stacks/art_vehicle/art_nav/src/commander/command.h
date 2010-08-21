@@ -32,7 +32,7 @@ class Commander
 
  public:
 
-  Commander(int verbosity, float limit, Graph* _graph, Mission* _mission,
+  Commander(int verbosity, double limit, Graph* _graph, Mission* _mission,
 	    const ZonePerimeterList& _zones);
   ~Commander();
   art_nav::Order command(const art_nav::NavigatorState &cur_navstate);

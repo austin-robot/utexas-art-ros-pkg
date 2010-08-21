@@ -29,7 +29,7 @@ using namespace applanix_info;          // defines gps_info
 
 /** @file
 
-    @brief ART vehicle commander client
+    @brief ART vehicle commander node
 
     @section Synopsis
 
@@ -52,10 +52,7 @@ using namespace applanix_info;          // defines gps_info
     @section Options
 
     @verbatim
-    -m <speed>	maximum vehicle speed in m/s (default 7.5)
-    -q		quiet (no verbose messages)
     -r		run vehicle immediately
-    -s		start anywhere, even outside RNDF
     -v        	verbose messages (-vv for more)
     -?		print usage message
     @endverbatim
@@ -63,22 +60,22 @@ using namespace applanix_info;          // defines gps_info
     @section Examples
 
     @verbatim
-    $ commander example.rndf example.mdf
+    $ rosrun art_nav commander _rndf:=example.rndf _mdf:=example.mdf
     @endverbatim
 
-    Connect to the robot vehicle.  Path names for the rndf and
-    mdf files are required.
+    Run the robot vehicle using the specified road network and mission.
 
     @verbatim
-    $ commander -r example.rndf example.mdf
+    $ rosrun art_nav commander -r _rndf:=example.rndf _mdf:=example.mdf
     @endverbatim
 
-    Start running the robot vehicle immediately.
+    Start running the robot immediately.
 
     @author Patrick Beeson, Jack O'Quin
 */
 
 
+/** @brief Commander node class */
 class CommanderNode
 {
 public:
@@ -164,6 +161,7 @@ public:
     nav_state_msg_ = *nst;
   }
 
+  /** Parse command line arguments */
   bool parse_args(int argc, char** argv)
   {
     // set the flags
@@ -199,6 +197,7 @@ public:
     return true;
   }
 
+  /** Build road map graph */
   bool build_graph()
   {
     if (!rndf_->is_valid)
@@ -256,8 +255,8 @@ public:
   }
 
   
-  /** send order in command to navigator driver */
-  void putOrder(art_nav::Order order)
+  /** Send order in command to navigator driver */
+  void putOrder(const art_nav::Order &order)
   {
     art_nav::NavigatorCommand cmd;
     cmd.header.stamp = ros::Time::now();
@@ -266,7 +265,7 @@ public:
     nav_cmd_pub_.publish(cmd);
   }
 
-  /** main spin loop */
+  /** Main spin loop */
   bool spin()
   {
     if (startrun_)                      // -r option specified?
@@ -320,7 +319,8 @@ public:
     ROS_INFO("Robot shut down.");
     return true;
   };
-  
+
+  /** Print command argument usage message */
   void print_usage(int argc, char** argv)
   {
     std::cerr << "usage:  rosrun art_nav commander [options]"
@@ -334,7 +334,7 @@ public:
 	      << std::endl;
   }
 
-  /** wait until all required input topics available */
+  /** Wait for navigator state message to arrive */
   bool wait_for_input()
   {
     ROS_INFO("Waiting for navigator input");
@@ -377,7 +377,7 @@ private:
   art_nav::NavigatorState navState_;
 };
 
-/** main program */
+/** Main program */
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "commander");

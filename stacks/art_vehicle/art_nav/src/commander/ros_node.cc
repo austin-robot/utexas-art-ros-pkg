@@ -146,9 +146,12 @@ public:
   /** Set up ROS topics */
   bool setup(ros::NodeHandle node)
   {   
+    // no delay: we always want the most recent data
+    ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
     static int qDepth = 1;
     nav_state_topic_ = node.subscribe("navigator/state", qDepth,
-                                      &CommanderNode::processNavState, this);
+                                      &CommanderNode::processNavState, this,
+                                      noDelay);
     nav_cmd_pub_ = 
       node.advertise<art_nav::NavigatorCommand>("navigator/cmd", qDepth);
     return true;
@@ -157,16 +160,12 @@ public:
   /** Process navigator state input */
   void processNavState(const art_nav::NavigatorState::ConstPtr &nst)
   {
-    if (nav_state_msg_.header.stamp == ros::Time())
-      {
-        ROS_INFO("initial navigator state received");
-      }
+    ROS_DEBUG("navigator state message received");
     nav_state_msg_ = *nst;
   }
 
   bool parse_args(int argc, char** argv)
   {
-
     // set the flags
     const char* optflags = "rv?";
     int ch;
@@ -286,6 +285,8 @@ public:
     // loop until end of mission
     while(ros::ok())
       {
+        ros::spinOnce();                  // handle incoming messages
+
         // ROS_DEBUG_STREAM:
         ROS_INFO_STREAM("navstate = "
                          << NavEstopState(navState_.estop).Name()
@@ -342,6 +343,7 @@ public:
     ros::Rate cycle(HERTZ_COMMANDER);
     while(ros::ok())
       {
+        ros::spinOnce();                // handle incoming messages
         if (nav_state_msg_.header.stamp != ros::Time())
           {
             ROS_INFO("Navigator input received");

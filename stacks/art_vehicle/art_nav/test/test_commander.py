@@ -21,16 +21,15 @@ last_order = None
 
 def log_cmd(cmd):
     global last_order
-    if not have_cmd:
+    if not last_order:
         rospy.loginfo("first navigator command received")
         rospy.loginfo(str(cmd))
-        have_cmd = True;
     last_order = cmd.order
     rospy.loginfo('order ' + str(cmd.behavior.value) + ' received')
 
 def log_state(state_msg):
     #rospy.loginfo('publishing ' + str(state_msg))
-    rospy.loginfo('publishing ' + str(state_msg.header.seq))
+    rospy.logdebug('publishing ' + str(state_msg.header.seq))
 
 def test():
     topic = rospy.Publisher('navigator/state', NavigatorState)

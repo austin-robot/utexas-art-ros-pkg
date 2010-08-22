@@ -1,0 +1,179 @@
+//
+// Navigator stop controller
+//
+//  Copyright (C) 2007 Austin Robot Technology
+//  All Rights Reserved. Licensed Software.
+//
+//  This is unpublished proprietary source code of Austin Robot
+//  Technology, Inc.  The copyright notice above does not evidence any
+//  actual or intended publication of such source code.
+//
+//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
+//
+//
+// This is based on the unpublished "Control Tutorial" draft dated
+// January 26, 2004 by Dr. Benjamin Kuypers, section 5: "The Stopping
+// Controller".  He recommends a constant deceleration instead of the
+// simpler exponential decay.  The dynamical system is:
+//
+//	x_dot = -k * sqrt(x)
+//
+// Solving analytically with initial condition x(0) = D and v(0) = V
+// yields these equations of motion:
+//
+//	x(t) = (sqrt(D) - V*t/(2*sqrt(D)))**2	(parabolic drop)
+//	v(t) = dx/dt = (V**2/2*D)*t + V		(linear velocity)
+//	a(t) = dv/dt = V**2/(2*D) = A		(constant deceleration)
+//
+// Note that the initial velocity V is negative in these equations,
+// because it represents motion from positive x to zero.  The system
+// stops in finite time T = -2*D/V, with x(T) = 0, and v(T) = 0.
+//
+// For example, when D = 10m from stop line and V = -5m/s, the vehicle
+// stops in 4 seconds at a constant 1.25m/s/s deceleration.
+//
+//  $Id$
+//
+//  Author: Jack O'Quin
+//
+
+#include "navigator_internal.h"
+#include "Controller.h"
+#include "course.h"
+#include "stop.h"
+
+#include <art/DARPA_rules.hh>
+
+Stop::Stop(Navigator *navptr, int _verbose):
+  Controller(navptr, _verbose)
+{
+  reset();
+};
+
+Stop::~Stop() {};
+
+// configuration method
+void Stop::configure(ConfigFile* cf, int section)
+{
+  min_stop_distance = cf->ReadFloat(section, "min_stop_distance", 5.0);
+  ART_MSG(2, "\tminimum distance to begin stopping is %.3f m",
+	  min_stop_distance);
+
+  stop_creep_speed = cf->ReadFloat(section, "stop_creep_speed", 1.0);
+  ART_MSG(2, "\tspeed while creeping forward is %.3f m/s",
+	  stop_creep_speed);
+
+  max_creep_distance = cf->ReadFloat(section, "max_creep_distance", 
+				     ArtVehicle::length);
+  ART_MSG(2, "\tdistance in which creep applies is %.3f m/s",
+	  max_creep_distance);
+
+  stop_deceleration = cf->ReadFloat(section, "stop_deceleration", 0.2);
+  ART_MSG(2, "\tdesired stopping deceleration is %.3f m/s/s",
+	  stop_deceleration);
+
+  // stop_latency compensates for latency in the braking system
+  //stop_latency = cf->ReadFloat(section, "stop_latency", 1.5);
+  stop_latency = cf->ReadFloat(section, "stop_latency", 0.0);
+  ART_MSG(2, "\tstopping latency is %.3f sec", stop_latency);
+};
+
+Controller::result_t Stop::control(pilot_command_t &pcmd)
+{
+  ART_ERROR("Stop::control() requires a float distance parameter,");
+  ART_ERROR("                regular control() interface not supported.");
+  return NotApplicable;
+}
+
+// Set speed for steady deceleration for stop distance
+//
+// entry:
+//	pcmd contains desired heading and speed, assuming it is not
+//	     yet time to stop.
+//	distance to stop location along current path
+//	threshold: finished when stopped within this distance
+// returns:
+//	OK if in process of stopping;
+//	Finished if stop point reached.
+//
+Controller::result_t Stop::control(pilot_command_t &pcmd,
+				   float distance, float threshold,
+				   float topspeed)
+{
+  result_t result = OK;
+
+  // stop_latency compensates for latency in the braking system.
+  float latencydist = fabsf(estimate->vel.px) * stop_latency;
+  float D = distance - latencydist;
+
+  // According to the model, deceleration should be constant, but in
+  // the real world control latency will cause it to vary, so apply
+  // feedback and recompute the model every cycle.
+  float abs_speed = fabsf(estimate->vel.px);
+  if (abs_speed < Epsilon::speed)
+    abs_speed = 0.0;
+  float V = -abs_speed;
+  float A = V*V/(2.0*D);
+
+  // see if it is time to begin stopping
+  if ((D <= min_stop_distance || A >= stop_deceleration)
+      && !stopping)
+    {
+      stopping = true;
+      initial_speed = fmaxf(topspeed,abs_speed);
+      if (verbose)
+	ART_MSG(2, "begin stopping while %.3fm distant", distance);
+    }
+
+  // Once stopping is initiated, keep doing it until reset(), no
+  // matter how V changes.
+  if (stopping)
+    {
+
+      if (D <= threshold)
+	{
+	  pcmd.velocity = 0.0;		// halt immediately.
+
+	  // report Finished when stopped within stop polygon
+	  if (abs_speed < Epsilon::speed)
+	    result = Finished;
+	}
+      else if (!creeping && abs_speed >= Epsilon::speed)
+	{
+	  // Not there yet.  Do not let the requested speed increase
+	  // above initial speed when stopping began, even when the
+	  // car was accelerating.
+	  pcmd.velocity = fminf(pcmd.velocity, abs_speed - A);
+	  pcmd.velocity = fminf(pcmd.velocity, initial_speed);
+	  if (pcmd.velocity < 0.0)
+	    pcmd.velocity = 0.0;	// do not change direction
+	}
+      else if (D <= max_creep_distance)
+	{
+	  if (!creeping && verbose)
+	    ART_MSG(2, "begin creeping while %.3fm distant", distance);
+	  creeping = true;
+	  // stopped too soon, keep creeping forward
+	  pcmd.velocity = fminf(pcmd.velocity, stop_creep_speed);
+	}
+      
+      if (verbose >= 2)
+	{
+	  ART_MSG(5, "current, desired speed %.3f m/s, %.3f, decel %.3f m/s/s",
+		  abs_speed, pcmd.velocity, A);
+	  ART_MSG(5, "distance %.3f m, threshold %.3f, latency %.3f",
+		  distance, threshold, latencydist);
+	}
+    }
+
+  trace("stop controller", pcmd, result);
+  return result;
+};
+
+// reset controller
+void Stop::reset(void)
+{
+  stopping = false;
+  creeping = false;
+  initial_speed = 0.0;
+};

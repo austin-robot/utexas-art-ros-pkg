@@ -21,6 +21,7 @@ rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
-add_subdirectory(src/commander)
 add_subdirectory(src/lib)
 add_subdirectory(src/pilot)
+add_subdirectory(src/commander)
+#add_subdirectory(src/navigator)

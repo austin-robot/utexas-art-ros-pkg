@@ -1,0 +1,74 @@
+//
+// Navigator zone controller
+//
+//  Copyright (C) 2007 Austin Robot Technology
+//  All Rights Reserved. Licensed Software.
+//
+//  This is unpublished proprietary source code of Austin Robot
+//  Technology, Inc.  The copyright notice above does not evidence any
+//  actual or intended publication of such source code.
+//
+//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
+//
+//  $Id$
+//
+//  Author: Mickey Ristroph
+//
+
+#ifndef __VORONOI_ZONE_HH__
+#define __VORONOI_ZONE_HH__
+#include "parking.h"
+#include "follow_lane.h"
+
+class Safety;
+class Halt;
+class ZoneManager;
+
+class VoronoiZone: public Controller
+{
+public:
+
+  VoronoiZone(Navigator *navptr, int _verbose);
+  ~VoronoiZone();
+  void configure(ConfigFile* cf, int section);
+  result_t control(pilot_command_t &pcmd);
+  void reset(void);
+
+private:
+  // state
+  bool in_fake_zone;
+
+  // .cfg variables
+  float zone_speed_limit;
+  float zone_safety_radius;
+  float zone_perimeter_sample;
+  float fake_zone_border;
+  float fake_zone_included_obstacle_radius;
+  float zone_evg_thin_scale;
+  int zone_grid_max_cells;
+  bool zone_use_voronoi;
+  bool zone_avoid_obstacles;
+  bool zone_write_graph_to_tmp;
+  bool zone_write_poly_to_tmp;
+  bool zone_write_obstacles_to_tmp;
+  float zone_aim_point;
+
+  Safety *safety;
+  Halt *halt;
+
+  Controller::result_t set_heading(pilot_command_t &pcmd);
+
+  rotate_translate_transform trans;
+
+  PolyOps pops;
+  ZoneManager *zmanager;
+
+  PARK_control *park;
+
+  
+  FollowLane* follow_lane;
+  float lastYaw;
+  mapxy_list_t spot_points;
+};
+
+#endif // __VORONOI_ZONE_HH__

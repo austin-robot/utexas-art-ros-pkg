@@ -289,7 +289,8 @@ public:
       {
         ros::spinOnce();                  // handle incoming messages
 
-        ROS_DEBUG_STREAM("navstate = "
+        //ROS_DEBUG_STREAM("navstate = "
+        ROS_INFO_STREAM("navstate = "
                          << NavEstopState(navState_.estop).Name()
                          << ", " << NavRoadState(navState_.road).Name()
                          << ", last_waypt = "

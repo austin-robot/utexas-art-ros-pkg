@@ -54,7 +54,7 @@ art_nav::Order Commander::command(const art_nav::NavigatorState &_navstate)
   //order.min_speed = 0.0;
 
   // handle initial startup sequence
-  if (NavEstopState(navstate->estop) != NavEstopState::Run)
+  if (navstate->estop.state != art_nav::EstopState::Run)
     {
       // do nothing if Navigator not running
       ROS_DEBUG("Waiting for Navigator to enter Run state.");

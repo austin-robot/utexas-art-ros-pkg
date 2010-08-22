@@ -27,7 +27,6 @@ Commander::Commander(int verbosity, double limit,
   graph = _graph;
   mission = _mission;
   blockages = new Blockages(graph, route);
-  memset(&order, 0, sizeof(order));     // TODO: better reset?
   set_checkpoint_goals();
   replan_num = 0;
 }

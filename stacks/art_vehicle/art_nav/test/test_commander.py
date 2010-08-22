@@ -14,10 +14,12 @@ roslib.load_manifest('art_nav')
 
 import rospy
 from art_common.msg import ArtHertz
+from art_map.msg import MapID
 from art_nav.msg import Behavior
 from art_nav.msg import EstopState
 from art_nav.msg import NavigatorCommand
 from art_nav.msg import NavigatorState
+from art_nav.msg import RoadState
 
 last_order = None
 
@@ -30,6 +32,37 @@ def log_cmd(cmd):
 
 def log_state(state_msg):
     rospy.logdebug('publishing ' + str(state_msg.header.seq))
+
+def estop_state_changes(state_msg):
+    "do some E-stop state transitions, returns updated state message"
+    if last_order.behavior.value == Behavior.Run:
+        if state_msg.estop.state != EstopState.Run:
+            state_msg.estop.state = EstopState.Run
+            rospy.loginfo('entering E-stop Run state')
+    elif last_order.behavior.value == Behavior.Pause:
+        if state_msg.estop.state != EstopState.Pause:
+            state_msg.estop.state = EstopState.Pause
+            rospy.loginfo('entering E-stop Pause state')
+    elif (last_order.behavior.value == Behavior.Quit
+          or last_order.behavior.value == Behavior.Abort):
+        if state_msg.estop.state != EstopState.Done:
+            state_msg.estop.state = EstopState.Done
+            rospy.loginfo('entering E-stop Done state')
+    return state_msg
+
+def road_state_changes(state_msg):
+    """do some road state transitions when running
+       returns updated state message"""
+    rospy.loginfo('Running, checking behavior')
+    if last_order.behavior.value == Behavior.Initialize:
+        if state_msg.road.state == RoadState.Init:
+            state_msg.road.state = RoadState.Follow
+            # set initial way-point to 1.1.1
+            state_msg.last_waypt.seg = 1
+            state_msg.last_waypt.lane = 1
+            state_msg.last_waypt.pt = 1
+            rospy.loginfo('entering Road Follow state')
+    return state_msg
 
 def test():
     topic = rospy.Publisher('navigator/state', NavigatorState)
@@ -47,22 +80,10 @@ def test():
 
         # echo last order, if any received yet
         if last_order:
+            state_msg = estop_state_changes(state_msg)
+            if state_msg.estop.state == EstopState.Run:
+                state_msg = road_state_changes(state_msg)
             state_msg.last_order = last_order
-
-            # do some E-stop state transitions
-            if last_order.behavior.value == Behavior.Run:
-                if state_msg.estop.state != EstopState.Run:
-                    state_msg.estop.state = EstopState.Run
-                    rospy.loginfo('entering Run state')
-            elif last_order.behavior.value == Behavior.Pause:
-                if state_msg.estop.state != EstopState.Pause:
-                    state_msg.estop.state = EstopState.Pause
-                    rospy.loginfo('entering Pause state')
-            elif (last_order.behavior.value == Behavior.Quit
-                  or last_order.behavior.value == Behavior.Abort):
-                if state_msg.estop.state != EstopState.Done:
-                    state_msg.estop.state = EstopState.Done
-                    rospy.loginfo('entering Done state')
 
         log_state(state_msg)
         topic.publish(state_msg)

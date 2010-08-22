@@ -1,9 +1,9 @@
 
 define sick_laser laser
 (
-  range_min 0.0
+  #range_min 0.0        
   range_max 80.0
-  fov 3.14159
+  fov 180               # should be 3.14159 radians, but it's not
   samples 181
 
   color "blue"

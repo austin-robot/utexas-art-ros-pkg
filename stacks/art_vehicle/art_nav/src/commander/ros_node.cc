@@ -262,6 +262,9 @@ public:
     cmd.header.stamp = ros::Time::now();
     cmd.header.frame_id = frame_id_;
     cmd.order = order;
+    //ROS_DEBUG_STREAM
+    ROS_INFO_STREAM("sending behavior "
+                    << NavBehavior(cmd.order.behavior).Name());
     nav_cmd_pub_.publish(cmd);
   }
 
@@ -270,7 +273,7 @@ public:
   {
     if (startrun_)                      // -r option specified?
       {
-        ROS_INFO("ordering navigator to RUN");
+        ROS_INFO("ordering navigator to Run");
         art_nav::Order run_order;
         run_order.behavior.value = NavBehavior::Run;
         putOrder(run_order);
@@ -279,9 +282,9 @@ public:
     // initialize Commander class
     Commander commander(verbose_, speed_limit_, graph_, mission_, zones_);
 
-    ros::Rate cycle(art_common::ArtHertz::COMMANDER);
-
     // loop until end of mission
+    ROS_INFO("begin mission");
+    ros::Rate cycle(art_common::ArtHertz::COMMANDER);
     while(ros::ok())
       {
         ros::spinOnce();                  // handle incoming messages

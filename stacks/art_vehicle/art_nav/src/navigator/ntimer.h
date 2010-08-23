@@ -19,10 +19,6 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include <libplayercore/player.h>
-
-#include <art/cycle.h>
-
 /** @brief Navigator driver timer class.
  *
  *  This class is intended for drivers.  Rather than system time, it

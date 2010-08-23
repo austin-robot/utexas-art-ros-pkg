@@ -1,17 +1,9 @@
 /*
- * Queue manager front end for navigator driver.
+ * Queue manager front end for ROS navigator node.
  *
- *  Copyright (C) 2005 Austin Robot Technology
- *  All Rights Reserved. Licensed Software.
+ *  Copyright (C) 2005, 2010 Austin Robot Technology
  *
- *  This is unpublished proprietary source code of Austin Robot
- *  Technology, Inc.  The copyright notice above does not evidence any
- *  actual or intended publication of such source code.
- *
- *  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
- *
- *  If this is ever released publicly, the requirements of the GPL
- *  will apply, due to Player header and library dependencies.
+ *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
@@ -23,103 +15,26 @@
 #define SPAM_SIGNALS 1
 
 #include <unistd.h>
-#include <art/aioservo.h>
-#include <art/observers.h>
-#include <art/ioadr.h>
-#include <art/ZoneOps.h>
-#include <art/steering.h>
+
+#include <art_servo/IOadrCommand.h>
+#include <art_servo/IOadrState.h>
+#include <art_servo/steering.h>
+#include <art_map/ZoneOps.h>
+
+#include <art_nav/Observers.h>
 
 #include "navigator_internal.h"
 #include "course.h"
 #include "obstacle.h"
 
-/** @{ */
-/** @defgroup driver_navigator Urban Challenge navigator
+/** @file
 
- @ingroup driver_planning
  @brief navigate the vehicle towards waypoint goals from commander
 
-Use the @ref client_commander client to control this driver.
-
-Provides
-
-- @ref interface_navigator
-
-Requires
-
-This driver controls two named position2d devices: one for odometry
-and one for control.  That way you can read poses from a localization
-or SLAM system and send commands directly to the robot.  The odometry
-and control devices may be the same.
-
-- "odometry" @ref interface_position2d : source of current pose
-  information.  Normally, the vehicle would use the @ref driver_applanix
-  driver, with the @ref driver_fakeodom driver used for simulation.
-
-- "control" @ref interface_position2d : robot to be controlled;
-  this device must be capable of velocity control (usually you would
-  use the @ref driver_pilot driver)
-
-- @ref interface_aio : turn signal relays ("signals:::aio:0").
-
-Configuration requests
-
-- PLAYER_PLANNER_REQ_ENABLE
-- PLAYER_PLANNER_REQ_GET_WAYPOINTS
-
-Configuration file options
-
-- verbose (integer)
-
-Sets the verbosity level of player log messages created by this
-driver.  Verbose 0 generates minimal output.  The default, verbose 1
-adds some basic status messages.  Larger values result in more output.
-
-Example
-
-This example shows how to use art_navigator to plan and execute
-paths on the A.R.T. autonomous vehicle.
-
-@verbatim
-driver
-(
-  name "art_odometry"
-  plugin "art_odometry"
-  provides ["position2d:0"]
-)
-driver
-(
-  name "art_pilot"
-  plugin "art_pilot"
-  provides ["position2d:1"]
-  requires ["odometry:::position2d:0"]
-  alwayson 1
-)
-driver
-(
-  name "laser_fusion"
-  plugin "laser_fusion"
-  provides ["laser:42"]
-  requires ["position2d:0" "laser:0"]
-)
-driver
-(
-  name "navigator"
-  plugin "navigator"
-  provides ["opaque:0"]
-  requires ["odometry:::position2d:0"
-            "control:::position2d:1"
-            "laser:42"
-	    "maplanes:::opaque:10"
-	    "observers:::opaque:2"
-	    "signals:::aio:0"]
-  verbose 1
-)
-@endverbatim
+Use the commander node to control this driver.
 
 @author Jack O'Quin
 */
-/** @} */
 
 #define CLASS "NavQueueMgr"
 

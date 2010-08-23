@@ -42,7 +42,7 @@
 #include <art_nav/NavigatorState.h>
 
 //TODO create art_observers package with this interface
-//#include <art_nav/odometry.h>
+#include <art_nav/odometry.h>
 
 typedef struct
 {
@@ -60,7 +60,6 @@ class Navigator
  public:
 
   // helper classes
-  Cycle* cycle;				// driver cycle class
   PolyOps* pops;			// polygon operations class
   Course* course;			// course planning class
   Obstacle* obstacle;			// obstacle class
@@ -69,18 +68,18 @@ class Navigator
   Estop	*estop;
 
   // public data used by controllers
-  Order order;				// current commander order
-  nav_state_msg_t navdata;		// current navigator state data
-  player_position2d_data_t estimate;	// estimated control position
+  art_nav::Order order;			// current commander order
+  art_nav/NavigatorState navdata;       // current navigator state data
+  nav_msgs/Odometry estimate;           // estimated control position
   
   Odometry* odometry;
 
   // public methods
-  Navigator(int _verbose, Cycle *_cycle);
+  Navigator();
   ~Navigator();
 
-  // configure .cfg variables
-  void configure(ConfigFile* cf, int section);
+  // configure parameters
+  void configure();
 
   // decrease pilot command velocity, obeying min_speed
   void reduce_speed_with_min(pilot_command_t &pcmd, float new_speed)

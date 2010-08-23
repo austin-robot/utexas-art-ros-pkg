@@ -17,8 +17,8 @@
 #define _OBSTACLE_HH_
 
 #include <vector>
-#include <art/observers.h>
-#include <art/lasers.h>
+#include <art_nav/Observers.h>
+#include <art_nav/lasers.h>
 #include "ntimer.h"
 
 

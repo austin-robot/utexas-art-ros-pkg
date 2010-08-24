@@ -12,18 +12,13 @@
 
 #include <art/error.h>
 #include <art_nav/odometry.h>
-#include <art_map/rotate_translate_transform.h>
 
-Odometry::Odometry(int _verbose)
+Odometry::Odometry()
 {
-  verbose = _verbose;
-  memset(&curr_pos, 0, sizeof(curr_pos));
-  time = 0.0;
-
   listsize=20;
   
   poselist = new Position::Pose3D[listsize];  
-  timelist = new double[listsize];
+  timelist = new ros::Time[listsize];
   
   list_start=list_curr=0;
   list_end=listsize-1;

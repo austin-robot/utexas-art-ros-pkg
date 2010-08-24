@@ -21,26 +21,20 @@ public:
 
   // public data
   nav_msgs::Odometry curr_pos;          // current position
-  double time;				// last message timestamp
+  ros::Time time;                       // last message timestamp
     
-  Odometry(int _verbose);
+  Odometry();
   ~Odometry();
 
   int configure();
   int subscribe();
 
   Position::Pose3D *poselist;
-  double *timelist;
+  ros::Time *timelist;
   
   unsigned int listsize,list_start,list_end, list_curr;
 
-  bool have_odom;
-
 private:
-
-
-  // .cfg variables:
-  int verbose;				// log level verbosity
 
   // odometry interface
   ros::Subscriber odom_topic_;          // odom topic

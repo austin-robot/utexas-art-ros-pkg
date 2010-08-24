@@ -25,7 +25,7 @@
 
 #include "navigator_internal.h"
 #include "course.h"
-#include "obstacle.h"
+//#include "obstacle.h"
 
 /** @file
 
@@ -39,54 +39,35 @@ Use the commander node to control this driver.
 #define CLASS "NavQueueMgr"
 
 // The class for the driver
-class NavQueueMgr : public Driver
+class NavQueueMgr
 {
 public:
     
   // Constructor
-  NavQueueMgr(ConfigFile* cf, int section);
+  NavQueueMgr();
   ~NavQueueMgr()
     {
       delete nav;
-      delete cycle;
-      if (signals) delete signals;
-      if (opaque.data != NULL)
-	delete [] opaque.data;
     };
 
-  int Setup();
-  int Shutdown();
-
-  // method invoked on each incoming message
-  int ProcessMessage(QueuePointer& resp_queue, 
-		     player_msghdr * hdr, void * data);
+  bool setup(ros::NodeHandle node);
+  bool shutdown();
+  void spin(void);
 
 private:
 
-  int  Configure(QueuePointer resp_queue,
-		 player_msghdr *hdr,
-		 void *data);
-  void Main(void);			// main device thread function
-  int  ProcessInput(player_msghdr *hdr, void *data);
   void PublishState(void);
   void SetSignals(void);
   void SetSpeed(pilot_command_t pcmd);
-  void EnableMotor();
 
   // .cfg variables:
   int verbose;				// log level verbosity
-  Cycle *cycle;				// driver cycle class
 
-  // control interface
-  Device *ctl;				// control device
-  player_devaddr_t ctl_addr;		// control device address
-  bool have_ctl;
+  // ROS topics
+  ros::Subscriber ctl_topic_;		// control device (pilot) topic
+  ros::Subscriber map_topic_;           // road map topic
 
-
-  Device *map_lanes;			//map lanes device
-  player_devaddr_t map_lanes_addr;	//map lanes device address
-  bool have_map_lanes;
-
+#if 0
   Device *intersection;			// intersection device
   player_devaddr_t intersection_addr;	// intersection device address
   bool have_intersection;
@@ -94,213 +75,45 @@ private:
   Device *observers;			// observers device
   player_devaddr_t observers_addr;	// observers device address
   bool have_observers;
+#endif
 
   // turn signal variables
-  AioServo *signals;
+  //AioServo *signals;
   bool signal_on_left;			// requested turn signal states
   bool signal_on_right;
 
   // latest order command
-  order_message_t order_cmd;
-
-  player_opaque_data_t opaque;
+  art_nav::Order order_cmd;
 
   // navigator implementation class
-  Navigator* nav;
+  Navigator *nav;
 };
 
-Driver* NavQueueMgr_Init(ConfigFile* cf, int section)
-{
-  // Create and return a new instance of this driver
-  return((Driver*)(new NavQueueMgr(cf, section)));
-}
-
-void NavQueueMgr_Register(DriverTable* table)
-{
-  table->AddDriver("navigator", NavQueueMgr_Init);
-}
-
 // constructor, requesting overwrite of commands
-NavQueueMgr::NavQueueMgr(ConfigFile* cf, int section)
-    : Driver(cf, section, true, PLAYER_MSGQUEUE_DEFAULT_MAXLEN, 
-             PLAYER_OPAQUE_CODE)
+NavQueueMgr::NavQueueMgr()
 {
-  // TODO: allow queuing of opaque Order messages, but nothing else
-  //  //InQueue->SetPull(true);
-  InQueue->SetReplace(true);
-
-  opaque.data_count = (sizeof(art_message_header_t)
-		       + sizeof(nav_state_msg_t));
-  opaque.data = new uint8_t[opaque.data_count];
-
-  // set debug output verbosity, cycle rate
-  verbose = cf->ReadInt(section, "verbose", 0);
-  PLAYER_MSG1(2, CLASS " constructor: verbose level %d", verbose);
-  cycle = new Cycle("navigator", verbose);
-  cycle->Configure(cf, section, HERTZ_NAVIGATOR);
-
   // subscribe to control driver
-  have_ctl = (0 == cf->ReadDeviceAddr(&ctl_addr, section, "requires",
-				      PLAYER_POSITION2D_CODE, -1, "control"));
-  if (have_ctl)
-    ART_MSG(1, "using control:::position2d:%d", ctl_addr.index);
 
-  nav = new Navigator(verbose, cycle);
-  nav->configure(cf, section);
+  nav = new Navigator();
+  nav->configure();
   
-  have_map_lanes = 
-    (0 == cf->ReadDeviceAddr(&map_lanes_addr, section, "requires",
-			     PLAYER_OPAQUE_CODE, -1, "maplanes"));
-  if (have_map_lanes)
-    ART_MSG(1, "using maplanes:::opaque:%d", map_lanes_addr.index);
-  else
-    {
-      ART_ERROR("Required maplanes:::opaque interface missing!");
-      SetError(-1);
-      return;
-    }
-
-  have_intersection = 
-    (0 == cf->ReadDeviceAddr(&intersection_addr, section, "requires",
-			     PLAYER_OPAQUE_CODE, -1, "intersection"));
-  if (have_intersection)
-    ART_MSG(1, "using intersection:::opaque:%d", intersection_addr.index);
-
-  have_observers = 
-    (0 == cf->ReadDeviceAddr(&observers_addr, section, "requires",
-			     PLAYER_OPAQUE_CODE, -1, "observers"));
-  if (have_observers)
-	ART_MSG(1, "using observers:::opaque:%d", observers_addr.index);
-
-  signals = new AioServo("signals", 0.0, verbose);
-  if (0 != signals->CfgRequires(cf, section)) // no turn signal device
-    {
-      ART_MSG(4, "no turn signal interface available");
-      delete signals;
-      signals = NULL;
-    }
+  //signals = new AioServo("signals", 0.0, verbose);
   signal_on_left = signal_on_right = false;
   
 
 }
 
-// Set up the device.
-int NavQueueMgr::Setup()
+// Set up node message topics.
+bool NavQueueMgr::setup(ros::NodeHandle node)
 {   
-  ctl = NULL;
-  if (have_ctl)
-    {
-      // get the pointer to the odometry
-      if (verbose)
-	ART_MSG(2, "finding control:::position2d:%d", ctl_addr.index);
-      ctl = deviceTable->GetDevice(ctl_addr);
-      if (ctl == NULL)
-	{
-	  ART_ERROR("unable to find control driver");
-	  return -1;
-	}
-      if (ctl->Subscribe(InQueue) != 0)
-	{
-	  ART_ERROR("unable to subscribe to control driver");
-	  return -1;
-	}
-      if (verbose)
-	ART_MSG(2, CLASS ": subscribed to control.");
-    }
-  else					// control missing
-    {
-      ART_ERROR(CLASS " Required control interface not provided!\n");
-      return -1;
-    }
-
-  if (nav->odometry->have_odom)
-    {
-      if (0 != nav->odometry->subscribe(InQueue))
-	return -1;
-    }
-  else ART_MSG(2, CLASS " No odometry interface, using control instead.\n");
-  
-  nav->obstacle->lasers->subscribe_lasers(InQueue);  
-  
-  map_lanes = NULL;
-  if(have_map_lanes)
-  {
-	if(verbose)
-		ART_MSG(2, "finding maplanes:::opaque:%d..",
-			map_lanes_addr.index);
-	map_lanes = deviceTable->GetDevice(map_lanes_addr);
-	if(map_lanes == NULL)
-	  {
-		ART_ERROR("unable to find map lane driver");
-		return -1;
-	  }
-	if(map_lanes->Subscribe(InQueue) != 0)
-	  {
-		ART_ERROR("unable to subscribe to map lanes");
-		return -1;
-	  }
-	if(verbose)
-		ART_MSG(2, CLASS ": subscribed to map lanes");
-  }
-  
-  intersection = NULL;
-  if(have_intersection)
-    {
-      if(verbose)
-	ART_MSG(2, "finding intersection:::opaque:%d..",
-		intersection_addr.index);
-      intersection = deviceTable->GetDevice(intersection_addr);
-      if(intersection == NULL)
-	{
-	  ART_ERROR("unable to find intersection driver");
-	  return -1;
-	}
-      if(intersection->Subscribe(InQueue) != 0)
-	{
-	  ART_ERROR("unable to subscribe to intersection");
-	  return -1;
-	}
-      if(verbose)
-	ART_MSG(2, CLASS ": subscribed to intersection");
-  }
-  
-  observers = NULL;
-  if(have_observers)
-    {
-      if(verbose)
-	ART_MSG(2, "finding observers:::opaque:%d..",
-		observers_addr.index);
-      observers = deviceTable->GetDevice(observers_addr);
-      if(observers == NULL)
-	{
-	  ART_ERROR("unable to find observers driver");
-	  return -1;
-	}
-      if(observers->Subscribe(InQueue) != 0)
-	{
-	  ART_ERROR("unable to subscribe to observers");
-	  return -1;
-	}
-      if(verbose)
-	ART_MSG(2, CLASS ": subscribed to observers");
-  }
-
-  if (signals && 0 != signals->Subscribe(InQueue))
-    return -1;
-  
-  StartThread();
-  return 0;
+  return true;
 }
 
 
-// Shutdown the device
-int NavQueueMgr::Shutdown()
+// Shutdown the node
+bool NavQueueMgr::shutdown()
 {
-  // Stop and join the driver thread
-  ART_MSG(1, CLASS " Shutting down Navigator");
-  StopThread();
-
-  cycle->End();
+  ROS_INFO("Shutting down navigator node");
 
   // issue immediate halt command to pilot
   pilot_command_t cmd;
@@ -308,58 +121,15 @@ int NavQueueMgr::Shutdown()
   cmd.yawRate = 0.0;
   SetSpeed(cmd);
 
+#if 0
   nav->obstacle->lasers->unsubscribe_lasers();
-
-
-  if (ctl)
-    ctl->Unsubscribe(InQueue);
-
   nav->odometry->unsubscribe();
-
-  if (have_map_lanes)
-    map_lanes->Unsubscribe(InQueue);
-
-  if (have_intersection)
-    intersection->Unsubscribe(InQueue);
-
-  if (have_observers)
-    observers->Unsubscribe(InQueue);
-
-  if (signals)
-    signals->Unsubscribe();
+#endif
 
   return 0;
 }
 
-int NavQueueMgr::ProcessMessage(QueuePointer& resp_queue, 
-                                  player_msghdr * hdr,
-                                  void * data)
-{
-  if (verbose >= 2)
-    ART_MSG(4, CLASS "::ProcessMessage() type: (%d, %d) [time %.6f]",
-	    hdr->type, hdr->subtype, cycle->Time());
-
-  // Look for configuration requests
-  if (hdr->type == PLAYER_MSGTYPE_RESP_ACK) 
-    return 0;
-
-  if (hdr->type == PLAYER_MSGTYPE_REQ)
-    return Configure(resp_queue, hdr, data);
-  else
-    return ProcessInput(hdr, data);
-
-  ART_ERROR("unknown " CLASS " message type: %d", hdr->type);
-  return -1;
-}  
-
-int NavQueueMgr::Configure(QueuePointer resp_queue,
-		    player_msghdr *hdr,
-		    void *data)
-{
-  ART_ERROR("unknown " CLASS " config request: %d", hdr->subtype);
-  return -1;
-}
-
+#if 0 // read corresponding ROS topics instead
 int NavQueueMgr::ProcessInput(player_msghdr *hdr, void *data)
 {
   if (Message::MatchMessage(hdr,
@@ -518,10 +288,12 @@ int NavQueueMgr::ProcessInput(player_msghdr *hdr, void *data)
     }
   return 0;
 }
+#endif
 
-// Set or reset turn signal relays
+/** Set or reset turn signal relays */
 void NavQueueMgr::SetSignals(void)
 {
+#if 0
 #ifdef RELAY_FEEDBACK
 
   if (signal_on_left != nav->navdata.signal_left)
@@ -576,12 +348,13 @@ void NavQueueMgr::SetSignals(void)
 		(signal_on_right? "on": "off"));
     }
 #endif // RELAY_FEEDBACK
+#endif
 }
 
-// Send a command to the underlying position2d control device
+/** Send a command to the pilot */
 void NavQueueMgr::SetSpeed(pilot_command_t pcmd)
 {
-
+#if 0
 #if 1
   player_position2d_cmd_car_t cmd;
   memset(&cmd, 0, sizeof(cmd));
@@ -615,32 +388,13 @@ void NavQueueMgr::SetSpeed(pilot_command_t pcmd)
   ctl->PutMsg(this->InQueue, PLAYER_MSGTYPE_CMD, PLAYER_POSITION2D_CMD_VEL,
 	      (void*) &cmd, sizeof(cmd), NULL);
 #endif
+#endif
 }
-
-void NavQueueMgr::EnableMotor() {
-
-  player_position2d_power_config_t power_config;
-  power_config.state=true;
-  
-  ctl->PutMsg(this->InQueue, PLAYER_MSGTYPE_REQ, 
-	      PLAYER_POSITION2D_REQ_MOTOR_POWER,
-	      (void*) &power_config, sizeof(power_config), NULL);
-}
-
 
 // Publish current navigator state data
 void NavQueueMgr::PublishState(void)
 {
-  // format opaque message
-
-  art_message_header_t msghdr;
-  msghdr.type = NAVIGATOR_MESSAGE;
-  msghdr.subtype = NAVIGATOR_MESSAGE_STATE_DATA;
-
-
-  memcpy(opaque.data, &msghdr, sizeof(msghdr));
-  memcpy(opaque.data+sizeof(msghdr), &nav->navdata, sizeof(nav->navdata));
-
+#if 0
   if (verbose >= 2)
     ART_MSG(7, "Publishing Navigator state = %s, %s, last_waypt %s"
 	    ", replan_waypt %s, R%d S%d Z%d, next waypt %s, goal chkpt %s",
@@ -658,24 +412,16 @@ void NavQueueMgr::PublishState(void)
   Publish(device_addr,
 	  PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,
 	  (void*)&opaque, sizeof(opaque.data_count) + opaque.data_count);
-
+#endif
 }
 
-// Main function for device thread
-void NavQueueMgr::Main() 
+/** Spin method for main thread */
+void NavQueueMgr::spin() 
 {
-  cycle->Start();
-
-  EnableMotor();
-
-  for(;;)
+  ros::Rate cycle(art_common::ArtHertz::NAVIGATOR);
+  while(ros::ok())
     {
-      // see if we are supposed to exit
-      pthread_testcancel();
-
-      // Process incoming messages.  NavQueueMgr::ProcessMessage() is
-      // called on each message.
-      ProcessMessages();
+      ros::spinOnce();                  // handle incoming messages
 
       // invoke appropriate Navigator method, pass result to Pilot
       SetSpeed(nav->navigate());
@@ -685,15 +431,27 @@ void NavQueueMgr::Main()
       PublishState();
 
       // wait for next cycle
-      cycle->Wait();
+      cycle.sleep();
     }
 }
 
-// Extra stuff for building a shared object.
-extern "C" {
-  int player_driver_init(DriverTable* table)
-  {
-    NavQueueMgr_Register(table);
-    return 0;
-  }
+/** Main program */
+int main(int argc, char **argv)
+{
+  ros::init(argc, argv, "commander");
+  ros::NodeHandle node;
+  NavQueueMgr nq;
+  
+  // set up ROS topics
+  if (!nq.setup(node))
+    return 1;
+
+  // keep running until mission completed
+  nq.spin();
+
+  // shut down node
+  if (!nq.shutdown())
+    return 3;
+
+  return 0;
 }

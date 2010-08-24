@@ -1,14 +1,10 @@
-/*
- *  Description:  Navigator obstacle class
+/* -*- mode: C++ -*-
  *
- *  Copyright Austin Robot Technology                    
- *  All Rights Reserved. Licensed Software.
+ *  Navigator obstacle class
  *
- *  This is unpublished proprietary source code of Austin Robot
- *  Technology, Inc.  The copyright notice above does not evidence any
- *  actual or intended publication of such source code.
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
  *
- *  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
+ *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
@@ -59,7 +55,7 @@ class Obstacle
   bool car_approaching();
 
   /** @brief set configuration variables. */
-  void configure(ConfigFile* cf, int section);
+  void configure();
 
   /** @brief return distance to closest obstacle ahead in course plan */
   float closest_ahead_in_plan(void);
@@ -70,6 +66,7 @@ class Obstacle
   /** @brief return true if class initialized */
   bool initialized(void) {return lasers->have_ranges;};
 
+#if 0
   /** @brief handle intersection driver message
    *
    *  TEMPORARY: bridge old driver to observers interface
@@ -85,7 +82,7 @@ class Obstacle
    */
   int intersection_message(player_msghdr *hdr,
 			   player_opaque_data_t *opaque);
-
+#endif
 
   /** @brief maximum scan range accessor. */
   float maximum_range(void) {return lasers->max_range;}

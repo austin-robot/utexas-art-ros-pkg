@@ -19,20 +19,17 @@
 #include <sys/time.h>
 #include <time.h>
 
-/** @brief Navigator driver timer class.
+/** @brief Navigator node timer class.
  *
- *  This class is intended for drivers.  Rather than system time, it
- *  uses the ART Cycle class, which simulates time when running in
- *  Stage.
+ *  This class is specific to the navigator node.
  */
 class NavTimer
 {
  public:
 
   /** @brief Constructor */
-  NavTimer(Cycle *_cycle)
+  NavTimer()
     {
-      cycle = _cycle;
       this->Cancel();
     };
 
@@ -57,7 +54,7 @@ class NavTimer
       return false;			// timer not set
 
     // decrement time remaining by the duration of one cycle
-    time_remaining -= (1.0 / cycle->Frequency());
+    time_remaining -= (1.0 / art_common::ArtHertz::NAVIGATOR);
     return (time_remaining <= 0.0);
   }
 
@@ -82,7 +79,6 @@ class NavTimer
 
  protected:
 
-  Cycle *cycle;				//< driver cycle class
   double time_remaining;		//< time remaining until done
   bool timer_running;			//< true when timer running
 };

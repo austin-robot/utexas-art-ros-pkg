@@ -1,14 +1,10 @@
-/*
- *  Description:  Navigator course planning class
+/* -*- mode: C++ -*-
  *
- *  Copyright Austin Robot Technology                    
- *  All Rights Reserved. Licensed Software.
+ *  Navigator course planning class
  *
- *  This is unpublished proprietary source code of Austin Robot
- *  Technology, Inc.  The copyright notice above does not evidence any
- *  actual or intended publication of such source code.
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
  *
- *  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
+ *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
@@ -45,21 +41,21 @@ class Course
   void begin_run_cycle(void);
 
   /** @brief set configuration variables. */
-  void configure(ConfigFile* cf, int section);
+  void configure();
 
   /** @brief set heading for desired course */
   void desired_heading(pilot_command_t &pcmd, float offset_ratio = 0.0);
 
   /** return distance in a lane to a way-point */
-  float distance_in_plan(const player_pose2d_t &from,
+  float distance_in_plan(const Position::Pose3D &from,
 			 const WayPointNode &wp) const;
 
   /** return distance in a lane to a pose */
-  float distance_in_plan(const player_pose2d_t &from,
-			 const player_pose2d_t &to) const;
+  float distance_in_plan(const Position::Pose3D &from,
+			 const Position::Pose3D &to) const;
 
   /** return distance in a lane to a pose */
-  float distance_in_plan(const player_pose2d_t &from,
+  float distance_in_plan(const Position::Pose3D &from,
 			 const MapXY &to) const;
 
   /** @brief Course class termination for run state cycle. */
@@ -77,14 +73,14 @@ class Course
   void find_travel_lane(bool rejoin);
 
   /** @brief return true if pose is in the current travel lane */
-  bool in_lane(const player_pose2d_t &pose) const
+  bool in_lane(const Position::Pose3D &pose) const
   {
     return in_poly_list(plan, pose);
   }
 
   /** @brief return true if pose is in the polys list */
   bool in_poly_list(const poly_list_t &polys,
-		    const player_pose2d_t &pose) const
+		    const Position::Pose3D &pose) const
   {
     return (pops->getContainingPoly(polys, pose) >= 0);
   }
@@ -106,7 +102,7 @@ class Course
    * @param lanes pointer to the lanes message in the player message
    * queue.  Must copy the data before returning.
    */
-  void lanes_message(lanes_state_msg_t* lanes);
+  void lanes_message(art_map::ArtLanes *lanes);
 
   /** @brief log a vector of polygons */
   void log(const char *str, const poly_list_t &polys);
@@ -115,9 +111,8 @@ class Course
   void new_waypoint_reached(ElementID new_way)
   {
     waypoint_checked = true;
-    navdata->last_waypt = new_way;
-    if (verbose)
-      ART_MSG(2, "reached waypoint %s", navdata->last_waypt.name().str);
+    navdata->last_waypt = new_way.toMapID();
+    ROS_DEBUG_STREAM("reached waypoint %s" << new_way.name().str);
   };
 
   /** @brief return true if current order does not match saved
@@ -275,7 +270,7 @@ class Course
 
   poly_list_t passed_lane;		//< original lane being passed
   bool passing_left;			//< when passing, true if to left
-  player_pose2d_t start_pass_location;	//< pose where passing started
+  Position::Pose3D start_pass_location;	//< pose where passing started
 
   WayPointNode stop_waypt;		//< coming stop or U-turn way-point
   poly stop_poly;			//< polygon containing stop waypt
@@ -300,7 +295,8 @@ class Course
 			      float offset_ratio = 0.0);
 
   bool spot_ahead();
-  mapxy_list_t calculate_spot_points(const std::vector<WayPointNode>& new_waypts);
+  mapxy_list_t calculate_spot_points(const std::vector<WayPointNode>
+                                     &new_waypts);
   mapxy_list_t calculate_spot_points();
   mapxy_list_t calculate_zone_barrier_points();
   bool curr_spot();
@@ -312,7 +308,7 @@ class Course
   // Internal state.  Some of these vectors are class variables to
   // minimize dynamic memory allocation, instead of making them
   // automatic.
-  ElementID plan_waypt[N_ORDER_WAYPTS];	//< waypts in the plan
+  ElementID plan_waypt[art_nav::Order::N_WAYPTS]; //< waypts in the plan
   bool new_plan_lanes;			//< new lanes since plan made
   bool waypoint_checked;
   int poly_index;			// index in polygons of odom pose
@@ -323,7 +319,7 @@ class Course
   int passing_lane;			// index of passing lane (or -1)
 
   // saved order way-points for road block
-  ElementID saved_waypt_id[N_ORDER_WAYPTS];
+  ElementID saved_waypt_id[art_nav::Order::N_WAYPTS];
   int saved_replan_num;
 
   // .cfg variables
@@ -351,10 +347,10 @@ class Course
 
   // convenience pointers to Navigator class data
   PolyOps* pops;			// polygon operations class
-  Order *order;				// current commander order
-  nav_state_msg_t *navdata;		// current navigator state data
-  Odometry *odom;	// current odometry position
-  player_position2d_data_t *estimate;	// estimated control position
+  art_nav::Order *order;                // current commander order
+  art_nav::NavigatorState *navdata;     // current navigator state data
+  nav_msgs::Odometry *odom;             // current odometry position
+  nav_msgs::Odometry *estimate;         // estimated control position
 
   /** @brief head directly for next reachable way-point */
   Polar head_for_waypt(float target_dist);

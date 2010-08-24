@@ -69,8 +69,8 @@ class Navigator
 
   // public data used by controllers
   art_nav::Order order;			// current commander order
-  art_nav/NavigatorState navdata;       // current navigator state data
-  nav_msgs/Odometry estimate;           // estimated control position
+  art_nav::NavigatorState navdata;      // current navigator state data
+  nav_msgs::Odometry estimate;          // estimated control position
   
   Odometry* odometry;
 

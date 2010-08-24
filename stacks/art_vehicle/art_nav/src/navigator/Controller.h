@@ -1,19 +1,13 @@
-//
-// Navigator controller base class
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/* -*- mode: C++ -*-
+ *
+ *  Base class for finite state machine states
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #ifndef __CONTROLLER_HH__
 #define __CONTROLLER_HH__
@@ -64,7 +58,6 @@ public:
     nav = navptr;
 
     // save pointers to frequently-used Navigator data
-    cycle = nav->cycle;
     course = nav->course;
     estimate = &nav->estimate;
     navdata = &nav->navdata;
@@ -81,7 +74,7 @@ public:
   virtual ~Controller() {};
 
   // null configuration method
-  virtual void configure(ConfigFile* cf, int section) {};
+  virtual void configure() {};
 
   // generic controller method
   virtual result_t control(pilot_command_t &pcmd)
@@ -122,13 +115,12 @@ protected:
   int verbose;
 
   // convenience pointers to public Navigator control data
-  Cycle *cycle;
   Course *course;
   Obstacle *obstacle;
-  player_position2d_data_t *estimate;
-  nav_state_msg_t *navdata;
+  nav_msgs::Odometry *estimate;
+  art_nav::NavigatorState *navdata;
   Odometry *odom;
-  Order *order;
+  art_nav::Order *order;
   PolyOps *pops;
 
   // reset this controller only

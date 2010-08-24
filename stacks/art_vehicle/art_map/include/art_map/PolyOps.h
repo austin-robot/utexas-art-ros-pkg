@@ -26,6 +26,8 @@
 #include <set>
 #include <map>
 
+#include <art/Position.h>
+
 #include <art_map/ArtLanes.h>
 #include <art_map/coordinates.h>
 #include <art_map/types.h>
@@ -323,11 +325,11 @@ class PolyOps
   int getContainingPoly(const std::vector<poly> &polys, float x, float y);
   int getContainingPoly(const std::vector<poly>& polys, const MapXY& pt)
   {return getContainingPoly(polys, pt.x, pt.y);};
-  //int getContainingPoly(const std::vector<poly>& polys,
-  //                      const player_pose2d_t &pose)
-  //{
-  //  return getContainingPoly(polys, pose.px, pose.py);
-  //};
+  int getContainingPoly(const std::vector<poly>& polys,
+                        const Position::Pose3D &pose)
+  {
+    return getContainingPoly(polys, pose.x, pose.y);
+  };
 
   // return containing POLYGON ID, -1 if none in list
   poly_id_t getContainingPolyID(const std::vector<poly> &polys,

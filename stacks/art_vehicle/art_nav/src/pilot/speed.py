@@ -33,7 +33,7 @@ import roslib
 roslib.load_manifest('art_nav')
 
 import rospy
-
+import math
 import pid
 
 EPSILON_BRAKE = 0.01
@@ -132,38 +132,72 @@ class SpeedControlRL (SpeedControl) :
     self.action = None
 
   def adjust(self, speed, error, throttle_req, brake_req) :
+    # Update states
+    self.previousState = {}
+    for key in self.currentState :
+      self.previousState[key] = self.currentState[key]
+    self.updateCurrentState(speed, error)
+
+    # Make training update
     if self.training :
-      # TODO: Update the currentState and previousState variables before calling self.update()
-      self.update()
-    #error = goal - speed
-    # if speed > goal, then error < 0, brake
-    # if speed < goal, then error > 0, accelerate
+      if self.action != None : self.update()
 
-    if error > 0 :
-      throttle_req = 1.0
-      brake_req = 0.0
-    if error < 0 :
+    # Choose an action
+    maxAction = -1.0
+    maxScore = self.getQValue(self.currentState, -1.0)
+    for action in self.legalActions() :
+      score = self.getQValue(self.currentState, action)
+      if score > maxScore :
+        maxScore = score
+        maxAction = action
+    self.action = maxAction
+
+    # Translate the action into throttle and brake requests
+    if self.action < 0.0 :
       throttle_req = 0.0
-      brake_req = 1.0
+      brake_req = -self.action
+    else :
+      throttle_req = self.action
+      brake_req = 0.0
 
+    # Return throttle and brake requests
     return throttle_req, brake_req
 
+  def updateCurrentState(self, speed, error) :
+    # TODO: Get better state representation?
+    x = 100
+    while x > 0 :
+      self.currentState['speed' + str(x)] = self.currentState.get('speed' + str(x - 1), 0.0)
+      self.currentState['error' + str(x)] = self.currentState.get('error' + str(x - 1), 0.0)
+      self.currentState['action' + str(x)] = self.currentState.get('action' + str(x - 1), 0.0)
+      x -= 1     
+    self.currentState['action0'] = self.action
+    self.currentState['speed0'] = self.currentState.get('speed', 0.0)
+    self.currentState['error0'] = self.currentState.get('error', 0.0)
+    self.currentState['speed'] = speed
+    self.currentState['error'] = error
+
   def update(self) :
-    # This should be complete
     reward = self.reward()
     correction = (reward + self.gamma * self.getValue(self.currentState)) - self.getQValue(self.previousState, self.action)
     for key in self.currentState.keys() :
       self.weight[self.action][key] = self.weight[self.action].get(key, 0.0) + self.alpha * correction * self.currentState[key]
     return
 
-  #TODO: Define reward function
   def reward(self) :
+    # TODO: Make a better reward function
+    if math.fabs(self.currentState['error']) < 1.0 :
+      return 2.0
+    if math.fabs(self.currentState['error']) < math.fabs(self.currentState['error0']) :
+      return 1.0
+    if math.fabs(self.currentState['error']) > math.fabs(self.currentState['error0']) :
+      return -1.0
     return 0.0
 
   def legalActions(self) :
     actions = []
     temp = -1.0
-    while temp <= -1.0 :
+    while temp <= 1.0 :
       actions += [temp]
       temp += 0.25
     return actions
@@ -171,13 +205,14 @@ class SpeedControlRL (SpeedControl) :
   def getQValue(self, state, action) :
     sum = 0.0
     for key in state.keys() :
-      sum += state.get(key) * self.weight[action].setdefault(key, 0.0)
+      sum += state.get(key) * self.weight[action].get(key, 0.0)
     return sum
     
   def getValue(self, state) :
     return max([self.getQValue(state, action) for action in self.legalActions()])
 
   def configure(self) :
+    #self.update()
     return
 
   def reset(self) :

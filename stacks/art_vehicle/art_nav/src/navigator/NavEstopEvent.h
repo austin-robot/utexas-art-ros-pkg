@@ -18,7 +18,7 @@
 #ifndef __NAV_ESTOP_EVENT_HH__
 #define __NAV_ESTOP_EVENT_HH__
 
-#include <art/FSMevent.h>
+#include <art_nav/FSMevent.h>
 
 class NavEstopEvent: FSMevent
 {

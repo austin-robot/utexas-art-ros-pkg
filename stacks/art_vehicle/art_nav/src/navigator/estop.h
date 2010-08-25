@@ -18,6 +18,8 @@
 #ifndef __ESTOP_HH__
 #define __ESTOP_HH__
 
+#include <art_nav/NavEstopState.h>
+
 #include "Controller.h"
 #include "NavEstopEvent.h"
 
@@ -31,7 +33,7 @@ public:
 
   Estop(Navigator *navptr, int _verbose);
   ~Estop();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 

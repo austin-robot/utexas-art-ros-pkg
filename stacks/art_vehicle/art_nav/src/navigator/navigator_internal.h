@@ -40,6 +40,8 @@
 
 #include <art_nav/NavigatorCommand.h>
 #include <art_nav/NavigatorState.h>
+#include <art_nav/Behavior.h>
+#include <art_nav/NavBehavior.h>
 
 //TODO create art_observers package with this interface
 #include <art_nav/odometry.h>

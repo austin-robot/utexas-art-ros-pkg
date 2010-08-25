@@ -23,19 +23,16 @@
 
 #include "navigator_internal.h"
 #include "course.h"
-#include "obstacle.h"
+
+/** @todo add ROS-style obstacle detection */
+//#include "obstacle.h"
 
 // subordinate controller classes
 #include "estop.h"
 
-Navigator::Navigator(int _verbose, Cycle *_cycle)
+Navigator::Navigator()
 {
-  verbose = _verbose;
-  cycle = _cycle;
-
-  memset(&estimate, 0, sizeof(estimate));
-  memset(&order, 0, sizeof(order));
-  order.behavior = NavBehavior::Pause;	// initial order
+  order.behavior.value = art_nav::Behavior::Pause; // initial order
 
   // set navigator state flags to false, current polygon none
   navdata.cur_poly = -1;
@@ -45,11 +42,11 @@ Navigator::Navigator(int _verbose, Cycle *_cycle)
   navdata.reverse = false;
   navdata.have_zones = false;
 
-  odometry = new Odometry(verbose);
+  odometry = new Odometry();
   // allocate helper classes
   pops = new PolyOps();
   course = new Course(this, verbose);
-  obstacle = new Obstacle(this, verbose);
+  //obstacle = new Obstacle(this, verbose);
 
   // allocate controller classes
   estop = new Estop(this, verbose);
@@ -64,7 +61,7 @@ Navigator::~Navigator()
   delete course; 
   delete pops;
   delete odometry;
-  delete obstacle;
+  //delete obstacle;
 };
 
 // main navigator entry point -- called once every driver cycle
@@ -78,7 +75,8 @@ pilot_command_t Navigator::navigate(void)
   pilot_command_t pcmd;			// pilot command to return
 
   // report whether odometry reports vehicle currently stopped
-  navdata.stopped = (fabsf(odometry->curr_pos.vel.px) < Epsilon::speed);
+  navdata.stopped = (fabsf(odometry->curr_pos.twist.twist.linear.x)
+                     < Epsilon::speed);
 
   // run top-level (E-stop) state machine controller
   estop->control(pcmd);
@@ -91,14 +89,14 @@ pilot_command_t Navigator::navigate(void)
 }
 
 // configure .cfg variables -- called by driver constructor
-void Navigator::configure(ConfigFile* cf, int section)
+void Navigator::configure()
 {
-  ART_MSG(2, "Navigator configuration options:");
+  ROS_INFO("Navigator configuration options:");
 
   // configure controller methods
-  estop->configure(cf,section);
-  course->configure(cf,section);
-  obstacle->configure(cf,section);
-  odometry->configure(cf, section);
+  estop->configure();
+  course->configure();
+  //obstacle->configure(cf,section);
+  odometry->configure();
 }
 

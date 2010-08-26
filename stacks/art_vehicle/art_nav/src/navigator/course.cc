@@ -67,7 +67,8 @@ void Course::begin_run_cycle(void)
   // in the polygons vector, not necessarily the correct one.
 
   // So, first check whether vehicle is in the planned travel lane
-  if (0 <= (poly_index = pops->getContainingPoly(plan, estimate->pos)))
+  if (0 <= (poly_index = pops->getContainingPoly(plan,
+                                                 MapPose(estimate->pose.pose))))
     {
       // This is the normal case.  Re-resolve poly_index relative to
       // polygons vector.
@@ -76,7 +77,8 @@ void Course::begin_run_cycle(void)
   else
     {
       // Not in the planned travel lane, check the whole road network.
-      poly_index = pops->getContainingPoly(polygons, estimate->pos);
+      poly_index = pops->getContainingPoly(polygons,
+                                           MapPose(estimate->pose.pose));
     }
 
   // set cur_poly ID in navdata for Commander (no longer used)
@@ -88,34 +90,36 @@ void Course::begin_run_cycle(void)
   // This order may have been issued before Commander saw the
   // last_waypt Navigator returned in a previous cycle.  Make sure the
   // order reflects the current situation.
-  int limit = N_ORDER_WAYPTS;		// search limit
-  while (order->waypt[0].id != navdata->last_waypt && --limit > 0)
+  int limit = art_nav::Order::N_WAYPTS; // search limit
+  while (ElementID(order->waypt[0].id) != ElementID(navdata->last_waypt)
+         && --limit > 0)
     {
-      if (verbose >= 5)
-	ART_MSG(8, "waypoint %s already reached, advance order->waypt[] array",
-		order->waypt[1].id.name().str);
+      ROS_DEBUG_STREAM("waypoint " << ElementID(order->waypt[1].id).name().str
+                       << " already reached, advance order->waypt[] array");
       // advance order->waypt array by one
-      for (unsigned i = 1; i < N_ORDER_WAYPTS; ++i)
+      for (unsigned i = 1; i < art_nav::Order::N_WAYPTS; ++i)
 	order->waypt[i-1] = order->waypt[i];
     }
 
   // log current order attributes
   if (verbose >= 3)
-    for (unsigned i = 0; i < N_ORDER_WAYPTS; ++i)
-      ART_MSG(8, "waypt[%u] %s (%.3f,%.3f), E%d G%d L%d P%d S%d X%d Z%d",
-	      i, order->waypt[i].id.name().str,
-	      order->waypt[i].map.x, order->waypt[i].map.y,
-	      order->waypt[i].is_entry,
-	      order->waypt[i].is_goal,
-	      order->waypt[i].is_lane_change,
-	      order->waypt[i].is_spot,
-	      order->waypt[i].is_stop,
-	      order->waypt[i].is_exit,
-	      order->waypt[i].is_perimeter);
+    for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
+      ROS_INFO("waypt[%u] %s (%.3f,%.3f), E%d G%d L%d P%d S%d X%d Z%d",
+               i, ElementID(order->waypt[i].id).name().str,
+               order->waypt[i].mapxy.x,
+               order->waypt[i].mapxy.y,
+               (bool) order->waypt[i].is_entry,
+               (bool) order->waypt[i].is_goal,
+               (bool) order->waypt[i].is_lane_change,
+               (bool) order->waypt[i].is_spot,
+               (bool) order->waypt[i].is_stop,
+               (bool) order->waypt[i].is_exit,
+               (bool) order->waypt[i].is_perimeter);
 }
 
-void Course::configure(ConfigFile* cf, int section)
+void Course::configure()
 {
+#if 0
   // how far away (in seconds) we aim when changing lanes
   lane_change_secs = cf->ReadFloat(section, "lane_change_secs", 2.0);
   ART_MSG(2, "\tlane change target is %.3f seconds ahead",
@@ -150,9 +154,10 @@ void Course::configure(ConfigFile* cf, int section)
 
   // Minimum distance to aim for when changing lanes.
   // Should at least include front bumper offset and minimum separation.
-  min_lane_change_dist = cf->ReadFloat(section, "min_lane_change_dist",
-				       (DARPA_rules::min_forw_sep_travel
-					+ ArtVehicle::front_bumper_px));
+  min_lane_change_dist =
+    cf->ReadFloat(section, "min_lane_change_dist",
+                  (DARPA_rules::min_forw_sep_travel
+                   + art_common::ArtVehicle::front_bumper_px));
 				       
   ART_MSG(2, "\tminimum lane change distance is %.3f meters",
 	  min_lane_change_dist);
@@ -192,6 +197,7 @@ void Course::configure(ConfigFile* cf, int section)
 
   spot_waypoint_radius = cf->ReadFloat(section, "spot_waypoint_radius", 0.5);
   ART_MSG(2, "\tzone waypoint radius is %.3f m", spot_waypoint_radius);
+#endif
 }
 
 // set heading for desired course
@@ -221,7 +227,7 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
   float used_velocity=fmaxf(estimate->vel.px,pcmd.velocity);
   float target_dist=min_lane_steer_dist+lane_steer_time*estimate->vel.px;//used_velocity;
 #else
-  float used_velocity=estimate->vel.px;
+  float used_velocity=estimate->twist.twise.linear.x;
   float target_dist=min_lane_steer_dist;
 #endif
   
@@ -232,7 +238,7 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	ART_MSG(5, "no lane data available, steer using waypoints.");
       aim_polar = head_for_waypt(target_dist);
       aim_distance=aim_polar.range;
-      aim_next_heading=Coordinates::normalize(estimate->pos.pa+aim_polar.heading);
+      aim_next_heading =Coordinates::normalize(estimate->pos.pa+aim_polar.heading);
     }
   else 
     {

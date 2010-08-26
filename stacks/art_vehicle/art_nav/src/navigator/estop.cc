@@ -1,19 +1,12 @@
-//
-// Navigator E-stop controller finite state machine
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/*
+ *  Navigator E-stop controller finite state machine
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #include "navigator_internal.h"
 #include "Controller.h"
@@ -84,10 +77,10 @@ void Estop::Add(NavEstopEvent::event_t event, action_t action,
   xp->next = to_state;
 }
 
-void Estop::configure(ConfigFile* cf, int section)
+void Estop::configure()
 {
-  halt->configure(cf, section);
-  run->configure(cf, section);
+  halt->configure();
+  run->configure();
 }
 
 Controller::result_t Estop::control(pilot_command_t &pcmd)
@@ -103,10 +96,12 @@ Controller::result_t Estop::control(pilot_command_t &pcmd)
 
   if (state != prev)
     {
-      if (verbose)
-	ART_MSG(4, "Navigator E-stop state changing from %s to %s, "
-		"event = %s", prev.Name(), state.Name(), event.Name());
-      navdata->estop_state = state;	// update data state message
+      // update navigator state message
+      //ROS_DEBUG_STREAM
+      ROS_INFO_STREAM("Navigator E-stop state changing from " << prev.Name()
+                       << " to " << state.Name()
+                       << ", event = " << event.Name());
+      navdata->estop.state = (art_nav::EstopState::_state_type) state.Value();
     }
 
   // perform transition action, returning next Pilot command
@@ -122,7 +117,7 @@ NavEstopEvent Estop::current_event(void)
   if (nevent == NavEstopEvent::None)
     {
       // no pending event, translate order behavior into FSM event
-      switch (order->behavior.Value())
+      switch (order->behavior.value)
 	{
 	case NavBehavior::Abort:
 	  nevent = NavEstopEvent::Abort;

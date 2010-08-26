@@ -24,5 +24,10 @@
 #  uturn.cc
 #  voronoi_zone.cc
 #  zone.cc)
-rosbuild_add_executable(navigator queue_mgr.cc navigator.cc)
+rosbuild_add_executable(navigator
+  #course.cc
+  estop.cc
+  navigator.cc
+  queue_mgr.cc
+  )
 target_link_libraries(navigator artnav artmap)

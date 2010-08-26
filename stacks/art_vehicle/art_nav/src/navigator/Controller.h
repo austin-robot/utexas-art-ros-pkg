@@ -119,7 +119,7 @@ protected:
   Obstacle *obstacle;
   nav_msgs::Odometry *estimate;
   art_nav::NavigatorState *navdata;
-  Odometry *odom;
+  nav_msgs::Odometry *odom;
   art_nav::Order *order;
   PolyOps *pops;
 

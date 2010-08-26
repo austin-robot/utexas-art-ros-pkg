@@ -42,7 +42,7 @@ Navigator::Navigator()
   navdata.reverse = false;
   navdata.have_zones = false;
 
-  odometry = new Odometry();
+  odometry = new nav_msgs::Odometry();
   // allocate helper classes
   pops = new PolyOps();
   course = new Course(this, verbose);
@@ -75,7 +75,7 @@ pilot_command_t Navigator::navigate(void)
   pilot_command_t pcmd;			// pilot command to return
 
   // report whether odometry reports vehicle currently stopped
-  navdata.stopped = (fabsf(odometry->curr_pos.twist.twist.linear.x)
+  navdata.stopped = (fabsf(odometry->twist.twist.linear.x)
                      < Epsilon::speed);
 
   // run top-level (E-stop) state machine controller
@@ -96,7 +96,6 @@ void Navigator::configure()
   // configure controller methods
   estop->configure();
   course->configure();
-  //obstacle->configure(cf,section);
-  odometry->configure();
+  //obstacle->configure();
 }
 

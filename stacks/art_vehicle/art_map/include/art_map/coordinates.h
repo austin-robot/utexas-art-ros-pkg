@@ -26,7 +26,9 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Point32.h>
 #include <geometry_msgs/Pose.h>
+#include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
+#include <art/Position.h>
 #include <art/conversions.h>
 
 
@@ -83,6 +85,7 @@ public:
   MapXY(double _x, double _y): x(_x), y(_y) {};
   MapXY(const geometry_msgs::Point &pt): x(pt.x), y(pt.y) {};
   MapXY(const geometry_msgs::Point32 &pt): x(pt.x), y(pt.y) {};
+  MapXY(const Position::Pose3D &pose): x(pose.x), y(pose.y) {};
   MapXY(const MapXY &pt): x(pt.x), y(pt.y) {};
 
   bool operator==(const MapXY &that) const
@@ -126,6 +129,11 @@ public:
   {
     map = MapXY(pose.position);
     yaw = tf::getYaw(pose.orientation);
+  };
+  MapPose(Position::Pose3D pose)
+  {
+    map = MapXY(pose.x, pose.y);
+    yaw = pose.yaw;
   };
 };
 
@@ -194,39 +202,36 @@ namespace Coordinates
     return normalize(bearing(from_pose.map, to_point) - from_pose.yaw);
   }
 
-#ifdef USE_PLAYER
-  inline float bearing(const player_pose2d_t &from_pose, MapXY to_point)
+  inline float bearing(const Position::Pose3D &from_pose, MapXY to_point)
   {
-    return normalize(bearing(MapXY(from_pose), to_point) - from_pose.pa);
+    return bearing(MapPose(from_pose), to_point);
   }
 
   // transform MapXY coordinate to egocentric Polar
-  inline Polar MapXY_to_Polar(MapXY point, const player_pose2d_t &origin)
+  inline Polar MapXY_to_Polar(MapXY point, const nav_msgs::Odometry &origin)
   {
-
     // TODO: figure out how to use Euclidean::DistanceTo() function,
     // (it is not working here for some reason) 
 
     //PFB: It's because there are circular header dependencies.
     //euclidean_distance.h needs this header file.
     
-    MapPose orgpose = origin;
-    MapXY diff=point - orgpose.map;
-    return Polar(bearing(origin, point),
+    MapPose orgpose = MapPose(origin.pose.pose);
+    MapXY diff = point - orgpose.map;
+    return Polar(bearing(orgpose, point),
 		 sqrtf(diff.x*diff.x + diff.y*diff.y));
   }
 
   // transform egocentric Polar coordinate to MapXY
-  inline MapXY Polar_to_MapXY(Polar polar, const player_pose2d_t &origin)
+  inline MapXY Polar_to_MapXY(Polar polar, const MapPose &origin)
   {
-    MapXY retval;
-    float map_heading = origin.pa + polar.heading;
     // Don't normalize map_heading, we just need sin() and cos().
-    retval.x = (origin.px + cosf(map_heading) * polar.range);
-    retval.y = (origin.py + sinf(map_heading) * polar.range);
+    float map_heading = origin.yaw + polar.heading;
+    MapXY retval;
+    retval.x = (origin.map.x + cosf(map_heading) * polar.range);
+    retval.y = (origin.map.y + sinf(map_heading) * polar.range);
     return retval;
   }
-#endif // USE_PLAYER
 
   inline float sign(float val)
   {

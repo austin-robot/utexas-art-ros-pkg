@@ -17,12 +17,9 @@
      @brief ART Euclidean distance functions.
  */
 
-#ifdef USE_PLAYER
-#include <libplayercore/player.h>
-#endif
-
 #include <art/epsilon.h>
 #include <art/infinity.h>
+#include <art/Position.h>
 #include <art_map/types.h>
 
 namespace Euclidean
@@ -97,15 +94,13 @@ namespace Euclidean
 			    distanceLine);
   }
 
-#ifdef USE_PLAYER
   /** find the Euclidean distance between poses p1 and p2 */
-  float inline DistanceTo(player_pose2d_t p1, player_pose2d_t p2)
+  float inline DistanceTo(Position::Pose3D p1, Position::Pose3D p2)
     {
-      float x_dist = p1.px - p2.px;
-      float y_dist = p1.py - p2.py;
+      float x_dist = p1.x - p2.x;
+      float y_dist = p1.y - p2.y;
       return sqrtf(x_dist*x_dist + y_dist*y_dist);
     }
-#endif
 
   /** find the Euclidean distance between poses p1 and p2 */
   float inline DistanceTo(float p1x, float p1y, float p2x, float p2y)
@@ -134,14 +129,12 @@ namespace Euclidean
 	return (distance / abs_speed);
     }
 
-#ifdef USE_PLAYER
   /** find the Euclidean distance between pose and way-point */
-  float inline DistanceToWaypt(const player_pose2d_t &pose,
+  float inline DistanceToWaypt(const Position::Pose3D &pose,
 			       const WayPointNode &waypt)
     {
       return DistanceTo(MapXY(pose), waypt.map);
     }
-#endif
 
   /** find the Euclidean distance between MapXY point and way-point */
   float inline DistanceToWaypt(MapXY point, const WayPointNode &waypt)
@@ -149,16 +142,14 @@ namespace Euclidean
       return DistanceTo(point, waypt.map);
     }
 
-#ifdef USE_PLAYER
   /** find the Euclidean distance between Polar coordinate (relative
    *  to origin) and way-point */
-  float inline DistanceToWaypt(Polar polar, const player_pose2d_t &origin,
+  float inline DistanceToWaypt(Polar polar, const Position::Pose3D &origin,
 			       const WayPointNode &waypt)
     {
       return DistanceTo(Coordinates::Polar_to_MapXY(polar, origin),
 			waypt.map);
     }
-#endif
 
   /** return true if point is in the line segment between lp1 and lp2 */
   bool inline point_in_line_segment(MapXY point, MapXY lp1, MapXY lp2)

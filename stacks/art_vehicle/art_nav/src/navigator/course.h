@@ -79,8 +79,7 @@ class Course
   }
 
   /** @brief return true if pose is in the polys list */
-  bool in_poly_list(const poly_list_t &polys,
-		    const Position::Pose3D &pose) const
+  bool in_poly_list(const poly_list_t &polys, const MapPose &pose) const
   {
     return (pops->getContainingPoly(polys, pose) >= 0);
   }

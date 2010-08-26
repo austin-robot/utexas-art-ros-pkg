@@ -1,19 +1,13 @@
-//
-// Navigator run controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/* -*- mode: C++ -*-
+ *
+ *  Navigator run controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #ifndef __RUN_HH__
 #define __RUN_HH__
@@ -31,7 +25,7 @@ public:
 
   Run(Navigator *navptr, int _verbose);
   ~Run();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
@@ -46,7 +40,7 @@ private:
     } state_t;
 
   state_t go_state;			// current Go behavior FSM state
-  player_pose2d_t blockage_pose;
+  Position::Pose3D blockage_pose;
   float blockage_waypt_dist;
   int last_replan;
   NavTimer *escape_timer;

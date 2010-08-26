@@ -320,15 +320,23 @@ class PolyOps
   //  return (getShortestDistToPoly(pose.px, pose.py, poly) < epsilon);
   //}
 
-  // return INDEX of polygon containing location (x, y) in the vector
-  // -1 if no such polygon is found
+  /** Get containing polygon
+   *
+   * @param polys vector of polygons to consider
+   * @param x, y MapXY coordinates of desired point
+   * @return index of polygon containing location (x, y) in @a polys
+   *         -1 if no such polygon is found
+  */
   int getContainingPoly(const std::vector<poly> &polys, float x, float y);
   int getContainingPoly(const std::vector<poly>& polys, const MapXY& pt)
-  {return getContainingPoly(polys, pt.x, pt.y);};
-  int getContainingPoly(const std::vector<poly>& polys,
-                        const Position::Pose3D &pose)
   {
-    return getContainingPoly(polys, pose.x, pose.y);
+    return getContainingPoly(polys, pt.x, pt.y);
+  };
+
+  int getContainingPoly(const std::vector<poly>& polys,
+                        const MapPose &pose)
+  {
+    return getContainingPoly(polys, pose.map.x, pose.map.y);
   };
 
   // return containing POLYGON ID, -1 if none in list

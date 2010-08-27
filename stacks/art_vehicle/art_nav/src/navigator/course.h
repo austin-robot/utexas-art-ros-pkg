@@ -13,11 +13,14 @@
 #define _COURSE_HH_
 
 #include <vector>
-#include "Controller.h"
+
 #include <art/infinity.h>
+#include <art_map/ArtLanes.h>
 #include <art_map/coordinates.h>
 #include <art_map/zones.h>
 #include <art_nav/odometry.h>
+
+#include "Controller.h"
 
 /** @brief Navigator course planning class. */
 class Course

@@ -61,6 +61,7 @@ public:
 
 private:
 
+  void processNavCmd(const art_nav::NavigatorCommand::ConstPtr &cmdIn);
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void PublishState(void);
   void SetSignals(void);
@@ -70,20 +71,13 @@ private:
   int verbose;				// log level verbosity
 
   // ROS topics
-  ros::Subscriber map_topic_;           // road map topic
-  ros::Subscriber odom_state_;          // odometry
+  ros::Subscriber nav_cmd_;             // NavigatorCommand topic
   ros::Publisher nav_state_;            // navigator state topic
+  ros::Subscriber odom_state_;          // odometry
   ros::Publisher car_cmd_;              // pilot CarCommand
 
-#if 0
-  Device *intersection;			// intersection device
-  player_devaddr_t intersection_addr;	// intersection device address
-  bool have_intersection;
-
-  Device *observers;			// observers device
-  player_devaddr_t observers_addr;	// observers device address
-  bool have_observers;
-#endif
+  // @todo add Observers interface
+  //ros::Subscriber observers_;
 
   // turn signal variables
   //AioServo *signals;
@@ -93,8 +87,8 @@ private:
   // Odometry data
   nav_msgs::Odometry odom_msg_;
 
-  // latest order command
-  art_nav::Order order_cmd;
+  // time latest command received
+  ros::Time cmd_time_;
 
   // navigator implementation class
   Navigator *nav;
@@ -114,6 +108,16 @@ NavQueueMgr::NavQueueMgr()
 
 }
 
+/** handle command input */
+void NavQueueMgr::processNavCmd(const
+                                art_nav::NavigatorCommand::ConstPtr &cmdIn)
+{
+  ROS_DEBUG_STREAM("Navigator order:"
+                   << NavBehavior(cmdIn->order.behavior).Name());
+  cmd_time_ = cmdIn->header.stamp;
+  nav->order = cmdIn->order;
+}
+
 /** handle Odometry input */
 void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
 {
@@ -125,11 +129,10 @@ void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
             odomIn->twist.twist.linear.y,
             odomIn->twist.twist.linear.z);
 
-  odom_msg_ = *odomIn;
+  float vel = odomIn->twist.twist.linear.x;
+  ROS_DEBUG("current velocity = %.3f m/sec, (%02.f mph)", vel, mps2mph(vel));
 
-  ROS_DEBUG("current velocity = %.3f m/sec, (%02.f mph)",
-            odom_msg_.twist.twist.linear.x,
-            mps2mph(odom_msg_.twist.twist.linear.x));
+  odom_msg_ = *odomIn;
 }
 
 /** Set up ROS topics for navigator node */
@@ -140,6 +143,8 @@ bool NavQueueMgr::setup(ros::NodeHandle node)
   static uint32_t qDepth = 1;
 
   // topics to read
+  nav_cmd_ = node.subscribe("navigator/cmd", qDepth,
+                            &NavQueueMgr::processNavCmd, this, noDelay);
   odom_state_ = node.subscribe("odom", qDepth,
                                &NavQueueMgr::processOdom, this, noDelay);
 
@@ -212,40 +217,7 @@ int NavQueueMgr::ProcessInput(player_msghdr *hdr, void *data)
 		      nav->order.waypt[2].id.name().str);
 	    }
 	}
-      else if ((art_hdr->type == NAVIGATOR_MESSAGE)
-	  && (art_hdr->subtype == NAVIGATOR_MESSAGE_ZONES)) {
-	if (!nav->navdata.have_zones)
-	  {
-	    nav->course->zones = 
-	      ZoneOps::unpackage_zone_list_from_opaque(*opaque);
-	
-	    nav->navdata.have_zones = true;
-
-	    ART_MSG(1, 
-		    "ZonePerimeterList received by Navigator from Commander:");
-	    ART_MSG(1, "Number of Zones: %d", nav->course->zones.size());
-	    for(unsigned i = 0; i < nav->course->zones.size(); i++) {
-	      ART_MSG(1, 
-		      "Zone ID: %d Perimeter: ", nav->course->zones[i].zone_id);
-	      for(unsigned j = 0; 
-		  j < nav->course->zones[i].perimeter_points.size(); j++) {
-		ART_MSG(1, "(%.3f, %.3f), ",
-			nav->course->zones[i].perimeter_points[j].map.x,
-			nav->course->zones[i].perimeter_points[j].map.y);
-	      }
-	    }
-	  }
-      }
-      else {
-	ART_MSG(2, CLASS " unknown OPAQUE_CMD received");
-	return -1;
-      }
     }
-  else if (Message::MatchMessage(hdr,
-				 PLAYER_MSGTYPE_DATA,
-				 PLAYER_POSITION2D_DATA_STATE,
-				 ctl_addr))
-    {}
   else if (nav->obstacle->lasers->match_lasers(hdr, data))
     {
       // tell observers about this later, after all laser scans queued
@@ -282,14 +254,6 @@ int NavQueueMgr::ProcessInput(player_msghdr *hdr, void *data)
 	}
     }
   else if (Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA, 
-				 PLAYER_OPAQUE_DATA_STATE, intersection_addr))
-    {
-      // handle intersection driver messages
-      player_opaque_data_t *opaque = (player_opaque_data_t*) data;
-
-      return nav->obstacle->intersection_message(hdr, opaque);
-    }
-  else if (Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA, 
 				 PLAYER_OPAQUE_DATA_STATE, observers_addr))
     {
       // handle observer messages
@@ -322,11 +286,7 @@ int NavQueueMgr::ProcessInput(player_msghdr *hdr, void *data)
       signal_on_right = (relay_bits >> Relay_Turn_Right) & 0x01;
 #endif
     }
-  else					// some other message
-    {
-      ART_ERROR("unknown " CLASS " command: %d", hdr->subtype);
-      return -1;
-    }
+
   return 0;
 }
 #endif

@@ -34,36 +34,36 @@
 #include <art_nav/Behavior.h>
 #include <art_nav/NavBehavior.h>
 
- #include <nav_msgs/Odometry.h>
+#include <nav_msgs/Odometry.h>
 
- typedef struct
- {
-   float velocity;
-   float yawRate;
- } pilot_command_t;
+typedef struct
+{
+  float velocity;
+  float yawRate;
+} pilot_command_t;
 
- // forward class declarations
- class Estop;
- class Course;
- class Obstacle;
+// forward class declarations
+class Estop;
+class Course;
+class Obstacle;
 
- class Navigator
- {
-  public:
+class Navigator
+{
+public:
 
-   // helper classes
-   PolyOps* pops;			// polygon operations class
-   Course* course;			// course planning class
-   Obstacle* obstacle;			// obstacle class
+  // helper classes
+  PolyOps* pops;			// polygon operations class
+  Course* course;			// course planning class
+  Obstacle* obstacle;			// obstacle class
 
-   // subordinate controllers
-   Estop	*estop;
+  // subordinate controllers
+  Estop	*estop;
 
-   // public data used by controllers
-   art_nav::Order order;                 // current commander order
-   art_nav::NavigatorState navdata;      // current navigator state data
-   nav_msgs::Odometry estimate;          // estimated control position
-   nav_msgs::Odometry *odometry;
+  // public data used by controllers
+  art_nav::Order order;                 // current commander order
+  art_nav::NavigatorState navdata;      // current navigator state data
+  nav_msgs::Odometry estimate;          // estimated control position
+  nav_msgs::Odometry *odometry;
 
   // public methods
   Navigator();
@@ -90,7 +90,7 @@
 	      name, pcmd.velocity, pcmd.yawRate);
   }
 
- private:
+private:
   int verbose;				// log message verbosity
 };
 

@@ -11,7 +11,6 @@
 #include <angles/angles.h>
 
 #include <art/DARPA_rules.h>
-#include <art_map/ArtLanes.h>
 
 #include "navigator_internal.h"
 #include "course.h"

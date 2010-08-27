@@ -85,8 +85,10 @@ public:
   MapXY(double _x, double _y): x(_x), y(_y) {};
   MapXY(const geometry_msgs::Point &pt): x(pt.x), y(pt.y) {};
   MapXY(const geometry_msgs::Point32 &pt): x(pt.x), y(pt.y) {};
-  MapXY(const Position::Pose3D &pose): x(pose.x), y(pose.y) {};
   MapXY(const MapXY &pt): x(pt.x), y(pt.y) {};
+  
+  // TODO figure out how to define this without circular references
+  //MapXY(const MapPose &pose): x(pose.map.x), y(pose.map.y) {};
 
   bool operator==(const MapXY &that) const
   {
@@ -208,7 +210,8 @@ namespace Coordinates
   }
 
   // transform MapXY coordinate to egocentric Polar
-  inline Polar MapXY_to_Polar(MapXY point, const nav_msgs::Odometry &origin)
+  inline Polar MapXY_to_Polar(MapXY point,
+                              const nav_msgs::Odometry &origin)
   {
     // TODO: figure out how to use Euclidean::DistanceTo() function,
     // (it is not working here for some reason) 

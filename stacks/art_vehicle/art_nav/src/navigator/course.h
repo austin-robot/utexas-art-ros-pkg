@@ -47,15 +47,15 @@ class Course
   void desired_heading(pilot_command_t &pcmd, float offset_ratio = 0.0);
 
   /** return distance in a lane to a way-point */
-  float distance_in_plan(const Position::Pose3D &from,
+  float distance_in_plan(const MapPose &from,
 			 const WayPointNode &wp) const;
 
   /** return distance in a lane to a pose */
-  float distance_in_plan(const Position::Pose3D &from,
-			 const Position::Pose3D &to) const;
+  float distance_in_plan(const MapPose &from,
+			 const MapPose &to) const;
 
   /** return distance in a lane to a pose */
-  float distance_in_plan(const Position::Pose3D &from,
+  float distance_in_plan(const MapPose &from,
 			 const MapXY &to) const;
 
   /** @brief Course class termination for run state cycle. */

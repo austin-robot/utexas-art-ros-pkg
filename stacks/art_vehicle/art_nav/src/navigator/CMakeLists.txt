@@ -25,7 +25,7 @@
 #  voronoi_zone.cc
 #  zone.cc)
 rosbuild_add_executable(navigator
-  #course.cc
+  course.cc
   estop.cc
   navigator.cc
   queue_mgr.cc

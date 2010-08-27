@@ -615,8 +615,8 @@ class PolyOps
 
   MapXY midpoint(const MapXY& p1, const MapXY& p2);
 
-  //ElementID getReverseLane(const std::vector<poly>& polys,
-  //                         const player_pose2d_t &pose);
+  ElementID getReverseLane(const std::vector<poly>& polys,
+                           const MapPose &pose);
 
   // true if this_poly is to the left of cur_poly.
   bool left_of_poly(const poly &this_poly, const poly &cur_poly)

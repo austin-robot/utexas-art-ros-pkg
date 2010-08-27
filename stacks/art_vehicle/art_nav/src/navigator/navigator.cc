@@ -35,7 +35,7 @@ Navigator::Navigator()
   odometry = new nav_msgs::Odometry();
   // allocate helper classes
   pops = new PolyOps();
-  //course = new Course(this, verbose);
+  course = new Course(this, verbose);
   //obstacle = new Obstacle(this, verbose);
 
   // allocate controller classes
@@ -85,7 +85,7 @@ void Navigator::configure()
 
   // configure controller methods
   estop->configure();
-  //course->configure();
+  course->configure();
   //obstacle->configure();
 }
 

@@ -162,9 +162,26 @@ public:
   int checkpoint_id;			//< checkpoint ID or zero
   float lane_width;
   
-  // constructor
+  // constructors
   WayPointNode(){ clear();};
   WayPointNode(const MapXY &point) : map(point) { clear();};
+  WayPointNode(const art_map::WayPoint &wp)
+  {
+    ll.latitude = wp.latitude;
+    ll.longitude = wp.longitude;
+    map = MapXY(wp.mapxy);
+    id = ElementID(wp.id);
+    index = wp.index;
+    is_entry = is_entry;
+    is_exit = is_exit;
+    is_goal = is_goal;
+    is_lane_change = is_lane_change;
+    is_spot = is_spot;
+    is_stop = is_stop;
+    is_perimeter = is_perimeter;
+    checkpoint_id = checkpoint_id;
+    lane_width = lane_width;
+  };
 
   // public methods
   void clear()

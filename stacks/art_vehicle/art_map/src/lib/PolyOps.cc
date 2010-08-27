@@ -1156,9 +1156,10 @@ void PolyOps::getNumLanesDir(const std::vector<poly>& polys,
   if (to_polys.size() == 0) // no lanes gotten
     ROS_DEBUG("no lanes in given direction when expected");
 }
+#endif
 
 ElementID PolyOps::getReverseLane(const std::vector<poly>& polys,
-				  const player_pose2d_t &pose)
+				  const MapPose &pose)
 {
   poly_list_t to_polys;
 
@@ -1169,7 +1170,7 @@ ElementID PolyOps::getReverseLane(const std::vector<poly>& polys,
     return return_id;
 
   float base_heading=polys.at(base_index).heading;  
-  player_pose2d_t my_pose=pose;
+  MapPose my_pose = pose;
 
   while (true)
     {
@@ -1180,12 +1181,11 @@ ElementID PolyOps::getReverseLane(const std::vector<poly>& polys,
       float lane_heading=to_polys.at(poly_index).heading;
       if (fabs(Coordinates::normalize(lane_heading - base_heading)) > HALFPI)
 	return to_polys.at(poly_index).end_way;
-      my_pose.px = to_polys.at(poly_index).midpoint.x;
-      my_pose.py = to_polys.at(poly_index).midpoint.y;
+      my_pose.map.x = to_polys.at(poly_index).midpoint.x;
+      my_pose.map.y = to_polys.at(poly_index).midpoint.y;
     }
   return return_id;
 }
-#endif
 
 // Print useful information of each polygon to ROS log
 void PolyOps::printPolygons(const poly_list_t& polys) 

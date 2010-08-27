@@ -95,10 +95,10 @@ namespace Euclidean
   }
 
   /** find the Euclidean distance between poses p1 and p2 */
-  float inline DistanceTo(Position::Pose3D p1, Position::Pose3D p2)
+  float inline DistanceTo(MapPose p1, MapPose p2)
     {
-      float x_dist = p1.x - p2.x;
-      float y_dist = p1.y - p2.y;
+      float x_dist = p1.map.x - p2.map.x;
+      float y_dist = p1.map.y - p2.map.y;
       return sqrtf(x_dist*x_dist + y_dist*y_dist);
     }
 
@@ -130,10 +130,10 @@ namespace Euclidean
     }
 
   /** find the Euclidean distance between pose and way-point */
-  float inline DistanceToWaypt(const Position::Pose3D &pose,
+  float inline DistanceToWaypt(const MapPose &pose,
 			       const WayPointNode &waypt)
     {
-      return DistanceTo(MapXY(pose), waypt.map);
+      return DistanceTo(pose.map, waypt.map);
     }
 
   /** find the Euclidean distance between MapXY point and way-point */
@@ -144,7 +144,8 @@ namespace Euclidean
 
   /** find the Euclidean distance between Polar coordinate (relative
    *  to origin) and way-point */
-  float inline DistanceToWaypt(Polar polar, const Position::Pose3D &origin,
+  float inline DistanceToWaypt(Polar polar,
+                               const MapPose &origin,
 			       const WayPointNode &waypt)
     {
       return DistanceTo(Coordinates::Polar_to_MapXY(polar, origin),

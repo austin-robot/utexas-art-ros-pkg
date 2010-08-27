@@ -8,16 +8,20 @@
  *  $Id$
  */
 
+#include <angles/angles.h>
+
 #include <art/DARPA_rules.h>
 #include <art_map/ArtLanes.h>
 
 #include "navigator_internal.h"
 #include "course.h"
 #include <art_servo/steering.h>
-#include <art_map/rotate_translate_transform.h>
 #include <art_map/coordinates.h>
 #include <art_nav/estimate.h>
 using namespace Coordinates;
+
+/** @todo Use ROS tf instead of art_map/rotate_translate_transform */
+#include <art_map/rotate_translate_transform.h>
 
 // Constructor
 Course::Course(Navigator *_nav, int _verbose)
@@ -93,7 +97,7 @@ void Course::begin_run_cycle(void)
                        << " already reached, advance order->waypt[] array");
       // advance order->waypt array by one
       for (unsigned i = 1; i < art_nav::Order::N_WAYPTS; ++i)
-	order->waypt[i-1] = order->waypt[i];
+        order->waypt[i-1] = order->waypt[i];
     }
 
   // log current order attributes
@@ -118,7 +122,7 @@ void Course::configure()
   // how far away (in seconds) we aim when changing lanes
   lane_change_secs = cf->ReadFloat(section, "lane_change_secs", 2.0);
   ART_MSG(2, "\tlane change target is %.3f seconds ahead",
-	  lane_change_secs);
+          lane_change_secs);
 
   // Look-ahead time for steering towards a polygon.
   lane_steer_time = cf->ReadFloat(section, "lane_steer_time", 2.0);
@@ -153,16 +157,16 @@ void Course::configure()
     cf->ReadFloat(section, "min_lane_change_dist",
                   (DARPA_rules::min_forw_sep_travel
                    + art_common::ArtVehicle::front_bumper_px));
-				       
+
   ART_MSG(2, "\tminimum lane change distance is %.3f meters",
-	  min_lane_change_dist);
+          min_lane_change_dist);
 
   // Minimum look-ahead distance for steering towards a polygon.
   // Should at least include front bumper offset.
   min_lane_steer_dist = cf->ReadFloat(section, "min_lane_steer_dist",
-				      ArtVehicle::front_bumper_px);
+                                      ArtVehicle::front_bumper_px);
   ART_MSG(2, "\tminimum lane steering distance is %.3f meters",
-	  min_lane_steer_dist);
+          min_lane_steer_dist);
 
   // plan way-point limit.  Only for testing Navigator's ability to
   // run with a truncated course plan.  Do not set otherwise.
@@ -217,38 +221,40 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
   int aim_index=-1;
 
 
-  
+
 #if 0
-  float used_velocity=fmaxf(estimate->vel.px,pcmd.velocity);
-  float target_dist=min_lane_steer_dist+lane_steer_time*estimate->vel.px;//used_velocity;
+  float used_velocity=fmaxf(estimate->vel.x,pcmd.velocity);
+  float target_dist=min_lane_steer_dist+lane_steer_time*estimate->vel.x;//used_velocity;
 #else
-  float used_velocity=estimate->twist.twise.linear.x;
+  float used_velocity=estimate->twist.twist.linear.x;
   float target_dist=min_lane_steer_dist;
 #endif
-  
+
   if (plan.empty())
     {
       // no plan available: a big problem, but must do something
       if (verbose >= 2)
-	ART_MSG(5, "no lane data available, steer using waypoints.");
+        ART_MSG(5, "no lane data available, steer using waypoints.");
       aim_polar = head_for_waypt(target_dist);
       aim_distance=aim_polar.range;
-      aim_next_heading =Coordinates::normalize(estimate->pos.pa+aim_polar.heading);
+      aim_next_heading =
+        Coordinates::normalize(MapPose(estimate->pose.pose).yaw
+                               + aim_polar.heading);
     }
   else 
     {
       // Look in plan
       aim_index = pops->getPolyIndex(plan, aim_poly);
-      
+
       poly_list_t edge;
       pops->add_polys_for_waypts(plan,edge,order->waypt[0].id,
-				 order->waypt[1].id);
-      
+                                 order->waypt[1].id);
+
       // get closest polygon to estimated position
-      int nearby_poly = pops->getClosestPoly(edge, estimate->pos);
+      int nearby_poly = pops->getClosestPoly(edge, MapPose(estimate->pose.pose));
       if (nearby_poly >= 0)
 	nearby_poly=pops->getPolyIndex(plan,edge.at(nearby_poly));
-      else  nearby_poly=pops->getClosestPoly(plan, estimate->pos);
+      else  nearby_poly=pops->getClosestPoly(plan, MapPose(estimate->pose.pose));
 
       if (aim_poly.poly_id != -1 && aim_index >=0 && 
 	  aim_index < (int)plan.size()-1)
@@ -269,10 +275,10 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	  // aim_poly
 	  
 	  //	  aim_polar = MapXY_to_Polar(pops->getPolyEdgeMidpoint
-	  //				     (plan.at(aim_index)), estimate->pos);
+	  //				     (plan.at(aim_index)), MapPose(estimate->pose.pose));
 	  
 	  //	  aim_abs_heading=Coordinates::normalize
-	  //	    (estimate->pos.pa+aim_polar.heading);
+	  //	    (MapPose(estimate->pose.pose).yaw+aim_polar.heading);
 	  aim_distance = Euclidean::DistanceTo(plan.at(aim_index+1).midpoint,
 					       plan.at(aim_index).midpoint);
 	  aim_next_heading = atan2f(plan.at(aim_index+1).midpoint.y-
@@ -304,10 +310,10 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 		  // Polygon at target distance
 		  //		  aim_polar = MapXY_to_Polar
 		  //		    (plan.at(aim_index).midpoint,
-		  //		     estimate->pos);
+		  //		     MapPose(estimate->pose.pose));
 		  
 		  //		  aim_abs_heading=Coordinates::normalize
-		  //		    (estimate->pos.pa+aim_polar.heading);
+		  //		    (MapPose(estimate->pose.pose).yaw+aim_polar.heading);
 		  
 		  aim_distance = Euclidean::DistanceTo(plan.at(aim_index+1).midpoint,
 						       plan.at(aim_index).midpoint);
@@ -332,7 +338,7 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 		  
 		  aim_distance=aim_polar.range;
 		  aim_next_heading=Coordinates::normalize
-		    (estimate->pos.pa+aim_polar.heading);
+		    (MapPose(estimate->pose.pose).yaw+aim_polar.heading);
 		}
 	    }
 	  else
@@ -345,23 +351,19 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	      aim_polar = head_for_waypt(target_dist);
 	      aim_distance=aim_polar.range;
 	      aim_next_heading=Coordinates::normalize
-		(estimate->pos.pa+aim_polar.heading);
+		(MapPose(estimate->pose.pose).yaw+aim_polar.heading);
 	    }
 	}
     }
   
   
-  if (verbose >= 3)
-    {
-      ART_MSG(8, "desired, current positions: (%.3f, %.3f), (%.3f, %.3f, %.3f)",
-	      order->waypt[1].map.x, order->waypt[1].map.y,
-	      estimate->pos.px, estimate->pos.py, estimate->pos.pa);
-      //      ART_MSG(8, "desired relative heading: %.3f radians, "
-      //	      "distance: %.3f meters",
-      //	      aim_polar.heading, aim_polar.range);
-    }
+  ROS_DEBUG("desired, current positions: (%.3f, %.3f), (%.3f, %.3f, %.3f)",
+            order->waypt[1].mapxy.x, order->waypt[1].mapxy.y,
+            estimate->pose.pose.position.x,
+            estimate->pose.pose.position.y,
+            MapPose(estimate->pose.pose).yaw);
   
-  float full_heading_change=fabs(Coordinates::normalize(aim_next_heading-estimate->pos.pa));
+  float full_heading_change=fabs(Coordinates::normalize(aim_next_heading-MapPose(estimate->pose.pose).yaw));
   //fabsf(aim_polar.heading);//+
   //    fabsf(Coordinates::normalize(aim_next_heading-aim_abs_heading));
   
@@ -415,29 +417,29 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 }
 
 // return distance in the plan to a way-point
-float Course::distance_in_plan(const player_pose2d_t &from,
+float Course::distance_in_plan(const MapPose &from,
 			       const WayPointNode &wp) const
 {
   if (plan.empty())
     return Euclidean::DistanceToWaypt(from, wp);
-  else return pops->distanceAlongLane(plan, MapXY(from), wp.map);
+  else return pops->distanceAlongLane(plan, from.map, wp.map);
 }
 
 // return distance in plan to a pose
-float Course::distance_in_plan(const player_pose2d_t &from,
-			       const player_pose2d_t &to) const
+float Course::distance_in_plan(const MapPose &from,
+			       const MapPose &to) const
 {
   if (plan.empty())
     return Euclidean::DistanceTo(from, to);
-  else return pops->distanceAlongLane(plan, MapXY(from), MapXY(to));
+  else return pops->distanceAlongLane(plan, from.map, to.map);
 }
 
-float Course::distance_in_plan(const player_pose2d_t &from,
+float Course::distance_in_plan(const MapPose &from,
 			       const MapXY &to) const
 {
   if (plan.empty())
-    return Euclidean::DistanceTo(from, to);
-  else return pops->distanceAlongLane(plan, MapXY(from),to);
+    return Euclidean::DistanceTo(from.map, to);
+  else return pops->distanceAlongLane(plan, from.map,to);
 }
 
 
@@ -469,9 +471,9 @@ int Course::find_aim_polygon(poly_list_t &lane)
 			     order->waypt[1].id);
   
   // get closest polygon to estimated position
-  int nearby_poly = pops->getClosestPoly(edge, estimate->pos);
+  int nearby_poly = pops->getClosestPoly(edge, MapPose(estimate->pose.pose));
   if (nearby_poly < 0)
-    nearby_poly = pops->getClosestPoly(lane, estimate->pos);
+    nearby_poly = pops->getClosestPoly(lane, MapPose(estimate->pose.pose));
   else
     nearby_poly=pops->getPolyIndex(lane,edge.at(nearby_poly));
 
@@ -490,12 +492,12 @@ int Course::find_aim_polygon(poly_list_t &lane)
 
   // increase aim_distance if the lane is far away
   float lane_distance =
-    pops->getShortestDistToPoly(estimate->pos, lane.at(nearby_poly));
+    pops->getShortestDistToPoly(MapPose(estimate->pose.pose), lane.at(nearby_poly));
   
   if (Epsilon::equal(lane_distance,0.0))
     return -1;
    
-  float lane_change_distance_ratio = estimate->vel.px;
+  float lane_change_distance_ratio = estimate->vel.x;
   float aim_distance;
 
   if (req_max_dist < Infinite::distance)
@@ -504,7 +506,7 @@ int Course::find_aim_polygon(poly_list_t &lane)
     {  
       // Try based on speed -- may be too far or 0 (if not moving)
       aim_distance = fminf(lane_distance * lane_change_distance_ratio,
-			   estimate->vel.px * lane_change_secs);
+			   estimate->vel.x * lane_change_secs);
     }
 
   float max_pass_distance=ArtVehicle::length*4;
@@ -514,7 +516,7 @@ int Course::find_aim_polygon(poly_list_t &lane)
 
   if (order->waypt[1].is_goal)
     {
-      float way_dist=distance_in_plan(estimate->pos, order->waypt[1]);
+      float way_dist=distance_in_plan(MapPose(estimate->pose.pose), order->waypt[1]);
       aim_distance=fminf(aim_distance,way_dist);
     }
 
@@ -548,9 +550,8 @@ int Course::find_aim_polygon(poly_list_t &lane)
 //
 bool Course::find_passing_lane(void)
 {
-  if (verbose)
-    ART_MSG(5, "find passing lane around waypoint %s",
-	    order->waypt[1].id.name().str);
+  ROS_DEBUG("find passing lane around waypoint %s",
+            ElementID(order->waypt[1].id).name().str);
 
   // generate adjacent lane IDs
   adj_lane[0] = order->waypt[1].id;
@@ -561,7 +562,7 @@ bool Course::find_passing_lane(void)
 
 #if 1 // more general implementation, experimental
 
-  int cur_index = pops->getClosestPoly(plan, estimate->pos);
+  int cur_index = pops->getClosestPoly(plan, MapPose(estimate->pose.pose));
   if (cur_index == -1)
     {
       if (verbose)
@@ -585,8 +586,9 @@ bool Course::find_passing_lane(void)
 
       // collect lane polygons
       pops->AddLanePolys(polygons, adj_polys[i], adj_lane[i]);
-      int this_index = pops->getClosestPoly(adj_polys[i],
-					    order->waypt[1].map);
+      int this_index =
+        pops->getClosestPoly(adj_polys[i],
+                             MapXY(order->waypt[1].mapxy));
       if (this_index < 0)		// no polygon found?
 	continue;
 
@@ -615,7 +617,7 @@ bool Course::find_passing_lane(void)
       && adj_forw[right_lane])
     passing_lane = right_lane;		// right lane, forward
   else if (left_lane >= 0
-      && adj_forw[left_lane])
+           && adj_forw[left_lane])
     passing_lane = left_lane;		// left lane, forward
   else if (right_lane >= 0)
     passing_lane = right_lane;		// right lane, backward
@@ -624,9 +626,8 @@ bool Course::find_passing_lane(void)
   else
     {
       passing_lane = -1;
-      if (verbose)
-	ART_MSG(1, "no passing lane available for waypoint %s",
-		order->waypt[1].id.name().str);
+      ROS_DEBUG("no passing lane available for waypoint %s",
+		ElementID(order->waypt[1].id).name().str);
       return false;
     }
 
@@ -722,7 +723,8 @@ void Course::find_travel_lane(bool rejoin)
       for (int i = 1; i < plan_waypt_limit; ++i)
 	{
 	  // Do not repeat polygons for repeated way-points in the order.
-	  if (order->waypt[i-1].id != order->waypt[i].id)
+	  if (ElementID(order->waypt[i-1].id)
+              != ElementID(order->waypt[i].id))
 	    // Collect all polygons from previous waypt to this one and
 	    // also the polygon containing this one.
 	    pops->add_polys_for_waypts(polygons, plan,
@@ -784,7 +786,8 @@ void Course::find_travel_lane(bool rejoin)
 // that the car does not double back to it.
 Polar Course::head_for_waypt(float target_dist)
 {
-  Polar aim_polar = MapXY_to_Polar(order->waypt[1].map, estimate->pos);
+  Polar aim_polar = MapXY_to_Polar(MapXY(order->waypt[1].mapxy),
+                                   *estimate);
   if (aim_polar.range < target_dist)
     {
       if (special_waypt(1))
@@ -797,15 +800,18 @@ Polar Course::head_for_waypt(float target_dist)
       else if (order->waypt[1].is_perimeter)
 	{
 	  ART_MSG(8, "waypt[1] is a perimeter point");
-	  aim_polar = MapXY_to_Polar(order->waypt[1].map, estimate->pos);
-	  if (fabsf(Coordinates::bearing(estimate->pos,order->waypt[1].map)) >
-	      HALFPI)
+	  aim_polar = MapXY_to_Polar(MapXY(order->waypt[1].mapxy),
+                                     *estimate);
+	  if (fabsf(Coordinates::bearing(MapPose(estimate->pose.pose),
+                                         MapXY(order->waypt[1].mapxy)))
+              > HALFPI)
 	    new_waypoint_reached(order->waypt[1].id);
 	}
       else
 	{
 	  // waypt[1] is too close, steer for waypt[2] instead
-	  aim_polar = MapXY_to_Polar(order->waypt[2].map, estimate->pos);
+	  aim_polar = MapXY_to_Polar(MapXY(order->waypt[2].mapxy),
+                                     *estimate);
 	  ART_MSG(8, "waypt[1] less than %.3fm away, using waypt[2] instead",
 		  target_dist);
 	  // claim we got there (we're at least close)
@@ -892,13 +898,14 @@ bool Course::lane_waypoint_reached(void)
     {
       // form way-point pose using polygon heading
       // TODO: save somewhere
-      MapPose w1_pose(order->waypt[1].map, 
+      MapPose w1_pose(MapXY(order->waypt[1].mapxy),
 		      pops->PolyHeading(polygons.at(w1_index)));
       
 #if 1
       // Is the bearing of the car from that pose within 90
       // degrees of the polygon heading?
-      float bearing_from_w1 = bearing(w1_pose, MapXY(odom->curr_pos.pos));
+      float bearing_from_w1 = bearing(w1_pose,
+                                      MapXY(odom->pose.pose.position));
 #else // experimental code -- not working right yet
       // Is the bearing of a point slightly ahead of the front bumper
       // from that pose within 90 degrees of the polygon heading?
@@ -908,12 +915,12 @@ bool Course::lane_waypoint_reached(void)
       MapXY bumper_pos = Polar_to_MapXY(bumper_polar, odom->pos);
       float bearing_from_w1 = bearing(w1_pose, bumper_pos);
 #endif
-      if (fabsf(bearing_from_w1) < DTOR(90))
+      if (fabsf(bearing_from_w1) < angles::from_degrees(90))
 	{
 	  // The car is "in front" of this way-point's pose.
-	  if (verbose)
-	    ART_MSG(2, "reached waypoint %s, bearing %.3f radians",
-		    order->waypt[1].id.name().str, bearing_from_w1);
+          ROS_INFO("reached waypoint %s, bearing %.3f radians",
+                   ElementID(order->waypt[1].id).name().str,
+                   bearing_from_w1);
 	  navdata->last_waypt = order->waypt[1].id;
 	  found = true;
 	}
@@ -922,7 +929,8 @@ bool Course::lane_waypoint_reached(void)
   
   if (!found && verbose >= 5)
     ART_MSG(8, "cur_poly = %d, last_waypt = %s",
-	    navdata->cur_poly, navdata->last_waypt.name().str);
+	    navdata->cur_poly,
+            ElementID(navdata->last_waypt).name().str);
   return found;
 }
 
@@ -931,12 +939,12 @@ bool Course::lane_waypoint_reached(void)
 //  Called from the driver ProcessMessage() handler when new lanes
 //  data arrive.
 //
-void Course::lanes_message(lanes_state_msg_t* lanes)
+void Course::lanes_message(art_map::ArtLanes *lanes)
 {
-  polygons.resize(lanes->poly_count);
+  polygons.resize(lanes->polygons.size());
 
-  for (unsigned num = 0; num < lanes->poly_count; num++)
-    polygons.at(num) = lanes->poly[num];
+  for (unsigned num = 0; num < lanes->polygons.size(); num++)
+    polygons.at(num) = lanes->polygons[num];
 
   if (polygons.empty())
     ART_MSG(1, "empty lanes polygon list received!");
@@ -994,7 +1002,7 @@ bool Course::new_waypts(void)
   if (saved_replan_num!=order->replan_num)
     return true;
 
-  for (unsigned i = 0; i < N_ORDER_WAYPTS; ++i)
+  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
     if (saved_waypt_id[i] != order->waypt[i].id)
       return true;
 
@@ -1009,9 +1017,9 @@ void Course::reset(void)
     ART_MSG(2, "Course class reset()");
 
   // TODO: figure out when this needs to happen and what to do
-  start_pass_location.px = 0.0;
-  start_pass_location.py = 0.0;
-  start_pass_location.pa = 0.0;
+  start_pass_location.x = 0.0;
+  start_pass_location.y = 0.0;
+  start_pass_location.yaw = 0.0;
 
   // clear the previous plan
   plan.clear();
@@ -1024,7 +1032,7 @@ ElementID Course::replan_roadblock(void)
   saved_replan_num=order->replan_num;
 
   // save current order way-points
-  for (unsigned i = 0; i < N_ORDER_WAYPTS; ++i)
+  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
     {
       saved_waypt_id[i] = order->waypt[i].id;
       if (verbose >= 4)
@@ -1034,15 +1042,16 @@ ElementID Course::replan_roadblock(void)
 
   // Get closest polygon in current plan.
   int uturn_exit_index = 
-    pops->getClosestPoly(plan,estimate->pos);
+    pops->getClosestPoly(plan,MapPose(estimate->pose.pose));
 
-  player_pose2d_t exit_pose;
-  exit_pose.px=plan.at(uturn_exit_index).midpoint.x;
-  exit_pose.py=plan.at(uturn_exit_index).midpoint.y;
+  MapPose exit_pose;
+  exit_pose.map.x=plan.at(uturn_exit_index).midpoint.x;
+  exit_pose.map.y=plan.at(uturn_exit_index).midpoint.y;
 
   // Should get lane left of current position.  If in transition, the
   // lane should be left of previous lane left.
-  ElementID reverse_lane=pops->getReverseLane(polygons,exit_pose);
+  ElementID reverse_lane =
+    pops->getReverseLane(polygons,exit_pose);
 
   if (verbose >= 4)
     ART_MSG(5,"Replan from lane %s", reverse_lane.lane_name().str);
@@ -1053,8 +1062,12 @@ ElementID Course::replan_roadblock(void)
 // direction for crossing an intersection
 Course::direction_t Course::intersection_direction(void)
 {
-  int w0_index = pops->getContainingPoly(polygons, order->waypt[0].map);
-  int w1_index = pops->getContainingPoly(polygons, order->waypt[1].map);
+  int w0_index =
+    pops->getContainingPoly(polygons,
+                            MapXY(order->waypt[0].mapxy));
+  int w1_index =
+    pops->getContainingPoly(polygons,
+                            MapXY(order->waypt[1].mapxy));
 
   // give up unless both polygons are available
   if (w0_index < 0 || w1_index < 0)
@@ -1064,13 +1077,12 @@ Course::direction_t Course::intersection_direction(void)
   float w1_heading = pops->PolyHeading(polygons.at(w1_index));
   float heading_change = normalize(w1_heading - w0_heading);
 					    
-  if (verbose >= 4)
-    ART_MSG(5, "heading change from waypoint %s to %s is %.3f radians",
-	    order->waypt[0].id.name().str,
-	    order->waypt[1].id.name().str,
+  ROS_DEBUG("heading change from waypoint %s to %s is %.3f radians",
+	    ElementID(order->waypt[0].id).name().str,
+	    ElementID(order->waypt[1].id).name().str,
 	    heading_change);
 
-  if (fabsf(heading_change) < DTOR(30))
+  if (fabsf(heading_change) < angles::from_degrees(30))
     return Straight;
   else if (heading_change > 0.0)
     return Left;
@@ -1084,24 +1096,25 @@ Course::direction_t Course::intersection_direction(void)
 //
 float Course::stop_waypt_distance(bool same_lane)
 {
-  for (unsigned i = 1; i < N_ORDER_WAYPTS; ++i)
+  for (unsigned i = 1; i < art_nav::Order::N_WAYPTS; ++i)
     {
       // only consider way-points in the current lane
       if (same_lane
-	  && !order->waypt[i].id.same_lane(order->waypt[0].id))
+	  && !ElementID(order->waypt[i].id).same_lane(order->waypt[0].id))
 	break;
 
       if (order->waypt[i].is_stop)
 	{
 	  // find stop way-point polygon
-	  int stop_index = pops->getContainingPoly(polygons,
-						   order->waypt[i].map);
+	  int stop_index =
+            pops->getContainingPoly(polygons,
+                                    MapXY(order->waypt[i].mapxy));
 	  if (stop_index < 0)		// none found?
 	    continue;			// keep looking
 
 	  stop_poly = polygons.at(stop_index);
-	  stop_waypt = order->waypt[i];
-	  float wayptdist = distance_in_plan(estimate->pos, stop_waypt);
+	  stop_waypt = WayPointNode(order->waypt[i]);
+	  float wayptdist = distance_in_plan(MapPose(estimate->pose.pose), stop_waypt);
 	  if (verbose >= 2)
 	    ART_MSG(5, "Stop at waypoint %s is %.3fm away",
 		    stop_waypt.id.name().str, wayptdist);
@@ -1155,17 +1168,18 @@ bool Course::switch_to_passing_lane()
     ART_MSG(5, "aiming at polygon %d, midpoint (%.3f, %.3f)",
 	    aim_poly.poly_id, aim_poly_midpt.x, aim_poly_midpt.y);
 
-  MapXY start_point=pops->GetClosestPointToLine
-    (pops->midpoint(aim_poly.p1,aim_poly.p4),
-     pops->midpoint(aim_poly.p2,aim_poly.p3),
-     estimate->pos,true);
+  MapXY start_point =
+    pops->GetClosestPointToLine (pops->midpoint(aim_poly.p1,aim_poly.p4),
+                                 pops->midpoint(aim_poly.p2,aim_poly.p3),
+                                 MapXY(estimate->pose.pose.position),
+                                 true);
 
-  start_pass_location.px=start_point.x;
-  start_pass_location.py=start_point.y;
-  start_pass_location.pa=aim_poly.heading;
+  start_pass_location.x=start_point.x;
+  start_pass_location.y=start_point.y;
+  start_pass_location.yaw=aim_poly.heading;
 
   ART_MSG(1, "passing starts at (%.3f, %.3f)",
-	  start_pass_location.px, start_pass_location.py);
+	  start_pass_location.x, start_pass_location.y);
 
   return true;
 }
@@ -1178,16 +1192,18 @@ float Course::uturn_distance(void)
     return Infinite::distance;
 
   // find stop way-point polygon
-  int stop_index = pops->getContainingPoly(polygons, order->waypt[i].map);
+  int stop_index =
+    pops->getContainingPoly(polygons,
+                            MapXY(order->waypt[i].mapxy));
   if (stop_index < 0)		// none found?
     return Infinite::distance;
 
   // save way-point and polygon for stop_line controller
   stop_poly = polygons.at(stop_index);
-  stop_waypt = order->waypt[i];
+  stop_waypt = WayPointNode(order->waypt[i]);
 
   // compute distance remaining
-  float wayptdist = distance_in_plan(estimate->pos, stop_waypt);
+  float wayptdist = distance_in_plan(MapPose(estimate->pose.pose), stop_waypt);
   if (verbose >= 2)
     ART_MSG(5, "U-turn at waypoint %s, %.3fm away",
 	    stop_waypt.id.name().str, wayptdist);
@@ -1201,10 +1217,10 @@ float Course::uturn_distance(void)
 //
 int Course::uturn_order_index(void)
 {
-  for (unsigned i = 1; i < N_ORDER_WAYPTS-1; ++i)
+  for (unsigned i = 1; i < art_nav::Order::N_WAYPTS-1; ++i)
     {
       // only consider way-points in the current lane
-      if (!order->waypt[i].id.same_lane(order->waypt[0].id))
+      if (!ElementID(order->waypt[i].id).same_lane(ElementID(order->waypt[0].id)))
 	break;
       
       if (uturn_waypt(i))
@@ -1236,24 +1252,25 @@ bool Course::zone_waypoint_reached(void)
   waypoint_checked = true;
 	  
   // polar coordinate of front bumper from estimated position
-  Polar bumper_polar(0.0, ArtVehicle::front_bumper_px);
-  float distance = Euclidean::DistanceToWaypt(bumper_polar, estimate->pos,
-					      order->waypt[1]);
+  Polar bumper_polar(0.0, art_common::ArtVehicle::front_bumper_px);
+  float distance =
+    Euclidean::DistanceToWaypt(bumper_polar,
+                               MapPose(estimate->pose.pose),
+                               WayPointNode(order->waypt[1]));
 
   if (distance <= zone_waypoint_radius)
     {
       // The car is near this way-point.
-      if (verbose)
-	ART_MSG(2, "reached zone waypoint %s, distance %.3fm",
-		    order->waypt[1].id.name().str, distance);
+      ROS_DEBUG("reached zone waypoint %s, distance %.3fm",
+                ElementID(order->waypt[1].id).name().str, distance);
       navdata->last_waypt = order->waypt[1].id;
       found = true;
     }
   else
     {
       if (verbose >= 5)
-	ART_MSG(2, "distance to zone waypoint %s is %.3fm",
-		order->waypt[1].id.name().str, distance);
+	ROS_DEBUG("distance to zone waypoint %s is %.3fm",
+                  ElementID(order->waypt[1].id).name().str, distance);
     }
   
   return found;
@@ -1264,33 +1281,36 @@ bool Course::zone_perimeter_reached(void)
   bool found = false;
   waypoint_checked = true;
   
-  int w1_index = pops->getClosestPoly(polygons, order->waypt[1].map);
+  int w1_index =
+    pops->getClosestPoly(polygons,
+                         MapXY(order->waypt[1].mapxy));
   if (w1_index >= 0)
     {
       // form way-point pose using polygon heading
       // TODO: save somewhere
-      MapPose w1_pose(order->waypt[1].map, 
+      MapPose w1_pose(order->waypt[1].mapxy, 
 		      pops->PolyHeading(polygons.at(w1_index)));
       
 #if 1
       // Is the bearing of the car from that pose within 90
       // degrees of the polygon heading?
-      float bearing_from_w1 = bearing(w1_pose, MapXY(odom->curr_pos.pos));
+      float bearing_from_w1 =
+        bearing(w1_pose, MapXY(odom->pose.pose.position));
 #else // experimental code -- not working right yet
       // Is the bearing of a point slightly ahead of the front bumper
       // from that pose within 90 degrees of the polygon heading?
       Polar bumper_polar(0.0,
-			 (ArtVehicle::front_bumper_px
+			 (art_common::ArtVehicle::front_bumper_px
 			  + DARPA_rules::stop_line_to_bumper));
       MapXY bumper_pos = Polar_to_MapXY(bumper_polar, odom->pos);
       float bearing_from_w1 = bearing(w1_pose, bumper_pos);
 #endif
-      if (fabsf(bearing_from_w1) < DTOR(90))
+      if (fabsf(bearing_from_w1) < angles::from_degrees(90))
 	{
 	  // The car is "in front" of this way-point's pose.
-	  if (verbose)
-	    ART_MSG(2, "reached waypoint %s, bearing %.3f radians",
-		    order->waypt[1].id.name().str, bearing_from_w1);
+          ROS_DEBUG("reached waypoint %s, bearing %.3f radians",
+		    ElementID(order->waypt[1].id).name().str,
+                    bearing_from_w1);
 	  navdata->last_waypt = order->waypt[1].id;
 	  found = true;
 	}
@@ -1306,24 +1326,24 @@ bool Course::spot_waypoint_reached(void)
   waypoint_checked = true;
 	  
   // polar coordinate of front bumper from estimated position
-  Polar bumper_polar(0.0, ArtVehicle::front_bumper_px);
-  float distance = Euclidean::DistanceToWaypt(bumper_polar, estimate->pos,
-					      order->waypt[1]);
+  Polar bumper_polar(0.0, art_common::ArtVehicle::front_bumper_px);
+  float distance =
+    Euclidean::DistanceToWaypt(bumper_polar, MapPose(estimate->pose.pose),
+                               WayPointNode(order->waypt[1]));
 
   if (distance <= spot_waypoint_radius)
     {
       // The car is near this way-point.
-      if (verbose)
-	ART_MSG(2, "reached spot waypoint %s, distance %.3fm",
-		    order->waypt[1].id.name().str, distance);
+      ROS_DEBUG("reached spot waypoint %s, distance %.3fm",
+                ElementID(order->waypt[1].id).name().str, distance);
       navdata->last_waypt = order->waypt[1].id;
       found = true;
     }
   else
     {
       if (verbose >= 5)
-	ART_MSG(2, "distance to spot waypoint %s is %.3fm",
-		order->waypt[1].id.name().str, distance);
+	ROS_DEBUG("distance to spot waypoint %s is %.3fm",
+                  ElementID(order->waypt[1].id).name().str, distance);
     }
 
   return found;
@@ -1386,13 +1406,13 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
   float error = 0;
   float theta=-aim_polar.heading;
   float velocity = fmaxf(curr_velocity, Steering::steer_speed_min);
-  player_position2d_data_t pos_est;  
-  
-  player_position2d_data_t front_est;  
+  nav_msgs::Odometry pos_est;  
+  nav_msgs::Odometry front_est;  
   Estimate::front_axle_pose(*estimate, front_est);
-  double time_in_future=nav->cycle->Time()+velocity*spring_lookahead;
+  double time_in_future = (1.0 / art_common::ArtHertz::NAVIGATOR
+                           + velocity*spring_lookahead);
   Estimate::control_pose(front_est,
-			 nav->cycle->Time(),
+			 1.0 / art_common::ArtHertz::NAVIGATOR,
 			 time_in_future,
 			 pos_est);
  
@@ -1404,7 +1424,9 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
 		     poly_heading);
       rotate_translate_transform trans;
       trans.find_transform(cpoly,origin);
-      posetype car(pos_est.pos.px,pos_est.pos.py,0);
+      posetype car(pos_est.pose.pose.position.x,
+                   pos_est.pose.pose.position.y,
+                   0.0);
       posetype car_rel=trans.apply_transform(car);
 
       float width=Euclidean::DistanceTo(current_poly.p2,current_poly.p3);
@@ -1425,7 +1447,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
 	    pops->midpoint(current_poly.p1, current_poly.p2);
 	  float half_lane_width =
 	    Euclidean::DistanceTo(current_poly.midpoint, mid_left_side);
-	  float lane_space = half_lane_width - ArtVehicle::halfwidth;
+	  float lane_space = half_lane_width - art_common::ArtVehicle::halfwidth;
 	  float error_offset = 0.0;
 	  if (lane_space > 0.0)		// any room in this lane?
 	    error_offset = offset_ratio * lane_space;
@@ -1439,7 +1461,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
 #endif
       error=fminf(fmaxf(-width,error),width);
       // heading error
-      theta=Coordinates::normalize(pos_est.pos.pa-poly_heading);
+      theta=Coordinates::normalize(MapPose(pos_est.pose.pose).yaw-poly_heading);
     }
 
 
@@ -1467,14 +1489,14 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
   float d2=-k_theta*sinf(theta)/cth;
   float d1=-k_error*error/vcth;  
   
-// #ifdef NQE
-//   if (order->waypt[0].id==ElementID(2,1,3) &&
-//       order->waypt[1].id==ElementID(1,1,2))
-//     {
-//       d2=-0.7*sinf(theta)/cth;
-//       ART_MSG(1,"Taking special turn");
-//     }
-// #endif
+  // #ifdef NQE
+  //   if (order->waypt[0].id==ElementID(2,1,3) &&
+  //       order->waypt[1].id==ElementID(1,1,2))
+  //     {
+  //       d2=-0.7*sinf(theta)/cth;
+  //       ART_MSG(1,"Taking special turn");
+  //     }
+  // #endif
 
   if ((Coordinates::sign(error) == Coordinates::sign(last_error)) &&
       (fabsf(error) > fabs(last_error)))
@@ -1494,7 +1516,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
 
 bool Course::spot_ahead()
 {
-  for (uint i=0; i<N_ORDER_WAYPTS-1;i++)
+  for (uint i=0; i<art_nav::Order::N_WAYPTS-1;i++)
     if (order->waypt[i].is_spot &&
 	order->waypt[i+1].is_spot &&
 	order->waypt[i].id.pt==1 &&
@@ -1510,6 +1532,7 @@ bool Course::curr_spot()
   return order->waypt[0].is_spot;
 }
 
+#if 0
 mapxy_list_t Course::calculate_zone_barrier_points() 
 {
   mapxy_list_t spot_points;
@@ -1519,15 +1542,15 @@ mapxy_list_t Course::calculate_zone_barrier_points()
   if (order->waypt[1].is_spot)
     return spot_points;
 
-  posetype way_pose(order->waypt[1].map.x,order->waypt[1].map.y,
-		    atan2f(order->waypt[2].map.y-order->waypt[1].map.y,
-			   order->waypt[2].map.x-order->waypt[1].map.x));
+  posetype way_pose(order->waypt[1].mapxy.x,
+                    order->waypt[1].mapxy.y,
+		    atan2f(order->waypt[2].mapxy.y-order->waypt[1].mapxy.y,
+			   order->waypt[2].mapxy.x-order->waypt[1].mapxy.x));
   
   rotate_translate_transform trans;
   trans.find_transform(posetype(),way_pose);
   
   posetype npose;
-
   npose=trans.apply_transform(posetype(1,order->waypt[1].lane_width,0));
   spot_points.push_back(npose);
 
@@ -1546,12 +1569,11 @@ mapxy_list_t Course::calculate_zone_barrier_points()
   return spot_points;
 }
 
-
 mapxy_list_t Course::calculate_spot_points(const std::vector<WayPointNode>& new_waypts) 
 {
   mapxy_list_t spot_points;
 
-  for (uint i=0; i<N_ORDER_WAYPTS-1;i++)
+  for (uint i=0; i<art_nav::Order::N_WAYPTS-1;i++)
     if (new_waypts[i].is_spot &&
 	new_waypts[i+1].is_spot &&
 	new_waypts[i].id.pt==1 &&
@@ -1603,18 +1625,19 @@ mapxy_list_t Course::calculate_spot_points()
 {
   mapxy_list_t spot_points;
 
-  for (uint i=0; i<N_ORDER_WAYPTS-1;i++)
+  for (uint i=0; i<art_nav::Order::N_WAYPTS-1;i++)
     if (order->waypt[i].is_spot &&
 	order->waypt[i+1].is_spot &&
 	order->waypt[i].id.pt==1 &&
 	order->waypt[i+1].id.pt==2)
       {
-	posetype way_pose(order->waypt[i].map.x,order->waypt[i].map.y,
-			  atan2f(order->waypt[i+1].map.y-order->waypt[i].map.y,
-				 order->waypt[i+1].map.x-order->waypt[i].map.x));
+	posetype way_pose(order->waypt[i].mapxy.x,
+                          order->waypt[i].mapxy.y,
+			  atan2f(order->waypt[i+1].mapxy.y-order->waypt[i].mapxy.y,
+				 order->waypt[i+1].mapxy.x-order->waypt[i].mapxy.x));
 
-	float dist=Euclidean::DistanceTo(order->waypt[i+1].map,
-					 order->waypt[i].map);
+	float dist=Euclidean::DistanceTo(order->waypt[i+1].mapxy,
+					 order->waypt[i].mapxy);
 	rotate_translate_transform trans;
 	trans.find_transform(posetype(),way_pose);
 	
@@ -1650,7 +1673,7 @@ mapxy_list_t Course::calculate_spot_points()
       }
   return spot_points;
 }
-
+#endif
 
 bool Course::nqe_special(int i, int j)
 {

@@ -9,6 +9,7 @@
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/art_nav</url>
 
+  <depend package="angles"/>
   <depend package="art_common"/>
   <depend package="art_map"/>
   <depend package="art_servo"/>

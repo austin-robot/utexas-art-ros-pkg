@@ -30,7 +30,7 @@ void SlowForCurves::configure()
     cf->ReadFloat(section, "max_yaw_rate",
 		  Steering::steering_angle_inverse
 		  (min_speed_when_slowing_for_curves,
-		   Artvehicle::max_steer_degrees)); 
+		   art_common::ArtVehicle::max_steer_degrees)); 
 
   min_curve_length = cf->ReadFloat(section, "min_curve_length", 1.5);
   ART_MSG(2, "\tturn lookahead distance is %.3f meters", lookahead_distance);

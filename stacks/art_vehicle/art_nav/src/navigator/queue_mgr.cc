@@ -24,6 +24,8 @@
 #include <art_map/ZoneOps.h>
 
 #include <art_nav/CarCommand.h>
+#include <art_nav/NavEstopState.h>
+#include <art_nav/NavRoadState.h>
 //#include <art_nav/Observers.h>
 
 #include "navigator_internal.h"
@@ -70,6 +72,7 @@ private:
   // ROS topics
   ros::Subscriber map_topic_;           // road map topic
   ros::Subscriber odom_state_;          // odometry
+  ros::Publisher nav_state_;            // navigator state topic
   ros::Publisher car_cmd_;              // pilot CarCommand
 
 #if 0
@@ -129,6 +132,7 @@ void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
             mps2mph(odom_msg_.twist.twist.linear.x));
 }
 
+/** Set up ROS topics for navigator node */
 bool NavQueueMgr::setup(ros::NodeHandle node)
 {
   // no delay: we always want the most recent data
@@ -139,12 +143,13 @@ bool NavQueueMgr::setup(ros::NodeHandle node)
   odom_state_ = node.subscribe("odom", qDepth,
                                &NavQueueMgr::processOdom, this, noDelay);
 
-  // initialize servo command interfaces and messages
+  // topics to write
+  nav_state_ =
+    node.advertise<art_nav::NavigatorState>("navigator/state", qDepth);
   car_cmd_ = node.advertise<art_nav::CarCommand>("pilot/cmd", qDepth);
 
   return true;
 }
-
 
 // Shutdown the node
 bool NavQueueMgr::shutdown()
@@ -407,28 +412,23 @@ void NavQueueMgr::SetSpeed(pilot_command_t pcmd)
   car_cmd_.publish(cmd);
 }
 
-// Publish current navigator state data
+/** Publish current navigator state data */
 void NavQueueMgr::PublishState(void)
 {
-#if 0
-  if (verbose >= 2)
-    ART_MSG(7, "Publishing Navigator state = %s, %s, last_waypt %s"
+  ROS_DEBUG("Publishing Navigator state = %s, %s, last_waypt %s"
 	    ", replan_waypt %s, R%d S%d Z%d, next waypt %s, goal chkpt %s",
-	    nav->navdata.estop_state.Name(),
-	    nav->navdata.road_state.Name(),
-	    nav->navdata.last_waypt.name().str,
-	    nav->navdata.replan_waypt.name().str,
-	    nav->navdata.reverse,
-	    nav->navdata.stopped,
-	    nav->navdata.have_zones,
-	    nav->navdata.last_order.waypt[1].id.name().str,
-	    nav->navdata.last_order.chkpt[0].id.name().str);
+	    NavEstopState(nav->navdata.estop).Name(),
+	    NavRoadState(nav->navdata.road).Name(),
+	    ElementID(nav->navdata.last_waypt).name().str,
+	    ElementID(nav->navdata.replan_waypt).name().str,
+	    (bool) nav->navdata.reverse,
+	    (bool) nav->navdata.stopped,
+	    (bool) nav->navdata.have_zones,
+	    ElementID(nav->navdata.last_order.waypt[1].id).name().str,
+	    ElementID(nav->navdata.last_order.chkpt[0].id).name().str);
 
   // Publish this info for all subscribers
-  Publish(device_addr,
-	  PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,
-	  (void*)&opaque, sizeof(opaque.data_count) + opaque.data_count);
-#endif
+  nav_state_.publish(nav->navdata);
 }
 
 /** Spin method for main thread */

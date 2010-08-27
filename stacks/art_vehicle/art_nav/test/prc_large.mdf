@@ -1,0 +1,30 @@
+MDF_name	nqe3.mdf
+RNDF	nqe_large.rndf
+creation_date	10/11/2007
+checkpoints
+num_checkpoints	14
+/*21*/
+15
+16
+1
+11
+8
+13
+14
+3
+1
+9
+10
+2
+15
+end_checkpoints
+speed_limits
+num_speed_limits	8
+1	0	15
+2	0	15
+3	0	15
+4	0	15
+5	0	15
+6	0	15
+7	0	15
+8	0	15	

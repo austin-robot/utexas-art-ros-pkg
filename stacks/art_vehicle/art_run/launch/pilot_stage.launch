@@ -1,9 +1,16 @@
 <!-- -*- mode: XML -*- -->
-<!-- launch file for pilot with stage simulation -->
+<!-- launch file for pilot with stage simulation
+
+     WORLD = base name (without prefix) of world file and RNDF
+             (default prc_large)
+  -->
 
 <launch>
+  <!-- global parameters (in this namespace) -->
   <!-- define use_sim_time first to avoid races as nodes start up -->
   <param name="use_sim_time" value="true" />
+  <param name="rndf"
+         value="$(find art_map)/rndf/$(optenv WORLD prc_large).rndf"/>
 
   <!-- stage simulator for ART vehicle -->
   <node pkg="simulator_art" type="artstage" name="artstage"
@@ -19,8 +26,6 @@
 
   <!-- start maplanes node with corresponding RNDF -->
   <node pkg="art_map" type="maplanes" name="maplanes">
-    <param name="rndf"
-           value="$(find art_map)/rndf/$(optenv WORLD prc_large).rndf"/>
     <param name="frame_id" value="/map" />
   </node>
 

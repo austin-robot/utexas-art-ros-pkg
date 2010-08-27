@@ -1,0 +1,18 @@
+MDF_name	SwRI_Site_Visit_MDF
+RNDF	SwRI_Site_Visit_RNDF
+format_version	1.0
+creation_date	2/21/2007
+checkpoints
+num_checkpoints	4
+7
+8	
+9
+1
+end_checkpoints
+speed_limits
+num_speed_limits	3
+1	0	25	
+2	0	25
+3	0	25
+end_speed_limits
+end_file

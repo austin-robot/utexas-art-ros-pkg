@@ -87,7 +87,7 @@ private:
   // Odometry data
   nav_msgs::Odometry odom_msg_;
 
-  // time latest command received
+  // time stamp of latest command received
   ros::Time cmd_time_;
 
   // navigator implementation class

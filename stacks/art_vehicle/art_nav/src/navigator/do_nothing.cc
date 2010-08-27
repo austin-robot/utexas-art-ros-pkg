@@ -1,19 +1,12 @@
-//
-// Navigator examplex controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Mickey Ristroph
-//
+/*
+ *  Navigator example controller
+ *
+ *  Copyright (C) 2007, Mickey Ristroph
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #include "navigator_internal.h"
 #include "Controller.h"

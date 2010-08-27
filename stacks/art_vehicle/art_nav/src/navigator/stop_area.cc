@@ -1,19 +1,12 @@
-//
-// Navigator stop line safety area controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/*
+ *  Navigator stop line safety area controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #include "navigator_internal.h"
 #include "Controller.h"
@@ -31,7 +24,7 @@ StopArea::StopArea(Navigator *navptr, int _verbose):
 StopArea::~StopArea() {};
 
 // configuration method
-void StopArea::configure(ConfigFile* cf, int section)
+void StopArea::configure()
 {
   stop_approach_speed = cf->ReadFloat(section, "stop_approach_speed", 3.0);
   ART_MSG(2, "\tstop line approach speed is %.3f m/s",

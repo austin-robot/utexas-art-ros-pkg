@@ -1,19 +1,12 @@
-//
-// Navigator run controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/*
+ *  Navigator run controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #include "navigator_internal.h"
 #include "Controller.h"
@@ -71,7 +64,7 @@ void Run::begin_escape(void)
   set_go_state(Escape);
 }
 
-void Run::configure(ConfigFile* cf, int section)
+void Run::configure()
 {
   // attempt to escape if blockage detected
   escape = cf->ReadBool(section, "escape", true);

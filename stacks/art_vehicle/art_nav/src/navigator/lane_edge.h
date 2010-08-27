@@ -1,19 +1,13 @@
-//
-// Navigator edge right controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/* -*- mode: C++ -*-
+ *
+ *  Navigator edge right controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #ifndef __LANE_EDGE_HH__
 #define __LANE_EDGE_HH__
@@ -26,7 +20,7 @@ public:
 
   LaneEdge(Navigator *navptr, int _verbose);
   ~LaneEdge();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd, float offset_ratio);
   void reset(void);
 

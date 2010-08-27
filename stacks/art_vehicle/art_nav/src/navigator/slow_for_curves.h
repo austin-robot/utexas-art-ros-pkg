@@ -1,19 +1,13 @@
-//
-// Navigator "slow down for curves" controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Mickey Ristroph
-//
+/* -*- mode: C++ -*-
+ *
+ *  Navigator "slow down for curves" controller
+ *
+ *  Copyright (C) 2007, 2010, Mickey Ristroph
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #ifndef __SLOW_FOR_CURVES_HH__
 #define __SLOW_FOR_CURVES_HH__

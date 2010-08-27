@@ -1,19 +1,12 @@
-//
-// Navigator passing controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/*
+ *  Navigator passing controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #include "navigator_internal.h"
 #include "Controller.h"
@@ -27,7 +20,7 @@
 #include "follow_safely.h"
 #include "slow_for_curves.h"
 
-#include <art/DARPA_rules.hh>
+#include <art/DARPA_rules.h>
 
 Passing::Passing(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
@@ -49,7 +42,7 @@ Passing::~Passing()
   delete slow_for_curves;
 };
 
-void Passing::configure(ConfigFile* cf, int section)
+void Passing::configure()
 {
 
   // minimum passing distance

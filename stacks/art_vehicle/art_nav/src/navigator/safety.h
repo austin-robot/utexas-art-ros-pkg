@@ -1,31 +1,23 @@
-//
-// Navigator safety controller
-//
-// Safety control runs at the end of the Navigator cycle.  Its job is
-// to avoid any obstacle in the vehicle's immediate path, regardless
-// of states or lanes.  If we are about to hit something, either halt
-// or swerve.
-//
-// TODO: seems like a good idea, implement it!
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
+/* -*- mode: C++ -*-
+ *
+ *  Navigator safety controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #ifndef __SAFETY_HH__
 #define __SAFETY_HH__
 
 #include "Controller.h"
+
+// Safety control runs at the end of the Navigator cycle.  Its job is
+// to avoid any obstacle in the vehicle's immediate path, regardless
+// of states or lanes.  If we are about to hit something, either halt
+// or swerve.
 
 class Safety_Distance;
 
@@ -37,7 +29,7 @@ public:
   ~Safety();
   
   // null configuration method
-  void configure(ConfigFile* cf, int section);
+  void configure();
   
   // safety controller
   result_t control(pilot_command_t &pcmd);

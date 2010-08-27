@@ -1,26 +1,18 @@
-
-// Navigator U-turn controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Authors: Jack O'Quin, Patrick Beeson
-//
+/*
+ *  Navigator U-turn controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #include "navigator_internal.h"
 #include "Controller.h"
 #include "course.h"
 #include "obstacle.h"
 #include "uturn.h"
-
 #include "safety.h"
 #include "stop.h"
 

@@ -1,19 +1,14 @@
 /*
- *  Description:  Navigator course planning class
+ *  Navigator course planning class
  *
- *  Copyright Austin Robot Technology                    
- *  All Rights Reserved. Licensed Software.
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
  *
- *  This is unpublished proprietary source code of Austin Robot
- *  Technology, Inc.  The copyright notice above does not evidence any
- *  actual or intended publication of such source code.
- *
- *  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
+ *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
 
-#include <art/DARPA_rules.hh>
+#include <art/DARPA_rules.h>
 #include <art_map/ArtLanes.h>
 
 #include "navigator_internal.h"

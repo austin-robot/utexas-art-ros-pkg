@@ -56,7 +56,7 @@ Estop::Estop(Navigator *navptr, int _verbose):
       NavEstopState::Done,	NavEstopState::Done);
 
   // allocate subordinate controllers
-  run = new Run(navptr, _verbose);
+  //run = new Run(navptr, _verbose);
   halt = new Halt(navptr, _verbose);
   reset_me();
 }
@@ -64,7 +64,7 @@ Estop::Estop(Navigator *navptr, int _verbose):
 Estop::~Estop()
 {
   delete halt;
-  delete run;
+  //delete run;
 };
 
 // add a transition to the table
@@ -80,7 +80,7 @@ void Estop::Add(NavEstopEvent::event_t event, action_t action,
 void Estop::configure()
 {
   halt->configure();
-  run->configure();
+  //run->configure();
 }
 
 Controller::result_t Estop::control(pilot_command_t &pcmd)
@@ -155,7 +155,7 @@ void Estop::reset(void)
   trace_reset("Estop");
   reset_me();
   halt->reset();
-  run->reset();
+  //run->reset();
 }
 
 void Estop::reset_me(void)

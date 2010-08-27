@@ -1,21 +1,12 @@
-/*
- * Navigator class interface
+/* -*- mode: C++ -*-
  *
- *  Copyright (C) 2007 Austin Robot Technology
- *  All Rights Reserved. Licensed Software.
+ *  Navigator class interface
  *
- *  This is unpublished proprietary source code of Austin Robot
- *  Technology, Inc.  The copyright notice above does not evidence any
- *  actual or intended publication of such source code.
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
  *
- *  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
- *
- *  If this is ever released publicly, the requirements of the GPL
- *  will apply, due to Player header and library dependencies.
+ *  License: Modified BSD Software License Agreement
  *
  *  $Id$
- *
- * Authors: Ryan Madigan, Jack O'Quin
  */
 
 #ifndef __NAVIGATOR_INTERNAL_H__

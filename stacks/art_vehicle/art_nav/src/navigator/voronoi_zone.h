@@ -1,19 +1,13 @@
-//
-// Navigator zone controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Mickey Ristroph
-//
+/* -*- mode: C++ -*-
+ *
+ *  Navigator zone controller
+ *
+ *  Copyright (C) 2007, Mickey Ristroph
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #ifndef __VORONOI_ZONE_HH__
 #define __VORONOI_ZONE_HH__
@@ -30,7 +24,7 @@ public:
 
   VoronoiZone(Navigator *navptr, int _verbose);
   ~VoronoiZone();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 

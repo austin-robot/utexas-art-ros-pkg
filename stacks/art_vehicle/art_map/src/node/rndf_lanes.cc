@@ -1,18 +1,12 @@
 /*
- *  Description: utility to print RNDF lane information.
+ *  Utility to print RNDF lane information.
  *
- *  Copyright (c) 2005, Austin Robot Technology, Inc.
- *  All Rights Reserved. Licensed Software.
+ *  Copyright (C) 2010, Austin Robot Technology
  *
- *  This is unpublished proprietary source code of Austin Robot
- *  Technology, Inc.  The copyright notice above does not evidence any
- *  actual or intended publication of such source code.
- *
- *  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
+ *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
-
 
 #include <stdio.h>
 #include <stdlib.h>

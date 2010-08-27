@@ -1,14 +1,10 @@
-/*
- *  Description:  Navigator driver timer class
+/* -*- mode: C++ -*-
  *
- *  Copyright Austin Robot Technology                    
- *  All Rights Reserved. Licensed Software.
+ *  Navigator timer class
  *
- *  This is unpublished proprietary source code of Austin Robot
- *  Technology, Inc.  The copyright notice above does not evidence any
- *  actual or intended publication of such source code.
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
  *
- *  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
+ *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */

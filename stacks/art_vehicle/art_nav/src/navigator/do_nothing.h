@@ -1,19 +1,13 @@
-//
-// Navigator example controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Mickey Ristroph
-//
+/* -*- mode: C++ -*-
+ *
+ *  Finite state machine interface
+ *
+ *  Copyright (C) 2007, Mickey Ristroph
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #ifndef __DO_NOTHING_HH__
 #define __DO_NOTHING_HH__
@@ -24,7 +18,7 @@ public:
 
   DoNothing(Navigator *navptr, int _verbose);
   ~DoNothing();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 };

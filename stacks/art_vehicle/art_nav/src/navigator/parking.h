@@ -1,18 +1,15 @@
-//
-// Navigator parking controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//
-//  Author: Patrick Beeson
-//
+/* -*- mode: C++ -*-
+ *
+ *  Navigator parking controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  Author: Patrick Beeson
+ *
+ *  $Id$
+ */
 
 #ifndef __PARKING_HH__
 #define __PARKING_HH__

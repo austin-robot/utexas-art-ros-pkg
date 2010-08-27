@@ -1,25 +1,15 @@
 /*
- * Navigator class interface
+ *  Navigator class interface
  *
- *  Copyright (C) 2007 Austin Robot Technology
- *  All Rights Reserved. Licensed Software.
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
  *
- *  This is unpublished proprietary source code of Austin Robot
- *  Technology, Inc.  The copyright notice above does not evidence any
- *  actual or intended publication of such source code.
- *
- *  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
- *
- *  If this is ever released publicly, the requirements of the GPL
- *  will apply, due to Player header and library dependencies.
+ *  License: Modified BSD Software License Agreement
  *
  *  $Id$
- *
- *  Authors: Ryan Madigan, Jack O'Quin
  */
 
 #include <assert.h>
-#include <art/DARPA_rules.hh>
+//#include <art/DARPA_rules.h>
 
 #include "navigator_internal.h"
 #include "course.h"
@@ -45,7 +35,7 @@ Navigator::Navigator()
   odometry = new nav_msgs::Odometry();
   // allocate helper classes
   pops = new PolyOps();
-  course = new Course(this, verbose);
+  //course = new Course(this, verbose);
   //obstacle = new Obstacle(this, verbose);
 
   // allocate controller classes
@@ -95,7 +85,7 @@ void Navigator::configure()
 
   // configure controller methods
   estop->configure();
-  course->configure();
+  //course->configure();
   //obstacle->configure();
 }
 

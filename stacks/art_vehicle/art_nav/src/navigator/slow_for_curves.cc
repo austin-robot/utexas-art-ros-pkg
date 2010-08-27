@@ -1,30 +1,23 @@
-//
-// Navigator "slow down for curves" controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//  $Id$
-//
-//  Author: Mickey Ristroph
-//
+/*
+ *  Navigator "slow down for curves" controller
+ *
+ *  Copyright (C) 2007, Mickey Ristroph
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
 
 #include "navigator_internal.h"
 #include "Controller.h"
 #include "course.h"
 #include "slow_for_curves.h"
-#include <art/coordinates.h>
+#include <art_map/coordinates.h>
 #include <art/epsilon.h>
-#include <art/steering.h>
+#include <art_servo/steering.h>
 #include <float.h>
 
-void SlowForCurves::configure(ConfigFile* cf, int section)
+void SlowForCurves::configure()
 {
   // TODO: lookahead_distance should probably be time in seconds.
   lookahead_distance = cf->ReadFloat(section, "lookahead_distance", 50.0);
@@ -37,7 +30,7 @@ void SlowForCurves::configure(ConfigFile* cf, int section)
     cf->ReadFloat(section, "max_yaw_rate",
 		  Steering::steering_angle_inverse
 		  (min_speed_when_slowing_for_curves,
-		   ArtVehicle::max_steer_degrees)); 
+		   Artvehicle::max_steer_degrees)); 
 
   min_curve_length = cf->ReadFloat(section, "min_curve_length", 1.5);
   ART_MSG(2, "\tturn lookahead distance is %.3f meters", lookahead_distance);

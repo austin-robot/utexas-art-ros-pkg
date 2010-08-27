@@ -1,7 +1,7 @@
 /*
  * Queue manager front end for ROS navigator node.
  *
- *  Copyright (C) 2005, 2010 Austin Robot Technology
+ *  Copyright (C) 2007, 2010 Austin Robot Technology
  *
  *  License: Modified BSD Software License Agreement
  *

@@ -1,16 +1,19 @@
-//
-// Navigator stop line controller
-//
-//  Copyright (C) 2007 Austin Robot Technology
-//  All Rights Reserved. Licensed Software.
-//
-//  This is unpublished proprietary source code of Austin Robot
-//  Technology, Inc.  The copyright notice above does not evidence any
-//  actual or intended publication of such source code.
-//
-//  PROPRIETARY INFORMATION, PROPERTY OF AUSTIN ROBOT TECHNOLOGY
-//
-//
+/*
+ *  Navigator stop line controller
+ *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
+ *
+ *  License: Modified BSD Software License Agreement
+ *
+ *  $Id$
+ */
+
+#include <art/DARPA_rules.h>
+#include "navigator_internal.h"
+#include "Controller.h"
+#include "course.h"
+#include "stop_line.h"
+
 // This is based on the unpublished "Control Tutorial" draft dated
 // January 26, 2004 by Dr. Benjamin Kuypers, section 5: "The Stopping
 // Controller".  He recommends a constant deceleration instead of the
@@ -31,18 +34,6 @@
 //
 // For example, when D = 10m from stop line and V = -5m/s, the vehicle
 // stops in 4 seconds at a constant 1.25m/s/s deceleration.
-//
-//  $Id$
-//
-//  Author: Jack O'Quin
-//
-
-#include "navigator_internal.h"
-#include "Controller.h"
-#include "course.h"
-#include "stop_line.h"
-
-#include <art/DARPA_rules.hh>
 
 StopLine::StopLine(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)

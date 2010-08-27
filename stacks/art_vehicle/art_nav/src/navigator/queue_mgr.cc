@@ -16,12 +16,15 @@
 
 #include <unistd.h>
 
+#include <art/frames.h>
+
 #include <art_servo/IOadrCommand.h>
 #include <art_servo/IOadrState.h>
 #include <art_servo/steering.h>
 #include <art_map/ZoneOps.h>
 
-#include <art_nav/Observers.h>
+#include <art_nav/CarCommand.h>
+//#include <art_nav/Observers.h>
 
 #include "navigator_internal.h"
 #include "course.h"
@@ -56,6 +59,7 @@ public:
 
 private:
 
+  void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void PublishState(void);
   void SetSignals(void);
   void SetSpeed(pilot_command_t pcmd);
@@ -64,8 +68,9 @@ private:
   int verbose;				// log level verbosity
 
   // ROS topics
-  ros::Subscriber ctl_topic_;		// control device (pilot) topic
   ros::Subscriber map_topic_;           // road map topic
+  ros::Subscriber odom_state_;          // odometry
+  ros::Publisher car_cmd_;              // pilot CarCommand
 
 #if 0
   Device *intersection;			// intersection device
@@ -81,6 +86,9 @@ private:
   //AioServo *signals;
   bool signal_on_left;			// requested turn signal states
   bool signal_on_right;
+
+  // Odometry data
+  nav_msgs::Odometry odom_msg_;
 
   // latest order command
   art_nav::Order order_cmd;
@@ -103,9 +111,37 @@ NavQueueMgr::NavQueueMgr()
 
 }
 
-// Set up node message topics.
+/** handle Odometry input */
+void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
+{
+  ROS_DEBUG("Odometry pose: (%.3f, %.3f, %.3f), (%.3f, %.3f, %.3f)",
+            odomIn->pose.pose.position.x,
+            odomIn->pose.pose.position.y,
+            odomIn->pose.pose.position.z,
+            odomIn->twist.twist.linear.x,
+            odomIn->twist.twist.linear.y,
+            odomIn->twist.twist.linear.z);
+
+  odom_msg_ = *odomIn;
+
+  ROS_DEBUG("current velocity = %.3f m/sec, (%02.f mph)",
+            odom_msg_.twist.twist.linear.x,
+            mps2mph(odom_msg_.twist.twist.linear.x));
+}
+
 bool NavQueueMgr::setup(ros::NodeHandle node)
-{   
+{
+  // no delay: we always want the most recent data
+  ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
+  static uint32_t qDepth = 1;
+
+  // topics to read
+  odom_state_ = node.subscribe("odom", qDepth,
+                               &NavQueueMgr::processOdom, this, noDelay);
+
+  // initialize servo command interfaces and messages
+  car_cmd_ = node.advertise<art_nav::CarCommand>("pilot/cmd", qDepth);
+
   return true;
 }
 
@@ -354,41 +390,21 @@ void NavQueueMgr::SetSignals(void)
 /** Send a command to the pilot */
 void NavQueueMgr::SetSpeed(pilot_command_t pcmd)
 {
-#if 0
-#if 1
-  player_position2d_cmd_car_t cmd;
-  memset(&cmd, 0, sizeof(cmd));
-  
-  cmd.velocity = pcmd.velocity;
+  art_nav::CarCommand cmd;
+  cmd.header.stamp = ros::Time::now();
+  cmd.header.frame_id = ArtFrames::vehicle;
 
-  float yawRate=pcmd.yawRate;
-
-  if (cmd.velocity < 0)
-    yawRate = -yawRate;		// steer in opposite direction
-  cmd.angle = Steering::steering_angle(fabs(cmd.velocity), yawRate);
+  cmd.control.velocity = pcmd.velocity;
+  float yawRate = pcmd.yawRate;
+  if (pcmd.velocity < 0)
+    yawRate = -yawRate;                 // steer in opposite direction
+  cmd.control.angle =
+    Steering::steering_angle(fabs(pcmd.velocity), yawRate);
     
-  if (verbose >= 2)
-    ART_MSG(7, "Navigator CMD_CAR (%.3f m/s, %.3f degrees)",
-	    cmd.velocity, cmd.angle);
+  ROS_DEBUG("Navigator CMD_CAR (%.3f m/s, %.3f degrees)",
+	    cmd.control.velocity, cmd.control.angle);
   
-  ctl->PutMsg(this->InQueue, PLAYER_MSGTYPE_CMD, PLAYER_POSITION2D_CMD_CAR,
-	      (void*) &cmd, sizeof(cmd), NULL);
-#else
-  player_position2d_cmd_vel_t cmd;
-  memset(&cmd, 0, sizeof(cmd));
-  
-  cmd.vel.px =  pcmd.velocity;
-  cmd.vel.py =  0;
-  cmd.vel.pa =  pcmd.yawRate;
-  
-  if (verbose >= 2)
-    ART_MSG(7, "Navigator CMD_VEL (%.3f m/s, %.3f rad/s)",
-	    cmd.vel.px, cmd.vel.pa);
-  
-  ctl->PutMsg(this->InQueue, PLAYER_MSGTYPE_CMD, PLAYER_POSITION2D_CMD_VEL,
-	      (void*) &cmd, sizeof(cmd), NULL);
-#endif
-#endif
+  car_cmd_.publish(cmd);
 }
 
 // Publish current navigator state data
@@ -438,7 +454,7 @@ void NavQueueMgr::spin()
 /** Main program */
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "commander");
+  ros::init(argc, argv, "navigator");
   ros::NodeHandle node;
   NavQueueMgr nq;
   

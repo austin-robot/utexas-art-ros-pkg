@@ -11,17 +11,21 @@
 #include "navigator_internal.h"
 #include "Controller.h"
 #include "course.h"
+#if 0
 #include "obstacle.h"
+#endif
 #include "ntimer.h"
 #include "run.h"
 
 #include "halt.h"
+#if 0
 #include "road.h"
 #include "safety.h"
 #include "voronoi_zone.h"
+#endif
 
-#include <art/estimate.h>
-#include <art_nav/ZoneOps.h>
+#include <art_nav/estimate.h>
+#include <art_map/ZoneOps.h>
 
 static const char *state_name[] =
   {
@@ -34,38 +38,61 @@ Run::Run(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
 {
   halt =	new Halt(navptr, _verbose);
+#if 0
   road =	new Road(navptr, _verbose);
   safety =	new Safety(navptr, _verbose);
   unstuck =	new VoronoiZone(navptr, _verbose);
 
   escape_timer = new NavTimer(cycle);
-
+#endif
   go_state = Continue;
 };
 
 Run::~Run()
 {
   delete halt;
+#if 0
   delete road;
   delete safety;
   delete unstuck;
 
   delete escape_timer;
+#endif
 };
 
 // go to escape state
 void Run::begin_escape(void)
 {
+#if 0
   unstuck->reset();
   blockage_pose = estimate->pos;
   blockage_waypt_dist =
     Euclidean::DistanceToWaypt(estimate->pos, order->waypt[1]);
   escape_timer->Start(escape_timeout_secs);
   set_go_state(Escape);
+#endif
 }
 
 void Run::configure()
 {
+  ros::NodeHandle nh("~");
+  
+  // look ahead distance for initialize behavior
+  nh.param("initialize_distance", initialize_distance, 10.0);
+  ROS_INFO("initialize look ahead distance is %.3f m", initialize_distance);
+
+  // minimum angle to accept current containing poly as good
+  nh.param("initialize_min_angle", initialize_min_angle, M_PI/4);
+  ROS_INFO("initialize minimum angle is %.3f radians", initialize_min_angle);
+
+  // maximum speed we will ever request (in meters/second)
+  nh.param("maxspeed", max_speed, 15.0);
+  ROS_INFO("maximum speed is %.3f m/s", max_speed);
+
+  // configure subordinate controllers
+  halt->configure();
+
+#if 0
   // attempt to escape if blockage detected
   escape = cf->ReadBool(section, "escape", true);
   ART_MSG(2, "\tescape is %s", (escape? "true": "false"));
@@ -83,25 +110,10 @@ void Run::configure()
   ART_MSG(2, "\textra safety check is %s",
 	  (extra_safety_check? "true": "false"));
 
-  // look ahead distance for initialize behavior
-  initialize_distance = cf->ReadFloat(section, "initialize_distance", 10.0);
-  ART_MSG(2, "\tinitialize look ahead distance is %.3f m",
-	  initialize_distance);
-
-  // minimum angle to accept current containing poly as good
-  initialize_min_angle = cf->ReadFloat(section, "initialize_min_angle", M_PI/4);
-  ART_MSG(2, "\tinitialize minimum angle is %.3f radians",
-	  initialize_min_angle);
-
-  // maximum speed we will ever request (in meters/second)
-  max_speed = cf->ReadFloat(section, "maxspeed", 15.0);
-  ART_MSG(2, "\tmaximum speed is %.3f m/s", max_speed);
-
-  // configure subordinate controllers
-  halt->configure(cf, section);
-  road->configure(cf, section);
-  safety->configure(cf, section);
-  unstuck->configure(cf, section);
+  road->configure();
+  safety->configure();
+  unstuck->configure();
+#endif
 }
 
 // main controller whenever E-stop is in the Run state
@@ -121,12 +133,11 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   // Do nothing if the order is still Run.  Wait until Commander sends
   // a new behavior.  Also, wait until the course controller receives
   // data from the maplanes driver.
-  if (order->behavior == NavBehavior::Run)
+  if (NavBehavior(order->behavior) == NavBehavior::Run)
     //      || course->polygons.empty())
     {
-      if (verbose >= 3)
-	ART_MSG(8, "run controller not initialized, have %u polygons",
-		course->polygons.size());
+      ROS_DEBUG_STREAM("run controller not initialized, have "
+                       << course->polygons.size() << " polygons");
       // Run order in Run state is valid, but does nothing.
       // Do nothing until lanes data are initialized.
       return halt->control(pcmd);
@@ -138,9 +149,8 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   
   // estimate current dead reckoning position based on time of current
   // cycle and latest odometry course and speed
-
-  Estimate::control_pose(odom->curr_pos, odom->time, cycle->Time(),
-			 *estimate, verbose);
+  estimate->header.stamp = ros::Time::now(); // desired time of estimate
+  Estimate::control_pose(*odom, *estimate);
 
   course->begin_run_cycle();
 
@@ -149,7 +159,7 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   result_t result;
 
   // select subordinate controller based on order behavior
-  switch (order->behavior.Value())
+  switch (order->behavior.value)
     {
     case NavBehavior::Go:
       result = go(pcmd);
@@ -160,12 +170,13 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
       break;
       
     default:
-      ART_MSG(1, "unsupported Navigator behavior: %s (halting)",
-	      order->behavior.Name());
+      ROS_ERROR("unsupported Navigator behavior: %s (halting)",
+                NavBehavior(order->behavior).Name());
       halt->control(pcmd);
       result = NotImplemented;
     }
 
+#if 0
   if (extra_safety_check)
     {
       // make safety check for obstacle in our immediate path
@@ -173,15 +184,7 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
       if (sres != OK)
 	result = sres;
     }
-
-
-// #ifdef NQE
-//   if (order->waypt[1].id.seg==1 ||
-//       order->waypt[1].id.seg==2 ||
-//       order->waypt[1].id.seg==41)
-//     pcmd.gradual=false;
-// #endif
-  
+#endif
 
   if (navdata->reverse)
     {
@@ -257,13 +260,14 @@ Controller::result_t Run::initialize(pilot_command_t &pcmd)
 //
 Controller::result_t Run::go(pilot_command_t &pcmd)
 {
-  if (order->waypt[0].id == order->waypt[1].id)
+  if (ElementID(order->waypt[0].id) == ElementID(order->waypt[1].id))
     {
       // halt and let Commander catch up (does not count as timeout)
-      ART_MSG(1, "already reached all way-points in order, halting");
+      ROS_INFO("already reached all way-points in order, halting");
       return halt->control(pcmd);
     }
 
+#if 0 // not doing blockage timer yet
   // check whether car moving, set blockage timer appropriately
   obstacle->update_blockage_state();
 
@@ -279,9 +283,11 @@ Controller::result_t Run::go(pilot_command_t &pcmd)
       else
 	ART_MSG(1, "Run controller blocked, but not trying to escape.");
     }
+#endif
 
   switch (go_state)
     {
+#if 0 // not doing Escape yet
     case Escape:
       {
 	float blockage_distance =
@@ -310,28 +316,39 @@ Controller::result_t Run::go(pilot_command_t &pcmd)
 	set_go_state(Replan);
 	// fall through...
       }
+#endif
 
     case Replan:
       if (order->replan_num == last_replan)
 	{
-	  navdata->replan_waypt = starting_waypt();
-	  if (navdata->replan_waypt == ElementID())
+	  ElementID start_id = starting_waypt();
+	  navdata->replan_waypt = start_id.toMapID();
+	  if (start_id == ElementID())
 	    {
-	      ART_MSG(1, "Unable to replan from here, keep trying to escape.");
+	      ROS_WARN("Unable to replan from here, keep trying to escape.");
+#if 0
 	      begin_escape();
+#endif
 	    }
 	  return halt->control(pcmd);
 	}
 
       // Commander issued new replanned order
-      navdata->replan_waypt = ElementID();
+      navdata->replan_waypt = ElementID().toMapID();
+#if 0
       road->reset();
+#endif
       set_go_state(Continue);
       // fall through...
 
     case Continue:
+#if 0
       // normal processing -- run the road state machine
       return road->control(pcmd);
+#else
+      // temporary scaffolding
+      return halt->control(pcmd);
+#endif
 
     default:
       // not reached, only to avoid compiler warning
@@ -345,8 +362,10 @@ void Run::reset(void)
   go_state = Continue;
 
   halt->reset();
+#if 0
   road->reset();
   safety->reset();
+#endif
 }
 
 // set new Go behavior state
@@ -354,8 +373,7 @@ void Run::set_go_state(state_t newstate)
 {
   if (go_state != newstate)
     {
-      if (verbose)
-	ART_MSG(4, "Go behavior state changing from %s to %s",
+      ROS_DEBUG("Go behavior state changing from %s to %s",
 		state_name[go_state], state_name[newstate]);
       go_state = newstate;
     }
@@ -371,6 +389,7 @@ ElementID Run::starting_waypt(void)
 {
   ElementID waypt;
 
+#if 0
   // first look for a containing zone
   segment_id_t starting_zone =
     ZoneOps::containing_zone(course->zones, MapXY(estimate->pos));
@@ -390,9 +409,10 @@ ElementID Run::starting_waypt(void)
 	return waypt;
       }
   }
+#endif
 
   // not in a zone -- find an appropriate lane polygon
-  int index = pops->getStartingPoly(estimate->pos,
+  int index = pops->getStartingPoly(MapPose(estimate->pose.pose),
 				    course->polygons,
 				    initialize_distance,
 				    initialize_min_angle);
@@ -400,13 +420,13 @@ ElementID Run::starting_waypt(void)
   if (index < 0)
     {
       // no starting way-point found
-      ART_MSG(2, "getStartingPoly() failed, returning %d", index);
+      ROS_WARN_STREAM("getStartingPoly() failed, returning " << index);
     }
   else
     {
       waypt = course->polygons[index].start_way;
-      ART_MSG(2, "starting_waypt() is %s, polygon %u",
-	      waypt.name().str, course->polygons[index].poly_id);
+      ROS_INFO_STREAM("starting_waypt() is " << waypt.name().str
+                      << ", polygon " << course->polygons[index].poly_id);
     }
 
   return waypt;

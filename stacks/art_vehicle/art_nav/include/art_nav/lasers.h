@@ -36,20 +36,20 @@ class Lasers
   // TODO: make this an array of lasers
   bool have_ranges;                   //< true when range data present
   sensor_msgs::LaserScan front_laser_scan; //< current front_laser scan
-  Position::Pose3D front_laser_pose;       //< estimated pose of scan
-  Position::Pose3D front_laser_odom;
+  MapPose front_laser_pose;                //< estimated pose of scan
+  MapPose front_laser_odom;
   ros::Time front_laser_time;        //< timestamp of front_laser scan
   sensor_msgs::LaserScan rear_laser_scan; //< current front_laser scan
-  Position::Pose3D rear_laser_pose;       //< estimated pose of scan
-  Position::Pose3D rear_laser_odom;
+  MapPose rear_laser_pose;                //< estimated pose of scan
+  MapPose rear_laser_odom;
   ros::Time rear_laser_time;         //< timestamp of front_laser scan
   sensor_msgs::LaserScan velodyne_laser_scan; //< current front_laser scan
-  Position::Pose3D velodyne_laser_pose;	//< estimated pose of scan
-  Position::Pose3D velodyne_laser_odom;
+  MapPose velodyne_laser_pose;          //< estimated pose of scan
+  MapPose velodyne_laser_odom;
   ros::Time velodyne_laser_time;     //< timestamp of front_laser scan
   sensor_msgs::LaserScan fusion_laser_scan; //< current front_laser scan
-  Position::Pose3D fusion_laser_pose;       //< estimated pose of scan
-  Position::Pose3D fusion_laser_odom;
+  MapPose fusion_laser_pose;                //< estimated pose of scan
+  MapPose fusion_laser_odom;
   ros::Time fusion_laser_time;       //< timestamp of front_laser scan
   float max_range;                   //< maximum scan range
   float front_max_range;             //< maximum scan range
@@ -103,7 +103,7 @@ class Lasers
 
   // handle laser scan message
   void laser_message(sensor_msgs::LaserScan *scan,
-		     Position::Pose3D *pose,
+		     MapPose *pose,
 		     lasertype laser_t);
 
   //convert laser_scans to MapXY

@@ -17,7 +17,7 @@ Odometry::Odometry()
 {
   listsize=20;
   
-  poselist = new Position::Pose3D[listsize];  
+  poselist = new MapPose[listsize];  
   timelist = new ros::Time[listsize];
   
   list_start=list_curr=0;

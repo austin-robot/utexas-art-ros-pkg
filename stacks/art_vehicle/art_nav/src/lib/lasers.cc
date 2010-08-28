@@ -57,7 +57,7 @@ int Lasers::configure()
  *  Called from the match_lasers() method when new laser data arrive.
  */
 void Lasers::laser_message(sensor_msgs::LaserScan *scan,
-                           Position::Pose3D *pose,
+                           MapPose *pose,
                            lasertype laser_t)
 {
   if (laser_t==front)

@@ -76,7 +76,7 @@ class Course
   void find_travel_lane(bool rejoin);
 
   /** @brief return true if pose is in the current travel lane */
-  bool in_lane(const Position::Pose3D &pose) const
+  bool in_lane(const MapPose &pose) const
   {
     return in_poly_list(plan, pose);
   }
@@ -272,7 +272,7 @@ class Course
 
   poly_list_t passed_lane;		//< original lane being passed
   bool passing_left;			//< when passing, true if to left
-  Position::Pose3D start_pass_location;	//< pose where passing started
+  MapPose start_pass_location;          //< pose where passing started
 
   WayPointNode stop_waypt;		//< coming stop or U-turn way-point
   poly stop_poly;			//< polygon containing stop waypt

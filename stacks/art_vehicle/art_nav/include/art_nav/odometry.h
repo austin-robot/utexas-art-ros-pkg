@@ -12,7 +12,7 @@
 #ifndef __ODOMETRY_HH__
 #define __ODOMETRY_HH__
 
-#include <art/Position.h>
+#include <art_map/types.h>
 #include <nav_msgs/Odometry.h>
 
 class Odometry
@@ -29,7 +29,7 @@ public:
   int configure();
   int subscribe();
 
-  Position::Pose3D *poselist;
+  MapPose *poselist;
   ros::Time *timelist;
   
   unsigned int listsize,list_start,list_end, list_curr;

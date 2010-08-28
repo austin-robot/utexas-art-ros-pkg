@@ -478,14 +478,22 @@ class PolyOps
   // by navigator as waypoints
   std::vector<MapXY> getPointsFromPolys(const std::vector<poly>& polys);
 
-  // Return closest polygon that is kind of in front of
-  // robot's current pose -- Useful when starting off road.  
-  //int getStartingPoly(const player_pose2d_t &pose,
-  //                    const std::vector<poly>& polygons,
-  //                    float distance,
-  //                    float min_heading);
-  // distance looks ahead a certain amount so that we don't turn
-  // sharply to redah a nearby waypoint.  
+  /** Get closest polygon in front of robot's current pose
+   *
+   * Useful when starting off road.  
+   *
+   * @param pose current vehicle pose (2D map coordinates)
+   * @param polygons list of polygons
+   * @param distance looks ahead a certain amount so that we don't turn
+   *                 sharply to reach a nearby waypoint.
+   * @param min_heading angle to accept polygon as valid
+   * @return index in @a polygons of closest polygon within
+   *                 @a min_heading and @a distance.
+   */
+  int getStartingPoly(const MapPose &pose,
+                      const std::vector<poly>& polygons,
+                      float distance,
+                      float min_heading);
   
   //ElementID updateLaneLocation(const std::vector<poly>& polygons,
   //                             const player_pose2d_t& pose,

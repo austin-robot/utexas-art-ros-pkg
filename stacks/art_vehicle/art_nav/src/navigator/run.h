@@ -40,25 +40,31 @@ private:
     } state_t;
 
   state_t go_state;			// current Go behavior FSM state
-  Position::Pose3D blockage_pose;
+  MapPose blockage_pose;
   float blockage_waypt_dist;
   int last_replan;
+#if 0
   NavTimer *escape_timer;
+#endif
 
   // .cfg variables
+  double initialize_distance;
+  double initialize_min_angle;
+  double max_speed;
+#if 0
   bool  escape;
   float escape_distance;
   double escape_timeout_secs;
   bool  extra_safety_check;
-  float initialize_distance;
-  float initialize_min_angle;
-  float max_speed;
+#endif
 
   // subordinate controllers
   Halt		*halt;
+#if 0
   Road		*road;
   Safety	*safety;
   VoronoiZone	*unstuck;
+#endif
 
   // behavior-specific control methods
   Controller::result_t initialize(pilot_command_t &pcmd);

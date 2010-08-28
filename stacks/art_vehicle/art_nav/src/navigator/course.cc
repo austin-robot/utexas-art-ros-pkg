@@ -1016,9 +1016,7 @@ void Course::reset(void)
     ART_MSG(2, "Course class reset()");
 
   // TODO: figure out when this needs to happen and what to do
-  start_pass_location.x = 0.0;
-  start_pass_location.y = 0.0;
-  start_pass_location.yaw = 0.0;
+  start_pass_location = MapPose();
 
   // clear the previous plan
   plan.clear();
@@ -1173,12 +1171,11 @@ bool Course::switch_to_passing_lane()
                                  MapXY(estimate->pose.pose.position),
                                  true);
 
-  start_pass_location.x=start_point.x;
-  start_pass_location.y=start_point.y;
+  start_pass_location.map=start_point;
   start_pass_location.yaw=aim_poly.heading;
 
   ART_MSG(1, "passing starts at (%.3f, %.3f)",
-	  start_pass_location.x, start_pass_location.y);
+	  start_pass_location.map.x, start_pass_location.map.y);
 
   return true;
 }
@@ -1405,15 +1402,14 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
   float error = 0;
   float theta=-aim_polar.heading;
   float velocity = fmaxf(curr_velocity, Steering::steer_speed_min);
-  nav_msgs::Odometry pos_est;  
   nav_msgs::Odometry front_est;  
   Estimate::front_axle_pose(*estimate, front_est);
-  double time_in_future = (1.0 / art_common::ArtHertz::NAVIGATOR
-                           + velocity*spring_lookahead);
-  Estimate::control_pose(front_est,
-			 1.0 / art_common::ArtHertz::NAVIGATOR,
-			 time_in_future,
-			 pos_est);
+  ros::Duration frequency(1.0 / art_common::ArtHertz::NAVIGATOR);
+  front_est.header.stamp = ros::Time::now() + frequency;
+  ros::Time time_in_future(frequency.toSec() + velocity*spring_lookahead);
+  nav_msgs::Odometry pos_est;
+  pos_est.header.stamp = time_in_future;
+  Estimate::control_pose(front_est, pos_est);
  
   if (poly_id >=0)
     {

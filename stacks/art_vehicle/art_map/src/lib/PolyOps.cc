@@ -624,24 +624,23 @@ float PolyOps::PolyHeading(const poly& curPoly)
 				/ 2.0f);
 }
 
-#if 0 //TODO
-int PolyOps::getStartingPoly(const player_pose2d_t &pose,
+int PolyOps::getStartingPoly(const MapPose &pose,
 			     const std::vector<poly>& polygons,
 			     float distance,
 			     float min_heading) 
 {
   
-  int index=getContainingPoly(polygons, pose.px, pose.py);
+  int index = getContainingPoly(polygons, pose.map);
   if (index >=0 && fabs(Coordinates::normalize
-			(polygons.at(index).heading-pose.pa)) < min_heading)
+			(polygons.at(index).heading-pose.yaw)) < min_heading)
     return index;
   
   // Get closest polygon 
-  index=getClosestPoly(polygons, pose.px, pose.py);
+  index = getClosestPoly(polygons, pose);
   if (index < 0)
     return index;
-  else if (fabs(Coordinates::normalize
-		(polygons.at(index).heading-pose.pa)) < min_heading)
+  else if (fabs(Coordinates::normalize(polygons.at(index).heading-pose.yaw))
+           < min_heading)
     return index;
   
   // Find closest segment
@@ -678,16 +677,17 @@ int PolyOps::getStartingPoly(const player_pose2d_t &pose,
 
     std::vector<poly> lane_polys;
     AddLanePolys(polygons,lane_polys,waypt);
-    int newind=getClosestPoly(lane_polys,pose.px, pose.py);
+    int newind = getClosestPoly(lane_polys, pose);
     if (newind < 0)
       continue;
-    float tempdist=fabs(Coordinates::normalize
-			(lane_polys.at(newind).heading-pose.pa));
-    if (tempdist < mindist) {
-      mindist=tempdist;
-      minpoly=lane_polys.at(newind);
-      foundd=true;
-    }
+    float tempdist =
+      fabs(Coordinates::normalize(lane_polys.at(newind).heading-pose.yaw));
+    if (tempdist < mindist)
+      {
+        mindist=tempdist;
+        minpoly=lane_polys.at(newind);
+        foundd=true;
+      }
   }
 
   if (!foundd)
@@ -701,10 +701,10 @@ int PolyOps::getStartingPoly(const player_pose2d_t &pose,
   return -1;
 }
 
-
+#if 0 //TODO
 ElementID
 PolyOps::updateLaneLocation(const std::vector<poly>& polygons,
-			    const player_pose2d_t& pose,
+			    const MapPose& pose,
 			    const WayPointNode& waypt1,
 			    const WayPointNode& waypt2)
 {

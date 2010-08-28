@@ -35,7 +35,8 @@ def estop(behavior, new_state):
     cmd = rospy.Publisher('navigator/cmd', NavigatorCommand)
     rospy.Subscriber('navigator/state', NavigatorState, log_state)
     rospy.init_node('navigator_state')
-    rospy.loginfo('setting navigator E-stop state to: ' + str(behavior))
+    rospy.loginfo('sending behavior: ' + str(behavior))
+    rospy.loginfo('setting E-stop state to: ' + str(new_state))
 
     cmd_msg = NavigatorCommand()     # navigator command msg
     cmd_msg.header.frame_id = '/map'
@@ -66,18 +67,21 @@ if __name__ == '__main__':
         print 'exactly one parameter expected'
         usage()
 
-    new_state = sys.argv[1]
-    if new_state == 'r':
+    option = sys.argv[1]
+    if option == 'p':
+        print 'Running'
         new_state = EstopState.Pause
         behavior = Behavior.Pause
-    elif new_state == 'p':
+    elif option == 'r':
+        print 'Pausing'
         new_state = EstopState.Run
         behavior = Behavior.Run
-    elif new_state == 'q':
+    elif option == 'q':
+        print 'Done'
         new_state = EstopState.Done
         behavior = Behavior.Quit
     else:
-        print 'unknown parameter:', new_state
+        print 'unknown parameter:', option
         usage()
 
     try:

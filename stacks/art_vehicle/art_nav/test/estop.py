@@ -23,6 +23,7 @@ last_state_ = None
 
 def log_state(state_msg):
     "log navigator state information"
+    global last_state_
     # TODO print state labels, not just numbers
     rospy.loginfo('E-stop: ' + str(state_msg.estop.state)
                   + ' Road: ' + str(state_msg.road.state)

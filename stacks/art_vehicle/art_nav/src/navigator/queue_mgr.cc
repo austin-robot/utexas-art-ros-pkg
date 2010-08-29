@@ -63,6 +63,7 @@ private:
 
   void processNavCmd(const art_nav::NavigatorCommand::ConstPtr &cmdIn);
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
+  void processRoadMap(const art_map::ArtLanes::ConstPtr &cmdIn);
   void PublishState(void);
   void SetSignals(void);
   void SetSpeed(pilot_command_t pcmd);
@@ -71,10 +72,11 @@ private:
   int verbose;				// log level verbosity
 
   // ROS topics
+  ros::Publisher car_cmd_;              // pilot CarCommand
   ros::Subscriber nav_cmd_;             // NavigatorCommand topic
   ros::Publisher nav_state_;            // navigator state topic
   ros::Subscriber odom_state_;          // odometry
-  ros::Publisher car_cmd_;              // pilot CarCommand
+  ros::Subscriber roadmap_;             // local road map polygons
 
   /** @todo Add Observers interface. */
   //ros::Subscriber observers_;
@@ -87,8 +89,9 @@ private:
   // Odometry data
   nav_msgs::Odometry odom_msg_;
 
-  // time stamp of latest command received
+  // time stamps of latest messages received
   ros::Time cmd_time_;
+  ros::Time map_time_;
 
   // navigator implementation class
   Navigator *nav;
@@ -108,7 +111,7 @@ NavQueueMgr::NavQueueMgr()
 
 }
 
-/** handle command input */
+/** Handle command input. */
 void NavQueueMgr::processNavCmd(const
                                 art_nav::NavigatorCommand::ConstPtr &cmdIn)
 {
@@ -118,7 +121,7 @@ void NavQueueMgr::processNavCmd(const
   nav->order = cmdIn->order;
 }
 
-/** handle Odometry input */
+/** Handle Odometry input. */
 void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
 {
   ROS_DEBUG("Odometry pose: (%.3f, %.3f, %.3f), (%.3f, %.3f, %.3f)",
@@ -135,6 +138,15 @@ void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
   odom_msg_ = *odomIn;
 }
 
+/** Handle road map polygons. */
+void NavQueueMgr::processRoadMap(const art_map::ArtLanes::ConstPtr &mapIn)
+{
+  //ROS_DEBUG_STREAM(mapIn->polygons.size() << " lanes polygons received");
+  ROS_INFO_STREAM(mapIn->polygons.size() << " lanes polygons received");
+  map_time_ = mapIn->header.stamp;
+  nav->course->lanes_message(*mapIn);
+}
+
 /** Set up ROS topics for navigator node */
 bool NavQueueMgr::setup(ros::NodeHandle node)
 {
@@ -147,6 +159,8 @@ bool NavQueueMgr::setup(ros::NodeHandle node)
                             &NavQueueMgr::processNavCmd, this, noDelay);
   odom_state_ = node.subscribe("odom", qDepth,
                                &NavQueueMgr::processOdom, this, noDelay);
+  roadmap_ = node.subscribe("roadmap_local", qDepth,
+                            &NavQueueMgr::processRoadMap, this, noDelay);
 
   // topics to write
   nav_state_ =

@@ -2,7 +2,6 @@
  *  Navigator run controller
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -133,8 +132,8 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   // Do nothing if the order is still Run.  Wait until Commander sends
   // a new behavior.  Also, wait until the course controller receives
   // data from the maplanes driver.
-  if (NavBehavior(order->behavior) == NavBehavior::Run)
-    //      || course->polygons.empty())
+  if (NavBehavior(order->behavior) == NavBehavior::Run
+      || course->polygons.empty())
     {
       ROS_DEBUG_STREAM("run controller not initialized, have "
                        << course->polygons.size() << " polygons");
@@ -199,15 +198,15 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   return result;
 };
 
-// Initialize behavior
-//
-// returns:
-//	OK if successful
-//	NotApplicable is unable to determine initial way-point
-// exit:
-//	pcmd is a halt
-//	navdata->last_way is starting way-point, if found
-//
+/** Initialize behavior
+ *
+ * @return OK if successful
+ *	   NotApplicable is unable to determine initial way-point
+ *
+ * @post
+ *	pcmd is a halt
+ *	navdata->last_way is starting way-point, if found
+ */
 Controller::result_t Run::initialize(pilot_command_t &pcmd)
 {
   result_t result;
@@ -231,33 +230,33 @@ Controller::result_t Run::initialize(pilot_command_t &pcmd)
 }
 
 
-// controller for Go behavior.
-//
-//  Blockage handling:
-// 
-//  Set obstacle blockage timer when car stops.
-// 
-//  Restart timer in observer_clear() and in follow_lane when waiting
-//  for an obstacle in a stop line (not intersection) safety area.
-// 
-//  When the blockage timer expires, remember the current pose, stop
-//  calling the road controller, and instead call the unstuck
-//  controller (VoronoiZone).  When it has gone 10m, run the
-//  starting_waypt() algorithm to determine a new replan_waypt.  When
-//  Commander sees replan_waypt set without the roadblock flag, it
-//  will make a new plan.  When the new plan is received, reset the
-//  road controller and attempt to continue.
-// 
-//  While blocked, mark waypt[1] reached whenever the front bumper is
-//  within zone_waypoint_radius.  TODO: configure a larger radius.
-// 
-//  Commander looks at both the roadblock flag and the replan_waypt.
-//  If replan_waypt is set it makes a new plan from there.  If the
-//  roadblock flag is also set, it marks a blockage in the RNDF after
-//  last_waypt.  Commander marks every order with a replan_num that is
-//  incremented every time replan route runs, so Navigator can detect
-//  when that has been done.
-//
+/** controller for Go behavior.
+ *
+ *  Blockage handling (@todo implement or delete):
+ * 
+ *  Set obstacle blockage timer when car stops.
+ * 
+ *  Restart timer in observer_clear() and in follow_lane when waiting
+ *  for an obstacle in a stop line (not intersection) safety area.
+ * 
+ *  When the blockage timer expires, remember the current pose, stop
+ *  calling the road controller, and instead call the unstuck
+ *  controller (VoronoiZone).  When it has gone 10m, run the
+ *  starting_waypt() algorithm to determine a new replan_waypt.  When
+ *  Commander sees replan_waypt set without the roadblock flag, it
+ *  will make a new plan.  When the new plan is received, reset the
+ *  road controller and attempt to continue.
+ * 
+ *  While blocked, mark waypt[1] reached whenever the front bumper is
+ *  within zone_waypoint_radius.  TODO: configure a larger radius.
+ * 
+ *  Commander looks at both the roadblock flag and the replan_waypt.
+ *  If replan_waypt is set it makes a new plan from there.  If the
+ *  roadblock flag is also set, it marks a blockage in the RNDF after
+ *  last_waypt.  Commander marks every order with a replan_num that is
+ *  incremented every time replan route runs, so Navigator can detect
+ *  when that has been done.
+*/
 Controller::result_t Run::go(pilot_command_t &pcmd)
 {
   if (ElementID(order->waypt[0].id) == ElementID(order->waypt[1].id))

@@ -933,20 +933,20 @@ bool Course::lane_waypoint_reached(void)
   return found;
 }
 
-// handle lanes message
-//
-//  Called from the driver ProcessMessage() handler when new lanes
-//  data arrive.
-//
-void Course::lanes_message(art_map::ArtLanes *lanes)
+/** Handle lanes message.
+ *
+ *  Called from the topic subscription callback when new lanes data
+ *  arrive.
+ */
+void Course::lanes_message(const art_map::ArtLanes &lanes)
 {
-  polygons.resize(lanes->polygons.size());
-
-  for (unsigned num = 0; num < lanes->polygons.size(); num++)
-    polygons.at(num) = lanes->polygons[num];
+  // copy polygons from message
+  polygons.resize(lanes.polygons.size());
+  for (unsigned num = 0; num < lanes.polygons.size(); num++)
+    polygons.at(num) = lanes.polygons[num];
 
   if (polygons.empty())
-    ART_MSG(1, "empty lanes polygon list received!");
+    ROS_WARN("empty lanes polygon list received!");
 
   // force plan to be recomputed
   new_plan_lanes = true;

@@ -26,8 +26,6 @@
 #include <set>
 #include <map>
 
-#include <art/Position.h>
-
 #include <art_map/ArtLanes.h>
 #include <art_map/coordinates.h>
 #include <art_map/types.h>

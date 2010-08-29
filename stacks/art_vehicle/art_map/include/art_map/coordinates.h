@@ -28,9 +28,7 @@
 #include <geometry_msgs/Pose.h>
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
-#include <art/Position.h>
 #include <art/conversions.h>
-
 
 /**  GPS latitude and longitude */
 class LatLong
@@ -132,13 +130,6 @@ public:
     map = MapXY(pose.position);
     yaw = tf::getYaw(pose.orientation);
   };
-#if 0 // does not seem necessary
-  MapPose(Position::Pose3D pose)
-  {
-    map = MapXY(pose.x, pose.y);
-    yaw = pose.yaw;
-  };
-#endif
 };
 
 /** egocentric polar coordinates
@@ -205,13 +196,6 @@ namespace Coordinates
   {
     return normalize(bearing(from_pose.map, to_point) - from_pose.yaw);
   }
-
-#if 0 // does not seem necessary
-  inline float bearing(const Position::Pose3D &from_pose, MapXY to_point)
-  {
-    return bearing(MapPose(from_pose), to_point);
-  }
-#endif
 
   // transform MapXY coordinate to egocentric Polar
   inline Polar MapXY_to_Polar(MapXY point,

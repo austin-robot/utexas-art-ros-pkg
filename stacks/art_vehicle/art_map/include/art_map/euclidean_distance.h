@@ -19,7 +19,6 @@
 
 #include <art/epsilon.h>
 #include <art/infinity.h>
-#include <art/Position.h>
 #include <art_map/types.h>
 
 namespace Euclidean

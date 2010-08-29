@@ -14,7 +14,7 @@
 #include "navigator_internal.h"
 #include "course.h"
 
-/** @todo add ROS-style obstacle detection */
+/** @todo Add ROS-style obstacle detection. */
 //#include "obstacle.h"
 
 // subordinate controller classes

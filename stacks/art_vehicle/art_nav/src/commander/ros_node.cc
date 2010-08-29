@@ -1,14 +1,13 @@
 /*
- *  Copyright (C) 2007, 2010, Austin Robot Technology
+ * Commander node ROS front end
  *
+ *  Copyright (C) 2007, 2010, Austin Robot Technology
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  *
  *  Author:  Patrick Beeson, Jack O'Quin
  */
-
-// Commander node ROS front end
 
 #include <iostream>
 
@@ -70,6 +69,8 @@ using namespace applanix_info;          // defines gps_info
     @endverbatim
 
     Start running the robot immediately.
+
+    @todo Separate ROS packages for commander, navigator and pilot.
 
     @author Patrick Beeson, Jack O'Quin
 */

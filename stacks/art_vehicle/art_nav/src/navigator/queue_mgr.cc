@@ -76,7 +76,7 @@ private:
   ros::Subscriber odom_state_;          // odometry
   ros::Publisher car_cmd_;              // pilot CarCommand
 
-  // @todo add Observers interface
+  /** @todo Add Observers interface. */
   //ros::Subscriber observers_;
 
   // turn signal variables

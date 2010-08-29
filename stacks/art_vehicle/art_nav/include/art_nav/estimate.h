@@ -13,7 +13,7 @@
 /** @brief global ART estimate definitions.  These constants represent
  *  trivial differences in distance, speed, angle, etc.
  *
- *  @todo move implementations to an estimate.cc file
+ *  @todo Move implementations to an estimate.cc file.
  */
 namespace Estimate
 {

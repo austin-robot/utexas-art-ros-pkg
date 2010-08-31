@@ -35,7 +35,7 @@ def log_state(state_msg):
 def estop(behavior, new_state):
     cmd = rospy.Publisher('navigator/cmd', NavigatorCommand)
     rospy.Subscriber('navigator/state', NavigatorState, log_state)
-    rospy.init_node('navigator_state')
+    rospy.init_node('estop')
     rospy.loginfo('sending behavior: ' + str(behavior))
     rospy.loginfo('setting E-stop state to: ' + str(new_state))
 

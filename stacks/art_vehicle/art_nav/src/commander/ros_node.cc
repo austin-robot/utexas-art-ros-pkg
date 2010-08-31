@@ -159,7 +159,7 @@ public:
   void processNavState(const art_nav::NavigatorState::ConstPtr &nst)
   {
     ROS_DEBUG("navigator state message received");
-    nav_state_msg_ = *nst;
+    navState_ = *nst;
   }
 
   /** Parse command line arguments */
@@ -347,7 +347,7 @@ public:
     while(ros::ok())
       {
         ros::spinOnce();                // handle incoming messages
-        if (nav_state_msg_.header.stamp != ros::Time())
+        if (navState_.header.stamp != ros::Time())
           {
             ROS_INFO("Navigator input received");
             return true;                // navigator running
@@ -371,15 +371,14 @@ private:
 
   // topics and messages
   ros::Subscriber nav_state_topic_;       // navigator state topic
-  art_nav::NavigatorState nav_state_msg_; // last received
   ros::Publisher nav_cmd_pub_;            // navigator command topic
+  art_nav::NavigatorState navState_;      // last received
 
   RNDF *rndf_;
   MDF *mdf_;
   Graph* graph_;
   Mission* mission_;
   ZonePerimeterList zones_;
-  art_nav::NavigatorState navState_;
 };
 
 /** Main program */

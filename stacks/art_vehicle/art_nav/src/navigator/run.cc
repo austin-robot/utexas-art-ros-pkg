@@ -135,7 +135,8 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   if (NavBehavior(order->behavior) == NavBehavior::Run
       || course->polygons.empty())
     {
-      ROS_DEBUG_STREAM("run controller not initialized, have "
+      //ROS_DEBUG_STREAM("run controller not initialized, have "
+      ROS_INFO_STREAM("run controller not initialized, have "
                        << course->polygons.size() << " polygons");
       // Run order in Run state is valid, but does nothing.
       // Do nothing until lanes data are initialized.
@@ -205,7 +206,7 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
  *
  * @post
  *	pcmd is a halt
- *	navdata->last_way is starting way-point, if found
+ *	navdata->last_waypt is starting way-point, if found
  */
 Controller::result_t Run::initialize(pilot_command_t &pcmd)
 {
@@ -215,12 +216,13 @@ Controller::result_t Run::initialize(pilot_command_t &pcmd)
   if (start_way != ElementID())
     {
       course->new_waypoint_reached(start_way);
+      ROS_INFO("starting way-point: %s", start_way.name());
       result = OK;
     }
   else
     {
       // no starting way-point found
-      ART_MSG(2, "no starting way-point found, run failed.");
+      ROS_WARN("no starting way-point found, run failed.");
       result = NotApplicable;
       course->no_waypoint_reached();
     }

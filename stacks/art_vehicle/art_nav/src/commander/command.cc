@@ -64,7 +64,8 @@ art_nav::Order Commander::command(const art_nav::NavigatorState &_navstate)
   else if (ElementID(navstate->last_waypt) == ElementID())
     {
       // initialize navigator if last_waypt not set yet
-      ROS_DEBUG("Waiting for Navigator to find initial way-point.");
+      //ROS_DEBUG("Waiting for Navigator to find initial way-point.");
+      ROS_INFO("Waiting for Navigator to find initial way-point.");
       order.behavior.value = NavBehavior::Initialize;
       return order;
     }

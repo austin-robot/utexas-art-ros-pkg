@@ -137,7 +137,8 @@ art_nav::Order CmdrFSM::control(const art_nav::NavigatorState *_navstate)
   prev = state;
   state = xp->next;
   if ((state != prev.Value()))
-    ROS_DEBUG_STREAM("Commander state changing from " << prev.Name()
+    //ROS_DEBUG_STREAM("Commander state changing from " << prev.Name()
+    ROS_INFO_STREAM("Commander state changing from " << prev.Name()
                      << " to " << state.Name()
                      << ", event = " << event.Name());
 

@@ -48,6 +48,8 @@
 #include <art_nav/CarCommand.h>
 #include <art_nav/PilotConfig.h>
 
+#include <art_nav/LearningCommand.h>
+
 #include "speed.h"
 
 #define NODE "pilot"
@@ -95,6 +97,8 @@ namespace
   ros::Subscriber steering_state_;
   ros::Subscriber throttle_state_;
 
+  ros::Subscriber learning_state_;
+
   ros::Publisher brake_cmd_;            // brake command
   ros::Publisher shifter_cmd_;          // shifter command
   ros::Publisher steering_cmd_;         // steering command
@@ -121,6 +125,8 @@ namespace
 
   // pilot command messages
   art_nav::CarControl goal_msg_;
+  art_nav::LearningCommand current_learning_cmd_;
+  
   ros::Time goal_time_;                 // time of last CarCommand
   geometry_msgs::Twist twist_msg_;
 
@@ -276,6 +282,14 @@ void processSteering(const art_servo::SteeringState::ConstPtr &steeringIn)
   steering_angle_ = steeringIn->angle;
   ROS_DEBUG("Steering reports angle %.1f (degrees)", steering_angle_);
 }
+
+
+void processLearning(const art_nav::LearningCommand::ConstPtr &learningIn)
+{
+  current_learning_cmd_.pilotActive = learningIn->pilotActive;
+  ROS_INFO("Pilot Active set to %d", current_learning_cmd_.pilotActive);
+}
+
 
 /** handle dynamic reconfigure service request
  *
@@ -450,6 +464,10 @@ namespace Transmission
 //
 void speedControl(float speed)
 {
+  // If the learning needs to bypass pilot then return here
+  if (!current_learning_cmd_.pilotActive)
+    return;
+  
   static const double shift_duration = 1.0; // hold relay one second
   static Transmission::state_t shifting_state = Transmission::Drive;
 
@@ -607,7 +625,10 @@ int setup(ros::NodeHandle node)
                                    processSteering, noDelay);
   throttle_state_ = node.subscribe("throttle/state", qDepth,
                                    processThrottle, noDelay);
+  learning_state_ = node.subscribe("pilot/learningCmd", qDepth,
+                                   processLearning, noDelay);
 
+  
   // initialize servo command interfaces and messages
   brake_cmd_ = node.advertise<art_servo::BrakeCommand>("brake/cmd", qDepth);
   brake_msg_.header.frame_id = art_common::ArtVehicle::frame_id;
@@ -628,6 +649,9 @@ int setup(ros::NodeHandle node)
   throttle_msg_.request = art_servo::ThrottleCommand::Absolute;
   throttle_msg_.position = 0.0;
 
+  //
+  current_learning_cmd_.pilotActive = true;
+  
   return 0;
 }
 
@@ -658,7 +682,7 @@ int main(int argc, char** argv)
       shutdown();
       return 2;
     }
-
+ 
   ros::Rate cycle(art_common::ArtHertz::PILOT); // set driver cycle rate
 
   // Main loop

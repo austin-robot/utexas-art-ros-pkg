@@ -2,7 +2,6 @@
   <description brief="reinforcement_learning">
     ROS interfaces for reinforcement learning algorithms.
   </description>
-
   <author>Maintained by Michael Quinlan</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>

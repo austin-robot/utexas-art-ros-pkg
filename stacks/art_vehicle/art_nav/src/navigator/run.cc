@@ -216,7 +216,7 @@ Controller::result_t Run::initialize(pilot_command_t &pcmd)
   if (start_way != ElementID())
     {
       course->new_waypoint_reached(start_way);
-      ROS_INFO("starting way-point: %s", start_way.name());
+      ROS_INFO("starting way-point: %s", start_way.name().str);
       result = OK;
     }
   else

@@ -13,7 +13,7 @@
 /** @brief global ART estimate definitions.  These constants represent
  *  trivial differences in distance, speed, angle, etc.
  *
- *  @todo Move implementations to an estimate.cc file.
+ *  @todo Move implementation from header to art_nav/src/lib/estimate.cc
  */
 namespace Estimate
 {
@@ -21,6 +21,9 @@ namespace Estimate
    *
    * @param[in] odom odometry on which to base estimate, with time stamp
    * @param est estimated odometry for time in @a est.header.stamp
+   *
+   * @todo Figure out how to estimate ROS Odometry messages with
+   *       Quaternions.  There may already be a ROS interface.
    */
   inline void control_pose(const nav_msgs::Odometry &odom, 
 			   nav_msgs::Odometry &est)

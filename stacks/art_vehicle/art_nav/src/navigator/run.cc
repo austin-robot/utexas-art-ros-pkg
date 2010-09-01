@@ -234,7 +234,9 @@ Controller::result_t Run::initialize(pilot_command_t &pcmd)
 
 /** controller for Go behavior.
  *
- *  Blockage handling (@todo implement or delete):
+ *  @todo either implement blockage handling or delete it.
+ *
+ *  Blockage handling:
  * 
  *  Set obstacle blockage timer when car stops.
  * 

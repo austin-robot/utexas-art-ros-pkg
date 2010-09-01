@@ -34,11 +34,13 @@
 
 /** @file
 
- @brief navigate the vehicle towards waypoint goals from commander
+  @brief navigate the vehicle towards way-point goals
 
-Use the commander node to control this driver.
+  Use the commander node to control this node.
 
-@author Jack O'Quin
+  @todo Add Observers interface.
+
+  @author Jack O'Quin
 */
 
 #define CLASS "NavQueueMgr"
@@ -78,7 +80,6 @@ private:
   ros::Subscriber odom_state_;          // odometry
   ros::Subscriber roadmap_;             // local road map polygons
 
-  /** @todo Add Observers interface. */
   //ros::Subscriber observers_;
 
   // turn signal variables
@@ -193,103 +194,7 @@ bool NavQueueMgr::shutdown()
 #if 0 // read corresponding ROS topics instead
 int NavQueueMgr::ProcessInput(player_msghdr *hdr, void *data)
 {
-  if (Message::MatchMessage(hdr,
-			    PLAYER_MSGTYPE_CMD,
-			    PLAYER_OPAQUE_CMD,
-			    device_addr))
-    {
-      player_opaque_data_t *opaque = (player_opaque_data_t*) data;
-      art_message_header_t *art_hdr = (art_message_header_t*) opaque->data;
- 
-      //ART_MSG(8, "Incoming opaque message: Type: %d Subtype: %d",
-      //	      art_hdr->type,
-      //	      art_hdr->subtype);
-
-      if ((art_hdr->type == NAVIGATOR_MESSAGE)
-	  && (art_hdr->subtype == NAVIGATOR_MESSAGE_ORDER))
-	{
-	  // TODO: this queue needs to handle multiple orders in one
-	  // cycle.  The highest priority goes to PAUSE, RUN, and DONE,
-	  // followed by the others.  Lower priority orders will be
-	  // ignored.  They are resent in the following cycle.
-
-	  // save message body
-	  order_message_t *order_message =
-	    (order_message_t*) (opaque->data + sizeof(art_message_header_t));
-	  memcpy(&order_cmd, order_message, sizeof(order_message_t));
-	  nav->order = order_cmd.od;
-
-	  if (verbose >= 2)
-	    {
-	      ART_MSG(8, "OPAQUE_CMD(%s) received, speed range [%.3f, %.3f]"
-		      " next_uturn %d",
-		      nav->order.behavior.Name(),
-		      nav->order.min_speed, nav->order.max_speed,
-		      nav->order.next_uturn);
-	      ART_MSG(8, "way0 = %s, way1 = %s, way2 = %s",
-		      nav->order.waypt[0].id.name().str,
-		      nav->order.waypt[1].id.name().str,
-		      nav->order.waypt[2].id.name().str);
-	    }
-	}
-    }
-  else if (nav->obstacle->lasers->match_lasers(hdr, data))
-    {
-      // tell observers about this later, after all laser scans queued
-      // for this cycle have been processed
-      ART_MSG(3, "NEW LASER RECEIVED");
-    }
-  else if (nav->odometry->match(hdr, data))
-    {
-      // update observers state pose
-      ART_MSG(3, "NEW ODOMETRY RECEIVED");
-      
-    }
-  else if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA, 
-				PLAYER_OPAQUE_DATA_STATE, 
-				map_lanes_addr))
-    {
-      // This block handles lane messages and passes the data
-      // over to navigator
-      player_opaque_data_t *opaque = (player_opaque_data_t*) data;
-      art_message_header_t *art_hdr = (art_message_header_t*) opaque->data;
-      if((art_hdr->type == LANES_MESSAGE) &&
-	 (art_hdr->subtype == LANES_MESSAGE_DATA_STATE) )
-	{
-	  lanes_state_msg_t* lanes = 
-	    (lanes_state_msg_t*)(opaque->data + sizeof(art_message_header_t));
-
-	  nav->course->lanes_message(lanes);
-	}
-      else
-	{
-	  ART_MSG(2, CLASS "unknown OPAQUE_DATA_STATE received from "
-		  "map lanes driver");
-	  return -1;
-	}
-    }
-  else if (Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA, 
-				 PLAYER_OPAQUE_DATA_STATE, observers_addr))
-    {
-      // handle observer messages
-      player_opaque_data_t *opaque = (player_opaque_data_t*) data;
-      art_message_header_t *art_hdr = (art_message_header_t*) opaque->data;
-      if ((art_hdr->type == OBSERVERS_MESSAGE) &&
-	  (art_hdr->subtype == OBSERVERS_MESSAGE_DATA_STATE))
-	{
-	  observers_state_msg_t* obs_msg = (observers_state_msg_t*)
-	    (opaque->data + sizeof(art_message_header_t));
-
-	  nav->obstacle->observers_message(hdr, obs_msg);
-	}
-      else
-	{
-	  ART_MSG(2, CLASS "unknown OPAQUE_DATA_STATE received from "
-		  "observers driver");
-	  return -1;
-	}
-    }
-  else if (signals && signals->MatchInput(hdr, data))
+  if (signals && signals->MatchInput(hdr, data))
     {
       player_aio_data_t *aio = (player_aio_data_t *) data;
       signals->position = rintf(aio->voltages[RelaysID]);
@@ -306,7 +211,10 @@ int NavQueueMgr::ProcessInput(player_msghdr *hdr, void *data)
 }
 #endif
 
-/** Set or reset turn signal relays */
+/** Set or reset turn signal relays
+ *
+ *  @todo ROS turn signal messages
+ */
 void NavQueueMgr::SetSignals(void)
 {
 #if 0

@@ -70,7 +70,6 @@ class Commander
   bool next_checkpoint(void);
 
   // prepare next Navigator order
-  // TODO: improve argument type
   art_nav::Order prepare_order(art_nav::Behavior::_value_type behavior);
 
   // replan route, return true if successful

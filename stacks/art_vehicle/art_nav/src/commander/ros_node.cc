@@ -70,7 +70,7 @@ using namespace applanix_info;          // defines gps_info
 
     Start running the robot immediately.
 
-    @todo Separate ROS packages for commander, navigator and pilot.
+    @todo Make separate ROS packages for commander, navigator and pilot.
 
     @author Patrick Beeson, Jack O'Quin
 */

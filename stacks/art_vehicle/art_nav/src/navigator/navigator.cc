@@ -14,12 +14,20 @@
 #include "navigator_internal.h"
 #include "course.h"
 
-/** @todo Add ROS-style obstacle detection. */
 //#include "obstacle.h"
 
 // subordinate controller classes
 #include "estop.h"
 
+/** Main ART navigator class.
+
+    The Navigator class instantiates some infrastructure and the
+    top-level (Estop) controller. Then, on each cycle it runs the
+    Estop controller, which indirectly invokes other controllers when
+    appropriate.
+
+   @todo Add ROS-style obstacle detection.
+*/
 Navigator::Navigator()
 {
   order.behavior.value = art_nav::Behavior::Pause; // initial order
@@ -57,12 +65,13 @@ Navigator::~Navigator()
   //delete obstacle;
 };
 
-// main navigator entry point -- called once every driver cycle
-//
-//  Each order contains a behavior which determines the navigator
-//  state for this cycle.  All return a pilot_command_t with the control
-//  output for this cycle.
-//
+/** Main navigator entry point -- called once every driver cycle
+ *
+ *  The order contains a behavior which affects the navigator state
+ *  for this cycle.
+ *
+ *  @return a pilot_command_t with control output for this cycle.
+ */
 pilot_command_t Navigator::navigate(void)
 {
   pilot_command_t pcmd;			// pilot command to return
@@ -81,7 +90,7 @@ pilot_command_t Navigator::navigate(void)
   return pcmd;
 }
 
-// configure .cfg variables -- called by driver constructor
+/** Configure parameters */
 void Navigator::configure()
 {
   ROS_INFO("Navigator configuration options:");

@@ -14,7 +14,7 @@
 
 #include <vector>
 #include <art_nav/Observers.h>
-#include <art_nav/lasers.h>
+//#include <art_nav/lasers.h>
 #include "ntimer.h"
 
 

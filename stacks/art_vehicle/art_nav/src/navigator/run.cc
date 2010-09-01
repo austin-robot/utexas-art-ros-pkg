@@ -421,7 +421,7 @@ ElementID Run::starting_waypt(void)
   if (index < 0)
     {
       // no starting way-point found
-      ROS_WARN_STREAM("getStartingPoly() failed, returning " << index);
+      ROS_FATAL_STREAM("getStartingPoly() failed, returning " << index);
     }
   else
     {

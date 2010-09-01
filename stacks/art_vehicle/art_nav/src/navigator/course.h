@@ -18,7 +18,6 @@
 #include <art_map/ArtLanes.h>
 #include <art_map/coordinates.h>
 #include <art_map/zones.h>
-#include <art_nav/odometry.h>
 
 #include "Controller.h"
 

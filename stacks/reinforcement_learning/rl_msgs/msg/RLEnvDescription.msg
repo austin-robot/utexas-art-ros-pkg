@@ -6,3 +6,6 @@ float32 num_states
 #Some RL algorithms may need this to discretize the state space
 float32[] min_state_range
 float32[] max_state_range
+
+bool episodic
+string title

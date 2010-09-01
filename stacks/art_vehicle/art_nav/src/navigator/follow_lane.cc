@@ -47,7 +47,7 @@ FollowLane::approaching_waypoint_type(WayPointNode &stop_point)
 {
   way_type_t wtype = Lane;
   unsigned i = 0;
-  while (++i < N_ORDER_WAYPTS)
+  while (++i < Order::N_WAYPTS)
     {
       // only look in the goal lane
       if (!course->same_lane(order->waypt[1].id, order->waypt[i].id))
@@ -79,7 +79,7 @@ FollowLane::approaching_waypoint_type(WayPointNode &stop_point)
 	  break;
 	}
       else if (order->waypt[i].is_exit
-	       && i+1 < N_ORDER_WAYPTS
+	       && i+1 < Order::N_WAYPTS
 	       && order->waypt[i+1].is_entry
 	       && !course->same_lane(order->waypt[i].id,
 				     order->waypt[i+1].id))
@@ -114,37 +114,39 @@ FollowLane::approaching_waypoint_type(WayPointNode &stop_point)
 FollowLane::FollowLane(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
 {
-  avoid = new Avoid(navptr, _verbose);
+  //avoid = new Avoid(navptr, _verbose);
   follow_safely = new FollowSafely(navptr, _verbose);
   lane_heading = new LaneHeading(navptr, _verbose);
   stop_area =	new StopArea(navptr, _verbose);
   stop_line =	new StopLine(navptr, _verbose);
-  slow_for_curves = new SlowForCurves(navptr, _verbose);
+  //slow_for_curves = new SlowForCurves(navptr, _verbose);
   reset_me();
 };
 
 FollowLane::~FollowLane()
 {
-  delete avoid;
+  //delete avoid;
   delete follow_safely;
   delete lane_heading;
   delete stop_area;
   delete stop_line;
-  delete slow_for_curves;
+  //delete slow_for_curves;
 };
 
-void FollowLane::configure(ConfigFile* cf, int section)
+void FollowLane::configure()
 {
-  // Speed to use when there is no plan available.
-  lost_speed = cf->ReadFloat(section, "lost_speed", 2.0);
-  ART_MSG(2, "\tspeed when lost is %.3f m/s", lost_speed);
+  ros::NodeHandle nh("~");
 
-  avoid->configure(cf, section);
-  follow_safely->configure(cf, section);
-  lane_heading->configure(cf, section);
-  stop_area->configure(cf, section);
-  stop_line->configure(cf, section);
-  slow_for_curves->configure(cf, section);
+  // Speed to use when there is no plan available.
+  nh.param("lost_speed", lost_speed, 2.0);
+  ROS_INFO("speed when lost is %.3f m/s", lost_speed);
+
+  //avoid->configure();
+  follow_safely->configure();
+  lane_heading->configure();
+  stop_area->configure();
+  stop_line->configure();
+  //slow_for_curves->configure();
 }
 
 // follow lane in the normal direction
@@ -173,22 +175,20 @@ Controller::result_t FollowLane::control(pilot_command_t &pcmd)
 			  || order->waypt[0].is_stop);
 
   // the first time through there is no course->plan yet
-  if (course->in_lane(estimate->pos))	// in travel lane?
+  if (course->in_lane(MapPose(estimate->pose.pose))) // in travel lane?
     {
       if (in_intersection)
 	{
-	  if (verbose >= 2)
-	  ART_MSG(5, "Cross intersection to waypoint %s (%s ahead)",
-		  order->waypt[1].id.name().str,
-		  way_table[wtype].name);
+	  ROS_DEBUG("Cross intersection to waypoint %s (%s ahead)",
+                    ElementID(order->waypt[1].id).name().str,
+                    way_table[wtype].name);
 	  // TODO: make .cfg option
 	  //	  pcmd.velocity = fminf(pcmd.velocity, 3.0);
 	}
       else
 	{
-	  if (verbose >= 2)
-	    ART_MSG(5, "Follow lane to waypoint %s (%s ahead)",
-		    order->waypt[1].id.name().str,
+          ROS_DEBUG("Follow lane to waypoint %s (%s ahead)",
+		    ElementID(order->waypt[1].id).name().str,
 		    way_table[wtype].name);
       
 	  // if signalling while joining a lane, turn signals off now
@@ -201,9 +201,8 @@ Controller::result_t FollowLane::control(pilot_command_t &pcmd)
   else
     {
       // set a path to join the travel lane
-      if (verbose >= 2)
-	ART_MSG(5, "Go to lane containing waypoint %s (%s ahead)",
-		order->waypt[1].id.name().str,
+      ROS_DEBUG("Go to lane containing waypoint %s (%s ahead)",
+		ElementID(order->waypt[1].id).name().str,
 		way_table[wtype].name);
 
       // fill in path to the next way-points
@@ -220,7 +219,7 @@ Controller::result_t FollowLane::control(pilot_command_t &pcmd)
   // adjust speed to maintain a safe following distance in the lane
   result_t result = follow_safely->control(pcmd);
   // reduce speed if approaching sharp turn.
-  slow_for_curves->control(pcmd);
+  //slow_for_curves->control(pcmd);
 
   if (in_safety_area)
     {
@@ -258,12 +257,14 @@ Controller::result_t FollowLane::control(pilot_command_t &pcmd)
   // check if way-point reached, ignoring stop lines and U-turns
   course->lane_waypoint_reached();
 
+#if 0 // not doing avoid right now
   if (result == OK)			// still moving, no Collision?
     {
       result = avoid->control(pcmd, incmd);
       if (result == Blocked)
 	result = Unsafe;		// return Blocked only for passing
     }
+#endif // not doing avoid right now
 
   trace("follow_lane controller", pcmd, result);
 
@@ -275,12 +276,12 @@ void FollowLane::reset(void)
 {
   trace_reset("FollowLane");
   reset_me();
-  avoid->reset();
+  //avoid->reset();
   follow_safely->reset();
   lane_heading->reset();
   stop_area->reset();
   stop_line->reset();
-  slow_for_curves->reset();
+  //slow_for_curves->reset();
 }
 
 // reset this controller only

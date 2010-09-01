@@ -27,6 +27,7 @@
 rosbuild_add_executable(navigator
   course.cc
   estop.cc
+  #follow_lane.cc
   follow_safely.cc
   navigator.cc
   obstacle.cc

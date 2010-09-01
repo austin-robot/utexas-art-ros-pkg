@@ -43,14 +43,14 @@ private:
     } way_type_t;
 
   // .cfg variables
-  float lost_speed;
+  double lost_speed;
 
   //Avoid       *avoid;
   FollowSafely	*follow_safely;
   LaneHeading	*lane_heading;
+  //SlowForCurves *slow_for_curves;
   StopArea	*stop_area;
   StopLine	*stop_line;
-  //SlowForCurves *slow_for_curves;
 
   way_type_t approaching_waypoint_type(WayPointNode &stop_point);
   void reset_me(void);

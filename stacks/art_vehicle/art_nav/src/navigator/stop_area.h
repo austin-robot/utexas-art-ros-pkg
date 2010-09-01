@@ -3,7 +3,6 @@
  *  Navigator stop line safety area controller
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -19,7 +18,7 @@ public:
 
   StopArea(Navigator *navptr, int _verbose);
   ~StopArea();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 

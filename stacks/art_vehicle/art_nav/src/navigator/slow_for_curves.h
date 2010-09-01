@@ -1,7 +1,6 @@
 /* -*- mode: C++ -*-
  *
  *  Navigator "slow down for curves" controller
- *
  *  Copyright (C) 2007, 2010, Mickey Ristroph
  *
  *  License: Modified BSD Software License Agreement
@@ -19,7 +18,7 @@ public:
   SlowForCurves(Navigator *navptr, int _verbose):
     Controller(navptr, _verbose), current_limiting_id(0) {}
   ~SlowForCurves() {}
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 

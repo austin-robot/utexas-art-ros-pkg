@@ -31,6 +31,9 @@ Navigator::Navigator()
   navdata.road_blocked = false;
   navdata.reverse = false;
   navdata.have_zones = false;
+  art_map::MapID null_waypt = ElementID().toMapID();
+  navdata.last_waypt = null_waypt;
+  navdata.replan_waypt = null_waypt;
 
   odometry = new nav_msgs::Odometry();
   // allocate helper classes

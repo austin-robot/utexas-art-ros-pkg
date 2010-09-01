@@ -28,8 +28,10 @@
 
    @todo Add ROS-style obstacle detection.
 */
-Navigator::Navigator()
+Navigator::Navigator(nav_msgs::Odometry *odom_msg)
 {
+  odometry = odom_msg;
+
   order.behavior.value = art_nav::Behavior::Pause; // initial order
 
   // set navigator state flags to false, current polygon none
@@ -43,7 +45,6 @@ Navigator::Navigator()
   navdata.last_waypt = null_waypt;
   navdata.replan_waypt = null_waypt;
 
-  odometry = new nav_msgs::Odometry();
   // allocate helper classes
   pops = new PolyOps();
   course = new Course(this, verbose);
@@ -61,7 +62,6 @@ Navigator::~Navigator()
   // free helper classes
   delete course; 
   delete pops;
-  delete odometry;
   //delete obstacle;
 };
 

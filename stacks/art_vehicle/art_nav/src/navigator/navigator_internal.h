@@ -66,7 +66,7 @@ public:
   nav_msgs::Odometry *odometry;
 
   // public methods
-  Navigator();
+  Navigator(nav_msgs::Odometry *odom_msg);
   ~Navigator();
 
   // configure parameters

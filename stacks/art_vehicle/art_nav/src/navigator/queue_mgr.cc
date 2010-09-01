@@ -101,15 +101,12 @@ private:
 // constructor, requesting overwrite of commands
 NavQueueMgr::NavQueueMgr()
 {
-  // subscribe to control driver
-
-  nav = new Navigator();
+  // create control driver
+  nav = new Navigator(&odom_msg_);
   nav->configure();
   
   //signals = new AioServo("signals", 0.0, verbose);
   signal_on_left = signal_on_right = false;
-  
-
 }
 
 /** Handle command input. */
@@ -136,7 +133,6 @@ void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
 
   float vel = odomIn->twist.twist.linear.x;
   ROS_DEBUG("current velocity = %.3f m/sec, (%02.f mph)", vel, mps2mph(vel));
-
   odom_msg_ = *odomIn;
 }
 

@@ -26,6 +26,11 @@
 #include <art_nav/estimate.h>
 #include <art_map/ZoneOps.h>
 
+/* @brief Navigator run controller
+ *
+ * @todo Instantiate and invoke road controller.
+ */
+
 static const char *state_name[] =
   {
     "Continue",

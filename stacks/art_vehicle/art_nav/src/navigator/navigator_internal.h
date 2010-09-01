@@ -29,18 +29,21 @@
 #include <art_map/euclidean_distance.h>
 #include <art_map/PolyOps.h>
 
+#include <art_nav/Behavior.h>
 #include <art_nav/NavigatorCommand.h>
 #include <art_nav/NavigatorState.h>
-#include <art_nav/Behavior.h>
-#include <art_nav/NavBehavior.h>
-
+#include <art_nav/Observers.h>
 #include <nav_msgs/Odometry.h>
+
+#include <art_nav/NavBehavior.h>
 
 // Provide short names for some messages so they can more easily be
 // packaged differently.
 using art_nav::Behavior;
 using art_nav::NavigatorCommand;
 using art_nav::NavigatorState;
+using art_nav::Observers;
+using art_nav::Observation;
 using nav_msgs::Odometry;
 using art_nav::Order;
 

@@ -12,8 +12,8 @@
 #ifndef __ROAD_HH__
 #define __ROAD_HH__
 
+#include <art_nav/NavRoadState.h>
 #include "NavRoadEvent.h"
-#include <art/observers.h>
 
 //class Evade;
 class FollowLane;
@@ -57,7 +57,7 @@ private:
   NavRoadState	state;
   NavRoadEvent	event;			// current event
   NavRoadEvent	pending_event;
-  ObserverID::observer_id_t crossing_observer;
+  Observation::_oid_type crossing_observer;
   Course::direction_t lane_direction;
   transtion_t	ttable[NavRoadEvent::N_events][NavRoadState::N_states];
 

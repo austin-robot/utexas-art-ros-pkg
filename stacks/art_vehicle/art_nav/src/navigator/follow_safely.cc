@@ -2,7 +2,6 @@
  *  Navigator safe following distance controller
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -20,24 +19,26 @@ FollowSafely::FollowSafely(Navigator *navptr, int _verbose):
 
 FollowSafely::~FollowSafely() {};
 
-void FollowSafely::configure(ConfigFile* cf, int section)
+void FollowSafely::configure()
 {
+  ros::NodeHandle nh("~");
+  using art_common::ArtVehicle;
+
   // How close is close enough for stopping before an obstacle?
   // Should at least include front bumper offset and minimum separation.
-  close_stopping_distance = cf->ReadFloat(section, "close_stopping_distance",
-					  (DARPA_rules::min_forw_sep_travel
-					   + ArtVehicle::front_bumper_px
-					   + 7.0));
-  ART_MSG(2, "\tclose stopping distance is %.3f meters",
-	  close_stopping_distance);
+  nh.param("close_stopping_distance", close_stopping_distance,
+           (DARPA_rules::min_forw_sep_travel
+            + ArtVehicle::front_bumper_px
+            + 7.0));
+  ROS_INFO("close stopping distance is %.3f meters",
+           close_stopping_distance);
 
   // maximum, minimum and desired following times (in seconds)
-  max_following_time = cf->ReadFloat(section, "max_following_time", 7.0);
-  min_following_time = cf->ReadFloat(section, "min_following_time", 3.0);
-  desired_following_time =
-    cf->ReadFloat(section, "desired_following_time",
-		  (max_following_time + min_following_time)/2.0f);
-  ART_MSG(2, "\tminimum, desired and maximum following times: "
+  nh.param("max_following_time", max_following_time, 7.0);
+  nh.param("min_following_time", min_following_time, 3.0);
+  nh.param("desired_following_time", desired_following_time,
+           (max_following_time + min_following_time)/2.0f);
+  ROS_INFO("minimum, desired and maximum following times: "
 	  "%.1f, %.1f, %.1f secs",
 	  min_following_time, desired_following_time, max_following_time);
 }
@@ -76,11 +77,10 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
     }
 
   float following_time =
-    Euclidean::DistanceToTime(location, estimate->vel.px);
+    Euclidean::DistanceToTime(location, estimate->twist.twist.linear.x);
 
-  if (verbose >= 2)
-    ART_MSG(8, "obstacle is %.3f sec ahead at %.3f m/s",
-	    following_time, estimate->vel.px);
+  ROS_DEBUG("obstacle is %.3f sec ahead at %.3f m/s",
+	    following_time, estimate->twist.twist.linear.x);
 
   // A 2 sec minimum following time at 10mph will cause us to brake
   // hard when still about two car lengths away (~9m).  One length is
@@ -111,7 +111,7 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
     {
       adjust_speed(pcmd, location); // speed up a bit
     }
-  else if ((fabsf(estimate->vel.px) < Epsilon::speed) // stopped?
+  else if (nav->navdata.stopped
 	   || (following_time > desired_following_time))
     {
       adjust_speed(pcmd, location); // slow down a bit

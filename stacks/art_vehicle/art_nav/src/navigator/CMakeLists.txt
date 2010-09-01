@@ -27,6 +27,7 @@
 rosbuild_add_executable(navigator
   course.cc
   estop.cc
+  follow_safely.cc
   navigator.cc
   obstacle.cc
   queue_mgr.cc

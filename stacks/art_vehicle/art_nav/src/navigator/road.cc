@@ -149,19 +149,19 @@ Road::Road(Navigator *navptr, int _verbose):
       NavRoadState::Zone,		NavRoadState::WaitCross);
 
   // allocate subordinate controllers
-  evade = new Evade(navptr, _verbose);
+  //evade = new Evade(navptr, _verbose);
   follow_lane = new FollowLane(navptr, _verbose);
   follow_safely = new FollowSafely(navptr, _verbose);
   halt = new Halt(navptr, _verbose);
-  passing = new Passing(navptr, _verbose);
-  uturn = new Uturn(navptr, _verbose);
-  zone = new RealZone(navptr, _verbose);
+  //passing = new Passing(navptr, _verbose);
+  //uturn = new Uturn(navptr, _verbose);
+  //zone = new RealZone(navptr, _verbose);
 
   // allocate timers
-  passing_timer = new NavTimer(nav->cycle);
-  precedence_timer = new NavTimer(nav->cycle);
-  roadblock_timer = new NavTimer(nav->cycle);
-  stop_line_timer = new NavTimer(nav->cycle);
+  passing_timer = new NavTimer();
+  precedence_timer = new NavTimer();
+  roadblock_timer = new NavTimer();
+  stop_line_timer = new NavTimer();
 
   // reset this controller only
   reset_me();
@@ -169,13 +169,13 @@ Road::Road(Navigator *navptr, int _verbose):
 
 Road::~Road()
 {
-  delete evade;
+  //delete evade;
   delete follow_lane;
   delete follow_safely;
   delete halt;
-  delete passing;
-  delete uturn;
-  delete zone;
+  //delete passing;
+  //delete uturn;
+  //delete zone;
 
   delete passing_timer;
   delete precedence_timer;
@@ -203,27 +203,29 @@ void Road::cancel_all_timers(void)
 
 void Road::configure()
 {
-  passing_delay = cf->ReadFloat(section, "passing_delay", 5.0);
-  ART_MSG(2, "\tpassing delay is %.3f seconds", passing_delay);
+  ros::NodeHandle nh("~");
 
-  precedence_delay = cf->ReadFloat(section, "precedence_delay", 10.0);
-  ART_MSG(2, "\tintersection precedence delay is %.3f seconds",
+  nh.param("passing_delay", passing_delay, 5.0);
+  ROS_INFO("passing delay is %.3f seconds", passing_delay);
+
+  nh.param("precedence_delay", precedence_delay, 10.0);
+  ROS_INFO("intersection precedence delay is %.3f seconds",
 	  precedence_delay);
 
-  roadblock_delay = cf->ReadFloat(section, "roadblock_delay", 5.0);
-  ART_MSG(2, "\troadblock delay is %.3f seconds",
+  nh.param("roadblock_delay", roadblock_delay, 5.0);
+  ROS_INFO("roadblock delay is %.3f seconds",
 	  roadblock_delay);
 
-  stop_line_delay = cf->ReadFloat(section, "stop_line_delay", 1.0);
-  ART_MSG(2, "\tstop line delay is %.3f seconds", stop_line_delay);
+  nh.param("stop_line_delay", stop_line_delay, 1.0);
+  ROS_INFO("stop line delay is %.3f seconds", stop_line_delay);
 
-  //evade->configure(cf, section);
-  follow_lane->configure(cf, section);
-  follow_safely->configure(cf, section);
-  halt->configure(cf, section);
-  //passing->configure(cf, section);
-  //uturn->configure(cf, section);
-  //zone->configure(cf, section);
+  //evade->configure();
+  follow_lane->configure();
+  follow_safely->configure();
+  halt->configure();
+  //passing->configure();
+  //uturn->configure();
+  //zone->configure();
 }
 
 Controller::result_t Road::control(pilot_command_t &pcmd)
@@ -243,7 +245,7 @@ Controller::result_t Road::control(pilot_command_t &pcmd)
       if (verbose)
 	ART_MSG(4, "Navigator road state changing from %s to %s, event = %s",
 		prev.Name(), state.Name(), event.Name());
-      navdata->road_state = state;	// update data state message
+      navdata->road.state = state.Value(); // update data state message
     }
   else
     {
@@ -266,9 +268,9 @@ void Road::reset(void)
   follow_lane->reset();
   follow_safely->reset();
   halt->reset();
-  passing->reset();
-  uturn->reset();
-  zone->reset();
+  //passing->reset();
+  //uturn->reset();
+  //zone->reset();
 }
 
 // reset this controller only
@@ -282,7 +284,7 @@ void Road::reset_me(void)
 
 void Road::set_waypt_event(void)
 {
-  if (navdata->last_waypt == order->waypt[1].id)
+  if (ElementID(navdata->last_waypt) == ElementID(order->waypt[1].id))
     {
       // new way-point reached, be careful of the order of these tests
       if (order->waypt[1].is_perimeter)
@@ -343,7 +345,7 @@ Controller::result_t Road::ActionInBlock(pilot_command_t &pcmd)
 	  ART_MSG(1, "Following lane (NOT U-turn) after road block");
 	}
       navdata->road_blocked = false;
-      navdata->replan_waypt = ElementID();
+      navdata->replan_waypt = ElementID().toMapID();
       halt->control(pcmd);		// do the order next cycle
     }
   else
@@ -366,7 +368,7 @@ Controller::result_t Road::ActionInBlock(pilot_command_t &pcmd)
 
 	  // no longer blocked
 	  navdata->road_blocked = false;
-	  navdata->replan_waypt = ElementID();
+	  navdata->replan_waypt = ElementID().toMapID();
 	  // TODO: cancel timeout
 	}
     }
@@ -424,7 +426,8 @@ Controller::result_t Road::ActionInInit(pilot_command_t &pcmd)
 
 Controller::result_t Road::ActionInPass(pilot_command_t &pcmd)
 {
-  result_t result = passing->control(pcmd);
+  //result_t result = passing->control(pcmd);
+  result_t result = Finished;           // scaffolding
   if (result == Finished)
     {
       pending_event = NavRoadEvent::FollowLane;
@@ -463,7 +466,8 @@ Controller::result_t Road::ActionInPass(pilot_command_t &pcmd)
 
 Controller::result_t Road::ActionInUturn(pilot_command_t &pcmd)
 {
-  result_t result = uturn->control(pcmd);
+  //result_t result = uturn->control(pcmd);
+  result_t result = Finished;           // scaffolding
   if (result == Finished)
     {
       pending_event = NavRoadEvent::FollowLane;
@@ -494,16 +498,16 @@ Controller::result_t Road::ActionInWaitLane(pilot_command_t &pcmd)
   else
     {
       // direction known, query the relevant observer
-      ObserverID::observer_id_t lane_observer;
+      Observation::_oid_type lane_observer;
       if (lane_direction == Course::Left)
 	{
 	  ART_MSG(1, "Waiting for nearest left lane to clear.");
-	  lane_observer = ObserverID::Adjacent_left;
+	  lane_observer = Observers::Adjacent_left;
 	}
       else
 	{
 	  ART_MSG(1, "Waiting for nearest right lane to clear.");
-	  lane_observer = ObserverID::Adjacent_right;
+	  lane_observer = Observers::Adjacent_right;
 	}
       // TODO: add a timeout for when the observer is not applicable?
       if (obstacle->observer_clear(lane_observer))
@@ -547,7 +551,7 @@ Controller::result_t Road::ActionInWaitStop(pilot_command_t &pcmd)
 
   // wait until stopped for a while, then query observer
   if (stop_line_timer->Check()		// initial timer expired?
-      && obstacle->observer_clear(ObserverID::Intersection))
+      && obstacle->observer_clear(Observers::Intersection))
     {
       ART_MSG(1, "Our turn to cross intersection.");
       stop_line_timer->Cancel();
@@ -556,7 +560,7 @@ Controller::result_t Road::ActionInWaitStop(pilot_command_t &pcmd)
     }
 
   // restart precedence timer if number of cars remaining changed
-  Observation obs = obstacle->observation(ObserverID::Intersection);
+  Observation obs = obstacle->observation(Observers::Intersection);
   if (obs.applicable && obs.nobjects != prev_nobjects)
     {
       prev_nobjects = obs.nobjects;
@@ -579,8 +583,9 @@ Controller::result_t Road::ActionInWaitStop(pilot_command_t &pcmd)
 
 Controller::result_t Road::ActionInZone(pilot_command_t &pcmd)
 {
-  result_t result = zone->control(pcmd);
-  if (navdata->last_waypt == order->waypt[1].id
+  //result_t result = zone->control(pcmd);
+  result_t result = NotApplicable;      // scaffolding
+  if (ElementID(navdata->last_waypt) == ElementID(order->waypt[1].id)
       && order->waypt[1].is_perimeter)
     {
       // reached zone perimeter way-point
@@ -638,7 +643,7 @@ Controller::result_t Road::ActionToBlock(pilot_command_t &pcmd)
   ART_MSG(1, "Road blocked!");
   course->turn_signals_off();
   navdata->road_blocked = true;
-  navdata->replan_waypt = course->replan_roadblock();
+  navdata->replan_waypt = course->replan_roadblock().toMapID();
   follow_lane->reset();			// JOQ: is this needed?
   return ActionInBlock(pcmd);		// wait for commander to replan
 }
@@ -657,9 +662,9 @@ Controller::result_t Road::ActionToEvade(pilot_command_t &pcmd)
 	  return halt->control(pcmd);	// start passing next cycle
 	}
     }
-#endif
   // no passing lane: evade collision by leaving lane to the right
   evade->reset();
+#endif
   return ActionInEvade(pcmd);
 }
 
@@ -681,7 +686,7 @@ Controller::result_t Road::ActionToPass(pilot_command_t &pcmd)
   if (course->switch_to_passing_lane())
     {
       passing_timer->Cancel();
-      passing->reset();
+      //passing->reset();
       return ActionInPass(pcmd);
     }
   else
@@ -697,7 +702,7 @@ Controller::result_t Road::ActionToUturn(pilot_command_t &pcmd)
 {
   ART_MSG(1, "Start U-turn.");
   course->turn_signal_on(true);		// signal left
-  uturn->reset();
+  //uturn->reset();
   return ActionInUturn(pcmd);
 }
 
@@ -710,14 +715,14 @@ Controller::result_t Road::ActionToWaitCross(pilot_command_t &pcmd)
       // assume always headed for nearest right lane
       // TODO: how do I verify that?
       ART_MSG(1, "Waiting for nearest intersection lane to clear.");
-      crossing_observer = ObserverID::Merge_into_nearest;
+      crossing_observer = Observers::Merge_into_nearest;
     }
   else
 #endif
     {
       // going Straight or Left, wait for all lanes to clear
       ART_MSG(1, "Waiting for all intersection lanes to clear.");
-      crossing_observer = ObserverID::Merge_across_all;
+      crossing_observer = Observers::Merge_across_all;
     }
   course->signal_for_direction(crossing_direction);
   return ActionInWaitCross(pcmd);
@@ -764,7 +769,7 @@ Controller::result_t Road::ActionToWaitStop(pilot_command_t &pcmd)
 Controller::result_t Road::ActionToZone(pilot_command_t &pcmd)
 {
   ART_MSG(1, "Entering zone");
-  zone->reset();
+  //zone->reset();
   return ActionInZone(pcmd);
 }
 

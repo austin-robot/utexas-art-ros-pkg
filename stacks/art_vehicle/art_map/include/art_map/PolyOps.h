@@ -110,7 +110,11 @@ typedef struct polyUpdate
 } lanes_poly_vision_t;
 
 
-// TODO: alphabetize
+/** Polygon operations.
+ *
+ *  @todo This class has no state.  It should be replaced by a
+ *        collection of functions in an appropriate namespace.
+ */
 class PolyOps
 {
  public:

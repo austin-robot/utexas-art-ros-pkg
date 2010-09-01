@@ -7,11 +7,13 @@
  *  $Id$
  */
 
-/**  \file
+/**  @file
  
      C++ class for MapLanes polygon operations.
 
-     \author David Li, Patrick Beeson, Bartley Gillen, Jack O'Quin
+     @todo Rewrite this mess. PolyOps need not be a class.
+
+     @author David Li, Patrick Beeson, Bartley Gillen, Jack O'Quin
 
  */
 #include <float.h>
@@ -616,12 +618,12 @@ bool PolyOps::MatchTransitionPoly(const poly& curPoly,
 
 float PolyOps::PolyHeading(const poly& curPoly)
 {
-  float left_heading =  Coordinates::bearing(curPoly.p1,curPoly.p2);
-  float right_heading = Coordinates::bearing(curPoly.p4, curPoly.p3);
-  return Coordinates::normalize(right_heading
-				+ Coordinates::normalize(left_heading
-							 - right_heading)
-				/ 2.0f);
+  using Coordinates::bearing;
+  float left_heading =  bearing(curPoly.p1,curPoly.p2);
+  float right_heading = bearing(curPoly.p4, curPoly.p3);
+  using Coordinates::normalize;
+  return normalize(right_heading
+                   + normalize(left_heading - right_heading) / 2.0f);
 }
 
 int PolyOps::getStartingPoly(const MapPose &pose,
@@ -629,23 +631,37 @@ int PolyOps::getStartingPoly(const MapPose &pose,
 			     float distance,
 			     float min_heading) 
 {
-  
+  using Coordinates::normalize;
+
+  // See if already in a polygon
   int index = getContainingPoly(polygons, pose.map);
-  if (index >=0 && fabs(Coordinates::normalize
-			(polygons.at(index).heading-pose.yaw)) < min_heading)
-    return index;
+  if (index >=0
+      && (fabs(normalize(polygons.at(index).heading - pose.yaw))
+          < min_heading))
+    {
+      return index;
+    }
   
   // Get closest polygon 
   index = getClosestPoly(polygons, pose);
   if (index < 0)
-    return index;
-  else if (fabs(Coordinates::normalize(polygons.at(index).heading-pose.yaw))
+    {
+      ROS_WARN_STREAM("none of " << polygons.size()
+                      << " polygons near starting pose");
+      return index;
+    }
+  else if (fabs(normalize(polygons.at(index).heading - pose.yaw))
            < min_heading)
-    return index;
+    {
+      ROS_DEBUG_STREAM("closest polygon["  << index
+                       << "] has suitable heading");
+      return index;
+    }
   
   // Find closest segment
   segment_id_t segment = polygons.at(index).start_way.seg;
-
+  ROS_INFO_STREAM("closest polygon["  << index
+                  << "] in segment " << segment);
 
   // Find all lanes that share same segment with closest polygons
   std::vector<lane_id_t> lanes;
@@ -667,37 +683,41 @@ int PolyOps::getStartingPoly(const MapPose &pose,
   // Find closest polygons in every lane found above and mark one with
   // heading closest to vehcile's heading
   float mindist = FLT_MAX;
-  poly minpoly=polygons.at(0);
-  bool foundd=false;
+  poly minpoly = polygons.at(0);
+  bool foundd = false;
+  for (uint i=0; i<lanes.size(); i++)
+    {
+      ElementID point(segment,lanes.at(i),0);
+      WayPointNode waypt;
+      waypt.id=point;
 
-  for (uint i=0; i<lanes.size();i++) {
-    ElementID point(segment,lanes.at(i),0);
-    WayPointNode waypt;
-    waypt.id=point;
-
-    std::vector<poly> lane_polys;
-    AddLanePolys(polygons,lane_polys,waypt);
-    int newind = getClosestPoly(lane_polys, pose);
-    if (newind < 0)
-      continue;
-    float tempdist =
-      fabs(Coordinates::normalize(lane_polys.at(newind).heading-pose.yaw));
-    if (tempdist < mindist)
-      {
-        mindist=tempdist;
-        minpoly=lane_polys.at(newind);
-        foundd=true;
-      }
-  }
+      std::vector<poly> lane_polys;
+      AddLanePolys(polygons, lane_polys, waypt);
+      int newind = getClosestPoly(lane_polys, pose);
+      if (newind < 0)
+        continue;
+      float tempdist =
+        fabs(normalize(lane_polys.at(newind).heading - pose.yaw));
+      if (tempdist < mindist)
+        {
+          mindist = tempdist;
+          minpoly = lane_polys.at(newind);
+          foundd=true;
+        }
+    }
 
   if (!foundd)
-    return -1;
+    {
+      ROS_WARN_STREAM("no lane within distance " << distance);
+      return -1;
+    }
 
-  // Go find min polygon 
+  // Return min polygon 
   for (uint i=0; i< polygons.size(); i++)
     if (minpoly.poly_id == polygons.at(i).poly_id)
       return i;
 
+  ROS_WARN("no min polygon found");
   return -1;
 }
 

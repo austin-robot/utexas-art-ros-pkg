@@ -23,7 +23,7 @@ public:
 
   Evade(Navigator *navptr, int _verbose);
   ~Evade();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 

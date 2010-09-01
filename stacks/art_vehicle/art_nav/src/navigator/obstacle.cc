@@ -10,7 +10,7 @@
 
 //#include <art/DARPA_rules.h>
 #include <art/infinity.h>
-#include <art/Safety.h>
+//#include <art/Safety.h>
 
 #include "navigator_internal.h"
 #include "course.h"
@@ -30,14 +30,11 @@ Obstacle::Obstacle(Navigator *_nav, int _verbose)
   order = &nav->order;
   pops = nav->pops;
 
-  // create and configure lasers interface
-  lasers = new Lasers(odom, verbose);
-
-  max_range = 0.0;
+  // TODO Make this a parameter
+  max_range = 80.0;
 
   // initialize observers state to all clear in case that driver is
   // not subscribed or not publishing data
-  memset(&obstate, 0, sizeof(obstate));
   for (unsigned i = 0; i < ObserverID::N_Observers; ++i)
     {
       obstate.obs[i].clear = true;
@@ -91,6 +88,7 @@ float Obstacle::closest_ahead_in_plan(void)
   // value to return if no obstacle found
   float retval = Infinite::distance;
 
+#if 0 // ignoring obstacles at the moment
   // find index of closest polygon to current vehicle pose
   int closest_poly_index = pops->getClosestPoly(course->plan, estimate->pos);
   if (closest_poly_index < 0)
@@ -130,7 +128,8 @@ float Obstacle::closest_ahead_in_plan(void)
     ART_MSG(8, "Closest obstacle in lane %s is %.3f m down the lane",
 	    course->plan.at(closest_poly_index).start_way.lane_name().str,
 	    retval);
-  
+#endif // ignoring obstacles
+
   return retval;
 }
 
@@ -149,15 +148,17 @@ void Obstacle::closest_in_lane(const poly_list_t &lane,
   // values to return if no obstacles found
   ahead = Infinite::distance;
   behind = Infinite::distance;
-  
+
   int closest_poly_index = pops->getClosestPoly(lane, estimate->pos);
   if (lane.empty() || closest_poly_index < 0)
     {
-      if (verbose)
-	ART_MSG(2, "no closest polygon in lane (size %u)", lane.size());
+      ROS_DEBUG_STREAM("no closest polygon in lane (size "
+                       << lane.size() << ")");
       return;
     }
 
+#if 0 // ignoring obstacles at the moment
+  
   for (uint i=0; i< lasers->all_obstacle_list.size(); i++)
     if (in_lane(lasers->all_obstacle_list.at(i), lane, 0))
       {
@@ -169,16 +170,15 @@ void Obstacle::closest_in_lane(const poly_list_t &lane,
 	  ahead = fminf(ahead, distance);
       }
 
-  if (verbose >= 3)
-    ART_MSG(8, "Closest obstacles in lane %s are %.3fm ahead and %.3fm behind",
+#endif // ignoring obstacles at the moment
+
+  ROS_DEBUG("Closest obstacles in lane %s are %.3fm ahead and %.3fm behind",
 	    lane.at(closest_poly_index).start_way.lane_name().str,
 	    ahead, behind);
 }
 
 void Obstacle::configure(ConfigFile* cf, int section)
 {
-  lasers->configure(cf, section);
-
   blockage_timeout_secs = cf->ReadFloat(section, "blockage_timeout_secs", 9.0);
   ART_MSG(2, "\tblockage timeout is %.1f", blockage_timeout_secs);
 

@@ -28,7 +28,9 @@ rosbuild_add_executable(navigator
   course.cc
   estop.cc
   navigator.cc
+  #obstacle.cc
   queue_mgr.cc
+  #road.cc
   run.cc
   )
 target_link_libraries(navigator artnav artmap)

@@ -15,14 +15,14 @@
 #include "NavRoadEvent.h"
 #include <art/observers.h>
 
-class Evade;
+//class Evade;
 class FollowLane;
 class FollowSafely;
 class Halt;
-class Passing;
+//class Passing;
 class NavTimer;
-class Uturn;
-class RealZone;
+//class RealZone;
+//class Uturn;
 
 class Road: public Controller
 {
@@ -30,7 +30,7 @@ public:
 
   Road(Navigator *navptr, int _verbose);
   ~Road();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
@@ -65,13 +65,13 @@ private:
   int32_t prev_nobjects;		// previous number of cars
 
   // subordinate controllers
-  Evade		*evade;
+  //Evade	*evade;
   FollowLane	*follow_lane;
   FollowSafely	*follow_safely;
   Halt		*halt;
-  Passing	*passing;
-  Uturn		*uturn;
-  RealZone	*zone;
+  //Passing	*passing;
+  //Uturn	*uturn;
+  //RealZone	*zone;
 
   // timers
   NavTimer		*passing_timer;

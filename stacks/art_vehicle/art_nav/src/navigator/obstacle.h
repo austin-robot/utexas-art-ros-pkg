@@ -14,11 +14,14 @@
 
 #include <vector>
 #include <art_nav/Observers.h>
-//#include <art_nav/lasers.h>
 #include "ntimer.h"
 
 
-/** @brief Navigator obstacle class. */
+/** @brief Navigator obstacle class.
+ *
+ *  @todo Add ROS-style ObstacleGrid input.
+ *  @todo Add ART-style Observers input.
+ */
 class Obstacle
 {
  public:
@@ -29,8 +32,6 @@ class Obstacle
   /** @brief Destructor */
   ~Obstacle()
   {
-    if (lasers)
-      delete lasers;
     delete blockage_timer;
   };
 
@@ -64,7 +65,11 @@ class Obstacle
   void closest_in_lane(const poly_list_t &lane, float &ahead, float &behind);
 
   /** @brief return true if class initialized */
-  bool initialized(void) {return lasers->have_ranges;};
+  bool initialized(void)
+  {
+    //return lasers->have_ranges;
+    return true;
+  };
 
 #if 0
   /** @brief handle intersection driver message
@@ -85,7 +90,7 @@ class Obstacle
 #endif
 
   /** @brief maximum scan range accessor. */
-  float maximum_range(void) {return lasers->max_range;}
+  float maximum_range(void) {return max_range;}
 
   /** @brief return current observation state */
   Observation observation(ObserverID::observer_id_t oid)
@@ -151,11 +156,9 @@ class Obstacle
       }
   }
 
-  Lasers* lasers;
-
  private:
 
-  // laser data state
+  // parameters
   float max_range;			//< maximum scan range
 
   // observers data
@@ -190,6 +193,7 @@ class Obstacle
   // returns true if obstacle is within the specified lane
   bool in_lane(MapXY location, const poly_list_t &lane, int start_index);
 
+#if 0 // ignoring obstacles at the moment
   // conversions between laser scan indices and bearings
   float laser_scan_bearing(unsigned index, const player_laser_data_t &scan)
   {
@@ -205,6 +209,7 @@ class Obstacle
       index = scan.ranges_count;
     return index;
   }
+#endif // ignoring obstacles at the moment
 };
 
 #endif // _OBSTACLE_HH_

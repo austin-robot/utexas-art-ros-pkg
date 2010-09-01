@@ -45,7 +45,7 @@ Evade::~Evade()
   delete safety;
 }
 
-void Evade::configure(ConfigFile* cf, int section)
+void Evade::configure()
 {
   evade_delay = cf->ReadFloat(section, "evade_delay", 7.0);
   ART_MSG(2, "\tevade delay is %.1f seconds", evade_delay);

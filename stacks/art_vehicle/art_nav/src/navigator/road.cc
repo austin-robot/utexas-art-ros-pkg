@@ -14,15 +14,15 @@
 #include "obstacle.h"
 #include "road.h"
 
-#include "evade.h"
+//#include "evade.h"
 #include "follow_lane.h"
 #include "follow_safely.h"
 #include "halt.h"
-#include "passing.h"
-#include "real_zone.h"
+//#include "real_zone.h"
+//#include "passing.h"
 #include "ntimer.h"
-#include "uturn.h"
-#include "voronoi_zone.h"
+//#include "uturn.h"
+//#include "voronoi_zone.h"
 
 Road::Road(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
@@ -201,7 +201,7 @@ void Road::cancel_all_timers(void)
   stop_line_timer->Cancel();
 }
 
-void Road::configure(ConfigFile* cf, int section)
+void Road::configure()
 {
   passing_delay = cf->ReadFloat(section, "passing_delay", 5.0);
   ART_MSG(2, "\tpassing delay is %.3f seconds", passing_delay);
@@ -217,13 +217,13 @@ void Road::configure(ConfigFile* cf, int section)
   stop_line_delay = cf->ReadFloat(section, "stop_line_delay", 1.0);
   ART_MSG(2, "\tstop line delay is %.3f seconds", stop_line_delay);
 
-  evade->configure(cf, section);
+  //evade->configure(cf, section);
   follow_lane->configure(cf, section);
   follow_safely->configure(cf, section);
   halt->configure(cf, section);
-  passing->configure(cf, section);
-  uturn->configure(cf, section);
-  zone->configure(cf, section);
+  //passing->configure(cf, section);
+  //uturn->configure(cf, section);
+  //zone->configure(cf, section);
 }
 
 Controller::result_t Road::control(pilot_command_t &pcmd)
@@ -262,7 +262,7 @@ void Road::reset(void)
 {
   trace_reset("Road");
   reset_me();
-  evade->reset();
+  //evade->reset();
   follow_lane->reset();
   follow_safely->reset();
   halt->reset();
@@ -375,7 +375,9 @@ Controller::result_t Road::ActionInBlock(pilot_command_t &pcmd)
 
 Controller::result_t Road::ActionInEvade(pilot_command_t &pcmd)
 {
-  result_t result = evade->control(pcmd);
+  /** @todo Either implement the Evade controller or delete it. */
+  //result_t result = evade->control(pcmd);
+  result_t result = halt->control(pcmd);
   if (result == Finished)
     {
       pending_event = NavRoadEvent::FollowLane;

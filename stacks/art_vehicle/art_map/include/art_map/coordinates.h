@@ -125,7 +125,7 @@ public:
   MapPose(void): map(0.0, 0.0), yaw(0.0) {};
   MapPose(MapXY _map, float _yaw): map(_map), yaw(_yaw) {};
   MapPose(float _x, float _y, float _yaw): map(_x, _y), yaw(_yaw) {};
-  MapPose(geometry_msgs::Pose pose)
+  MapPose(const geometry_msgs::Pose &pose)
   {
     map = MapXY(pose.position);
     yaw = tf::getYaw(pose.orientation);

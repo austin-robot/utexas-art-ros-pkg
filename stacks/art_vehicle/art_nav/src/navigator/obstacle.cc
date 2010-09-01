@@ -2,7 +2,6 @@
  *  Navigator obstacle class
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -35,15 +34,16 @@ Obstacle::Obstacle(Navigator *_nav, int _verbose)
 
   // initialize observers state to all clear in case that driver is
   // not subscribed or not publishing data
-  for (unsigned i = 0; i < ObserverID::N_Observers; ++i)
+  obstate.obs.resize(Observers::N_Observers);
+  prev_obstate.obs.resize(Observers::N_Observers);
+  for (unsigned i = 0; i < Observers::N_Observers; ++i)
     {
       obstate.obs[i].clear = true;
       obstate.obs[i].applicable = true;
     }
-  observers_time = 0.0;
 
   // allocate timers
-  blockage_timer = new NavTimer(nav->cycle);
+  blockage_timer = new NavTimer();
   was_stopped = false;
 
   reset();
@@ -58,7 +58,7 @@ bool Obstacle::car_approaching()
   if (offensive_driving)
     return false;
 
-  ObserverID::observer_id_t oid = ObserverID::Nearest_forward;
+  Observation::_oid_type oid = Observers::Nearest_forward;
   if (obstate.obs[oid].clear || !obstate.obs[oid].applicable)
     {
       if (verbose >= 4)
@@ -69,7 +69,7 @@ bool Obstacle::car_approaching()
   // estimate absolute speed of obstacle from closing velocity and
   // vehicle speed at time of observation
   float rel_speed = obstate.obs[oid].velocity;
-  float abs_speed = rel_speed - obstate.pos2d.vel.px;
+  float abs_speed = rel_speed - obstate.odom.twist.twist.linear.x;
 
   if (verbose >= 3)
     ART_MSG(6, "obstacle observed closing at %.3fm/s, absolute speed %.3f",
@@ -149,7 +149,8 @@ void Obstacle::closest_in_lane(const poly_list_t &lane,
   ahead = Infinite::distance;
   behind = Infinite::distance;
 
-  int closest_poly_index = pops->getClosestPoly(lane, estimate->pos);
+  int closest_poly_index =
+    pops->getClosestPoly(lane, MapPose(estimate->pose.pose));
   if (lane.empty() || closest_poly_index < 0)
     {
       ROS_DEBUG_STREAM("no closest polygon in lane (size "
@@ -177,34 +178,36 @@ void Obstacle::closest_in_lane(const poly_list_t &lane,
 	    ahead, behind);
 }
 
-void Obstacle::configure(ConfigFile* cf, int section)
+void Obstacle::configure()
 {
-  blockage_timeout_secs = cf->ReadFloat(section, "blockage_timeout_secs", 9.0);
-  ART_MSG(2, "\tblockage timeout is %.1f", blockage_timeout_secs);
+  ros::NodeHandle nh("~");
+
+  nh.param( "blockage_timeout_secs", blockage_timeout_secs, 9.0);
+  ROS_INFO("\tblockage timeout is %.1f", blockage_timeout_secs);
 
   // lane width ratio (in range of 0.01 to 1.0)
-  lane_width_ratio = cf->ReadFloat(section, "lane_width_ratio", 0.3);
+  nh.param( "lane_width_ratio", lane_width_ratio, 0.3);
   lane_width_ratio = fmaxf(lane_width_ratio, 0.01f);
   lane_width_ratio = fminf(lane_width_ratio, 1.0f);
-  ART_MSG(2, "\tlane width ratio is %.3f", lane_width_ratio);
+  ROS_INFO("\tlane width ratio is %.3f", lane_width_ratio);
 
   // lane scan angle (in range of 0 to pi)
-  lane_scan_angle = cf->ReadFloat(section, "lane_scan_angle", M_PI/3.0);
+  nh.param("lane_scan_angle", lane_scan_angle, M_PI/3.0);
   lane_scan_angle = fmaxf(lane_scan_angle, 0.0f);
   lane_scan_angle = fminf(lane_scan_angle, (float) M_PI);
-  ART_MSG(2, "\tlane scan angle is %.3f radians", lane_scan_angle);
+  ROS_INFO("\tlane scan angle is %.3f radians", lane_scan_angle);
 
   // distance at which we start paying attention to an obstacle
-  max_obstacle_dist = cf->ReadFloat(section, "max_obstacle_dist", 100.0);
-  ART_MSG(2, "\tmaximum obstacle distance considered is %.3f meters",
+  nh.param("max_obstacle_dist", max_obstacle_dist, 100.0);
+  ROS_INFO("\tmaximum obstacle distance considered is %.3f meters",
 	  max_obstacle_dist);
 
   // minimum approach speed considered dangerous
-  min_approach_speed = cf->ReadFloat(section, "min_approach_speed", 2.0);
-  ART_MSG(2, "\tminimum approach speed is %.3f m/s", min_approach_speed);
+  nh.param("min_approach_speed", min_approach_speed, 2.0);
+  ROS_INFO("\tminimum approach speed is %.3f m/s", min_approach_speed);
 
-  offensive_driving = cf->ReadBool(section, "offensive_driving", false); 
-  ART_MSG(2, "\tuse %s driving style",
+  nh.param("offensive_driving", offensive_driving, false); 
+  ROS_INFO("\tuse %s driving style",
 	  (offensive_driving? "offensive": "defensive"));
 }
 
@@ -241,75 +244,46 @@ bool Obstacle::in_lane(MapXY location, const poly_list_t &lane,
   return false;
 }
 
-// handle intersection message
-//
-//  Called from the driver ProcessMessage() handler when new
-//  intersection data arrive.
-//
-// TEMPORARY: bridge old driver to observers interface
-//
-int Obstacle::intersection_message(player_msghdr *hdr,
-				    player_opaque_data_t *opaque)
-{
-  if (opaque->data_count != sizeof(bool))
-    {
-      // error in message size
-      ART_MSG(2, "ERROR: Intersection message size (%u) is wrong",
-	      opaque->data_count);
-      return -1;			// reject message
-    }
-
-  obstate.obs[ObserverID::Intersection].clear = (opaque->data[0] != 0);
-  observers_time = hdr->timestamp;
-
-  if (verbose >= 2)
-    ART_MSG(5, "intersection state is %s, time %.6f",
-	    (obstate.obs[ObserverID::Intersection].clear? "clear": "blocked"),
-	    observers_time);
-
-  return 0;				// message accepted
-}
-
-
 // handle observers driver message
 //
 //  Called from the driver ProcessMessage() handler when new
 //  observers data arrive.
 //
-void Obstacle::observers_message(player_msghdr *hdr,
-				 observers_state_msg_t *obs_msg)
+void Obstacle::observers_message(Observers *obs_msg)
 {
-  if (obs_msg->observations_count != ObserverID::N_Observers)
+  if (obs_msg->obs.size() != Observers::N_Observers)
     {
       // error in message size
-      ART_MSG(2, "ERROR: Observer message size (%u) is wrong (ignored)",
-	      obs_msg->observations_count);
+      ROS_ERROR_STREAM("ERROR: Observer message size (" << obs_msg->obs.size()
+                       << ") is wrong (ignored)");
       return;
     }
 
-  if (observers_time == hdr->timestamp)
+  if (obstate.header.stamp == obs_msg->header.stamp)
     return;				// repeated message, no new data
 
   prev_obstate = obstate;
   obstate = *obs_msg;
-  observers_time = hdr->timestamp;
 
   if (verbose >= 2)
     {
-      char clear_string[ObserverID::N_Observers+1];
-      for (unsigned i = 0; i < ObserverID::N_Observers; ++i)
+      char clear_string[Observers::N_Observers+1];
+      for (unsigned i = 0; i < Observers::N_Observers; ++i)
 	{
 	  clear_string[i] = (obstate.obs[i].clear? '1': '0');
 	  if (obstate.obs[i].applicable)
 	    clear_string[i] += 2;
 	}
-      clear_string[ObserverID::N_Observers] = '\0';
-      ART_MSG(5, "observers report {%s}, pose (%.3f,%.3f,%.3f), "
-	      "(%.3f, %.3f), time %.6f",
-	      clear_string,
-	      obstate.pos2d.pos.px, obstate.pos2d.pos.py, obstate.pos2d.pos.pa,
-	      obstate.pos2d.vel.px, obstate.pos2d.vel.pa,
-	      observers_time);
+      clear_string[Observers::N_Observers] = '\0';
+      ROS_DEBUG("observers report {%s}, pose (%.3f,%.3f,%.3f), "
+                "(%.3f, %.3f), time %.6f",
+                clear_string,
+                obstate.odom.pose.pose.position.x,
+                obstate.odom.pose.pose.position.y,
+                tf::getYaw(obstate.odom.pose.pose.orientation),
+                obstate.odom.twist.twist.linear.x,
+                obstate.odom.twist.twist.angular.z,
+                obstate.header.stamp.toSec());
     }
 }
 
@@ -317,9 +291,9 @@ void Obstacle::observers_message(player_msghdr *hdr,
 bool Obstacle::passing_lane_clear(void)
 {
   if (course->passing_left)
-    return observer_clear(ObserverID::Adjacent_left);
+    return observer_clear(Observers::Adjacent_left);
   else
-    return observer_clear(ObserverID::Adjacent_right);
+    return observer_clear(Observers::Adjacent_right);
 }
 
 // reset obstacle class

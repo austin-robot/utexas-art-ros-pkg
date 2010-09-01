@@ -36,6 +36,14 @@
 
 #include <nav_msgs/Odometry.h>
 
+// Provide short names for some messages so they can more easily be
+// packaged differently.
+using art_nav::Behavior;
+using art_nav::NavigatorCommand;
+using art_nav::NavigatorState;
+using nav_msgs::Odometry;
+using art_nav::Order;
+
 typedef struct
 {
   float velocity;

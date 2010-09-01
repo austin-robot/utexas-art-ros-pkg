@@ -14,7 +14,7 @@
 #include "navigator_internal.h"
 #include "course.h"
 
-//#include "obstacle.h"
+#include "obstacle.h"
 
 // subordinate controller classes
 #include "estop.h"
@@ -48,7 +48,7 @@ Navigator::Navigator(nav_msgs::Odometry *odom_msg)
   // allocate helper classes
   pops = new PolyOps();
   course = new Course(this, verbose);
-  //obstacle = new Obstacle(this, verbose);
+  obstacle = new Obstacle(this, verbose);
 
   // allocate controller classes
   estop = new Estop(this, verbose);
@@ -60,9 +60,9 @@ Navigator::~Navigator()
   delete estop;
 
   // free helper classes
+  delete obstacle;
   delete course; 
   delete pops;
-  //delete obstacle;
 };
 
 /** Main navigator entry point -- called once every driver cycle
@@ -98,6 +98,6 @@ void Navigator::configure()
   // configure controller methods
   estop->configure();
   course->configure();
-  //obstacle->configure();
+  obstacle->configure();
 }
 

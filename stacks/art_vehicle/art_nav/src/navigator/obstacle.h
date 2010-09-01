@@ -3,7 +3,6 @@
  *  Navigator obstacle class
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -13,9 +12,14 @@
 #define _OBSTACLE_HH_
 
 #include <vector>
-#include <art_nav/Observers.h>
 #include "ntimer.h"
 
+#include <art_nav/Observers.h>
+
+// Provide short names for these messages so they can easily be moved
+// to a different package.
+using art_nav::Observers;
+using art_nav::Observation;
 
 /** @brief Navigator obstacle class.
  *
@@ -71,41 +75,20 @@ class Obstacle
     return true;
   };
 
-#if 0
-  /** @brief handle intersection driver message
-   *
-   *  TEMPORARY: bridge old driver to observers interface
-   *
-   *  Called from the driver ProcessMessage() handler when new
-   *  intersection data arrive.
-   *
-   * @param hdr the player message header pointer
-   * @param opaque pointer to the opaque data struct in the player
-   * message queue.  Must copy the data before returning.
-   *
-   * @returns 0 if message OK, -1 if invalid.
-   */
-  int intersection_message(player_msghdr *hdr,
-			   player_opaque_data_t *opaque);
-#endif
-
   /** @brief maximum scan range accessor. */
   float maximum_range(void) {return max_range;}
 
   /** @brief return current observation state */
-  Observation observation(ObserverID::observer_id_t oid)
+  Observation observation(Observation::_oid_type oid)
   {
     return obstate.obs[oid];
   }
 
   /** @brief return true when observer reports clear to go */
-  bool observer_clear(ObserverID::observer_id_t oid)
+  bool observer_clear(Observation::_oid_type oid)
   {
-#if 1
     bool clear = obstate.obs[oid].clear && obstate.obs[oid].applicable;
-#else
-    bool clear = obstate.obs[oid].clear;
-#endif
+
     // if waiting on observers, reset the blockage_timer
     if (!clear)
       blocked();
@@ -121,8 +104,7 @@ class Obstacle
    * @param obs_msg pointer to the observer state message struct in
    * the player message queue.  Must copy the data before returning.
    */
-  void observers_message(player_msghdr *hdr,
-			 observers_state_msg_t *obs_msg);
+  void observers_message(Observers *obs_msg);
 
   /** @brief return true when observer reports passing lane clear */
   bool passing_lane_clear(void);
@@ -162,20 +144,19 @@ class Obstacle
   float max_range;			//< maximum scan range
 
   // observers data
-  observers_state_msg_t obstate;	//< current observers state
-  double observers_time;		//< timestamp of observers data
-  observers_state_msg_t prev_obstate;	//< previous observers state
+  Observers obstate;                    //< current observers state
+  Observers prev_obstate;               //< previous observers state
 
   // blockage timer
   NavTimer *blockage_timer;
   bool was_stopped;			// previous cycle's stop state
 
   // .cfg variables
-  float  blockage_timeout_secs;
-  float  lane_width_ratio;
-  float  lane_scan_angle;
-  float  max_obstacle_dist;
-  float  min_approach_speed;
+  double blockage_timeout_secs;
+  double lane_width_ratio;
+  double lane_scan_angle;
+  double max_obstacle_dist;
+  double min_approach_speed;
   bool   offensive_driving;
 
   // constructor parameters
@@ -185,10 +166,10 @@ class Obstacle
   // convenience pointers to Navigator class data
   PolyOps* pops;			// polygon operations class
   Course* course;			// course planning class
-  Order *order;				// current commander order
-  nav_state_msg_t *navdata;		// current navigator state data
-  Odometry *odom;			// current odometry position
-  player_position2d_data_t *estimate;	// estimated control position
+  art_nav::Order *order;                // current commander order
+  art_nav::NavigatorState *navdata;     // current navigator state data
+  nav_msgs::Odometry *odom;             // current odometry position
+  nav_msgs::Odometry *estimate;         // estimated control position
 
   // returns true if obstacle is within the specified lane
   bool in_lane(MapXY location, const poly_list_t &lane, int start_index);

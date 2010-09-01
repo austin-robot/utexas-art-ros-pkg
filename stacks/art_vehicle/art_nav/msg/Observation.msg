@@ -2,12 +2,15 @@
 # TODO: move to a separate art_observers package
 # $Id$
 
+int32  oid                      # observer ID
+string name                     # observer name
+
 bool applicable                 # true if obseravation is applicable
-bool clear			# true if clear to go
+bool clear                      # true if clear to go
 
 # optional time and distance to nearest obstacle
 # (only reported by some observers)
 float32 time
 float32 distance
 float32 velocity
-int32 nobjects  		# number of objects, when relevant
+int32 nobjects  		# number of objects

@@ -13,7 +13,7 @@
 
 //class Avoid;
 class FollowSafely;
-//class SlowForCurves;
+class SlowForCurves;
 class StopArea;
 class StopLine;
 
@@ -46,7 +46,7 @@ private:
 
   //Avoid       *avoid;
   FollowSafely	*follow_safely;
-  //SlowForCurves *slow_for_curves;
+  SlowForCurves *slow_for_curves;
   StopArea	*stop_area;
   StopLine	*stop_line;
 

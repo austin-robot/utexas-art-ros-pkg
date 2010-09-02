@@ -122,48 +122,48 @@ void Course::configure()
 
   // how far away (in seconds) we aim when changing lanes
   nh.param("lane_change_secs", lane_change_secs, 2.0);
-  ART_MSG(2, "\tlane change target is %.3f seconds ahead",
+  ROS_INFO("lane change target is %.3f seconds ahead",
           lane_change_secs);
 
   // Look-ahead time for steering towards a polygon.
   nh.param("lane_steer_time", lane_steer_time, 2.0);
-  ART_MSG(2, "\tlane steering time is %.3f seconds", lane_steer_time);
+  ROS_INFO("lane steering time is %.3f seconds", lane_steer_time);
 
   nh.param("heading_change_ratio", heading_change_ratio, 0.75);
-  ART_MSG(2, "\theading change ratio is %.3f", heading_change_ratio);
+  ROS_INFO("heading change ratio is %.3f", heading_change_ratio);
 
   nh.param("turning_latency", turning_latency, 1.0);
-  ART_MSG(2, "\tturning latency time is %.3f seconds", 1.0);
+  ROS_INFO("turning latency time is %.3f seconds", 1.0);
 
   // Look-ahead time for steering towards a polygon.
   nh.param("turning_offset_tune", k_error, 0.1);
-  ART_MSG(2, "\tyaw tuning parameter (offset) is %.3f", k_error);
+  ROS_INFO("yaw tuning parameter (offset) is %.3f", k_error);
 
   // Look-ahead time for steering towards a polygon.
   nh.param("turning_heading_tune", k_theta, sqrt(k_error/2));
-  ART_MSG(2, "\tyaw tuning parameter (heading) is %.3f", k_theta);
+  ROS_INFO("yaw tuning parameter (heading) is %.3f", k_theta);
 
   // Look-ahead time for steering towards a polygon.
   nh.param("yaw_ratio", yaw_ratio, 0.75);
-  ART_MSG(2, "\tyaw ratio is %.3f", yaw_ratio);
+  ROS_INFO("yaw ratio is %.3f", yaw_ratio);
 
   // Look-ahead time for steering towards a polygon.
   nh.param("turning_int_tune", k_int, 1.5);
-  ART_MSG(2, "\tyaw tuning parameter (integral) is %.3f", k_int);
+  ROS_INFO("yaw tuning parameter (integral) is %.3f", k_int);
 
   // Minimum distance to aim for when changing lanes.
   // Should at least include front bumper offset and minimum separation.
   nh.param("min_lane_change_dist", min_lane_change_dist,
            (double) (DARPA_rules::min_forw_sep_travel
                      + ArtVehicle::front_bumper_px));
-  ART_MSG(2, "\tminimum lane change distance is %.3f meters",
+  ROS_INFO("minimum lane change distance is %.3f meters",
           min_lane_change_dist);
 
   // Minimum look-ahead distance for steering towards a polygon.
   // Should at least include front bumper offset.
   nh.param("min_lane_steer_dist", min_lane_steer_dist,
            (double) ArtVehicle::front_bumper_px);
-  ART_MSG(2, "\tminimum lane steering distance is %.3f meters",
+  ROS_INFO("minimum lane steering distance is %.3f meters",
           min_lane_steer_dist);
 
   // plan way-point limit.  Only for testing Navigator's ability to
@@ -171,27 +171,27 @@ void Course::configure()
   nh.param("plan_waypt_limit", plan_waypt_limit, (int) Order::N_WAYPTS);
   if (plan_waypt_limit < 2 || plan_waypt_limit > Order::N_WAYPTS)
     plan_waypt_limit = Order::N_WAYPTS;
-  ART_MSG(2, "\tplan_waypt limit is %d", plan_waypt_limit);
+  ROS_INFO("plan_waypt limit is %d", plan_waypt_limit);
 
   //How fast the maximum steer can be done
   nh.param("max_speed_for_sharp", max_speed_for_sharp ,3.0); 
-  ART_MSG(2, "\tmaximum speed to go full yaw is %.3f m", max_speed_for_sharp);
+  ROS_INFO("maximum speed to go full yaw is %.3f m", max_speed_for_sharp);
 
   // desired passing distance
   nh.param("spring_lookahead", spring_lookahead, 0.0);
-  ART_MSG(2, "\tspring lookahead distance is %.3f m", spring_lookahead);
+  ROS_INFO("spring lookahead distance is %.3f m", spring_lookahead);
 
   nh.param("real_max_yaw_rate", max_yaw_rate, Steering::maximum_yaw);
-  ART_MSG(2, "\treal_max_rate_rate is %.3f m", max_yaw_rate);
+  ROS_INFO("real_max_rate_rate is %.3f m", max_yaw_rate);
 
   nh.param("zone_waypoint_radius", zone_waypoint_radius, 1.0);
-  ART_MSG(2, "\tzone waypoint radius is %.3f m", zone_waypoint_radius);
+  ROS_INFO("zone waypoint radius is %.3f m", zone_waypoint_radius);
 
   nh.param("zone_perimeter_radius", zone_perimeter_radius, 2.0);
-  ART_MSG(2, "\tzone perimeter radius is %.3f m", zone_perimeter_radius);
+  ROS_INFO("zone perimeter radius is %.3f m", zone_perimeter_radius);
 
   nh.param("spot_waypoint_radius", spot_waypoint_radius, 0.5);
-  ART_MSG(2, "\tzone waypoint radius is %.3f m", spot_waypoint_radius);
+  ROS_INFO("zone waypoint radius is %.3f m", spot_waypoint_radius);
 }
 
 /** Set heading for desired course.

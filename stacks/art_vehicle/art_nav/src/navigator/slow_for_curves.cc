@@ -2,42 +2,43 @@
  *  Navigator "slow down for curves" controller
  *
  *  Copyright (C) 2007, Mickey Ristroph
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
 
+#include <float.h>
+
+#include <art/epsilon.h>
+#include <art_servo/steering.h>
+#include <art_map/coordinates.h>
+
 #include "navigator_internal.h"
 #include "Controller.h"
 #include "course.h"
 #include "slow_for_curves.h"
-#include <art_map/coordinates.h>
-#include <art/epsilon.h>
-#include <art_servo/steering.h>
-#include <float.h>
 
 void SlowForCurves::configure()
 {
+  ros::NodeHandle nh("~");
+  using art_common::ArtVehicle;
+
   // TODO: lookahead_distance should probably be time in seconds.
-  lookahead_distance = cf->ReadFloat(section, "lookahead_distance", 50.0);
+  nh.param("lookahead_distance", lookahead_distance, 50.0);
+  nh.param("max_deceleration", max_deceleration, 1.0);
+  nh.param("min_speed_when_slowing_for_curves", 
+           min_speed_when_slowing_for_curves, 3.0);
+  nh.param("max_yaw_rate", max_yaw_rate, 
+           Steering::angle_to_yaw(min_speed_when_slowing_for_curves,
+                                  ArtVehicle::max_steer_degrees)); 
+  nh.param("min_curve_length", min_curve_length, 1.5);
 
-  max_deceleration = cf->ReadFloat(section, "max_deceleration", 1.0);
-  min_speed_when_slowing_for_curves = 
-    cf->ReadFloat(section, "min_speed_when_slowing_for_curves",
-		  3.0);
-  max_yaw_rate = 
-    cf->ReadFloat(section, "max_yaw_rate",
-		  Steering::steering_angle_inverse
-		  (min_speed_when_slowing_for_curves,
-		   art_common::ArtVehicle::max_steer_degrees)); 
-
-  min_curve_length = cf->ReadFloat(section, "min_curve_length", 1.5);
-  ART_MSG(2, "\tturn lookahead distance is %.3f meters", lookahead_distance);
-  ART_MSG(2, "\tturn max yaw rate is %.3f radians/second", max_yaw_rate);
-  ART_MSG(2, "\tturn max deceleration is %.3f meters/second^2", max_deceleration);
-  ART_MSG(2, "\tturn min speed when slowing for curves is %.3f meters/second", min_speed_when_slowing_for_curves);
-  ART_MSG(2, "\tturn min curve length is %.3f meters", min_curve_length);
+  ROS_INFO("turn lookahead distance is %.3f meters", lookahead_distance);
+  ROS_INFO("turn max yaw rate is %.3f radians/second", max_yaw_rate);
+  ROS_INFO("turn max deceleration is %.3f meters/second^2", max_deceleration);
+  ROS_INFO("turn min speed when slowing for curves is %.3f meters/second",
+           min_speed_when_slowing_for_curves);
+  ROS_INFO("turn min curve length is %.3f meters", min_curve_length);
 }
 
 Controller::result_t SlowForCurves::control(pilot_command_t &pcmd)
@@ -52,7 +53,8 @@ Controller::result_t SlowForCurves::control(pilot_command_t &pcmd)
   
 
   // These indices are checked in max_safe_speed
-  int start_index = pops->getClosestPoly(course->plan, estimate->pos);
+  int start_index = pops->getClosestPoly(course->plan,
+                                         MapPose(estimate->pose.pose));
 
   int stop_index = pops->index_of_downstream_poly(course->plan,
 						  start_index,

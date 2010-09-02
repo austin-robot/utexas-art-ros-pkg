@@ -26,22 +26,19 @@ public:
 private:
   
   // .cfg variables
-  float lookahead_distance;
-  float max_yaw_rate;
-  float max_deceleration;
-  float min_speed_when_slowing_for_curves;
-  float min_curve_length;
+  double lookahead_distance;
+  double max_yaw_rate;
+  double max_deceleration;
+  double min_speed_when_slowing_for_curves;
+  double min_curve_length;
   
   // state
   int current_limiting_id;
   
-  // See slow_for_curves.cc for comments about these functions
   float max_safe_speed(const std::vector<poly>& polygons,
 		       const int& start_index,
 		       const int& stop_index,
 		       const float& max);
-  
-  
 };
 
 #endif // __SLOW_FOR_CURVES_HH__

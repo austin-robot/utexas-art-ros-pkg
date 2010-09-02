@@ -16,9 +16,9 @@
 
 #include "avoid.h"
 #include "follow_safely.h"
+#include "slow_for_curves.h"
 #include "stop_area.h"
 #include "stop_line.h"
-#include "slow_for_curves.h"
 
 typedef struct
 {
@@ -115,9 +115,9 @@ FollowLane::FollowLane(Navigator *navptr, int _verbose):
 {
   //avoid = new Avoid(navptr, _verbose);
   follow_safely = new FollowSafely(navptr, _verbose);
+  slow_for_curves = new SlowForCurves(navptr, _verbose);
   stop_area =	new StopArea(navptr, _verbose);
   stop_line =	new StopLine(navptr, _verbose);
-  //slow_for_curves = new SlowForCurves(navptr, _verbose);
   reset_me();
 };
 
@@ -125,9 +125,9 @@ FollowLane::~FollowLane()
 {
   //delete avoid;
   delete follow_safely;
+  delete slow_for_curves;
   delete stop_area;
   delete stop_line;
-  //delete slow_for_curves;
 };
 
 void FollowLane::configure()
@@ -140,9 +140,9 @@ void FollowLane::configure()
 
   //avoid->configure();
   follow_safely->configure();
+  slow_for_curves->configure();
   stop_area->configure();
   stop_line->configure();
-  //slow_for_curves->configure();
 }
 
 // follow lane in the normal direction
@@ -214,8 +214,9 @@ Controller::result_t FollowLane::control(pilot_command_t &pcmd)
 
   // adjust speed to maintain a safe following distance in the lane
   result_t result = follow_safely->control(pcmd);
+
   // reduce speed if approaching sharp turn.
-  //slow_for_curves->control(pcmd);
+  slow_for_curves->control(pcmd);
 
   if (in_safety_area)
     {
@@ -274,9 +275,9 @@ void FollowLane::reset(void)
   reset_me();
   //avoid->reset();
   follow_safely->reset();
+  slow_for_curves->reset();
   stop_area->reset();
   stop_line->reset();
-  //slow_for_curves->reset();
 }
 
 // reset this controller only

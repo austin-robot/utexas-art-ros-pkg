@@ -55,7 +55,7 @@ void StopLine::configure()
   nh.param("min_stop_distance", min_stop_distance, 5.0);
   ROS_INFO("minimum distance to begin stopping is %.3f m", min_stop_distance);
 
-  nh.param("stop_creep_speed", stop_creep_speed, 0.5);
+  nh.param("stop_creep_speed", stop_creep_speed, 1.0);
   ROS_INFO("speed while creeping forward is %.3f m/s", stop_creep_speed);
 
   nh.param("max_creep_distance", max_creep_distance,

@@ -655,19 +655,16 @@ Controller::result_t Uturn::initialize(void)
 
   if (uturn_exit_index >= 0)
     {
-      MapPose exit_pose;
-      exit_pose.map = current_lane_polys.at(uturn_exit_index).midpoint;
-      
+      MapXY exit_pose;
+      exit_pose = current_lane_polys.at(uturn_exit_index).midpoint;
       pops->AddLanePolys(course->polygons, left_lane_polys,
-			 order->waypt[1].id);
-
-      uturn_entry_index = 
-	pops->getClosestPoly(left_lane_polys,exit_pose);
+                         order->waypt[1].id);
+      uturn_entry_index = pops->getClosestPoly(left_lane_polys, exit_pose);
     }
   
   if (uturn_exit_index < 0 || uturn_entry_index < 0)
     {
-      ART_ERROR("no U-turn according to polygons: %d %d", 
+      ROS_ERROR("no U-turn according to polygons: %d %d", 
 		uturn_exit_index, uturn_entry_index);
       return NotApplicable;
     }

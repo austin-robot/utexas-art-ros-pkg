@@ -56,7 +56,7 @@ void Stop::configure()
   nh.param("min_stop_distance", min_stop_distance, 5.0);
   ROS_INFO("minimum distance to begin stopping is %.3f m", min_stop_distance);
 
-  nh.param("stop_creep_speed", stop_creep_speed, 0.5);
+  nh.param("stop_creep_speed", stop_creep_speed, 1.0);
   ROS_INFO("speed while creeping forward is %.3f m/s", stop_creep_speed);
 
   nh.param("max_creep_distance", max_creep_distance,
@@ -67,7 +67,8 @@ void Stop::configure()
   ROS_INFO("desired stopping deceleration is %.3f m/s/s", stop_deceleration);
 
   // stop_latency compensates for latency in the braking system
-  nh.param("stop_latency", stop_latency, 1.5);
+  //nh.param("stop_latency", stop_latency, 1.5);
+  nh.param("stop_latency", stop_latency, 0.0);
   ROS_INFO("stopping latency is %.3f sec", stop_latency);
 };
 

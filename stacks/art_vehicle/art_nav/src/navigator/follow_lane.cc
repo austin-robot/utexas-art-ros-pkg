@@ -16,7 +16,6 @@
 
 #include "avoid.h"
 #include "follow_safely.h"
-#include "lane_heading.h"
 #include "stop_area.h"
 #include "stop_line.h"
 #include "slow_for_curves.h"
@@ -116,7 +115,6 @@ FollowLane::FollowLane(Navigator *navptr, int _verbose):
 {
   //avoid = new Avoid(navptr, _verbose);
   follow_safely = new FollowSafely(navptr, _verbose);
-  lane_heading = new LaneHeading(navptr, _verbose);
   stop_area =	new StopArea(navptr, _verbose);
   stop_line =	new StopLine(navptr, _verbose);
   //slow_for_curves = new SlowForCurves(navptr, _verbose);
@@ -127,7 +125,6 @@ FollowLane::~FollowLane()
 {
   //delete avoid;
   delete follow_safely;
-  delete lane_heading;
   delete stop_area;
   delete stop_line;
   //delete slow_for_curves;
@@ -143,7 +140,6 @@ void FollowLane::configure()
 
   //avoid->configure();
   follow_safely->configure();
-  lane_heading->configure();
   stop_area->configure();
   stop_line->configure();
   //slow_for_curves->configure();
@@ -251,8 +247,8 @@ Controller::result_t FollowLane::control(pilot_command_t &pcmd)
 	result = stop_result;		// ignore follow_safely result
     }
 
-  // set desired heading for this cycle
-  lane_heading->control(pcmd);
+  // set heading to desired course
+  course->desired_heading(pcmd);
 
   // check if way-point reached, ignoring stop lines and U-turns
   course->lane_waypoint_reached();
@@ -278,7 +274,6 @@ void FollowLane::reset(void)
   reset_me();
   //avoid->reset();
   follow_safely->reset();
-  lane_heading->reset();
   stop_area->reset();
   stop_line->reset();
   //slow_for_curves->reset();

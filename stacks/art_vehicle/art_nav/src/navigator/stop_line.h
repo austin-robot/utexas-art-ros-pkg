@@ -3,7 +3,6 @@
  *  Navigator stop line controller
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -25,17 +24,17 @@ public:
 
 private:
   // .cfg variables
-  float min_stop_distance;		// minimum distance to begin stopping
-  float stop_creep_speed;		// speed while creeping forward
-  float stop_deceleration;		// desired deceleration
-  float stop_distance;			// desired stop distance
-  float stop_latency;			// stop control latency in seconds
+  double min_stop_distance;             // minimum distance to begin stopping
+  double stop_creep_speed;              // speed while creeping forward
+  double stop_deceleration;             // desired deceleration
+  double stop_distance;                 // desired stop distance
+  double stop_latency;                  // stop control latency in seconds
 
   // controller state
-  bool stopping;			// stopping initiated
+  bool stopping;                        // stopping initiated
   bool creeping;                        // creeping up to line
-  float initial_speed;			// initial speed while stopping
-  float max_creep_distance;             // applicable distance for creep
+  double initial_speed;                 // initial speed while stopping
+  double max_creep_distance;            // applicable distance for creep
 
   void reset_me(void);
 };

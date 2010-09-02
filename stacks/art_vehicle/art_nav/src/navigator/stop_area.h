@@ -24,7 +24,7 @@ public:
 
 private:
   // .cfg variables
-  float stop_approach_speed;		// speed while approaching stop
+  double stop_approach_speed;          // speed while approaching stop
 
   // controller state
   bool in_safety_area;

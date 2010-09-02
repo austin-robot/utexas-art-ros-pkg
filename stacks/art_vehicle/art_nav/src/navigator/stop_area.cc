@@ -26,9 +26,10 @@ StopArea::~StopArea() {};
 // configuration method
 void StopArea::configure()
 {
-  stop_approach_speed = cf->ReadFloat(section, "stop_approach_speed", 3.0);
-  ART_MSG(2, "\tstop line approach speed is %.3f m/s",
-	  stop_approach_speed);
+  ros::NodeHandle nh("~");
+
+  nh.param("stop_approach_speed", stop_approach_speed, 3.0);
+  ROS_INFO("stop line approach speed is %.3f m/s", stop_approach_speed);
 };
 
 // Slow down if stop line safety area reached.
@@ -41,6 +42,7 @@ void StopArea::configure()
 //
 Controller::result_t StopArea::control(pilot_command_t &pcmd)
 {
+  using art_common::ArtVehicle;
   float wayptdist = (course->stop_waypt_distance(true)
 		     - ArtVehicle::front_bumper_px);
 

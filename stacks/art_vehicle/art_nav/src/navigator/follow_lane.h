@@ -13,7 +13,6 @@
 
 //class Avoid;
 class FollowSafely;
-class LaneHeading;
 //class SlowForCurves;
 class StopArea;
 class StopLine;
@@ -47,7 +46,6 @@ private:
 
   //Avoid       *avoid;
   FollowSafely	*follow_safely;
-  LaneHeading	*lane_heading;
   //SlowForCurves *slow_for_curves;
   StopArea	*stop_area;
   StopLine	*stop_line;

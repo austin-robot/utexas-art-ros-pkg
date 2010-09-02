@@ -2,11 +2,13 @@
  *  Navigator stop line controller
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
+
+#include <art_common/ArtVehicle.h>
+using art_common::ArtVehicle;
 
 #include <art/DARPA_rules.h>
 #include "navigator_internal.h"
@@ -14,26 +16,28 @@
 #include "course.h"
 #include "stop_line.h"
 
-// This is based on the unpublished "Control Tutorial" draft dated
-// January 26, 2004 by Dr. Benjamin Kuypers, section 5: "The Stopping
-// Controller".  He recommends a constant deceleration instead of the
-// simpler exponential decay.  The dynamical system is:
-//
-//	x_dot = -k * sqrt(x)
-//
-// Solving analytically with initial condition x(0) = D and v(0) = V
-// yields these equations of motion:
-//
-//	x(t) = (sqrt(D) - V*t/(2*sqrt(D)))**2	(parabolic drop)
-//	v(t) = dx/dt = (V**2/2*D)*t + V		(linear velocity)
-//	a(t) = dv/dt = V**2/(2*D) = A		(constant deceleration)
-//
-// Note that the initial velocity V is negative in these equations,
-// because it represents motion from positive x to zero.  The system
-// stops in finite time T = -2*D/V, with x(T) = 0, and v(T) = 0.
-//
-// For example, when D = 10m from stop line and V = -5m/s, the vehicle
-// stops in 4 seconds at a constant 1.25m/s/s deceleration.
+/**
+ *  This is based on the unpublished "Control Tutorial" draft dated
+ *  January 26, 2004 by Dr. Benjamin Kuypers, section 5: "The Stopping
+ *  Controller".  He recommends a constant deceleration instead of the
+ *  simpler exponential decay.  The dynamical system is:
+ * 
+ * 	x_dot = -k * sqrt(x)
+ * 
+ *  Solving analytically with initial condition x(0) = D and v(0) = V
+ *  yields these equations of motion:
+ * 
+ * 	x(t) = (sqrt(D) - V*t/(2*sqrt(D)))**2	(parabolic drop)
+ * 	v(t) = dx/dt = (V**2/2*D)*t + V		(linear velocity)
+ * 	a(t) = dv/dt = V**2/(2*D) = A		(constant deceleration)
+ * 
+ *  Note that the initial velocity V is negative in these equations,
+ *  because it represents motion from positive x to zero.  The system
+ *  stops in finite time T = -2*D/V, with x(T) = 0, and v(T) = 0.
+ * 
+ *  For example, when D = 10m from stop line and V = -5m/s, the
+ *  vehicle stops in 4 seconds at a constant 1.25m/s/s deceleration.
+ */
 
 StopLine::StopLine(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
@@ -44,69 +48,69 @@ StopLine::StopLine(Navigator *navptr, int _verbose):
 StopLine::~StopLine() {};
 
 // configuration method
-void StopLine::configure(ConfigFile* cf, int section)
+void StopLine::configure()
 {
-  min_stop_distance = cf->ReadFloat(section, "min_stop_distance", 5.0);
-  ART_MSG(2, "\tminimum distance to begin stopping is %.3f m",
-	  min_stop_distance);
+  ros::NodeHandle nh("~");
 
-  stop_creep_speed = cf->ReadFloat(section, "stop_creep_speed", 0.5);
-  ART_MSG(2, "\tspeed while creeping forward is %.3f m/s",
-	  stop_creep_speed);
+  nh.param("min_stop_distance", min_stop_distance, 5.0);
+  ROS_INFO("minimum distance to begin stopping is %.3f m", min_stop_distance);
 
+  nh.param("stop_creep_speed", stop_creep_speed, 0.5);
+  ROS_INFO("speed while creeping forward is %.3f m/s", stop_creep_speed);
 
-  max_creep_distance = cf->ReadFloat(section, "max_creep_distance", 
-				     ArtVehicle::length);
-  ART_MSG(2, "\tdistance in which creep applies is %.3f m/s",
-	  max_creep_distance);
+  nh.param("max_creep_distance", max_creep_distance,
+           (double) ArtVehicle::length);
+  ROS_INFO("distance in which creep applies is %.3f m/s", max_creep_distance);
 
-  stop_deceleration = cf->ReadFloat(section, "stop_deceleration", 0.2);
-  ART_MSG(2, "\tdesired stopping deceleration is %.3f m/s/s",
-	  stop_deceleration);
+  nh.param("stop_deceleration", stop_deceleration, 0.2);
+  ROS_INFO("desired stopping deceleration is %.3f m/s/s", stop_deceleration);
 
   // Distance from front bumper to stop.  Give it a small overshoot to
   // aim for point just beyond the actual stop line.  When the stop
   // polygon is reached, the controller will request full brake, while
   // the car is going slowly.
-  stop_distance = cf->ReadFloat(section, "stop_distance", 
-				DARPA_rules::stop_line_to_bumper+1.0);
-  ART_MSG(2, "\tdesired stopping distance is %.3f m", stop_distance);
+  nh.param("stop_distance", stop_distance,
+           DARPA_rules::stop_line_to_bumper+1.0);
+  ROS_INFO("desired stopping distance is %.3f m", stop_distance);
 
   // stop_latency compensates for latency in the braking system
-  stop_latency = cf->ReadFloat(section, "stop_latency", 1.5);
-  ART_MSG(2, "\tstopping latency is %.3f sec", stop_latency);
+  nh.param("stop_latency", stop_latency, 1.5);
+  ROS_INFO("stopping latency is %.3f sec", stop_latency);
 };
 
-// Set speed for steady deceleration to stop way-point
-//
-// entry:
-//	course->stop_waypt is goal way-point of stop
-//	pcmd contains desired heading and speed, assuming it is not
-//	     yet time to stop.
-// exit:
-//	resets course->stop_waypt.id if reached.
-// returns:
-//	OK if in process of stopping;
-//	Finished if stop way-point reached.
+/** Set speed for steady deceleration to stop way-point
+ *
+ * @pre:
+ *	course->stop_waypt is goal way-point of stop
+ *	pcmd contains desired heading and speed, assuming it is not
+ *	     yet time to stop.
+ * @post:
+ *	resets course->stop_waypt.id if reached.
+ * @return:
+ *	OK if in process of stopping;
+ *	Finished if stop way-point reached.
+ */
 Controller::result_t StopLine::control(pilot_command_t &pcmd,
 				       float topspeed)
 {
   result_t result = OK;
 
   // distance from front bumper to stop way-point
-  float wayptdist = (Euclidean::DistanceToWaypt(estimate->pos,
-						course->stop_waypt)
-		     - ArtVehicle::front_bumper_px + stop_distance);
+  float wayptdist =
+    (Euclidean::DistanceToWaypt(MapPose(estimate->pose.pose),
+                                course->stop_waypt)
+     - ArtVehicle::front_bumper_px + stop_distance);
   // stop_latency compensates for latency in the braking system.
-  float latencydist = fabsf(estimate->vel.px) * stop_latency;
+  float abs_speed = fabsf(estimate->twist.twist.linear.x);
+  float latencydist = abs_speed * stop_latency;
   float D = wayptdist - latencydist;
 
   // According to the model, deceleration should be constant, but in
   // the real world control latency will cause it to vary, so apply
   // feedback and recompute the model every cycle.
-  float abs_speed = fabsf(estimate->vel.px);
   if (abs_speed < Epsilon::speed)
     abs_speed = 0.0;
+
   float V = -abs_speed;
   float A = V*V/(2.0*D);
   ElementID stop_id = course->stop_waypt.id;
@@ -130,7 +134,8 @@ Controller::result_t StopLine::control(pilot_command_t &pcmd,
       Polar front_bumper(0.0, ArtVehicle::front_bumper_px);
 
       if (D <= stop_distance ||
-	  pops->pointInPoly(front_bumper, estimate->pos, course->stop_poly))
+	  pops->pointInPoly(front_bumper, MapPose(estimate->pose.pose),
+                            course->stop_poly))
 	{
 	  pcmd.velocity = 0.0;		// halt immediately.
 

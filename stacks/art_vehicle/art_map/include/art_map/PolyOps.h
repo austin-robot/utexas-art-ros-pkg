@@ -287,11 +287,13 @@ class PolyOps
   {
     return pointInPoly(pt.x, pt.y, p);
   };
-  //bool pointInPoly(const Polar& polar, const player_pose2d_t &origin,
-  //      	   const poly& p)
-  //{
-  //  return pointInPoly(Coordinates::Polar_to_MapXY(polar, origin), p);
-  //};
+
+  bool pointInPoly(const Polar& polar, const MapPose &origin,
+        	   const poly &p)
+  {
+    return pointInPoly(Coordinates::Polar_to_MapXY(polar, origin), p);
+  };
+
   //bool pointInPoly(const player_pose2d_t &pose, const poly& p)
   //{
   //  return pointInPoly(pose.px, pose.py, p);

@@ -41,6 +41,10 @@ Publishes:
 - @b visualization_marker_array [visualization_msgs::MarkerArray]
      markers for map visualization
 
+@todo Provide centralized interface to allow map updates during
+      operation.  Could be done in maplanes or in a separate node that
+      reads the RNDF and publishes the graph.
+
 @author Jack O'Quin, Patrick Beeson
 
 */

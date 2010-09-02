@@ -11,10 +11,12 @@
   <!-- start pilot and servo actuators -->
   <include file="$(find art_run)/launch/pilot_stage.launch" />
 
+  <!-- start navigation nodes, tell commander to enter Run mode -->
   <node pkg="art_nav" type="navigator" name="navigator" />
   <node pkg="art_nav" type="commander" name="commander" >
     <param name="mdf"
            value="$(find art_nav)/test/$(optenv WORLD prc_large).mdf"/>
+    <param name="start_run" value="true" />
   </node>
 
 </launch>

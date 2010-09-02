@@ -1,4 +1,5 @@
 rosbuild_add_library(artnav
+  estimate.cc
   FSMstate.cc
   GraphSearch.cc
   Mission.cc

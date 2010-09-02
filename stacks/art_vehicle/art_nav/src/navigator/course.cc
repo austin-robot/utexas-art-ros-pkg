@@ -2,7 +2,6 @@
  *  Navigator course planning class
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -198,36 +197,30 @@ void Course::configure()
 #endif
 }
 
-// set heading for desired course
-//
-// entry:
-//	plan contains desired polygon path to follow
-//      offset_ratio 1.0 pushes the left side of the car to the left
-//		lane boundary, 0.0 to the center, -1.0 to the right.
-//		Larger offsets push the car outside the lane.
-//
+/** Set heading for desired course.
+ *
+ * @pre
+ *	plan contains desired polygon path to follow
+ *
+ * @param pcmd[in,out] pilot command to be published
+ * @param offset_ratio 1.0 pushes the left side of the car to the left
+ *		lane boundary, 0.0 to the center, -1.0 to the right.
+ *		Larger offsets push the car outside the lane.
+ */
 void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 {
-
-  if (Epsilon::equal(pcmd.velocity,0.0))
+  if (Epsilon::equal(pcmd.velocity, 0.0))
     return;
 
+  using Coordinates::normalize;
   Polar aim_polar;			// egocentric polar aim point
-  //  float aim_abs_heading=0;
-  float aim_next_heading=0;
-  float aim_distance=0;
-  bool aim_in_plan=false;
-  int aim_index=-1;
-
-
-
-#if 0
-  float used_velocity=fmaxf(estimate->vel.x,pcmd.velocity);
-  float target_dist=min_lane_steer_dist+lane_steer_time*estimate->vel.x;//used_velocity;
-#else
-  float used_velocity=estimate->twist.twist.linear.x;
-  float target_dist=min_lane_steer_dist;
-#endif
+  //  float aim_abs_heading = 0;
+  float aim_next_heading = 0;
+  float aim_distance = 0;
+  bool aim_in_plan = false;
+  int aim_index = -1;
+  float used_velocity = estimate->twist.twist.linear.x;
+  float target_dist = min_lane_steer_dist;
 
   if (plan.empty())
     {
@@ -235,10 +228,9 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
       if (verbose >= 2)
         ART_MSG(5, "no lane data available, steer using waypoints.");
       aim_polar = head_for_waypt(target_dist);
-      aim_distance=aim_polar.range;
+      aim_distance = aim_polar.range;
       aim_next_heading =
-        Coordinates::normalize(MapPose(estimate->pose.pose).yaw
-                               + aim_polar.heading);
+        normalize(MapPose(estimate->pose.pose).yaw + aim_polar.heading);
     }
   else 
     {
@@ -250,34 +242,28 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
                                  order->waypt[1].id);
 
       // get closest polygon to estimated position
-      int nearby_poly = pops->getClosestPoly(edge, MapPose(estimate->pose.pose));
+      int nearby_poly =
+        pops->getClosestPoly(edge, MapPose(estimate->pose.pose));
       if (nearby_poly >= 0)
-	nearby_poly=pops->getPolyIndex(plan,edge.at(nearby_poly));
-      else  nearby_poly=pops->getClosestPoly(plan, MapPose(estimate->pose.pose));
+	nearby_poly = pops->getPolyIndex(plan,edge.at(nearby_poly));
+      else
+        nearby_poly = pops->getClosestPoly(plan, MapPose(estimate->pose.pose));
 
       if (aim_poly.poly_id != -1 && aim_index >=0 && 
 	  aim_index < (int)plan.size()-1)
 	{
 	  if (nearby_poly >= 0)
 	    {
-	      int aim_index2=pops->index_of_downstream_poly
+	      int aim_index2 = pops->index_of_downstream_poly
 		(plan,nearby_poly,target_dist);	      
 	  
 	      if (aim_index2 > aim_index && aim_index2 < (int) plan.size()-1) 
 		{
-		  aim_index=aim_index2;
+		  aim_index = aim_index2;
 		  aim_poly.poly_id = -1; // no aim polygon defined
 		}
 	    }
-	  // If find_aim_polygon was recently called by
-	  // find_travel_lane or by switch_to_passing_lane use the
-	  // aim_poly
-	  
-	  //	  aim_polar = MapXY_to_Polar(pops->getPolyEdgeMidpoint
-	  //				     (plan.at(aim_index)), MapPose(estimate->pose.pose));
-	  
-	  //	  aim_abs_heading=Coordinates::normalize
-	  //	    (MapPose(estimate->pose.pose).yaw+aim_polar.heading);
+
 	  aim_distance = Euclidean::DistanceTo(plan.at(aim_index+1).midpoint,
 					       plan.at(aim_index).midpoint);
 	  aim_next_heading = atan2f(plan.at(aim_index+1).midpoint.y-
@@ -285,59 +271,52 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 				    plan.at(aim_index+1).midpoint.x-
 				    plan.at(aim_index).midpoint.x);
 
-	  aim_in_plan=true;
+	  aim_in_plan = true;
 	  
-	  if (verbose >= 3)
-	    ART_MSG(8, "steering down the lane toward polygon %d",
-		    plan.at(aim_index).poly_id);
+          ROS_INFO("steering down the lane toward polygon %d",
+                   plan.at(aim_index).poly_id);
 	}
       else
 	{
 	  if (nearby_poly >= 0)
 	    {
-	      if (verbose >= 4)
-		ART_MSG(8, "nearby_poly in desired_heading() is %d",
-			plan.at(nearby_poly).poly_id);
+              ROS_INFO("nearby_poly in desired_heading() is %d",
+                       plan.at(nearby_poly).poly_id);
 	      
 	      // set aim_polar to the closest polygon at least target_dist
 	      // meters away from the estimated position.
 	      
-	      aim_index=pops->index_of_downstream_poly
+	      aim_index = pops->index_of_downstream_poly
 		(plan,nearby_poly,target_dist);
 	      if (aim_index >=0 && aim_index < (int)plan.size()-1)
 		{
 		  // Polygon at target distance
-		  //		  aim_polar = MapXY_to_Polar
-		  //		    (plan.at(aim_index).midpoint,
-		  //		     MapPose(estimate->pose.pose));
-		  
-		  //		  aim_abs_heading=Coordinates::normalize
-		  //		    (MapPose(estimate->pose.pose).yaw+aim_polar.heading);
-		  
-		  aim_distance = Euclidean::DistanceTo(plan.at(aim_index+1).midpoint,
-						       plan.at(aim_index).midpoint);
+		  aim_distance =
+                    Euclidean::DistanceTo(plan.at(aim_index+1).midpoint,
+                                          plan.at(aim_index).midpoint);
 
 		  aim_next_heading = atan2f(plan.at(aim_index+1).midpoint.y-
 					    plan.at(aim_index).midpoint.y,
 					    plan.at(aim_index+1).midpoint.x-
 					    plan.at(aim_index).midpoint.x);
 
-		  aim_in_plan=true;
+		  aim_in_plan = true;
 		  
-		  if (verbose >= 3)
-		    ART_MSG(8, "steering at least %.3fm down the lane toward polygon %d",
-			    target_dist, plan.at(aim_index).poly_id);
+                  ROS_INFO("steering at least %.3fm "
+                           "down the lane toward polygon %d",
+                           target_dist, plan.at(aim_index).poly_id);
 		}
 	      else
-		// No polygon in target distance.  Head to next
-		// waypoint
 		{
-		  ART_MSG(8, "no polygon at least %.3fm away, steer using waypoints", target_dist);
+                  // No polygon in target distance.  Head to next way-point
+		  ROS_INFO("no polygon at least %.3fm away, "
+                           "steer using waypoints", target_dist);
 		  aim_polar = head_for_waypt(target_dist);
 		  
-		  aim_distance=aim_polar.range;
-		  aim_next_heading=Coordinates::normalize
-		    (MapPose(estimate->pose.pose).yaw+aim_polar.heading);
+		  aim_distance = aim_polar.range;
+		  aim_next_heading =
+                    normalize(MapPose(estimate->pose.pose).yaw
+                              + aim_polar.heading);
 		}
 	    }
 	  else
@@ -348,9 +327,10 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	      if (verbose >= 2)
 		ART_MSG(5, "no lane data available, steer using waypoints.");
 	      aim_polar = head_for_waypt(target_dist);
-	      aim_distance=aim_polar.range;
-	      aim_next_heading=Coordinates::normalize
-		(MapPose(estimate->pose.pose).yaw+aim_polar.heading);
+	      aim_distance = aim_polar.range;
+	      aim_next_heading =
+                normalize (MapPose(estimate->pose.pose).yaw
+                           + aim_polar.heading);
 	    }
 	}
     }
@@ -362,11 +342,10 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
             estimate->pose.pose.position.y,
             MapPose(estimate->pose.pose).yaw);
   
-  float full_heading_change=fabs(Coordinates::normalize(aim_next_heading-MapPose(estimate->pose.pose).yaw));
-  //fabsf(aim_polar.heading);//+
-  //    fabsf(Coordinates::normalize(aim_next_heading-aim_abs_heading));
+  float full_heading_change =
+    fabs(normalize(aim_next_heading-MapPose(estimate->pose.pose).yaw));
   
-  float max_speed_to_hit_aim=
+  float max_speed_to_hit_aim = 
     max_speed_for_change_in_heading(full_heading_change,
 				    aim_distance,
 				    pcmd.velocity,
@@ -379,17 +358,17 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 
 #if 0
   if (pcmd.velocity>used_velocity)
-    used_velocity+=fminf(pcmd.velocity-used_velocity,1.0*turning_latency);
+    used_velocity += fminf(pcmd.velocity-used_velocity,1.0*turning_latency);
   else if (pcmd.velocity < used_velocity)
     used_velocity-=fminf(used_velocity-pcmd.velocity,1.0*turning_latency);
 #endif
 
 #if 1
-  used_velocity=fmaxf(pcmd.velocity,used_velocity);
+  used_velocity = fmaxf(pcmd.velocity,used_velocity);
 #endif
   
 #if 0
-  used_velocity=fminf(used_velocity,pcmd.velocity);
+  used_velocity = fminf(used_velocity,pcmd.velocity);
 #endif
 
   if (verbose >= 3)
@@ -397,19 +376,19 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 
   float spring_yaw;
   if (aim_in_plan)
-    spring_yaw=get_yaw_spring_system(aim_polar, aim_index, 
+    spring_yaw = get_yaw_spring_system(aim_polar, aim_index, 
 				     aim_next_heading,
 				     max_yaw_rate, used_velocity,
 				     offset_ratio);
   else
-    spring_yaw=get_yaw_spring_system(aim_polar, -1, aim_next_heading,
+    spring_yaw = get_yaw_spring_system(aim_polar, -1, aim_next_heading,
 				     max_yaw_rate, used_velocity);
   
   pcmd.yawRate = spring_yaw;
 
 #if 0
   if (Epsilon::equal(pcmd.yawRate,max_yaw_rate))
-    pcmd.velocity=fminf(pcmd.velocity,Steering::steer_speed_min);
+    pcmd.velocity = fminf(pcmd.velocity,Steering::steer_speed_min);
 #endif  
 
   nav->trace_controller("desired_heading", pcmd);
@@ -474,7 +453,7 @@ int Course::find_aim_polygon(poly_list_t &lane)
   if (nearby_poly < 0)
     nearby_poly = pops->getClosestPoly(lane, MapPose(estimate->pose.pose));
   else
-    nearby_poly=pops->getPolyIndex(lane,edge.at(nearby_poly));
+    nearby_poly = pops->getPolyIndex(lane,edge.at(nearby_poly));
 
   if (nearby_poly < 0)
     return -1;
@@ -500,7 +479,7 @@ int Course::find_aim_polygon(poly_list_t &lane)
   float aim_distance;
 
   if (req_max_dist < Infinite::distance)
-    aim_distance=req_max_dist;
+    aim_distance = req_max_dist;
   else 
     {  
       // Try based on speed -- may be too far or 0 (if not moving)
@@ -508,15 +487,15 @@ int Course::find_aim_polygon(poly_list_t &lane)
 			   estimate->vel.x * lane_change_secs);
     }
 
-  float max_pass_distance=ArtVehicle::length*4;
+  float max_pass_distance = ArtVehicle::length*4;
 
   // Threshold by maximum distance to get over.
   aim_distance = fminf(max_pass_distance,aim_distance);
 
   if (order->waypt[1].is_goal)
     {
-      float way_dist=distance_in_plan(MapPose(estimate->pose.pose), order->waypt[1]);
-      aim_distance=fminf(aim_distance,way_dist);
+      float way_dist = distance_in_plan(MapPose(estimate->pose.pose), order->waypt[1]);
+      aim_distance = fminf(aim_distance,way_dist);
     }
 
   // At least look as far ahead as bumper

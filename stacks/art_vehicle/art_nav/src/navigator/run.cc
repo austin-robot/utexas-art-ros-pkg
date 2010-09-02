@@ -10,15 +10,13 @@
 #include "navigator_internal.h"
 #include "Controller.h"
 #include "course.h"
-#if 0
 #include "obstacle.h"
-#endif
 #include "ntimer.h"
 #include "run.h"
 
 #include "halt.h"
-#if 0
 #include "road.h"
+#if 0
 #include "safety.h"
 #include "voronoi_zone.h"
 #endif
@@ -26,10 +24,7 @@
 #include <art_nav/estimate.h>
 #include <art_map/ZoneOps.h>
 
-/* @brief Navigator run controller
- *
- * @todo Instantiate and invoke road controller.
- */
+/* @brief Navigator run controller */
 
 static const char *state_name[] =
   {
@@ -42,8 +37,8 @@ Run::Run(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
 {
   halt =	new Halt(navptr, _verbose);
-#if 0
   road =	new Road(navptr, _verbose);
+#if 0
   safety =	new Safety(navptr, _verbose);
   unstuck =	new VoronoiZone(navptr, _verbose);
 
@@ -55,8 +50,8 @@ Run::Run(Navigator *navptr, int _verbose):
 Run::~Run()
 {
   delete halt;
-#if 0
   delete road;
+#if 0
   delete safety;
   delete unstuck;
 
@@ -95,6 +90,7 @@ void Run::configure()
 
   // configure subordinate controllers
   halt->configure();
+  road->configure();
 
 #if 0
   // attempt to escape if blockage detected
@@ -114,24 +110,23 @@ void Run::configure()
   ART_MSG(2, "\textra safety check is %s",
 	  (extra_safety_check? "true": "false"));
 
-  road->configure();
   safety->configure();
   unstuck->configure();
 #endif
 }
 
-// main controller whenever E-stop is in the Run state
-//
-//  Each order contains a behavior which determines the navigator
-//  run state for this cycle.
-//
-// returns:
-//	OK if able to continue running;
-//	NotImplemented if unrecognized behavior in order;
-//	NotApplicable if unable to determine starting way-point for
-//		Initialize behavior;
-//	other results from subordinate controllers.
-//
+/** Main controller whenever E-stop is in the Run state.
+ *
+ *  Each order contains a behavior which determines the navigator
+ *  run state for this cycle.
+ *
+ * @return
+ *	OK if able to continue running;
+ *	NotImplemented if unrecognized behavior in order;
+ *	NotApplicable if unable to determine starting way-point for
+ *		Initialize behavior;
+ *	other results from subordinate controllers.
+*/
 Controller::result_t Run::control(pilot_command_t &pcmd)
 {
   // Do nothing if the order is still Run.  Wait until Commander sends
@@ -265,7 +260,7 @@ Controller::result_t Run::initialize(pilot_command_t &pcmd)
  *  last_waypt.  Commander marks every order with a replan_num that is
  *  incremented every time replan route runs, so Navigator can detect
  *  when that has been done.
-*/
+ */
 Controller::result_t Run::go(pilot_command_t &pcmd)
 {
   if (ElementID(order->waypt[0].id) == ElementID(order->waypt[1].id))
@@ -291,7 +286,7 @@ Controller::result_t Run::go(pilot_command_t &pcmd)
       else
 	ART_MSG(1, "Run controller blocked, but not trying to escape.");
     }
-#endif
+#endif // no blockage timeout
 
   switch (go_state)
     {
@@ -302,12 +297,7 @@ Controller::result_t Run::go(pilot_command_t &pcmd)
 	  Euclidean::DistanceTo(blockage_pose, estimate->pos);
 
 	if (!escape_timer->Check()
-#if 0
-	    && blockage_distance < escape_distance + blockage_waypt_dist
-#else
-	    && blockage_distance < escape_distance
-#endif
-	    )
+	    && blockage_distance < escape_distance)
 	  {
 	    // vehicle blocked, try to escape (reach waypt[1] if close)
 	    result_t result = unstuck->control(pcmd);
@@ -324,7 +314,7 @@ Controller::result_t Run::go(pilot_command_t &pcmd)
 	set_go_state(Replan);
 	// fall through...
       }
-#endif
+#endif // no escape yet
 
     case Replan:
       if (order->replan_num == last_replan)
@@ -334,29 +324,21 @@ Controller::result_t Run::go(pilot_command_t &pcmd)
 	  if (start_id == ElementID())
 	    {
 	      ROS_WARN("Unable to replan from here, keep trying to escape.");
-#if 0
 	      begin_escape();
-#endif
 	    }
 	  return halt->control(pcmd);
 	}
 
       // Commander issued new replanned order
       navdata->replan_waypt = ElementID().toMapID();
-#if 0
       road->reset();
-#endif
       set_go_state(Continue);
       // fall through...
 
     case Continue:
-#if 0
       // normal processing -- run the road state machine
+      ROS_INFO("Running, invoking Road controller");
       return road->control(pcmd);
-#else
-      // temporary scaffolding
-      return halt->control(pcmd);
-#endif
 
     default:
       // not reached, only to avoid compiler warning
@@ -370,13 +352,13 @@ void Run::reset(void)
   go_state = Continue;
 
   halt->reset();
-#if 0
   road->reset();
+#if 0
   safety->reset();
 #endif
 }
 
-// set new Go behavior state
+/** set new Go behavior state */
 void Run::set_go_state(state_t newstate)
 {
   if (go_state != newstate)
@@ -387,12 +369,12 @@ void Run::set_go_state(state_t newstate)
     }
 }
 
-// find starting way-point for Commander
-//
-// returns:
-//	starting way-point for planning, if available;
-//	null ElementID, otherwise.
-//
+/** find starting way-point for Commander
+ *
+ * @return:
+ *	starting way-point for planning, if available;
+ *	null ElementID, otherwise.
+ */
 ElementID Run::starting_waypt(void)
 {
   ElementID waypt;

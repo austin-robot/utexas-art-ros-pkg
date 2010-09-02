@@ -60,8 +60,8 @@ private:
 
   // subordinate controllers
   Halt		*halt;
-#if 0
   Road		*road;
+#if 0
   Safety	*safety;
   VoronoiZone	*unstuck;
 #endif

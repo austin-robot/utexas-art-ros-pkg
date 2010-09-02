@@ -2,7 +2,6 @@
  *  Navigator road controller finite state machine
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -21,7 +20,7 @@
 //#include "real_zone.h"
 //#include "passing.h"
 #include "ntimer.h"
-//#include "uturn.h"
+#include "uturn.h"
 //#include "voronoi_zone.h"
 
 Road::Road(Navigator *navptr, int _verbose):
@@ -154,7 +153,7 @@ Road::Road(Navigator *navptr, int _verbose):
   follow_safely = new FollowSafely(navptr, _verbose);
   halt = new Halt(navptr, _verbose);
   //passing = new Passing(navptr, _verbose);
-  //uturn = new Uturn(navptr, _verbose);
+  uturn = new Uturn(navptr, _verbose);
   //zone = new RealZone(navptr, _verbose);
 
   // allocate timers
@@ -174,7 +173,7 @@ Road::~Road()
   delete follow_safely;
   delete halt;
   //delete passing;
-  //delete uturn;
+  delete uturn;
   //delete zone;
 
   delete passing_timer;
@@ -224,7 +223,7 @@ void Road::configure()
   follow_safely->configure();
   halt->configure();
   //passing->configure();
-  //uturn->configure();
+  uturn->configure();
   //zone->configure();
 }
 
@@ -269,7 +268,7 @@ void Road::reset(void)
   follow_safely->reset();
   halt->reset();
   //passing->reset();
-  //uturn->reset();
+  uturn->reset();
   //zone->reset();
 }
 
@@ -466,8 +465,8 @@ Controller::result_t Road::ActionInPass(pilot_command_t &pcmd)
 
 Controller::result_t Road::ActionInUturn(pilot_command_t &pcmd)
 {
-  //result_t result = uturn->control(pcmd);
-  result_t result = Finished;           // scaffolding
+  result_t result = uturn->control(pcmd);
+  //result_t result = Finished;           // scaffolding
   if (result == Finished)
     {
       pending_event = NavRoadEvent::FollowLane;
@@ -702,7 +701,7 @@ Controller::result_t Road::ActionToUturn(pilot_command_t &pcmd)
 {
   ART_MSG(1, "Start U-turn.");
   course->turn_signal_on(true);		// signal left
-  //uturn->reset();
+  uturn->reset();
   return ActionInUturn(pcmd);
 }
 

@@ -3,7 +3,6 @@
  *  Navigator road controller finite state machine
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -22,7 +21,7 @@ class Halt;
 //class Passing;
 class NavTimer;
 //class RealZone;
-//class Uturn;
+class Uturn;
 
 class Road: public Controller
 {
@@ -70,7 +69,7 @@ private:
   FollowSafely	*follow_safely;
   Halt		*halt;
   //Passing	*passing;
-  //Uturn	*uturn;
+  Uturn	*uturn;
   //RealZone	*zone;
 
   // timers

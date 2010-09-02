@@ -9,7 +9,6 @@
 #  real_zone.cc
 #  safety.cc
 #  stop.cc
-#  uturn.cc
 #  voronoi_zone.cc
 #  zone.cc)
 
@@ -27,5 +26,6 @@ rosbuild_add_executable(navigator
   slow_for_curves.cc
   stop_area.cc
   stop_line.cc
+  #uturn.cc
   )
 target_link_libraries(navigator artnav artmap)

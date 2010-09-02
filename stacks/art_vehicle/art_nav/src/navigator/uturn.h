@@ -3,7 +3,6 @@
  *  Navigator U-turn controller
  *
  *  Copyright (C) 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -21,7 +20,7 @@ public:
 
   Uturn(Navigator *navptr, int _verbose);
   ~Uturn();
-  void configure(ConfigFile* cf, int section);
+  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
@@ -39,15 +38,15 @@ private:
   bool do_init;
 
   // subordinate controllers
-  Safety *safety;
+  //Safety *safety;
   Stop	*stop;
 
   // .cfg variables
-  float uturn_near;
-  float uturn_speed;
-  float uturn_threshold;
-  float uturn_yaw_rate;
-  float uturn_stop_heading;
+  double uturn_near;
+  double uturn_speed;
+  double uturn_threshold;
+  double uturn_yaw_rate;
+  double uturn_stop_heading;
 
   // private data
   float goal_heading;			// heading of goal way-point

@@ -8,18 +8,21 @@
  *  $Id$
  */
 
+#include <angles/angles.h>
+
 #include "navigator_internal.h"
 #include "Controller.h"
 #include "course.h"
 #include "obstacle.h"
 #include "uturn.h"
-#include "safety.h"
+//#include "safety.h"
 #include "stop.h"
 
 #include <art_map/coordinates.h>
 using namespace Coordinates;
 #include <art_map/rotate_translate_transform.h>
 #include <art_common/ArtVehicle.h>
+using art_common::ArtVehicle;
 
 // PFB: TODO: get all left lanes and take first one going other
 // direction.
@@ -45,18 +48,18 @@ static const char *state_name[] =
 Uturn::Uturn(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
 {
-  ART_MSG(2, "vehicle turn radius %.3fm, front, rear wheel radii %.3fm, %.3f",
-	  art_common::ArtVehicle::turn_radius,
-	  art_common::ArtVehicle::front_outer_wheel_turn_radius,
-	  art_common::ArtVehicle::rear_outer_wheel_turn_radius);
-  safety = new Safety(navptr, _verbose);
+  ROS_INFO("vehicle turn radius %.3fm, front, rear wheel radii %.3fm, %.3f",
+           ArtVehicle::turn_radius,
+           ArtVehicle::front_outer_wheel_turn_radius,
+           ArtVehicle::rear_outer_wheel_turn_radius);
+  //safety = new Safety(navptr, _verbose);
   stop = new Stop(navptr, _verbose);
   reset_me();
 }
 
 Uturn::~Uturn()
 {
-  delete safety;
+  //delete safety;
   delete stop;
 }
 
@@ -257,25 +260,27 @@ bool Uturn::circle_and_line_intersect(MapXY c, float r,
   return intersects;
 }
 
-void Uturn::configure(ConfigFile* cf, int section)
+void Uturn::configure()
 {
-  uturn_speed = cf->ReadFloat(section, "uturn_speed", 2.0);
-  ART_MSG(2, "\tuturn speed is %.1f m/s", uturn_speed);
+  ros::NodeHandle nh("~");
 
-  uturn_threshold = cf->ReadFloat(section, "uturn_threshold", 1.0);
-  ART_MSG(2, "\tuturn threshold is %.3f m", uturn_threshold);
+  nh.param("uturn_speed", uturn_speed, 2.0);
+  ROS_INFO("U-turn speed is %.1f m/s", uturn_speed);
+
+  nh.param("uturn_threshold", uturn_threshold, 1.0);
+  ROS_INFO("U-turn threshold is %.3f m", uturn_threshold);
 
   // enough to always generate a full-lock turn at any speed
-  uturn_yaw_rate = cf->ReadFloat(section, "uturn_yaw_rate", 1.5);
-  ART_MSG(2, "\tuturn yaw rate is %.3f radians/s", uturn_yaw_rate);
+  nh.param("uturn_yaw_rate", uturn_yaw_rate, 1.5);
+  ROS_INFO("U-turn yaw rate is %.3f radians/s", uturn_yaw_rate);
 
-  uturn_stop_heading = cf->ReadFloat(section, "uturn_stop_heading", 5);
-  ART_MSG(2, "\tuturn stop heading is %.3f degrees", uturn_stop_heading);
-  
-  uturn_stop_heading=DTOR(uturn_stop_heading);
+  nh.param("uturn_stop_heading", uturn_stop_heading,
+           angles::from_degrees(5));
+  ROS_INFO("U-turn stop heading is %.3f radians (%.3f degrees)",
+           uturn_stop_heading, angles::to_degrees(uturn_stop_heading));
 
-  safety->configure(cf, section);
-  stop->configure(cf, section);
+  //safety->configure();
+  stop->configure();
 }
 
 // perform U-turn
@@ -329,20 +334,21 @@ Controller::result_t Uturn::control(pilot_command_t &pcmd)
   // have turned too far.
 
 
-  float remaining_angle = normalize(goal_heading - estimate->pos.pa);
+  float remaining_angle = normalize(goal_heading
+                                    - MapPose(estimate->pose.pose).yaw);
   if (remaining_angle < -HALFPI)
     remaining_angle += TWOPI;
 
-  float desired_arc_length = remaining_angle * art_common::ArtVehicle::turn_radius;
-  if (verbose >= 3)
-    ART_MSG(6, "%.3f radians (%.f degrees) remain for U-turn, %.3fm arc",
-	    remaining_angle, RTOD(remaining_angle), desired_arc_length);
+  float desired_arc_length = remaining_angle * ArtVehicle::turn_radius;
+  ROS_DEBUG("%.3f radians (%.f degrees) remain for U-turn, %.3fm arc",
+	    remaining_angle, angles::to_degrees(remaining_angle),
+            desired_arc_length);
 
   switch (state)
     {
     case Wait:
       // wait until left lane is clear.
-      if (obstacle->observer_clear(ObserverID::Adjacent_left))
+      if (obstacle->observer_clear(Observers::Adjacent_left))
 	{
 	  if (verbose)
 	    ART_MSG(1, "U-turn entry lane clear");
@@ -429,6 +435,7 @@ Controller::result_t Uturn::control(pilot_command_t &pcmd)
       break;
     };
 
+#if 0 // not using safety controller yet
   // must always run this on the final command
   result_t sresult = safety->control(pcmd);
   if (result != Finished)
@@ -448,6 +455,7 @@ Controller::result_t Uturn::control(pilot_command_t &pcmd)
     default:
       break;
     }
+#endif // not using safety controller yet
 
   trace("uturn controller", pcmd, result);
 
@@ -478,14 +486,16 @@ float Uturn::calculate_arc_length(bool forward,
       if (forward)
 	{
 	  // going forward, use the front axle's bearing
-	  Polar front_axle(0.0, art_common::ArtVehicle::wheelbase);
-	  car_bearing = bearing(center,
-				Polar_to_MapXY(front_axle, estimate->pos));
+	  Polar front_axle(0.0, ArtVehicle::wheelbase);
+	  car_bearing =
+            bearing(center,
+                    Polar_to_MapXY(front_axle,
+                                   MapPose(estimate->pose.pose)));
 	}
       else
 	{
 	  // in reverse, use the rear axle's bearing
-	  car_bearing = bearing(center, MapXY(estimate->pos));
+	  car_bearing = bearing(center, MapXY(estimate->pose.pose.position));
 	}
       
       // determine angle from car to meeting point
@@ -495,7 +505,7 @@ float Uturn::calculate_arc_length(bool forward,
 	arc += TWOPI;
       
       // distance from car bumper to meeting point around the circle
-      arc_length = arc * art_common::ArtVehicle::turn_radius;
+      arc_length = arc * ArtVehicle::turn_radius;
       
       if (verbose >= 5)
 	ART_MSG(5, "U-turn arc length %.3fm, bearing radians [%.3f,%.3f]",
@@ -518,16 +528,16 @@ float Uturn::estimate_uturn_distance(bool forward, float desired_arc_length)
   if (forward)
     {
       // circle to left of the car
-      center = Polar_to_MapXY(Polar(HALFPI, art_common::ArtVehicle::turn_radius),
-			      estimate->pos);
-      safety_radius = art_common::ArtVehicle::front_outer_wheel_turn_radius;
+      center = Polar_to_MapXY(Polar(HALFPI, ArtVehicle::turn_radius),
+			      MapPose(estimate->pose.pose));
+      safety_radius = ArtVehicle::front_outer_wheel_turn_radius;
     }
   else
     {
       // circle to right of the car
-      center = Polar_to_MapXY(Polar(-HALFPI, art_common::ArtVehicle::turn_radius),
-			      estimate->pos);
-      safety_radius = art_common::ArtVehicle::rear_outer_wheel_turn_radius;
+      center = Polar_to_MapXY(Polar(-HALFPI, ArtVehicle::turn_radius),
+			      MapPose(estimate->pose.pose));
+      safety_radius = ArtVehicle::rear_outer_wheel_turn_radius;
     }
   
   if (verbose >= 2)
@@ -638,16 +648,15 @@ Controller::result_t Uturn::initialize(void)
 		     order->waypt[0].id);
 
   int uturn_exit_index = 
-    pops->getClosestPoly(current_lane_polys,estimate->pos);
+    pops->getClosestPoly(current_lane_polys,
+                         MapPose(estimate->pose.pose));
 
   int uturn_entry_index=-1;
 
   if (uturn_exit_index >= 0)
     {
-      player_pose2d_t exit_pose;
-      exit_pose.px=current_lane_polys.at(uturn_exit_index).midpoint.x;
-      exit_pose.py=current_lane_polys.at(uturn_exit_index).midpoint.y;
-
+      MapPose exit_pose;
+      exit_pose.map = current_lane_polys.at(uturn_exit_index).midpoint;
       
       pops->AddLanePolys(course->polygons, left_lane_polys,
 			 order->waypt[1].id);
@@ -703,18 +712,16 @@ Controller::result_t Uturn::initialize(void)
 // return true when either front wheel is outside the U-turn lanes.
 bool Uturn::outside_lanes_front(void)
 {
-  using namespace art_common::ArtVehicle;		// for wheel locations
-
-  if (point_outside_lanes(wheel_location(front_right_wheel_px,
-					 front_right_wheel_py)))
+  if (point_outside_lanes(wheel_location(ArtVehicle::front_right_wheel_px,
+					 ArtVehicle::front_right_wheel_py)))
     {
       if (verbose >= 3)
 	ART_MSG(6, "right front wheel is outside the U-turn lanes");
       return true;
     }
 
-  if (point_outside_lanes(wheel_location(front_left_wheel_px,
-					 front_left_wheel_py)))
+  if (point_outside_lanes(wheel_location(ArtVehicle::front_left_wheel_px,
+					 ArtVehicle::front_left_wheel_py)))
     {
       if (verbose >= 3)
 	ART_MSG(6, "left front wheel is outside the U-turn lanes");
@@ -727,18 +734,16 @@ bool Uturn::outside_lanes_front(void)
 // return true when either rear wheel is outside the U-turn lanes.
 bool Uturn::outside_lanes_rear(void)
 {
-  using namespace art_common::ArtVehicle;		// for wheel locations
-
-  if (point_outside_lanes(wheel_location(rear_right_wheel_px,
-					 rear_right_wheel_py)))
+  if (point_outside_lanes(wheel_location(ArtVehicle::rear_right_wheel_px,
+					 ArtVehicle::rear_right_wheel_py)))
     {
       if (verbose >= 3)
 	ART_MSG(6, "right rear wheel is outside the U-turn lanes");
       return true;
     }
 
-  if (point_outside_lanes(wheel_location(rear_left_wheel_px,
-					 rear_left_wheel_py)))
+  if (point_outside_lanes(wheel_location(ArtVehicle::rear_left_wheel_px,
+					 ArtVehicle::rear_left_wheel_py)))
     {
       if (verbose >= 3)
 	ART_MSG(6, "left rear wheel is outside the U-turn lanes");
@@ -776,7 +781,7 @@ void Uturn::reset(void)
 {
   trace_reset("Uturn");
   reset_me();
-  safety->reset();
+  //safety->reset();
   stop->reset();
 }
 
@@ -806,7 +811,8 @@ MapXY Uturn::wheel_location(float x, float y)
 {
   posetype vehicle_relative(0, 0, 0);
   posetype wheel_relative(x, y, 0);
-  posetype vehicle_map(estimate->pos.px, estimate->pos.py, estimate->pos.pa);
+  MapPose pose2d(estimate->pose.pose);
+  posetype vehicle_map(pose2d.map.x, pose2d.map.y, pose2d.yaw);
   rotate_translate_transform trans;
   trans.find_transform(vehicle_relative, vehicle_map);
   posetype wheel_map = trans.apply_transform(wheel_relative);

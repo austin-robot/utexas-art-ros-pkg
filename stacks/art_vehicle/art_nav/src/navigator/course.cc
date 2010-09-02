@@ -16,7 +16,9 @@
 #include <art_servo/steering.h>
 #include <art_map/coordinates.h>
 #include <art_nav/estimate.h>
-using namespace Coordinates;
+using art_common::ArtVehicle;
+using Coordinates::bearing;
+using Coordinates::normalize;
 
 /** @todo Use ROS tf instead of art_map/rotate_translate_transform */
 #include <art_map/rotate_translate_transform.h>
@@ -116,85 +118,80 @@ void Course::begin_run_cycle(void)
 
 void Course::configure()
 {
-#if 0
+  ros::NodeHandle nh("~");
+
   // how far away (in seconds) we aim when changing lanes
-  lane_change_secs = cf->ReadFloat(section, "lane_change_secs", 2.0);
+  nh.param("lane_change_secs", lane_change_secs, 2.0);
   ART_MSG(2, "\tlane change target is %.3f seconds ahead",
           lane_change_secs);
 
   // Look-ahead time for steering towards a polygon.
-  lane_steer_time = cf->ReadFloat(section, "lane_steer_time", 2.0);
+  nh.param("lane_steer_time", lane_steer_time, 2.0);
   ART_MSG(2, "\tlane steering time is %.3f seconds", lane_steer_time);
 
-  heading_change_ratio = cf->ReadFloat(section, "heading_change_ratio", 0.75);
+  nh.param("heading_change_ratio", heading_change_ratio, 0.75);
   ART_MSG(2, "\theading change ratio is %.3f", heading_change_ratio);
 
-  turning_latency = cf->ReadFloat(section, "turning_latency", 1.0);
+  nh.param("turning_latency", turning_latency, 1.0);
   ART_MSG(2, "\tturning latency time is %.3f seconds", 1.0);
 
   // Look-ahead time for steering towards a polygon.
-  k_error = cf->ReadFloat(section, "turning_offset_tune", 0.1);
+  nh.param("turning_offset_tune", k_error, 0.1);
   ART_MSG(2, "\tyaw tuning parameter (offset) is %.3f", k_error);
 
   // Look-ahead time for steering towards a polygon.
-  k_theta = cf->ReadFloat(section, "turning_heading_tune", sqrtf(k_error/2));
+  nh.param("turning_heading_tune", k_theta, sqrt(k_error/2));
   ART_MSG(2, "\tyaw tuning parameter (heading) is %.3f", k_theta);
 
   // Look-ahead time for steering towards a polygon.
-  yaw_ratio = cf->ReadFloat(section, "yaw_ratio", 0.75);
+  nh.param("yaw_ratio", yaw_ratio, 0.75);
   ART_MSG(2, "\tyaw ratio is %.3f", yaw_ratio);
 
   // Look-ahead time for steering towards a polygon.
-  k_int = cf->ReadFloat(section, "turning_int_tune", 1.5);
+  nh.param("turning_int_tune", k_int, 1.5);
   ART_MSG(2, "\tyaw tuning parameter (integral) is %.3f", k_int);
-
 
   // Minimum distance to aim for when changing lanes.
   // Should at least include front bumper offset and minimum separation.
-  min_lane_change_dist =
-    cf->ReadFloat(section, "min_lane_change_dist",
-                  (DARPA_rules::min_forw_sep_travel
-                   + art_common::ArtVehicle::front_bumper_px));
-
+  nh.param("min_lane_change_dist", min_lane_change_dist,
+           (double) (DARPA_rules::min_forw_sep_travel
+                     + ArtVehicle::front_bumper_px));
   ART_MSG(2, "\tminimum lane change distance is %.3f meters",
           min_lane_change_dist);
 
   // Minimum look-ahead distance for steering towards a polygon.
   // Should at least include front bumper offset.
-  min_lane_steer_dist = cf->ReadFloat(section, "min_lane_steer_dist",
-                                      ArtVehicle::front_bumper_px);
+  nh.param("min_lane_steer_dist", min_lane_steer_dist,
+           (double) ArtVehicle::front_bumper_px);
   ART_MSG(2, "\tminimum lane steering distance is %.3f meters",
           min_lane_steer_dist);
 
   // plan way-point limit.  Only for testing Navigator's ability to
   // run with a truncated course plan.  Do not set otherwise.
-  plan_waypt_limit = cf->ReadInt(section, "plan_waypt_limit", N_ORDER_WAYPTS);
-  if (plan_waypt_limit < 2 || plan_waypt_limit > N_ORDER_WAYPTS)
-    plan_waypt_limit = N_ORDER_WAYPTS;
+  nh.param("plan_waypt_limit", plan_waypt_limit, (int) Order::N_WAYPTS);
+  if (plan_waypt_limit < 2 || plan_waypt_limit > Order::N_WAYPTS)
+    plan_waypt_limit = Order::N_WAYPTS;
   ART_MSG(2, "\tplan_waypt limit is %d", plan_waypt_limit);
 
   //How fast the maximum steer can be done
-  max_speed_for_sharp=cf->ReadFloat(section, "max_speed_for_sharp",3.0); 
+  nh.param("max_speed_for_sharp", max_speed_for_sharp ,3.0); 
   ART_MSG(2, "\tmaximum speed to go full yaw is %.3f m", max_speed_for_sharp);
 
   // desired passing distance
-  spring_lookahead = cf->ReadFloat(section, "spring_lookahead", 0.0);
+  nh.param("spring_lookahead", spring_lookahead, 0.0);
   ART_MSG(2, "\tspring lookahead distance is %.3f m", spring_lookahead);
 
-
-  max_yaw_rate = 
-    cf->ReadFloat(section, "real_max_yaw_rate", Steering::maximum_yaw);
+  nh.param("real_max_yaw_rate", max_yaw_rate, Steering::maximum_yaw);
   ART_MSG(2, "\treal_max_rate_rate is %.3f m", max_yaw_rate);
 
-  zone_waypoint_radius = cf->ReadFloat(section, "zone_waypoint_radius", 1.0);
+  nh.param("zone_waypoint_radius", zone_waypoint_radius, 1.0);
   ART_MSG(2, "\tzone waypoint radius is %.3f m", zone_waypoint_radius);
 
-  zone_perimeter_radius = cf->ReadFloat(section, "zone_perimeter_radius", 2.0);
+  nh.param("zone_perimeter_radius", zone_perimeter_radius, 2.0);
   ART_MSG(2, "\tzone perimeter radius is %.3f m", zone_perimeter_radius);
 
-  spot_waypoint_radius = cf->ReadFloat(section, "spot_waypoint_radius", 0.5);
+  nh.param("spot_waypoint_radius", spot_waypoint_radius, 0.5);
   ART_MSG(2, "\tzone waypoint radius is %.3f m", spot_waypoint_radius);
-#endif
 }
 
 /** Set heading for desired course.
@@ -212,7 +209,6 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
   if (Epsilon::equal(pcmd.velocity, 0.0))
     return;
 
-  using Coordinates::normalize;
   Polar aim_polar;			// egocentric polar aim point
   //  float aim_abs_heading = 0;
   float aim_next_heading = 0;
@@ -249,8 +245,9 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
       else
         nearby_poly = pops->getClosestPoly(plan, MapPose(estimate->pose.pose));
 
-      if (aim_poly.poly_id != -1 && aim_index >=0 && 
-	  aim_index < (int)plan.size()-1)
+      if (aim_poly.poly_id != -1
+          && aim_index >= 0
+          && aim_index < (int) plan.size() - 1)
 	{
 	  if (nearby_poly >= 0)
 	    {
@@ -285,10 +282,10 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	      
 	      // set aim_polar to the closest polygon at least target_dist
 	      // meters away from the estimated position.
-	      
-	      aim_index = pops->index_of_downstream_poly
-		(plan,nearby_poly,target_dist);
-	      if (aim_index >=0 && aim_index < (int)plan.size()-1)
+	      aim_index =
+                pops->index_of_downstream_poly(plan, nearby_poly,
+                                               target_dist);
+	      if (aim_index >= 0 && aim_index < (int)plan.size()-1)
 		{
 		  // Polygon at target distance
 		  aim_distance =
@@ -324,8 +321,7 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	      // no plan available: a big problem, but must do
 	      // something.  Go to next waypoint.
 	      
-	      if (verbose >= 2)
-		ART_MSG(5, "no lane data available, steer using waypoints.");
+              ROS_INFO("no lane data available, steer using waypoints.");
 	      aim_polar = head_for_waypt(target_dist);
 	      aim_distance = aim_polar.range;
 	      aim_next_heading =
@@ -764,6 +760,7 @@ void Course::find_travel_lane(bool rejoin)
 // that the car does not double back to it.
 Polar Course::head_for_waypt(float target_dist)
 {
+  using Coordinates::MapXY_to_Polar;
   Polar aim_polar = MapXY_to_Polar(MapXY(order->waypt[1].mapxy),
                                    *estimate);
   if (aim_polar.range < target_dist)
@@ -780,8 +777,8 @@ Polar Course::head_for_waypt(float target_dist)
 	  ART_MSG(8, "waypt[1] is a perimeter point");
 	  aim_polar = MapXY_to_Polar(MapXY(order->waypt[1].mapxy),
                                      *estimate);
-	  if (fabsf(Coordinates::bearing(MapPose(estimate->pose.pose),
-                                         MapXY(order->waypt[1].mapxy)))
+	  if (fabsf(bearing(MapPose(estimate->pose.pose),
+                            MapXY(order->waypt[1].mapxy)))
               > HALFPI)
 	    new_waypoint_reached(order->waypt[1].id);
 	}
@@ -865,12 +862,7 @@ bool Course::lane_waypoint_reached(void)
   // get polygon index of waypt[1] (TODO: save somewhere)
   int w1_index = -1;
 
-  // TURNING ON SHOULD BE OK.  KEEP OFF UNTIL WE ARE CERTAIN.
-#if 1
   w1_index = pops->get_waypoint_index(polygons, order->waypt[1].id);
-#else
-  w1_index = pops->getContainingPoly(polygons, order->waypt[1].map);
-#endif
   
   if (w1_index >= 0)
     {
@@ -879,20 +871,10 @@ bool Course::lane_waypoint_reached(void)
       MapPose w1_pose(MapXY(order->waypt[1].mapxy),
 		      pops->PolyHeading(polygons.at(w1_index)));
       
-#if 1
       // Is the bearing of the car from that pose within 90
       // degrees of the polygon heading?
       float bearing_from_w1 = bearing(w1_pose,
                                       MapXY(odom->pose.pose.position));
-#else // experimental code -- not working right yet
-      // Is the bearing of a point slightly ahead of the front bumper
-      // from that pose within 90 degrees of the polygon heading?
-      Polar bumper_polar(0.0,
-			 (ArtVehicle::front_bumper_px
-			  + DARPA_rules::stop_line_to_bumper));
-      MapXY bumper_pos = Polar_to_MapXY(bumper_polar, odom->pos);
-      float bearing_from_w1 = bearing(w1_pose, bumper_pos);
-#endif
       if (fabsf(bearing_from_w1) < angles::from_degrees(90))
 	{
 	  // The car is "in front" of this way-point's pose.
@@ -1227,7 +1209,7 @@ bool Course::zone_waypoint_reached(void)
   waypoint_checked = true;
 	  
   // polar coordinate of front bumper from estimated position
-  Polar bumper_polar(0.0, art_common::ArtVehicle::front_bumper_px);
+  Polar bumper_polar(0.0, ArtVehicle::front_bumper_px);
   float distance =
     Euclidean::DistanceToWaypt(bumper_polar,
                                MapPose(estimate->pose.pose),
@@ -1275,7 +1257,7 @@ bool Course::zone_perimeter_reached(void)
       // Is the bearing of a point slightly ahead of the front bumper
       // from that pose within 90 degrees of the polygon heading?
       Polar bumper_polar(0.0,
-			 (art_common::ArtVehicle::front_bumper_px
+			 (ArtVehicle::front_bumper_px
 			  + DARPA_rules::stop_line_to_bumper));
       MapXY bumper_pos = Polar_to_MapXY(bumper_polar, odom->pos);
       float bearing_from_w1 = bearing(w1_pose, bumper_pos);
@@ -1301,7 +1283,7 @@ bool Course::spot_waypoint_reached(void)
   waypoint_checked = true;
 	  
   // polar coordinate of front bumper from estimated position
-  Polar bumper_polar(0.0, art_common::ArtVehicle::front_bumper_px);
+  Polar bumper_polar(0.0, ArtVehicle::front_bumper_px);
   float distance =
     Euclidean::DistanceToWaypt(bumper_polar, MapPose(estimate->pose.pose),
                                WayPointNode(order->waypt[1]));
@@ -1421,7 +1403,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
 	    pops->midpoint(current_poly.p1, current_poly.p2);
 	  float half_lane_width =
 	    Euclidean::DistanceTo(current_poly.midpoint, mid_left_side);
-	  float lane_space = half_lane_width - art_common::ArtVehicle::halfwidth;
+	  float lane_space = half_lane_width - ArtVehicle::halfwidth;
 	  float error_offset = 0.0;
 	  if (lane_space > 0.0)		// any room in this lane?
 	    error_offset = offset_ratio * lane_space;
@@ -1435,7 +1417,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
 #endif
       error=fminf(fmaxf(-width,error),width);
       // heading error
-      theta=Coordinates::normalize(MapPose(pos_est.pose.pose).yaw-poly_heading);
+      theta = normalize(MapPose(pos_est.pose.pose).yaw - poly_heading);
     }
 
 

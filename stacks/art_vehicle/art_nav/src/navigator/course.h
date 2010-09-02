@@ -303,7 +303,7 @@ class Course
   bool curr_spot();
 
   bool nqe_special(int i, int j);
-  float spot_waypoint_radius;
+
  private:
 
   // Internal state.  Some of these vectors are class variables to
@@ -324,23 +324,24 @@ class Course
   int saved_replan_num;
 
   // .cfg variables
-  float lane_change_secs;
-  float lane_steer_time;
-  float heading_change_ratio;
-  float turning_latency;
-  float yaw_ratio;
-  float min_lane_change_dist;
-  float min_lane_steer_dist;
-  int   plan_waypt_limit;
-  float max_yaw_rate;
-  float spring_lookahead;
-  float max_speed_for_sharp;
-  float k_error;
-  float k_theta;
-  float k_int;
-  float last_error;
-  float zone_waypoint_radius;
-  float zone_perimeter_radius;
+  double heading_change_ratio;
+  double k_error;
+  double k_int;
+  double k_theta;
+  double lane_change_secs;
+  double lane_steer_time;
+  double last_error;
+  double max_speed_for_sharp;
+  double max_yaw_rate;
+  double min_lane_change_dist;
+  double min_lane_steer_dist;
+  int    plan_waypt_limit;
+  double spot_waypoint_radius;
+  double spring_lookahead;
+  double turning_latency;
+  double yaw_ratio;
+  double zone_perimeter_radius;
+  double zone_waypoint_radius;
 
   // constructor parameters
   int verbose;				// message verbosity level

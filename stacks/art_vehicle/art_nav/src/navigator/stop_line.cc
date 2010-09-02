@@ -80,13 +80,14 @@ void StopLine::configure()
 
 /** Set speed for steady deceleration to stop way-point
  *
- * @pre:
+ * @pre
  *	course->stop_waypt is goal way-point of stop
- *	pcmd contains desired heading and speed, assuming it is not
- *	     yet time to stop.
- * @post:
+ * @param pcmd contains desired heading and speed, assuming it is not
+ *	       yet time to stop, updated on exit
+ * @param topspeed velocity limit
+ * @post
  *	resets course->stop_waypt.id if reached.
- * @return:
+ * @return
  *	OK if in process of stopping;
  *	Finished if stop way-point reached.
  */

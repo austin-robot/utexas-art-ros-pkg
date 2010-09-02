@@ -8,7 +8,6 @@
 #  passing.cc
 #  real_zone.cc
 #  safety.cc
-#  stop.cc
 #  voronoi_zone.cc
 #  zone.cc)
 
@@ -24,8 +23,9 @@ rosbuild_add_executable(navigator
   road.cc
   run.cc
   slow_for_curves.cc
+  stop.cc
   stop_area.cc
   stop_line.cc
-  #uturn.cc
+  uturn.cc
   )
 target_link_libraries(navigator artnav artmap)

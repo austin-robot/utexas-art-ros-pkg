@@ -1,16 +1,15 @@
 /* -*- mode: C++ -*-
  *
- *  Finite state machine interface
+ *  Navigator stop controller
  *
  *  Copyright (C) 2007, 2010, Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
 
-#ifndef __STOP_LINE_HH__
-#define __STOP_LINE_HH__
+#ifndef __STOP_H__
+#define __STOP_H__
 
 class Stop: public Controller
 {
@@ -25,21 +24,21 @@ public:
 
   // overloaded control method
   result_t control(pilot_command_t &pcmd, float distance, float threshold,
-		   float topspeed=3.0);
+                   float topspeed=3.0);
   void reset(void);
 
 private:
   // .cfg variables
-  float min_stop_distance;		// minimum distance to begin stopping
-  float stop_creep_speed;		// speed while creeping forward
-  float stop_deceleration;		// desired deceleration
-  float stop_latency;			// stop control latency in seconds
+  double min_stop_distance;             // minimum distance to begin stopping
+  double stop_creep_speed;              // speed while creeping forward
+  double stop_deceleration;             // desired deceleration
+  double stop_latency;                  // stop control latency in seconds
 
   // controller state
-  bool stopping;			// stopping initiated
+  bool stopping;                        // stopping initiated
   bool creeping;                        // creeping up to line
-  float initial_speed;			// initial speed while stopping
-  float max_creep_distance;             // applicable distance for creep
+  double initial_speed;                 // initial speed while stopping
+  double max_creep_distance;            // applicable distance for creep
 };
 
-#endif // __STOP_LINE_HH__
+#endif // __STOP_H__

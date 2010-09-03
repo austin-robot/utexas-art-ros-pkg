@@ -149,8 +149,7 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   
   // estimate current dead reckoning position based on time of current
   // cycle and latest odometry course and speed
-  estimate->header.stamp = ros::Time::now(); // desired time of estimate
-  Estimate::control_pose(*odom, *estimate);
+  Estimate::control_pose(*odom, ros::Time::now(), *estimate);
 
   course->begin_run_cycle();
 

@@ -20,6 +20,7 @@
 namespace Estimate
 {
   void control_pose(const nav_msgs::Odometry &odom,
+                    ros::Time est_time,
                     nav_msgs::Odometry &est);
 
   void front_bumper_pose(const nav_msgs::Odometry &odom,

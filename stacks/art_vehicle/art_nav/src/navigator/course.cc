@@ -1369,8 +1369,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
   front_est.header.stamp = ros::Time::now() + frequency;
   ros::Time time_in_future(frequency.toSec() + velocity*spring_lookahead);
   nav_msgs::Odometry pos_est;
-  pos_est.header.stamp = time_in_future;
-  Estimate::control_pose(front_est, pos_est);
+  Estimate::control_pose(front_est, time_in_future, pos_est);
  
   if (poly_id >=0)
     {

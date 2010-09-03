@@ -24,16 +24,17 @@ namespace Estimate
   /** Estimate control pose from earlier odometry.
    *
    * @param[in] odom odometry on which to base estimate, with time stamp
+   * @param est_time time for which estimated odometry desired
    * @param est estimated odometry for time in @a est.header.stamp
    */
-  void control_pose(const nav_msgs::Odometry &odom, nav_msgs::Odometry &est)
+  void control_pose(const nav_msgs::Odometry &odom,
+                    ros::Time est_time,
+                    nav_msgs::Odometry &est)
   {
 #if 1 // just copy last odometry for now
 
-    // copy odom, preserving est.header time stamp
-    roslib::Header hdr = est.header;
+    // copy most recent odom
     est = odom;
-    est.header = hdr;
 
 #else // figure out how to interpolate quaternions
 
@@ -82,6 +83,9 @@ namespace Estimate
 	      est.pose.pose.position.y,
               est_pose.yaw);
 #endif
+
+    // return estimate time stamp in its header
+    est.header.stamp = est_time;
   }
 
   void front_bumper_pose(const nav_msgs::Odometry &odom, 

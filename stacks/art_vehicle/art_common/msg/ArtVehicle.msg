@@ -70,19 +70,26 @@ float32 front_right_camera_roll=0.0     # (assumed)
 float32 max_steer_degrees = 29.0        # maximum steering angle (degrees)
 float32 max_steer_radians = 0.5061455   # maximum steering angle (radians)
 
-# due to limitations of the ROS message definition format, these
-# values need to be calculated by hand.
+# Due to limitations of the ROS message definition format, these
+# values needed to be calculated by hand...
 
-#float32 turn_radius = wheelbase / tanf(max_steer_radians)
+# ArtVehicle.wheelbase / math.tan(ArtVehicle.max_steer_radians)
+float32 turn_radius = 4.2199922597674142
 
-# float32 front_outer_wheel_turn_radius = sqrtf(powf(wheelbase,2)+ powf(turn_radius+halfwidth,2))
-#  
-# float32 front_inner_wheel_turn_radius = sqrtf(powf(wheelbase,2)+ powf(turn_radius-halfwidth,2))
-#
-# float32 rear_outer_wheel_turn_radius = turn_radius+halfwidth
-#
-# float32 rear_inner_wheel_turn_radius = turn_radius-halfwidth
-#
+# math.sqrt(math.pow(ArtVehicle.wheelbase,2)
+#           + math.pow(ArtVehicle.turn_radius + ArtVehicle.halfwidth,2))
+float32 front_outer_wheel_turn_radius = 5.774952929297676
+
+# math.sqrt(math.pow(ArtVehicle.wheelbase,2)
+#           + math.pow(ArtVehicle.turn_radius - ArtVehicle.halfwidth,2))
+float32 front_inner_wheel_turn_radius = 3.9315790916869484
+
+# ArtVehicle.turn_radius + ArtVehicle.halfwidth
+float32 rear_outer_wheel_turn_radius = 5.2799922597674147
+
+# ArtVehicle.turn_radius - ArtVehicle.halfwidth
+float32 rear_inner_wheel_turn_radius = 3.1599922597674142
+
 # float32 front_outer_bumper_turn_radius = sqrtf(powf(front_bumper_px,2)+powf(turn_radius+halfwidth,2))
 #  
 # float32 front_inner_bumper_turn_radius = sqrtf(powf(front_bumper_px,2)+ powf(turn_radius-halfwidth,2))

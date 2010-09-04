@@ -173,11 +173,11 @@ void Course::configure()
     plan_waypt_limit = Order::N_WAYPTS;
   ROS_INFO("plan_waypt limit is %d", plan_waypt_limit);
 
-  //How fast the maximum steer can be done
+  // how fast the maximum steer can be done
   nh.param("max_speed_for_sharp", max_speed_for_sharp ,3.0); 
   ROS_INFO("maximum speed to go full yaw is %.3f m", max_speed_for_sharp);
 
-  // desired passing distance
+  // how far in future to estimate for reactive steering
   nh.param("spring_lookahead", spring_lookahead, 0.0);
   ROS_INFO("spring lookahead distance is %.3f m", spring_lookahead);
 
@@ -1366,8 +1366,9 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
   nav_msgs::Odometry front_est;  
   Estimate::front_axle_pose(*estimate, front_est);
   ros::Duration frequency(1.0 / art_common::ArtHertz::NAVIGATOR);
-  front_est.header.stamp = ros::Time::now() + frequency;
-  ros::Time time_in_future(frequency.toSec() + velocity*spring_lookahead);
+  ros::Time time_in_future = (ros::Time::now()
+                              + frequency
+                              + ros::Duration(velocity * spring_lookahead));
   nav_msgs::Odometry pos_est;
   Estimate::control_pose(front_est, time_in_future, pos_est);
  

@@ -135,8 +135,7 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   if (NavBehavior(order->behavior) == NavBehavior::Run
       || course->polygons.empty())
     {
-      //ROS_DEBUG_STREAM("run controller not initialized, have "
-      ROS_INFO_STREAM("run controller not initialized, have "
+      ROS_DEBUG_STREAM("run controller not initialized, have "
                        << course->polygons.size() << " polygons");
       // Run order in Run state is valid, but does nothing.
       // Do nothing until lanes data are initialized.
@@ -336,7 +335,7 @@ Controller::result_t Run::go(pilot_command_t &pcmd)
 
     case Continue:
       // normal processing -- run the road state machine
-      ROS_INFO("Running, invoking Road controller");
+      ROS_DEBUG("Running, invoking Road controller");
       return road->control(pcmd);
 
     default:
@@ -414,8 +413,8 @@ ElementID Run::starting_waypt(void)
   else
     {
       waypt = course->polygons[index].start_way;
-      ROS_INFO_STREAM("starting_waypt() is " << waypt.name().str
-                      << ", polygon " << course->polygons[index].poly_id);
+      ROS_DEBUG_STREAM("starting_waypt() is " << waypt.name().str
+                       << ", polygon " << course->polygons[index].poly_id);
     }
 
   return waypt;

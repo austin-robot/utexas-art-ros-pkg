@@ -19,7 +19,6 @@
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
 
-#include <art/conversions.h>
 #include "applanix.h"
 
 #define DEVICE "Applanix POS-LV"
@@ -200,8 +199,8 @@ int DevApplanix::get_packet(applanix_data_t *adata)
   // have a full packet in the buffer
   // \todo fix for 64-bit
   ROS_DEBUG(DEVICE " %*.*s %d packet, size %d",
-            sizeof(hdr->grpstart), sizeof(hdr->grpstart), hdr->grpstart,
-            hdr->groupnum, hdr->bytecount);
+            (int) sizeof(hdr->grpstart), (int) sizeof(hdr->grpstart),
+            hdr->grpstart, hdr->groupnum, hdr->bytecount);
 
   // copy packet data to applanix data struct
   switch(hdr->groupnum)

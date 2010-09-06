@@ -359,7 +359,7 @@ int devbrake::calibrate_brake(void)
   if (rc != 0) return rc;
 
   // Minimum brake pressure needs to be below 1 volt or both 
-  // throttle and brake will active simultaneously.
+  // throttle and brake will be active simultaneously (very bad).
   if (pressure_min > 1.0) {
     ROS_ERROR("Minimum brake pressure too high: %.3f", pressure_min);
     return (1);

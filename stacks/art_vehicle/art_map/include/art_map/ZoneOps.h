@@ -8,8 +8,8 @@
 #include <art_map/RNDF.h>
 #include <art_map/zones.h>
 
-//#include <art/evg-thin.hh>
-//#include <art/datatypes.hh>
+//#include <art/evg-thin.h>
+//#include <art/datatypes.h>
 
 class ZoneManager {
 public:

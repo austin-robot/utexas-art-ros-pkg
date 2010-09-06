@@ -41,9 +41,9 @@
 
 #include <art/conversions.h>
 #include <art/epsilon.h>
-#include <art_common/ArtHertz.h>
 #include <art/pid2.h>
 #include <art_common/ArtVehicle.h>
+#include <art_common/ArtHertz.h>
 
 #include <art_nav/CarCommand.h>
 #include <art_nav/PilotConfig.h>
@@ -683,7 +683,8 @@ int main(int argc, char** argv)
       return 2;
     }
  
-  ros::Rate cycle(art_common::ArtHertz::PILOT); // set driver cycle rate
+  
+ros::Rate cycle(art_common::ArtHertz::PILOT); // set driver cycle rate
 
   // Main loop
   while(ros::ok())

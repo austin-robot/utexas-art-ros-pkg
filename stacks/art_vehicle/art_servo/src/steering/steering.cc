@@ -11,14 +11,14 @@
 #include <ros/ros.h>
 
 #include <art_common/ArtHertz.h>
-#include <art/polynomial.hh>
+#include <art/polynomial.h>
 
 #include <art_servo/SteeringCommand.h>
 #include <art_servo/SteeringState.h>
 #include <art_servo/IOadrState.h>
 
-#include "devsteer.hh"			// servo device interface
-#include "testwheel.hh"			// steering wheel self-test
+#include "devsteer.h"			// servo device interface
+#include "testwheel.h"			// steering wheel self-test
 
 /**  \file
 
@@ -63,7 +63,7 @@ Parameters:
   - number of cycles to spend calibrating starting wheel position
   - default: 19
 
-@see <@ref devsteer.hh> for steering servo device options
+@see <@ref devsteer.h> for steering servo device options
 
 @author Jack O'Quin
 */

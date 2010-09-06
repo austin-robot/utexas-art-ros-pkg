@@ -239,7 +239,6 @@ void parse_args(int argc, char *argv[])
   rndf_name = argv[optind];
 }
 
-// taken (slightly modified) from <art/LanesProxy.hh>
 void PrintPolygons(const lanes_state_msg_t &ldata)
 {
   uint32_t count = ldata.poly_count;

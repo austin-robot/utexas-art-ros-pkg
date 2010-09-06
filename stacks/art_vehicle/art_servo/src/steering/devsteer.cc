@@ -15,7 +15,7 @@
 #include <ros/ros.h>
 #include <art_common/ArtHertz.h>
 #include <art_common/ArtVehicle.h>
-#include "devsteer.hh"
+#include "devsteer.h"
 
 /////////////////////////////////////////////////////////////////
 // public methods

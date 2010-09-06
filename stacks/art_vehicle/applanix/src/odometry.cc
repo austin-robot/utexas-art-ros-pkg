@@ -49,11 +49,11 @@ data are in the \b /odom frame of reference.
 
 #include <art/frames.h>
 #include <art_common/ArtHertz.h>
-#include <art/Position.h>
 #include <art/UTM.h>
 #include <applanix/applanix_info.h>
 
 #include "applanix.h"
+#include "position.h"
 
 #define NODE "applanix"
 

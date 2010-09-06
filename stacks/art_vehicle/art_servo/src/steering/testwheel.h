@@ -39,7 +39,7 @@ Configuration options for steering servo device:
 #define _TESTWHEEL_HH_
 
 #include <art_servo/steering.h>		// public steering interface
-#include "dtimer.hh"
+#include "dtimer.h"
 
 class testwheel
 {

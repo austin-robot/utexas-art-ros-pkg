@@ -8,7 +8,8 @@ Written and maintained by Patrick Beeson (pbeeson@cs.utexas.edu)
 #define rotate_translate_transform_h
 
 
-// TODO: move posetype to <art/types.hh> and replace MapPose with it
+// TODO: oGet rid of this file, replace with ROS tf package.
+
 /**
    Many things have x,y or x,y,theta.
 **/

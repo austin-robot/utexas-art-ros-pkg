@@ -12,8 +12,8 @@
 
 #include <ros/ros.h>
 
-#include "devsteer.hh"
-#include "testwheel.hh"
+#include "devsteer.h"
+#include "testwheel.h"
 
 /////////////////////////////////////////////////////////////////
 // public methods

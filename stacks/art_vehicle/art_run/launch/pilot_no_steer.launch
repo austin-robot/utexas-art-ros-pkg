@@ -1,0 +1,29 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch file for pilot driving real vehicle
+
+     Pass PILOT_NODE=pilot.py in environment to run Python version.
+  -->
+
+<launch>
+  <!-- servo actuators -->
+  <node pkg="art_servo" type="brake" name="brake">
+    <param name="~port" value="/dev/brake"/>
+  </node>
+  <node pkg="art_servo" type="ioadr" name="ioadr">
+    <param name="~port" value="/dev/ioadr8x"/>
+  </node>
+  <node pkg="art_servo" type="ioadr" name="shifter">
+    <param name="~port" value="/dev/shifter"/>
+  </node>
+  <node pkg="art_servo" type="steering" name="steering">
+    <param name="~port" value="/dev/null"/>
+  </node>
+  <node pkg="art_servo" type="throttle" name="throttle">
+    <param name="~port" value="/dev/throttle"/>
+  </node>
+
+  <!-- navigation components -->
+  <node pkg="applanix" type="odometry" name="odometry" />
+  <node pkg="art_nav" type="$(optenv PILOT_NODE pilot)" name="pilot" />
+
+</launch>

@@ -11,7 +11,7 @@ define car position
   # (need height so it shows up on laser scans)
   size [4.8 2.12 2.0]
 
-  #wheelbase 2.33918            # not used by Stage (need this)
+  wheelbase 2.33918            # not used by Stage (need this)
 
   # the car rotates about the rear axle, behind the center of area
   # it seems front of the car is neg - y-offset should be pos

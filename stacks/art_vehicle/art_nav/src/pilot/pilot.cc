@@ -683,10 +683,8 @@ int main(int argc, char** argv)
       return 2;
     }
  
-  
-ros::Rate cycle(art_common::ArtHertz::PILOT); // set driver cycle rate
-
   // Main loop
+  ros::Rate cycle(art_common::ArtHertz::PILOT); // set driver cycle rate
   while(ros::ok())
     {
       ros::spinOnce();                  // handle incoming commands

@@ -263,9 +263,8 @@ public:
     cmd.header.stamp = ros::Time::now();
     cmd.header.frame_id = frame_id_;
     cmd.order = order;
-    //ROS_DEBUG_STREAM
-    ROS_INFO_STREAM("sending behavior "
-                    << NavBehavior(cmd.order.behavior).Name());
+    ROS_DEBUG_STREAM("sending behavior "
+                     << NavBehavior(cmd.order.behavior).Name());
     nav_cmd_pub_.publish(cmd);
   }
 
@@ -290,8 +289,7 @@ public:
       {
         ros::spinOnce();                  // handle incoming messages
 
-        //ROS_DEBUG_STREAM("navstate = "
-        ROS_INFO_STREAM("navstate = "
+        ROS_DEBUG_STREAM("navstate = "
                          << NavEstopState(navState_.estop).Name()
                          << ", " << NavRoadState(navState_.road).Name()
                          << ", last_waypt = "

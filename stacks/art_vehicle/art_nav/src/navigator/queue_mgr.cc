@@ -113,8 +113,7 @@ NavQueueMgr::NavQueueMgr()
 void NavQueueMgr::processNavCmd(const
                                 art_nav::NavigatorCommand::ConstPtr &cmdIn)
 {
-  //ROS_DEBUG_STREAM("Navigator order:"
-  ROS_INFO_STREAM("Navigator order:"
+  ROS_DEBUG_STREAM("Navigator order:"
                    << NavBehavior(cmdIn->order.behavior).Name());
   cmd_time_ = cmdIn->header.stamp;
   nav->order = cmdIn->order;
@@ -139,8 +138,7 @@ void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
 /** Handle road map polygons. */
 void NavQueueMgr::processRoadMap(const art_map::ArtLanes::ConstPtr &mapIn)
 {
-  //ROS_DEBUG_STREAM(mapIn->polygons.size() << " lanes polygons received");
-  ROS_INFO_STREAM(mapIn->polygons.size() << " lanes polygons received");
+  ROS_DEBUG_STREAM(mapIn->polygons.size() << " lanes polygons received");
   map_time_ = mapIn->header.stamp;
   nav->course->lanes_message(*mapIn);
 }
@@ -297,8 +295,7 @@ void NavQueueMgr::PublishState(void)
   nav->navdata.header.stamp = ros::Time::now();
   nav->navdata.header.frame_id = ArtFrames::vehicle;
 
-  //ROS_DEBUG("Publishing Navigator state = %s, %s, last_waypt %s"
-  ROS_INFO("Publishing Navigator state = %s, %s, last_waypt %s"
+  ROS_DEBUG("Publishing Navigator state = %s, %s, last_waypt %s"
 	    ", replan_waypt %s, R%d S%d Z%d, next waypt %s, goal chkpt %s",
 	    NavEstopState(nav->navdata.estop).Name(),
 	    NavRoadState(nav->navdata.road).Name(),

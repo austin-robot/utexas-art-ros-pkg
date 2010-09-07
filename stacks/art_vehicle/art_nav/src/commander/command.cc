@@ -64,8 +64,7 @@ art_nav::Order Commander::command(const art_nav::NavigatorState &_navstate)
   else if (ElementID(navstate->last_waypt) == ElementID())
     {
       // initialize navigator if last_waypt not set yet
-      //ROS_DEBUG("Waiting for Navigator to find initial way-point.");
-      ROS_INFO("Waiting for Navigator to find initial way-point.");
+      ROS_DEBUG("Waiting for Navigator to find initial way-point.");
       order.behavior.value = NavBehavior::Initialize;
       return order;
     }
@@ -115,8 +114,8 @@ bool Commander::next_checkpoint(void)
 art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
 {
   order.behavior.value = behavior;
-  ROS_INFO_STREAM("order.behavior = " << NavBehavior(order.behavior).Name());
-  ROS_INFO_STREAM("goal = "<<goal.id.name().str);
+  ROS_DEBUG_STREAM("order.behavior = " << NavBehavior(order.behavior).Name());
+  ROS_DEBUG_STREAM("goal = "<<goal.id.name().str);
 
   // include next two checkpoints for monitoring purposes
   order.chkpt[0] = goal.toWayPoint();
@@ -174,16 +173,16 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
 	    order.waypt[i].is_stop = true; // tell navigator to stop there
 	}
       
-      ROS_INFO_STREAM("waypt[" << i << "] = "
-                      << ElementID(order.waypt[i].id).name().str
-                      << " (" << order.waypt[i].mapxy.x
-                      << ", " << order.waypt[i].mapxy.y
-                      << ") E" << order.waypt[i].is_entry
-                      << ", G" << order.waypt[i].is_goal
-                      << ", P" << order.waypt[i].is_spot
-                      << ", S" << order.waypt[i].is_stop
-                      << ", X" << order.waypt[i].is_exit
-                      << ", Z" << order.waypt[i].is_perimeter);
+      ROS_DEBUG_STREAM("waypt[" << i << "] = "
+                       << ElementID(order.waypt[i].id).name().str
+                       << " (" << order.waypt[i].mapxy.x
+                       << ", " << order.waypt[i].mapxy.y
+                       << ") E" << order.waypt[i].is_entry
+                       << ", G" << order.waypt[i].is_goal
+                       << ", P" << order.waypt[i].is_spot
+                       << ", S" << order.waypt[i].is_stop
+                       << ", X" << order.waypt[i].is_exit
+                       << ", Z" << order.waypt[i].is_perimeter);
     }
   
   for (uint i=0; i<zones.size(); i++)
@@ -191,8 +190,8 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
 	zones[i].zone_id==order.waypt[1].id.seg)
       order.max_speed=fmin(speedlimit,zones[i].speed_limit);
 
-  ROS_INFO_STREAM("Max speed = " << order.max_speed << " m/s");
-  ROS_INFO_STREAM("Min speed = " << order.min_speed << " m/s");
+  ROS_DEBUG_STREAM("Max speed = " << order.max_speed << " m/s");
+  ROS_DEBUG_STREAM("Min speed = " << order.min_speed << " m/s");
 
   order.replan_num=replan_num;
   order.next_uturn=-1;
@@ -206,8 +205,8 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
 	break;
       }
 
-  ROS_INFO_STREAM("Next uturn = " << order.next_uturn);
-  ROS_INFO_STREAM("Replan num = " << order.replan_num);
+  ROS_DEBUG_STREAM("Next uturn = " << order.next_uturn);
+  ROS_DEBUG_STREAM("Replan num = " << order.replan_num);
   
   return order;
 }

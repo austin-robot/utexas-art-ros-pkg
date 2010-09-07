@@ -101,19 +101,18 @@ void Course::begin_run_cycle(void)
     }
 
   // log current order attributes
-  if (verbose >= 3)
-    for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
-      ROS_INFO("waypt[%u] %s (%.3f,%.3f), E%d G%d L%d P%d S%d X%d Z%d",
-               i, ElementID(order->waypt[i].id).name().str,
-               order->waypt[i].mapxy.x,
-               order->waypt[i].mapxy.y,
-               (bool) order->waypt[i].is_entry,
-               (bool) order->waypt[i].is_goal,
-               (bool) order->waypt[i].is_lane_change,
-               (bool) order->waypt[i].is_spot,
-               (bool) order->waypt[i].is_stop,
-               (bool) order->waypt[i].is_exit,
-               (bool) order->waypt[i].is_perimeter);
+  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
+    ROS_DEBUG("waypt[%u] %s (%.3f,%.3f), E%d G%d L%d P%d S%d X%d Z%d",
+              i, ElementID(order->waypt[i].id).name().str,
+              order->waypt[i].mapxy.x,
+              order->waypt[i].mapxy.y,
+              (bool) order->waypt[i].is_entry,
+              (bool) order->waypt[i].is_goal,
+              (bool) order->waypt[i].is_lane_change,
+              (bool) order->waypt[i].is_spot,
+              (bool) order->waypt[i].is_stop,
+              (bool) order->waypt[i].is_exit,
+              (bool) order->waypt[i].is_perimeter);
 }
 
 void Course::configure()
@@ -270,15 +269,15 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 
 	  aim_in_plan = true;
 	  
-          ROS_INFO("steering down the lane toward polygon %d",
-                   plan.at(aim_index).poly_id);
+          ROS_DEBUG("steering down the lane toward polygon %d",
+                    plan.at(aim_index).poly_id);
 	}
       else
 	{
 	  if (nearby_poly >= 0)
 	    {
-              ROS_INFO("nearby_poly in desired_heading() is %d",
-                       plan.at(nearby_poly).poly_id);
+              ROS_DEBUG("nearby_poly in desired_heading() is %d",
+                        plan.at(nearby_poly).poly_id);
 	      
 	      // set aim_polar to the closest polygon at least target_dist
 	      // meters away from the estimated position.
@@ -299,14 +298,14 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 
 		  aim_in_plan = true;
 		  
-                  ROS_INFO("steering at least %.3fm "
-                           "down the lane toward polygon %d",
-                           target_dist, plan.at(aim_index).poly_id);
+                  ROS_DEBUG("steering at least %.3fm "
+                            "down the lane toward polygon %d",
+                            target_dist, plan.at(aim_index).poly_id);
 		}
 	      else
 		{
                   // No polygon in target distance.  Head to next way-point
-		  ROS_INFO("no polygon at least %.3fm away, "
+		  ROS_WARN("no polygon at least %.3fm away, "
                            "steer using waypoints", target_dist);
 		  aim_polar = head_for_waypt(target_dist);
 		  
@@ -321,7 +320,7 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	      // no plan available: a big problem, but must do
 	      // something.  Go to next waypoint.
 	      
-              ROS_INFO("no lane data available, steer using waypoints.");
+              ROS_WARN("no lane data available, steer using waypoints.");
 	      aim_polar = head_for_waypt(target_dist);
 	      aim_distance = aim_polar.range;
 	      aim_next_heading =
@@ -426,7 +425,7 @@ float Course::distance_in_plan(const MapPose &from,
 void Course::end_run_cycle()
 {
   if (!waypoint_checked)
-    ART_MSG(1, "failed to check for way-point reached!");
+    ROS_WARN("failed to check for way-point reached!");
 }
 
 // find an aim polygon ahead of the car in lane
@@ -887,10 +886,10 @@ bool Course::lane_waypoint_reached(void)
     }
 
   
-  if (!found && verbose >= 5)
-    ART_MSG(8, "cur_poly = %d, last_waypt = %s",
-	    navdata->cur_poly,
-            ElementID(navdata->last_waypt).name().str);
+  if (!found)
+    ROS_DEBUG("cur_poly = %d, last_waypt = %s",
+              navdata->cur_poly,
+              ElementID(navdata->last_waypt).name().str);
   return found;
 }
 

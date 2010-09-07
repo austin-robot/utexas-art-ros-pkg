@@ -24,8 +24,8 @@ void SlowForCurves::configure()
   using art_common::ArtVehicle;
 
   // TODO: lookahead_distance should probably be time in seconds.
-  nh.param("lookahead_distance", lookahead_distance, 50.0);
-  nh.param("max_deceleration", max_deceleration, 1.0);
+  nh.param("lookahead_distance", lookahead_distance, 100.0);
+  nh.param("max_deceleration", max_deceleration, 0.4);
   nh.param("min_speed_when_slowing_for_curves", 
            min_speed_when_slowing_for_curves, 3.0);
   nh.param("max_yaw_rate", max_yaw_rate, 

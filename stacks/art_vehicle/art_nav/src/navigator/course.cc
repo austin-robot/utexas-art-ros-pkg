@@ -136,7 +136,7 @@ void Course::configure()
   ROS_INFO("turning latency time is %.3f seconds", 1.0);
 
   // Look-ahead time for steering towards a polygon.
-  nh.param("turning_offset_tune", k_error, 0.1);
+  nh.param("turning_offset_tune", k_error, 0.5);
   ROS_INFO("yaw tuning parameter (offset) is %.3f", k_error);
 
   // Look-ahead time for steering towards a polygon.
@@ -148,7 +148,7 @@ void Course::configure()
   ROS_INFO("yaw ratio is %.3f", yaw_ratio);
 
   // Look-ahead time for steering towards a polygon.
-  nh.param("turning_int_tune", k_int, 1.5);
+  nh.param("turning_int_tune", k_int, 1.25);
   ROS_INFO("yaw tuning parameter (integral) is %.3f", k_int);
 
   // Minimum distance to aim for when changing lanes.

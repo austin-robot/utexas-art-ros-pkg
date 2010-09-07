@@ -275,7 +275,7 @@ void Uturn::configure()
   ROS_INFO("U-turn yaw rate is %.3f radians/s", uturn_yaw_rate);
 
   nh.param("uturn_stop_heading", uturn_stop_heading,
-           angles::from_degrees(5));
+           angles::from_degrees(45));
   ROS_INFO("U-turn stop heading is %.3f radians (%.3f degrees)",
            uturn_stop_heading, angles::to_degrees(uturn_stop_heading));
 

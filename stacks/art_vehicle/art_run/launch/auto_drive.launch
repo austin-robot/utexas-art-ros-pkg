@@ -1,0 +1,38 @@
+<!-- -*- mode: XML -*- -->
+<!-- Launch file for driving real vehicle autonomously using
+     commander and navigator nodes.
+
+     WORLD = base name (without prefix) of world file, MDF and RNDF
+             (default prc_large)
+  -->
+
+<launch>
+
+  <!-- start pilot and servo actuators -->
+  <include file="$(find art_run)/launch/pilot_drive.launch" />
+
+  <!-- start navigator -->
+  <node pkg="art_nav" type="navigator" name="navigator" >
+    <param name="lane_steer_time" value="1.0" />
+    <param name="min_lane_steer_dist" value="7.0" />
+    <param name="turning_offset_tune" value="0.4" />
+    <param name="turning_heading_tune" value="0.5" />
+
+    <param name="lane_width_ratio" value="0.5" />
+
+    <param name="min_following_time" value="4.0" />
+    <param name="max_following_time" value="8.0" />
+
+    <param name="stop_deceleration" value="2.0" />
+    <param name="stop_latency" value="0.6" />
+
+    <param name="max_yaw_rate" value="0.15" />
+  </node>
+
+  <!-- start commander -->
+  <node pkg="art_nav" type="commander" name="commander" >
+    <param name="mdf"
+           value="$(find art_nav)/test/$(optenv WORLD prc_large).mdf"/>
+  </node>
+
+</launch>

@@ -88,19 +88,17 @@ public:
   // trace controller state
   virtual void trace(const char *name, const pilot_command_t &pcmd)
   {
-    if (verbose >= 4)
-      ART_MSG(7, "%s: pcmd = (%.3f, %.3f) ",
-	      name, pcmd.velocity, pcmd.yawRate);
+    ROS_DEBUG_NAMED("trace", "%s: pcmd = (%.3f, %.3f) ",
+                    name, pcmd.velocity, pcmd.yawRate);
   }
 
   // trace controller state and result
   virtual void trace(const char *name, const pilot_command_t &pcmd,
 		     result_t res)
   {
-    if (verbose >= 4)
-      ART_MSG(7, "%s: pcmd = (%.3f, %.3f), result = %s",
-	      name, pcmd.velocity, pcmd.yawRate,
-	      result_name(res));
+    ROS_DEBUG_NAMED("trace", "%s: pcmd = (%.3f, %.3f), result = %s",
+                    name, pcmd.velocity, pcmd.yawRate,
+                    result_name(res));
   }
 
   // trace controller resets

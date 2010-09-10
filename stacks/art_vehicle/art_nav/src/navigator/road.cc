@@ -466,7 +466,6 @@ Controller::result_t Road::ActionInPass(pilot_command_t &pcmd)
 Controller::result_t Road::ActionInUturn(pilot_command_t &pcmd)
 {
   result_t result = uturn->control(pcmd);
-  //result_t result = Finished;           // scaffolding
   if (result == Finished)
     {
       pending_event = NavRoadEvent::FollowLane;

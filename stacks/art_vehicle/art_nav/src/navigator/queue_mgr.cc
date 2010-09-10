@@ -66,6 +66,7 @@ private:
   void processNavCmd(const art_nav::NavigatorCommand::ConstPtr &cmdIn);
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void processRoadMap(const art_map::ArtLanes::ConstPtr &cmdIn);
+  void processSignals(const art_servo::IOadrState::ConstPtr &sigIn);
   void PublishState(void);
   void SetSignals(void);
   void SetSpeed(pilot_command_t pcmd);
@@ -74,18 +75,19 @@ private:
   int verbose;				// log level verbosity
 
   // ROS topics
-  ros::Publisher car_cmd_;              // pilot CarCommand
+  ros::Publisher  car_cmd_;             // pilot CarCommand
   ros::Subscriber nav_cmd_;             // NavigatorCommand topic
-  ros::Publisher nav_state_;            // navigator state topic
+  ros::Publisher  nav_state_;           // navigator state topic
   ros::Subscriber odom_state_;          // odometry
   ros::Subscriber roadmap_;             // local road map polygons
+  ros::Publisher  signals_cmd_;
+  ros::Subscriber signals_state_;
 
   //ros::Subscriber observers_;
 
   // turn signal variables
-  //AioServo *signals;
-  bool signal_on_left;			// requested turn signal states
-  bool signal_on_right;
+  bool signal_on_left_;			// reported turn signal states
+  bool signal_on_right_;
 
   // Odometry data
   nav_msgs::Odometry odom_msg_;
@@ -105,8 +107,7 @@ NavQueueMgr::NavQueueMgr()
   nav = new Navigator(&odom_msg_);
   nav->configure();
   
-  //signals = new AioServo("signals", 0.0, verbose);
-  signal_on_left = signal_on_right = false;
+  signal_on_left_ = signal_on_right_ = false;
 }
 
 /** Handle command input. */
@@ -143,6 +144,27 @@ void NavQueueMgr::processRoadMap(const art_map::ArtLanes::ConstPtr &mapIn)
   nav->course->lanes_message(*mapIn);
 }
 
+/** Handle command input. */
+void NavQueueMgr::processSignals(const
+                                 art_servo::IOadrState::ConstPtr &sigIn)
+{
+  using art_servo::IOadrState;
+
+  bool left_on = (sigIn->relays && IOadrState::TURN_LEFT);
+  if (left_on != signal_on_left_)
+    {
+      ROS_INFO("left turn signal now %s", (left_on? "on": "off"));
+      signal_on_left_ = left_on;
+    }
+
+  bool right_on = (sigIn->relays && IOadrState::TURN_RIGHT);
+  if (right_on != signal_on_right_)
+    {
+      ROS_INFO("right turn signal now %s", (right_on? "on": "off"));
+      signal_on_right_ = right_on;
+    }
+}
+
 /** Set up ROS topics for navigator node */
 bool NavQueueMgr::setup(ros::NodeHandle node)
 {
@@ -157,6 +179,8 @@ bool NavQueueMgr::setup(ros::NodeHandle node)
                                &NavQueueMgr::processOdom, this, noDelay);
   roadmap_ = node.subscribe("roadmap_local", qDepth,
                             &NavQueueMgr::processRoadMap, this, noDelay);
+  signals_state_ = node.subscribe("ioadr/state", qDepth,
+                                  &NavQueueMgr::processSignals, this, noDelay);
 
   // topics to write
   nav_state_ =

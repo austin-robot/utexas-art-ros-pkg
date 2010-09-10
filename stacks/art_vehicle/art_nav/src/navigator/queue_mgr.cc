@@ -173,19 +173,20 @@ bool NavQueueMgr::setup(ros::NodeHandle node)
   static uint32_t qDepth = 1;
 
   // topics to read
-  nav_cmd_ = node.subscribe("navigator/cmd", qDepth,
-                            &NavQueueMgr::processNavCmd, this, noDelay);
   odom_state_ = node.subscribe("odom", qDepth,
                                &NavQueueMgr::processOdom, this, noDelay);
+  nav_cmd_ = node.subscribe("navigator/cmd", qDepth,
+                            &NavQueueMgr::processNavCmd, this, noDelay);
   roadmap_ = node.subscribe("roadmap_local", qDepth,
                             &NavQueueMgr::processRoadMap, this, noDelay);
   signals_state_ = node.subscribe("ioadr/state", qDepth,
                                   &NavQueueMgr::processSignals, this, noDelay);
 
   // topics to write
+  car_cmd_ = node.advertise<art_nav::CarCommand>("pilot/cmd", qDepth);
   nav_state_ =
     node.advertise<art_nav::NavigatorState>("navigator/state", qDepth);
-  car_cmd_ = node.advertise<art_nav::CarCommand>("pilot/cmd", qDepth);
+  signals_cmd_ = node.advertise<art_servo::IOadrCommand>("ioadr/cmd", qDepth);
 
   return true;
 }
@@ -231,66 +232,38 @@ int NavQueueMgr::ProcessInput(player_msghdr *hdr, void *data)
 
 /** Set or reset turn signal relays
  *
- *  @todo ROS turn signal messages
+ *  @pre signal_on_left_ and signal_on_right_ reflect the most
+ *       recently reported states of those relays;
+ *
+ *  @pre nav->navdata contains desired signal relay states
  */
 void NavQueueMgr::SetSignals(void)
 {
-#if 0
-#ifdef RELAY_FEEDBACK
-
-  if (signal_on_left != nav->navdata.signal_left)
+  if (signal_on_left_ != nav->navdata.signal_left
+      || signal_on_right_ != nav->navdata.signal_right)
     {
-      if (signals)
-	signals->SendCmd(nav->navdata.signal_left, Relay_Turn_Left);
-      if (verbose)	
-	ART_MSG(2, "setting left turn signal %s",
-		(nav->navdata.signal_left? "on": "off"));
-    }
+      // something needs to change
+      art_servo::IOadrCommand sig_cmd;
 
-  if (signal_on_right != nav->navdata.signal_right)
-    {
-      if (signals)
-	signals->SendCmd(nav->navdata.signal_right, Relay_Turn_Right);
-      if (verbose)	
-	ART_MSG(2, "setting right turn signal %s",
-		(nav->navdata.signal_right? "on": "off"));
-    }
+      // set or reset left signal relay
+      if (nav->navdata.signal_left)
+        sig_cmd.relays_on = art_servo::IOadrState::TURN_LEFT;
+      else
+        sig_cmd.relays_off = art_servo::IOadrState::TURN_LEFT;
 
-#else // RELAY_FEEDBACK
+      // or in right signal relay value
+      if (nav->navdata.signal_right)
+        sig_cmd.relays_on |= art_servo::IOadrState::TURN_RIGHT;
+      else
+        sig_cmd.relays_off |= art_servo::IOadrState::TURN_RIGHT;
 
-#ifdef SPAM_SIGNALS
-      if (signals)
-	signals->SendCmd(signal_on_left, Relay_Turn_Left);
-#endif
-  if (signal_on_left != nav->navdata.signal_left)
-    {
-      signal_on_left = nav->navdata.signal_left;
-#ifndef SPAM_SIGNALS
-      if (signals)
-	signals->SendCmd(signal_on_left, Relay_Turn_Left);
-#endif
-      if (verbose)	
-	ART_MSG(1, "setting left turn signal %s",
-		(signal_on_left? "on": "off"));
-    }
+      ROS_INFO("setting turn signals: left %s, right %s",
+               (nav->navdata.signal_left? "on": "off"),
+               (nav->navdata.signal_right? "on": "off"));
 
-#ifdef SPAM_SIGNALS
-      if (signals)
-	signals->SendCmd(signal_on_right, Relay_Turn_Right);
-#endif
-  if (signal_on_right != nav->navdata.signal_right)
-    {
-      signal_on_right = nav->navdata.signal_right;
-#ifndef SPAM_SIGNALS
-      if (signals)
-	signals->SendCmd(signal_on_right, Relay_Turn_Right);
-#endif
-      if (verbose)	
-	ART_MSG(1, "setting right turn signal %s",
-		(signal_on_right? "on": "off"));
+      // send command to relay driver
+      signals_cmd_.publish(sig_cmd);
     }
-#endif // RELAY_FEEDBACK
-#endif
 }
 
 /** Send a command to the pilot */

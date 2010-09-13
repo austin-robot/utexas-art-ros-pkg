@@ -38,7 +38,7 @@ def test():
     cmd = BrakeCommand()                # brake command msg
     cmd.request = BrakeCommand.Absolute
     npos = 1.0                          # next position to request
-    delta = 0.25                        # change requested per cycle
+    delta = 0.5                         # change requested per cycle
 
     while not rospy.is_shutdown():
 
@@ -56,7 +56,7 @@ def test():
         log_brake_cmd(cmd)
         topic.publish(cmd)
         npos += delta                   # update next position
-        rospy.sleep(4.0)
+        rospy.sleep(8.0)
 
 if __name__ == '__main__':
     try:

@@ -50,6 +50,7 @@
 
 #include <art_nav/LearningCommand.h>
 
+#include "learned_controller.h"
 #include "speed.h"
 
 #define NODE "pilot"
@@ -143,7 +144,12 @@ static inline float clamp(float value, float lower, float upper)
 void allocateSpeedControl(void)
 {
 
-  if (config_.use_accel_matrix)
+  if (config_.use_learned_controller) 
+    {
+      ROS_INFO("using RL learned controller for speed control");
+      speed_ = new LearnedSpeedControl();
+    }
+  else if (config_.use_accel_matrix)
     {
       ROS_INFO("using acceleration matrix for speed control");
       speed_ = new SpeedControlMatrix();
@@ -306,8 +312,10 @@ void reconfig(art_nav::PilotConfig &newconfig, uint32_t level)
   ROS_INFO("pilot dynamic reconfigure, level 0x%x", level);
 
   // need to reallocate speed controller when use_accel_matrix changes
-  bool realloc = (newconfig.use_accel_matrix != config_.use_accel_matrix);
-  
+  // or use_learned_controller changes
+  bool realloc = (newconfig.use_accel_matrix != config_.use_accel_matrix ||
+                  newconfig.use_learned_controller != config_.use_learned_controller);
+
   if (realloc)
     {
       deallocateSpeedControl();

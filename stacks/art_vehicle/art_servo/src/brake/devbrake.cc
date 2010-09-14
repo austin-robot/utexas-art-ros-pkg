@@ -497,7 +497,10 @@ int devbrake::configure_brake(void)
       rc = encoder_goto(-10000);	// relative goto
       if (rc != 0) return rc;
       if (cur_status & Status_Bm)	// -limit reached?
-        break;
+        {
+          ROS_INFO("-limit reached during configuration");
+          break;
+        }
       usleep(100*1000);                 // wait 0.1 sec
     }
 

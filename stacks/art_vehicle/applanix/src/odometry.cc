@@ -239,7 +239,7 @@ bool getOdom(Position::Position3D *odom_pos3d, ros::Time *odom_time,
   // Universal Transverse Mercator (Cartesian).
   double utm_e, utm_n;			// easting, northing (in meters)
   char zone[20];
-  UTM::LLtoUTM(adata.grp1.lat, adata.grp1.lon, utm_e, utm_n, zone);
+  UTM::LLtoUTM(adata.grp1.lat, adata.grp1.lon, utm_n, utm_e, zone);
 
   // publish GPS information topic
   publishGPS(adata, utm_e, utm_n, zone, gps_pub);

@@ -25,6 +25,7 @@
 #include <art_map/MapLanes.h>
 #include <art_map/RNDF.h>
 
+#include <art_common/ArtVehicle.h>
 
 /** @file
 
@@ -70,6 +71,7 @@ public:
 
 private:
 
+  void markCar(visualization_msgs::MarkerArray &markers);
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void publishGlobalMap(void);
   void publishLocalMap(void);
@@ -136,6 +138,48 @@ MapLanesDriver::MapLanesDriver(void)
   // create the MapLanes class
   map_ = new MapLanes(range_);
   graph_ = NULL;
+}
+
+/** @brief create marker for car pose.
+ *
+ *  @param pub topic to publish
+ *  @param markers array to add car pose
+ */
+void MapLanesDriver::markCar(visualization_msgs::MarkerArray &markers)
+{
+  using art_common::ArtVehicle;
+  visualization_msgs::Marker car;
+  car.header.stamp = ros::Time::now();
+  car.header.frame_id = "/vehicle";
+  car.frame_locked = true;
+
+  // publish polygon centers
+  car.ns = "Marvin";
+  car.id = (int32_t) 0;
+  car.type = visualization_msgs::Marker::CUBE;
+  car.action = visualization_msgs::Marker::ADD;
+
+  // pose is same as the /vehicle frame
+  car.pose.position.x = ArtVehicle::halflength + ArtVehicle::rear_bumper_px;
+  car.pose.position.z = ArtVehicle::halfheight;
+  car.pose.orientation.w = 1.0;
+
+  // vehicle size
+  car.scale.x = ArtVehicle::length;
+  car.scale.y = ArtVehicle::width;
+  car.scale.z = ArtVehicle::height;
+
+  // make car white and semitransparent
+  car.color.r = 1.0;
+  car.color.g = 1.0;
+  car.color.b = 1.0;
+  car.color.a = 0.5;
+
+  // indefinite duration
+  car.lifetime = ros::Duration();
+
+  // Add this polygon to the vector of markers to publish
+  markers.markers.push_back(car);
 }
 
 /** Set up ROS topics */
@@ -205,7 +249,13 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
   green.a = 1.0;
   ros::Time now = ros::Time::now();
 
+  // clear message array, this is a class variable to avoid memory
+  // allocation and deallocation on every cycle
   marks_msg_.markers.clear();
+
+  // add marker for odometry pose of car
+  markCar(marks_msg_);
+
   for (uint32_t i = 0; i < lane_data.polygons.size(); ++i)
     {
       visualization_msgs::Marker mark;

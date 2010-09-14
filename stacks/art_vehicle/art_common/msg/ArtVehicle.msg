@@ -10,8 +10,10 @@ string frame_id = "vehicle" # ROS frame ID
 
 float32 length = 4.8                    # overall length
 float32 width = 2.12                    # overall width
+float32 height = 1.5                    # overall height (TBD)
 float32 halflength = 2.4                # length / 2
 float32 halfwidth = 1.06                # width / 2
+float32 halfheight = 0.75               # height / 2
 float32 wheelbase = 2.33918     	# wheelbase
 
 # egocentric coordinates relative to vehicle origin at center of

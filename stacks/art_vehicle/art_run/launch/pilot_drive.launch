@@ -5,6 +5,10 @@
   -->
 
 <launch>
+  <!-- global parameters (in this namespace) -->
+  <param name="rndf"
+         value="$(find art_map)/rndf/$(optenv WORLD prc_large).rndf"/>
+
   <!-- servo actuators -->
   <node pkg="art_servo" type="brake" name="brake">
     <param name="~port" value="/dev/brake"/>
@@ -25,5 +29,15 @@
   <!-- navigation components -->
   <node pkg="applanix" type="odometry" name="odometry" />
   <node pkg="art_nav" type="$(optenv PILOT_NODE pilot)" name="pilot" />
+
+  <!-- static transforms (including identity tf for /map to /odom) -->
+  <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
+  <node pkg="tf" type="static_transform_publisher" name="odom_is_map"
+        args="0 0 0 0 0 0 /map /odom 1000" />
+
+  <!-- start maplanes node with corresponding RNDF -->
+  <node pkg="art_map" type="maplanes" name="maplanes">
+    <param name="frame_id" value="/map" />
+  </node>
 
 </launch>

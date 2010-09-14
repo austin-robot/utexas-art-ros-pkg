@@ -156,24 +156,27 @@ void MapLanesDriver::markCar(visualization_msgs::MarkerArray &markers)
   // publish polygon centers
   car.ns = "Marvin";
   car.id = (int32_t) 0;
-  car.type = visualization_msgs::Marker::CUBE;
+  car.type = visualization_msgs::Marker::MESH_RESOURCE;
   car.action = visualization_msgs::Marker::ADD;
 
-  // pose is same as the /vehicle frame
+  // Pose is same as the /vehicle frame, except the image center is
+  // not the vehicle origin and it is rotated 90 degrees to the right.
   car.pose.position.x = ArtVehicle::halflength + ArtVehicle::rear_bumper_px;
   car.pose.position.z = ArtVehicle::halfheight;
-  car.pose.orientation.w = 1.0;
+  car.pose.orientation = tf::createQuaternionMsgFromYaw(M_PI/2.0);
 
-  // vehicle size
-  car.scale.x = ArtVehicle::length;
-  car.scale.y = ArtVehicle::width;
-  car.scale.z = ArtVehicle::height;
+  // mesh vehicle proportions are about right, but its size is very small
+  car.scale.x = 2.4;
+  car.scale.y = 2.4;
+  car.scale.z = 2.4;
 
-  // make car white and semitransparent
+  // make car white, semitransparent
   car.color.r = 1.0;
   car.color.g = 1.0;
   car.color.b = 1.0;
   car.color.a = 0.5;
+  car.mesh_resource = "package://art_map/etc/car.dae";
+  car.mesh_use_embedded_materials = false;
 
   // indefinite duration
   car.lifetime = ros::Duration();

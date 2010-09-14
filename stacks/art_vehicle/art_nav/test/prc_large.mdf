@@ -1,21 +1,12 @@
-MDF_name	nqe3.mdf
+MDF_name	nqe1.mdf
 RNDF	nqe_large.rndf
 creation_date	10/11/2007
 checkpoints
-num_checkpoints	14
-/*21*/
-15
-16
+num_checkpoints	5
 1
-11
 8
-13
-14
+5
 3
-1
-9
-10
-2
 15
 end_checkpoints
 speed_limits

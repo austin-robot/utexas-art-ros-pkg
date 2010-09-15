@@ -12,6 +12,8 @@ art_map/MapID replan_waypt		# next way-point for replan
 int32 cur_poly                          # current polygon, -1 if none
 
 # status flags
+bool alarm
+bool flasher
 bool lane_blocked
 bool road_blocked
 bool reverse

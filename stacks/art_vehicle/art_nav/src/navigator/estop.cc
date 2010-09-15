@@ -173,11 +173,15 @@ void Estop::reset_me(void)
 
 Controller::result_t Estop::ActionInDone(pilot_command_t &pcmd)
 {
+  navdata->flasher = false;
+  navdata->alarm = false;
   return halt->control(pcmd);
 }  
 
 Controller::result_t Estop::ActionInRun(pilot_command_t &pcmd)
 {
+  navdata->flasher = true;
+  navdata->alarm = true;
   result_t result = run->control(pcmd);
   if (result == NotImplemented || 
       result == NotApplicable)
@@ -187,6 +191,8 @@ Controller::result_t Estop::ActionInRun(pilot_command_t &pcmd)
 
 Controller::result_t Estop::ActionInPause(pilot_command_t &pcmd)
 {
+  navdata->flasher = true;
+  navdata->alarm = false;
   return halt->control(pcmd);
 }
 
@@ -212,6 +218,7 @@ Controller::result_t Estop::ActionToPause(pilot_command_t &pcmd)
 
 Controller::result_t Estop::ActionToRun(pilot_command_t &pcmd)
 {
+  /// @todo implement 5 second pause before actually starting
   ART_MSG(1, "Robot running!");
   return ActionInRun(pcmd);
 }

@@ -75,11 +75,24 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_TOOL, self.run, id=wx.ID_FORWARD)
         self.Bind(wx.EVT_TOOL, self.pause, id=wx.ID_STOP)
 
+        panel = wx.Panel(self, -1)
+        panel.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        panel.SetFocus()
+
         self.Show(True)
 
     def halt(self, e):
         # send done command
         self.Close(True)                # Close the frame.
+
+    def OnKeyDown(self, event):
+        keycode = event.GetKeyCode()
+        if keycode == wx.WXK_UP:
+            self.run(event)
+        elif keycode == wx.WXK_DOWN or keycode == wx.WXK_PAUSE:
+            self.pause(event)
+        else:
+            event.Skip()
 
     def pause(self, e):
         self.statusbar.SetStatusText('Paused')

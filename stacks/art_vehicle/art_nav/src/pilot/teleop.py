@@ -29,7 +29,8 @@ g_topic = rospy.Publisher('pilot/cmd', CarCommand)
 rospy.init_node('teleop')
 
 # set path name for resolving icons
-icons_path = os.path.join(roslib.packages.get_pkg_dir(PKG_NAME), "icons")
+icons_path = os.path.join(roslib.packages.get_pkg_dir(PKG_NAME),
+                          os.path.join("icons", "teleop"))
 
 def find_icon(dir, basename, extlist=['.svg', '.png']):
     """Find icon file with basename in dir.

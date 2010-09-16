@@ -21,8 +21,6 @@
 
 #include <ros/ros.h>
 
-#include <applanix/GpsInfo.h>
-
 #include <art_map/ArtLanes.h>
 #include <art_map/euclidean_distance.h>
 #include <art_map/MapLanes.h>
@@ -54,7 +52,9 @@ int verbose = 0;
 char *rndf_name;
 float poly_size=-1;
 
-applanix_info::gps_info pos = {0, 0};   //gps_info pos = {0, 0};
+double gps_latitude = 0.0;
+double gps_longitude = 0.0;
+
 RNDF *rndf = NULL;
 Graph* graph = NULL;
 
@@ -83,11 +83,11 @@ bool build_RNDF()
       
       std::cout << "RNDF uses GPS waypoints\n";
 
-      if (pos.gps_latitude==0 &&
-	  pos.gps_longitude==0)
+      if (gps_latitude == 0 &&
+	  gps_longitude == 0)
 	{
-	  pos.gps_latitude=graph->nodes[0].ll.latitude;
-	  pos.gps_longitude=graph->nodes[0].ll.longitude;
+	  gps_latitude = graph->nodes[0].ll.latitude;
+	  gps_longitude = graph->nodes[0].ll.longitude;
 	  graph->find_mapxy();
 
 	  float min_x=FLT_MAX;
@@ -145,8 +145,8 @@ bool build_RNDF()
 	    std::setprecision(8)<<
 	    centerlat<<", "<<centerlong<<" "<<zone<<std::endl<<std::endl;
 	  
-	  pos.gps_latitude=centerlat;
-	  pos.gps_longitude=centerlong;
+	  gps_latitude = centerlat;
+	  gps_longitude = centerlong;
 	  
 	}
       graph->find_mapxy();
@@ -213,11 +213,11 @@ void parse_args(int argc, char *argv[])
 	  break;
 
 	case 'x':
-	  pos.gps_latitude = atof(optarg);
+	  gps_latitude = atof(optarg);
 	  break;
 
 	case 'y':
-	  pos.gps_longitude = atof(optarg);
+	  gps_longitude = atof(optarg);
 	  break;
 	 
 	case 's':

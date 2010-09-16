@@ -45,12 +45,10 @@ data are in the \b /odom frame of reference.
 #include <geometry_msgs/PoseStamped.h>
 #include <applanix/GpsInfo.h>
 #include <tf/transform_broadcaster.h>
-#include <art_servo/Shifter.h>
 
+#include <art_servo/Shifter.h>
 #include <art/frames.h>
-#include <art_common/ArtHertz.h>
 #include <art/UTM.h>
-#include <applanix/applanix_info.h>
 
 #include "applanix.h"
 #include "position.h"
@@ -440,7 +438,7 @@ int main(int argc, char** argv)
   if (rc != 0)				// device init failed?
     return 2;
 
-  ros::Rate cycle(art_common::ArtHertz::APPLANIX); // set driver cycle rate
+  ros::Rate cycle(20);                  // set driver cycle rate
   
   ROS_INFO(NODE ": starting main loop");
 

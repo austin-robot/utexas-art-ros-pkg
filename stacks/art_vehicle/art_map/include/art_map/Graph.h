@@ -23,7 +23,6 @@
 #include <fstream>
 #include <cstdlib>
 
-#include <applanix/applanix_info.h>
 #include <art_map/coordinates.h>
 #include <art_map/types.h>
 

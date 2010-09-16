@@ -15,12 +15,8 @@
 
 #include <art_common/ArtHertz.h>
 #include <art_map/ZoneOps.h>
-#include <applanix/applanix_info.h>
-
-using namespace applanix_info;          // defines gps_info
 
 #include <art_nav/NavigatorState.h>
-
 #include <art_nav/NavEstopState.h>
 #include <art_nav/NavRoadState.h>
 

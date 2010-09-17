@@ -1,0 +1,17 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch for testing occupancy grid (costmap) -->
+
+<launch>
+
+  <!-- use costmap_2d for local obstacles -->
+  <node pkg="costmap_2d" type="costmap_2d_node"  name="obstacles">
+    <rosparam file="$(find art_run)/params/obstacles.yaml" />
+  </node>
+
+  <!-- static transforms -->
+  <include file="$(find art_run)/launch/static_transforms.launch"/>
+
+  <!-- obstacle detection via Velodyne ring compression -->
+  <node pkg="velodyne_ringcomp" type="ringcomp" name="ringcomp" />
+
+</launch>

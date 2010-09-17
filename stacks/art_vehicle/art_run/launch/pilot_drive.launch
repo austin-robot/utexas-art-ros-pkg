@@ -30,10 +30,8 @@
   <node pkg="applanix" type="odometry" name="odometry" />
   <node pkg="art_nav" type="$(optenv PILOT_NODE pilot)" name="pilot" />
 
-  <!-- static transforms (including identity tf for /map to /odom) -->
-  <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
-  <node pkg="tf" type="static_transform_publisher" name="odom_is_map"
-        args="0 0 0 0 0 0 /map /odom 1000" />
+  <!-- static transforms -->
+  <include file="$(find art_run)/launch/static_transforms.launch"/>
 
   <!-- start maplanes node with corresponding RNDF -->
   <node pkg="art_map" type="maplanes" name="maplanes">

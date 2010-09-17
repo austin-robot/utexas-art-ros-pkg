@@ -2,47 +2,10 @@
 \mainpage
 \htmlinclude manifest.html
 
-\section launch Launch Files
+This package contains launch files for running and monitoring the
+vehicle.  There are also .yaml files for parameters to use when
+launching various system components.
 
-This package includes several launch files for running and monitoring
-the vehicle.  See the launch subdirectory for a complete list.  
-
-\subsection launch_examples Example Launch Commands
-
-Monitor and control ROS log output.
-
-\verbatim
-$ roslaunch art_run monitor.launch
-\endverbatim
-
-Run pilot with simulated servo devices.
-
-\verbatim
-$ roslaunch art_run pilot_null.launch
-\endverbatim
-
-Run pilot with Stage simulation using \b site_visit_3.world.
-
-\verbatim
-$ roslaunch art_run pilot_stage.launch
-\endverbatim
-
-Run pilot on the car with real servo devices.
-
-\verbatim
-$ roslaunch art_run drive_pilot.launch
-\endverbatim
-
-Capture a raw Velodyne bag file from the live device, including
-odometry, GPS, and coordinate transforms.  The bag file goes in the
-current directory with a "velodyne_" prefix to the current date and
-time.
-
-Interrupt the capture using ^C when finished.  Be aware that the
-device generates about 3.1MB of data per second.
-
-\verbatim
-$ roslaunch art_run velodyne_bag.launch
-\endverbatim
+See the ros.org Wiki documentation for documentation and examples.
 
 */

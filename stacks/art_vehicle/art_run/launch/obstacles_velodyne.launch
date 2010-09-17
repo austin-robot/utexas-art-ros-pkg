@@ -5,7 +5,8 @@
 
   <!-- use costmap_2d for local obstacles -->
   <node pkg="costmap_2d" type="costmap_2d_node"  name="obstacles">
-    <rosparam file="$(find art_run)/params/obstacles.yaml" />
+    <rosparam file="$(find art_run)/params/obstacles_common.yaml" />
+    <rosparam file="$(find art_run)/params/obstacles_velodyne.yaml" />
   </node>
 
   <!-- static transforms -->

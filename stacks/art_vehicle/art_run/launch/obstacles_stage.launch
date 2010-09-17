@@ -1,0 +1,12 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch for testing occupancy grid (costmap) with simulated stage laser -->
+
+<launch>
+
+  <!-- use costmap_2d for local obstacles -->
+  <node pkg="costmap_2d" type="costmap_2d_node"  name="obstacles">
+    <rosparam file="$(find art_run)/params/obstacles_common.yaml" />
+    <rosparam file="$(find art_run)/params/obstacles_stage.yaml" />
+  </node>
+
+</launch>

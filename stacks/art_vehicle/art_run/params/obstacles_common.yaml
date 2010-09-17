@@ -1,4 +1,4 @@
-# local obstacle grid parameters
+# local obstacle grid common parameters
 costmap:
 
     # vehicle dimensions based on ArtVehicle::halfwidth,
@@ -17,18 +17,3 @@ costmap:
     track_unknown_space: true
     transform_tolerance: 0.2                # timeout for old transforms
     update_frequency: 10.0
-    
-    # sensor sources
-    observation_sources: velodyne
-    
-    velodyne:
-    
-        clearing: true
-        data_type: PointCloud
-        expected_update_rate: 0.2           # twice actual frequency
-        marking: true
-        observation_persistence: 0.2
-        obstacle_range: 4.0                 # ignore closer readings
-        raytrace_range: 80.0
-        sensor_frame: /velodyne
-        topic: velodyne/obstacles

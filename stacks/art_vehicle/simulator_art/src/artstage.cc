@@ -67,7 +67,7 @@
 #define USAGE "artstage [-g] <worldfile>"
 
 // ROS relative topic names
-#define FRONT_LASER "laser/front"
+#define FRONT_LASER "front_sick"
 
 // Our node
 class StageNode

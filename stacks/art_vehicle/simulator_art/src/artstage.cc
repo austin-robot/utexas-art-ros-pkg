@@ -321,7 +321,7 @@ StageNode::WorldCallback()
       }
 
       // TODO map each laser to separate frame and topic names
-      this->laserMsgs[r].header.frame_id = mapName(ArtFrames::front_sick, r);
+      this->laserMsgs[r].header.frame_id = "/" + ArtFrames::front_sick;
       this->laserMsgs[r].header.stamp = sim_time;
       this->laser_pubs_[r].publish(this->laserMsgs[r]);
     }

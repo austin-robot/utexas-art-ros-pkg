@@ -16,7 +16,7 @@ costmap:
     transform_tolerance: 0.2                # timeout for old transforms
 
     # map parameters    
-    map_type: costmap                       # experiment with voxel
+    map_type: costmap                       # try voxel later
     rolling_window: true
     static_map: false
     width: 100.0

@@ -9,6 +9,7 @@
 
 import sys
 import os
+import threading
 import wx
 
 PKG_NAME = 'art_nav'
@@ -16,11 +17,34 @@ import roslib;
 roslib.load_manifest(PKG_NAME)
 import rospy
 
-rospy.init_node('teleop')
+from art_nav.msg import Behavior
+from art_nav.msg import EstopState
+from art_nav.msg import NavigatorCommand
+from art_nav.msg import NavigatorState
+
+last_state_ = EstopState()
+new_state_ = EstopState()
+new_behavior_ = Behavior.NONE
+
+state_ = rospy.Publisher('navigator/state', NavigatorState)
+cmd_ = rospy.Publisher('navigator/cmd', NavigatorCommand)
+rospy.init_node('estop')
 
 # set path name for resolving icons
 icons_path = os.path.join(roslib.packages.get_pkg_dir(PKG_NAME),
                           os.path.join("icons", "estop"))
+
+def check_state(state_msg):
+    "check navigator state, request change if not desired state"
+    global last_state_, new_state_, new_behavior_
+    last_state_ = state_msg.estop.state
+    rospy.logdebug('E-stop state: ' + str(last_state_))
+    if last_state_ != new_state_:
+        # send navigator command msg requesting new behavior
+        cmd_msg = NavigatorCommand()
+        cmd_msg.header.frame_id = '/map'
+        cmd_msg.order.behavior.value = new_behavior_
+        cmd_.publish(cmd_msg)
 
 def find_icon(dir, basename, extlist=['.svg', '.png']):
     """Find icon file with basename in dir.
@@ -33,6 +57,9 @@ def find_icon(dir, basename, extlist=['.svg', '.png']):
         if os.path.exists(pathname):
             return pathname
     return None
+
+    # remember last state received
+    last_state_ = state_msg
 
 def pkg_icon(name):
     """Resolve package-relative icon name to path name.
@@ -95,17 +122,40 @@ class MainWindow(wx.Frame):
             event.Skip()
 
     def pause(self, e):
-        self.statusbar.SetStatusText('Paused')
+        "request pause state"
+        global new_behavior_, new_state_
+        new_state_ = EstopState.Pause
+        new_behavior_ = Behavior.Pause
+        self.statusbar.SetStatusText('Pausing')
         pass
 
     def run(self, e):
+        "request run state"
+        global new_behavior_, new_state_
+        new_state_ = EstopState.Run
+        new_behavior_ = Behavior.Run
         self.statusbar.SetStatusText('Running')
-        pass
+
+
+class wxThread(threading.Thread):
+
+    def __init__(self, topic):
+        self.topic = topic
+        rospy.Subscriber('navigator/state', NavigatorState, check_state)
+        threading.Thread.__init__(self)
+
+    def run(self):
+        # run the GUI
+        app = wx.App(False)
+        frame = MainWindow(None, 'ART robot E-stop control')
+        exit_status = app.MainLoop()
+        sys.exit(exit_status)
 
 if __name__ == '__main__':
 
     # run the program
-    app = wx.App(False)
-    frame = MainWindow(None, 'ART robot E-stop control')
-    exit_status = app.MainLoop()
-    sys.exit(exit_status)
+    # needs two threads: GUI main loop and ROS event loop
+    try:
+        wxThread(state_).start()
+        rospy.spin()
+    except rospy.ROSInterruptException: pass

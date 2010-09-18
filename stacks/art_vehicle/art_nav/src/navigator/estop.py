@@ -110,6 +110,7 @@ class MainWindow(wx.Frame):
 
     def halt(self, e):
         # send done command
+        rospy.signal_shutdown('GUI exit')
         self.Close(True)                # Close the frame.
 
     def OnKeyDown(self, event):

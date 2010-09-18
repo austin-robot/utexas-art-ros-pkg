@@ -11,9 +11,16 @@ costmap:
     global_frame: /map
     robot_base_frame: /vehicle
     
-    map_type: costmap                       # experiment with voxel
     publish_frequency: 5.0
-    rolling_window: true
-    track_unknown_space: true
-    transform_tolerance: 0.2                # timeout for old transforms
     update_frequency: 10.0
+    transform_tolerance: 0.2                # timeout for old transforms
+
+    # map parameters    
+    map_type: costmap                       # experiment with voxel
+    rolling_window: true
+    static_map: false
+    width: 100.0
+    height: 100.0
+    resolution: 0.5
+    publish_voxel_map: true
+    track_unknown_space: true

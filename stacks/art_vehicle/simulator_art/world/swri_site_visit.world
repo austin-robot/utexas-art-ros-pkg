@@ -52,7 +52,7 @@ map
   laser_return 0
 )
 
-# create a robot
+# create Marvin
 car
 (
   name "marvin"
@@ -60,46 +60,20 @@ car
   pose [ 46.511 -1.645 0 175.000 ]
   localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
   localization "gps"
-  sick_laser( samples 181 origin [3.178 0.0 0.94 0.0] )
+  sick_laser( samples 181 origin [3.178 0.0 -0.94 0.0] )
   #sick_laser( samples 181 origin [-1.140 0.0 0.94 180.0] )
   laser_return 1          # visible to lasers
 )
 
 
-# create a robot
-#car
-#(
-#  name "robot2"
-#  color "yellow"
-#  pose [ 9.46 -15.515 0 90.000 ]
-## MGR: Ugliness, I'll fix this later
-## Offset between MapLanes and Stage, so the follow_lanes controller works...
-#  localization_origin [-9.6 -5.0 0.0 0.0]
-#  localization "gps"
-#  sick_laser( samples 181 laser_sample_skip 4 origin [3.075 0.0 0.0 0] )
-#)
-
-
-# create a robot
-#car
-#(
-#  name "robot3"
-#  color "grey"
-#  pose [86.000 -15.500 0.0 180.000]
-#  localization_origin [0.0 0.0 0.0 0.0]
-#  localization "gps"
-#  sick_laser( samples 181 laser_sample_skip 4 origin [3.075 0.0 0.0 0] )
-#)
-
-
-# create a robot
+# create another robot as an obstacle
 car
 (
  name "robot4"
   color "blue"
+  size [4.8 2.12 3.0]     # make tall enough for lasers to see
   pose [ -35.967 59.908 0 180.000 ]
   localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
   localization "gps"
-  #sick_laser( samples 181 origin [3.075 0.0 0] )
   laser_return 1          # visible to lasers
 )

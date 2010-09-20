@@ -11,6 +11,6 @@ costmap:
         expected_update_rate: 0.2           # twice actual frequency
         marking: true
         observation_persistence: 1.0
-        obstacle_range: 2.0                 # ignore closer readings
+        obstacle_range: 50.0                 # ignore closer readings
         raytrace_range: 50.0
         sensor_frame: /front_sick

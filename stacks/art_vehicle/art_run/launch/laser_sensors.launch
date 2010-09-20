@@ -1,22 +1,24 @@
 <!-- -*- mode: XML -*- -->
 
-<!-- start nodes to acquire data from cameras and velodyne, with
-     corresponding odometry, GPS and coordinate transforms -->
+<!-- start nodes to acquire data from velodyne (and later, sicks),
+     with corresponding odometry, GPS and coordinate transforms -->
 
 <launch>
 
   <node pkg="applanix" type="odometry" name="odometry"/>
   <node pkg="velodyne_common" type="read" name="velodyne_read"/>
 
-  <include file="$(find art_image)/launch/get_left_front.launch" />
-  <include file="$(find art_image)/launch/get_right_front.launch" />
-
   <!-- global parameters (in this namespace) -->
   <param name="rndf"
          value="$(find art_map)/rndf/$(optenv WORLD prc_large).rndf"/>
 
-  <!-- static transforms -->
+  <!-- static transforms
   <include file="$(find art_run)/launch/static_transforms.launch"/>
+   -->
+
+  <!-- velodyne cost map plus static transforms -->
+  <include file="$(find art_run)/launch/obstacles_velodyne.launch"/>
+
 
   <!-- start maplanes node with corresponding RNDF -->
   <node pkg="art_map" type="maplanes" name="maplanes">

@@ -35,4 +35,7 @@
            value="$(find art_nav)/test/$(optenv WORLD prc_large).mdf"/>
   </node>
 
+  <!-- run E-stop control GUI -->
+  <node pkg="art_nav" type="estop.py" name="estop_control" />
+
 </launch>

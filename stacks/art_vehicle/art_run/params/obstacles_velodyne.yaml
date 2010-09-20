@@ -1,5 +1,6 @@
 # local obstacle grid Velodyne parameters
 costmap:
+    
     # sensor sources
     observation_sources: velodyne/obstacles
 
@@ -10,8 +11,8 @@ costmap:
         data_type: PointCloud
         expected_update_rate: 0.2           # twice actual frequency
         marking: true
-        observation_persistence: 0.2
-        obstacle_range: 4.0                 # ignore closer readings
+        observation_persistence: 1.0
+        obstacle_range: 80.0                # ignore closer readings
         raytrace_range: 80.0
         sensor_frame: /velodyne
         #topic: velodyne/obstacles

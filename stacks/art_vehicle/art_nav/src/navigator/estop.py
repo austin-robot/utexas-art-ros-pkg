@@ -39,7 +39,7 @@ def check_state(state_msg):
     global last_state_, new_state_, new_behavior_
     last_state_ = state_msg.estop.state
     rospy.logdebug('E-stop state: ' + str(last_state_))
-    if last_state_ != new_state_:
+    if last_state_ != new_state_ and new_behavior_ != Behavior.NONE:
         # send navigator command msg requesting new behavior
         cmd_msg = NavigatorCommand()
         cmd_msg.header.frame_id = '/map'

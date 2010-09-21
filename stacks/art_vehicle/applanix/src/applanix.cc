@@ -181,7 +181,7 @@ int DevApplanix::read_packet(ros::Time *time)
 int DevApplanix::get_packet(applanix_data_t *adata)
 {
   GRPHDR_MSG *hdr = (GRPHDR_MSG *) packet_buffer;
-  ros::Time packet_time;
+  ros::Time packet_time = adata->time;
 
   // have we got a complete packet?
   while ((buffer_length < sizeof(GRPHDR_MSG))

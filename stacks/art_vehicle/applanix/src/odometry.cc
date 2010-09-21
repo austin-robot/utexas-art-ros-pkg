@@ -154,10 +154,6 @@ bool getNewData(applanix_data_t *adata)
   do
     {
       ROS_DEBUG_STREAM("got packet, time: " << adata->time);
-#if 0
-      if (adata->time == ros::Time())
-        ROS_WARN_STREAM("invalid packet time: " << adata->time);
-#endif
       rc = applanix_->get_packet(adata);
     }
   while (rc == 0);
@@ -171,6 +167,14 @@ bool getNewData(applanix_data_t *adata)
       ROS_WARN("Applanix alignment invalid");
       return false;			// no valid solution yet
     }
+
+#if 1
+  if (adata->time == ros::Time())
+    {
+      ROS_WARN_STREAM("invalid packet time: " << adata->time);
+      return false;
+    }
+#endif
 
   last_time = adata->time;              // remember time of last update
   return true;

@@ -1,3 +1,4 @@
+<!-- -*- mode: XML -*- -->
 <!-- static transforms (including identity tf for /map to /odom) -->
 <launch>
   <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>

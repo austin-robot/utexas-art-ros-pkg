@@ -9,19 +9,20 @@
   <license>BSD</license>
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/applanix</url>
-  <depend package="roscpp"/>
+
   <depend package="angles"/>
-  <depend package="nav_msgs"/>
-  <depend package="tf"/>
   <depend package="art_common"/>
+  <depend package="art_msgs"/>
   <depend package="art_servo"/>
+  <depend package="nav_msgs"/>
+  <depend package="roscpp"/>
+  <depend package="tf"/>
 
   <!-- declare build dependency on pcap library -->
   <rosdep name="libpcap"/>
 
   <export>
-    <cpp cflags="-I${prefix}/include"
-         lflags="-lpcap"/>
+    <cpp lflags="-lpcap"/>
   </export>
 
 </package>

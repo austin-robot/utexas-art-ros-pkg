@@ -25,7 +25,7 @@ provides differential GPS and accurate inertial navigation.
 and velocity in three dimensions, including roll, pitch, and yaw.  All
 data are in the \b /odom frame of reference.
 
-- \b gps (applanix/GpsInfo): Current GPS status from the Applanix.
+- \b gps (art_msgs/GpsInfo): Current GPS status from the Applanix.
 
 - \b tf: broadcast transform from \b vehicle frame to \b odom frame.
 
@@ -43,7 +43,7 @@ data are in the \b /odom frame of reference.
 
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <applanix/GpsInfo.h>
+#include <art_msgs/GpsInfo.h>
 #include <tf/transform_broadcaster.h>
 
 #include <art_servo/Shifter.h>
@@ -184,7 +184,7 @@ bool getNewData(applanix_data_t *adata)
 void publishGPS(const applanix_data_t &adata, double utm_e, double utm_n,
                 const char* zone, ros::Publisher *gps_pub)
 {
-  applanix::GpsInfo gpsi;
+  art_msgs::GpsInfo gpsi;
 
   gpsi.header.stamp = adata.time;
   gpsi.header.frame_id = vr_.getFrame(ArtFrames::odom);
@@ -198,13 +198,13 @@ void publishGPS(const applanix_data_t &adata, double utm_e, double utm_n,
   switch (adata.grp1.alignment)
     {
     case ApplStatusFull:
-      gpsi.quality = applanix::GpsInfo::DGPS_FIX;
+      gpsi.quality = art_msgs::GpsInfo::DGPS_FIX;
       break;
     case ApplStatusFine:
-      gpsi.quality = applanix::GpsInfo::GPS_FIX;
+      gpsi.quality = art_msgs::GpsInfo::GPS_FIX;
       break;
     default:
-      gpsi.quality = applanix::GpsInfo::INVALID_FIX;
+      gpsi.quality = art_msgs::GpsInfo::INVALID_FIX;
     }
 
   /// \todo unpack Applanix grp2 and grp3 data to complete other fields
@@ -221,7 +221,7 @@ void publishGPS(const applanix_data_t &adata, double utm_e, double utm_n,
  *
  *  \param odom_pos3d -> updated position, if new data
  *  \param odom_time  -> updated time when new data received
- *  \param gps_pub    -> ROS GpsInfo topic publisher
+ *  \param gps_pub    -> GpsInfo ROS topic publisher
  *
  *  \returns true if odometry should be published
  */
@@ -433,7 +433,7 @@ int main(int argc, char** argv)
   ros::Publisher odom_pub =
     node.advertise<nav_msgs::Odometry>("odom", qDepth);
   ros::Publisher gps_pub =
-    node.advertise<applanix::GpsInfo>("gps", qDepth);
+    node.advertise<art_msgs::GpsInfo>("gps", qDepth);
   tf::TransformBroadcaster odom_broadcaster;
   shifter_sub_ = node.subscribe("shifter/state", qDepth, getShifter, noDelay);
 

@@ -27,7 +27,7 @@
 #include <art_servo/ThrottleState.h>
 #include <art_servo/steering.h>
 
-#include <applanix/GpsInfo.h>
+#include <art_msgs/GpsInfo.h>
 
 #include "vehicle_model.h"
 
@@ -41,7 +41,7 @@ void ArtVehicleModel::setup(void)
   ground_truth_pub_ =
     node_.advertise<nav_msgs::Odometry>(ns_prefix_ + "ground_truth", qDepth);
   gps_pub_ =
-    node_.advertise<applanix::GpsInfo>(ns_prefix_ + "gps", qDepth);
+    node_.advertise<art_msgs::GpsInfo>(ns_prefix_ + "gps", qDepth);
   
   // servo state topics
   brake_sub_ =
@@ -244,7 +244,7 @@ void ArtVehicleModel::update(ros::Time sim_time)
 
 void ArtVehicleModel::publishGPS(ros::Time sim_time)
 {
-  applanix::GpsInfo gpsi;
+  art_msgs::GpsInfo gpsi;
 
   gpsi.header.stamp = sim_time;
   gpsi.header.frame_id = tf_prefix_ + ArtFrames::odom;
@@ -260,7 +260,7 @@ void ArtVehicleModel::publishGPS(ros::Time sim_time)
 
   gpsi.zone = origin_zone_;
   gpsi.altitude   = odomMsg_.pose.pose.position.z;
-  gpsi.quality = applanix::GpsInfo::DGPS_FIX;
+  gpsi.quality = art_msgs::GpsInfo::DGPS_FIX;
   gpsi.num_sats = 9;
 
   gps_pub_.publish(gpsi);

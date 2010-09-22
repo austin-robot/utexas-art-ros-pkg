@@ -2,10 +2,9 @@
 costmap:
     
     # sensor sources
-    observation_sources: velodyne/obstacles
+    observation_sources: velodyne_obstacles
 
-    velodyne:
-      obstacles:
+    velodyne_obstacles:
     
         clearing: true
         data_type: PointCloud
@@ -15,4 +14,4 @@ costmap:
         obstacle_range: 80.0                # ignore closer readings
         raytrace_range: 80.0
         sensor_frame: /velodyne
-        #topic: velodyne/obstacles
+        topic: velodyne/obstacles

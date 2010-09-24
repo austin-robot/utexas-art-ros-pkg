@@ -101,7 +101,7 @@ Controller::result_t Estop::control(pilot_command_t &pcmd)
       ROS_INFO_STREAM("Navigator E-stop state changing from " << prev.Name()
                        << " to " << state.Name()
                        << ", event = " << event.Name());
-      navdata->estop.state = (art_nav::EstopState::_state_type) state.Value();
+      navdata->estop.state = (art_msgs::EstopState::_state_type) state.Value();
     }
 
   // perform transition action, returning next Pilot command

@@ -12,7 +12,7 @@ import roslib;
 roslib.load_manifest('art_nav')
 
 import rospy
-from art_nav.msg   import CarCommand
+from art_msgs.msg  import CarCommand
 from nav_msgs.msg  import Odometry
 from art_servo.msg import BrakeCommand
 from art_servo.msg import BrakeState

@@ -17,8 +17,8 @@
 
 #include <art_nav/NavBehavior.h>
 #include <art_nav/Mission.h>
-#include <art_nav/NavigatorCommand.h>
-#include <art_nav/NavigatorState.h>
+#include <art_msgs/NavigatorCommand.h>
+#include <art_msgs/NavigatorState.h>
 
 #include "Blockage.h"
 #include "Path.h"
@@ -35,7 +35,7 @@ class Commander
   Commander(int verbosity, double limit, Graph* _graph, Mission* _mission,
 	    const ZonePerimeterList& _zones);
   ~Commander();
-  art_nav::Order command(const art_nav::NavigatorState &cur_navstate);
+  art_msgs::Order command(const art_msgs::NavigatorState &cur_navstate);
 
  private:
   int verbose;
@@ -48,8 +48,8 @@ class Commander
   Blockages* blockages;
 
   ElementID current_way;
-  const art_nav::NavigatorState *navstate; // current Navigator state
-  art_nav::Order order;
+  const art_msgs::NavigatorState *navstate; // current Navigator state
+  art_msgs::Order order;
 
   WayPointNode goal;			// next checkpoint goal
   WayPointNode goal2;			// following checkpoint
@@ -70,7 +70,7 @@ class Commander
   bool next_checkpoint(void);
 
   // prepare next Navigator order
-  art_nav::Order prepare_order(art_nav::Behavior::_value_type behavior);
+  art_msgs::Order prepare_order(art_msgs::Behavior::_value_type behavior);
 
   // replan route, return true if successful
   bool replan_route();

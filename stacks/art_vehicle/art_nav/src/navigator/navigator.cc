@@ -32,7 +32,7 @@ Navigator::Navigator(nav_msgs::Odometry *odom_msg)
 {
   odometry = odom_msg;
 
-  order.behavior.value = art_nav::Behavior::Pause; // initial order
+  order.behavior.value = art_msgs::Behavior::Pause; // initial order
 
   // set navigator state flags to false, current polygon none
   navdata.cur_poly = -1;

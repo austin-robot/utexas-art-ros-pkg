@@ -116,9 +116,9 @@ protected:
   Course *course;
   Obstacle *obstacle;
   nav_msgs::Odometry *estimate;
-  art_nav::NavigatorState *navdata;
+  art_msgs::NavigatorState *navdata;
   nav_msgs::Odometry *odom;
-  art_nav::Order *order;
+  art_msgs::Order *order;
   PolyOps *pops;
 
   // reset this controller only

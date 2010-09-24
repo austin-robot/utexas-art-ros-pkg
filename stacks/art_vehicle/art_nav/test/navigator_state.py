@@ -11,10 +11,10 @@ import roslib;
 roslib.load_manifest('art_nav')
 
 import rospy
-from art_map.msg import MapID
-from art_nav.msg import EstopState
-from art_nav.msg import NavigatorState
-from art_nav.msg import RoadState
+from art_msgs.msg import MapID
+from art_msgs.msg import EstopState
+from art_msgs.msg import NavigatorState
+from art_msgs.msg import RoadState
 
 def log_state(state_msg):
     "log navigator state information"

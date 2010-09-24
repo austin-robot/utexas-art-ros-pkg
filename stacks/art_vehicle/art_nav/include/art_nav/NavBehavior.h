@@ -13,7 +13,7 @@
 #define __NAV_BEHAVIORS_H__
 
 #include <ostream>
-#include <art_nav/Behavior.h>
+#include <art_msgs/Behavior.h>
 
 /** ART vehicle navigator behaviors */
 class NavBehavior
@@ -59,7 +59,7 @@ public:
     this->behavior = ibehavior;
   }
 
-  NavBehavior(const art_nav::Behavior &behavior_msg)
+  NavBehavior(const art_msgs::Behavior &behavior_msg)
   {
     this->behavior = (nav_behavior_t) behavior_msg.value;
   }

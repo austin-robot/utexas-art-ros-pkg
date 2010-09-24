@@ -57,8 +57,8 @@ from art_common.msg import ArtVehicle
 from art_common.msg import conversions
 from art_common.msg import epsilon
 
-from art_nav.msg import CarCommand
-from art_nav.msg import CarControl
+from art_msgs.msg import CarCommand
+from art_msgs.msg import CarControl
 from art_nav.cfg import PilotConfig
 
 import steering

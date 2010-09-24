@@ -123,7 +123,7 @@ void CmdrFSM::Add(CmdrEvent::event_t event, action_t action,
   xp->next = to_state;
 }
 
-art_nav::Order CmdrFSM::control(const art_nav::NavigatorState *_navstate)
+art_msgs::Order CmdrFSM::control(const art_msgs::NavigatorState *_navstate)
 {
   navstate = *_navstate;
 
@@ -286,61 +286,61 @@ CmdrEvent CmdrFSM::current_event()
 
 // error actions
 
-art_nav::Order CmdrFSM::ActionError(CmdrEvent event)
+art_msgs::Order CmdrFSM::ActionError(CmdrEvent event)
 {
   ROS_ERROR_STREAM("Invalid Commander event " << event.Name()
                    << " in state " << prev.Name());
   return ActionFail(event);
 }
 
-art_nav::Order CmdrFSM::ActionFail(CmdrEvent event)
+art_msgs::Order CmdrFSM::ActionFail(CmdrEvent event)
 {
   ROS_ERROR("Mission failure!");
-  art_nav::Order abort_order;
-  abort_order.behavior.value = art_nav::Behavior::Abort;
+  art_msgs::Order abort_order;
+  abort_order.behavior.value = art_msgs::Behavior::Abort;
   return abort_order;
 
 }
 
-art_nav::Order CmdrFSM::ActionWait(CmdrEvent event)
+art_msgs::Order CmdrFSM::ActionWait(CmdrEvent event)
 {
   ROS_INFO_THROTTLE(10, "No replan.  Just wait it out.");
-  return cmdr->prepare_order(art_nav::Behavior::Go);
+  return cmdr->prepare_order(art_msgs::Behavior::Go);
 }
 
 
 // steady state actions
 
-art_nav::Order CmdrFSM::ActionInDone(CmdrEvent event)
+art_msgs::Order CmdrFSM::ActionInDone(CmdrEvent event)
 {
-  art_nav::Order done_order;
-  done_order.behavior.value = art_nav::Behavior::Quit;
+  art_msgs::Order done_order;
+  done_order.behavior.value = art_msgs::Behavior::Quit;
   return done_order;
 }  
 
-art_nav::Order CmdrFSM::ActionInInit(CmdrEvent event)
+art_msgs::Order CmdrFSM::ActionInInit(CmdrEvent event)
 {
-  art_nav::Order init_order;
-  init_order.behavior.value = art_nav::Behavior::Initialize;
+  art_msgs::Order init_order;
+  init_order.behavior.value = art_msgs::Behavior::Initialize;
   return init_order;
 }  
 
-art_nav::Order CmdrFSM::ActionInRoad(CmdrEvent event)
+art_msgs::Order CmdrFSM::ActionInRoad(CmdrEvent event)
 {
   // prepare order for navigator driver
-  return cmdr->prepare_order(art_nav::Behavior::Go);
+  return cmdr->prepare_order(art_msgs::Behavior::Go);
 }  
 
 
 // state entry actions
 
-art_nav::Order CmdrFSM::ActionToDone(CmdrEvent event)
+art_msgs::Order CmdrFSM::ActionToDone(CmdrEvent event)
 {
   ROS_INFO("Mission completed!");
   return ActionInDone(event);
 }
 
-art_nav::Order CmdrFSM::ActionToRoad(CmdrEvent event)
+art_msgs::Order CmdrFSM::ActionToRoad(CmdrEvent event)
 {
   ROS_INFO("On the road.");
   return ActionInRoad(event);
@@ -348,7 +348,7 @@ art_nav::Order CmdrFSM::ActionToRoad(CmdrEvent event)
 
 // re-planning transitions
 
-art_nav::Order CmdrFSM::BlockedInRoad(CmdrEvent event)
+art_msgs::Order CmdrFSM::BlockedInRoad(CmdrEvent event)
 {
   ROS_INFO("Road blocked, making a new plan.");
 
@@ -360,7 +360,7 @@ art_nav::Order CmdrFSM::BlockedInRoad(CmdrEvent event)
 }
 
 
-art_nav::Order CmdrFSM::ReplanInRoad(CmdrEvent event)
+art_msgs::Order CmdrFSM::ReplanInRoad(CmdrEvent event)
 {
   ROS_INFO("Making new plan.");
   
@@ -372,7 +372,7 @@ art_nav::Order CmdrFSM::ReplanInRoad(CmdrEvent event)
 }
 
 
-art_nav::Order CmdrFSM::InitToRoad(CmdrEvent event)
+art_msgs::Order CmdrFSM::InitToRoad(CmdrEvent event)
 {
   ROS_INFO("On the road, making initial plan.");
   

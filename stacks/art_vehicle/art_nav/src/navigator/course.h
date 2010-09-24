@@ -309,7 +309,7 @@ class Course
   // Internal state.  Some of these vectors are class variables to
   // minimize dynamic memory allocation, instead of making them
   // automatic.
-  ElementID plan_waypt[art_nav::Order::N_WAYPTS]; //< waypts in the plan
+  ElementID plan_waypt[art_msgs::Order::N_WAYPTS]; //< waypts in the plan
   bool new_plan_lanes;			//< new lanes since plan made
   bool waypoint_checked;
   int poly_index;			// index in polygons of odom pose
@@ -320,7 +320,7 @@ class Course
   int passing_lane;			// index of passing lane (or -1)
 
   // saved order way-points for road block
-  ElementID saved_waypt_id[art_nav::Order::N_WAYPTS];
+  ElementID saved_waypt_id[art_msgs::Order::N_WAYPTS];
   int saved_replan_num;
 
   // .cfg variables
@@ -349,8 +349,8 @@ class Course
 
   // convenience pointers to Navigator class data
   PolyOps* pops;			// polygon operations class
-  art_nav::Order *order;                // current commander order
-  art_nav::NavigatorState *navdata;     // current navigator state data
+  art_msgs::Order *order;               // current commander order
+  art_msgs::NavigatorState *navdata;   // current navigator state data
   nav_msgs::Odometry *odom;             // current odometry position
   nav_msgs::Odometry *estimate;         // estimated control position
 

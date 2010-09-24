@@ -16,7 +16,7 @@
 #include <art_common/ArtHertz.h>
 #include <art_map/ZoneOps.h>
 
-#include <art_nav/NavigatorState.h>
+#include <art_msgs/NavigatorState.h>
 #include <art_nav/NavEstopState.h>
 #include <art_nav/NavRoadState.h>
 
@@ -147,12 +147,12 @@ public:
                                       &CommanderNode::processNavState, this,
                                       noDelay);
     nav_cmd_pub_ = 
-      node.advertise<art_nav::NavigatorCommand>("navigator/cmd", qDepth);
+      node.advertise<art_msgs::NavigatorCommand>("navigator/cmd", qDepth);
     return true;
   }
 
   /** Process navigator state input */
-  void processNavState(const art_nav::NavigatorState::ConstPtr &nst)
+  void processNavState(const art_msgs::NavigatorState::ConstPtr &nst)
   {
     ROS_DEBUG("navigator state message received");
     navState_ = *nst;
@@ -253,9 +253,9 @@ public:
 
   
   /** Send order in command to navigator driver */
-  void putOrder(const art_nav::Order &order)
+  void putOrder(const art_msgs::Order &order)
   {
-    art_nav::NavigatorCommand cmd;
+    art_msgs::NavigatorCommand cmd;
     cmd.header.stamp = ros::Time::now();
     cmd.header.frame_id = frame_id_;
     cmd.order = order;
@@ -270,7 +270,7 @@ public:
     if (startrun_)                      // -r option specified?
       {
         ROS_INFO("ordering navigator to Run");
-        art_nav::Order run_order;
+        art_msgs::Order run_order;
         run_order.behavior.value = NavBehavior::Run;
         putOrder(run_order);
       }
@@ -305,7 +305,7 @@ public:
           }
 
 	// generate navigator order for this cycle
-        art_nav::Order next_order = commander.command(navState_);
+        art_msgs::Order next_order = commander.command(navState_);
 	
 	// send next order to Navigator, if any
 	if (next_order.behavior.value != NavBehavior::None)
@@ -366,7 +366,7 @@ private:
   // topics and messages
   ros::Subscriber nav_state_topic_;       // navigator state topic
   ros::Publisher nav_cmd_pub_;            // navigator command topic
-  art_nav::NavigatorState navState_;      // last received
+  art_msgs::NavigatorState navState_;     // last received
 
   RNDF *rndf_;
   MDF *mdf_;

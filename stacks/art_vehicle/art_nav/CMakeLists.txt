@@ -16,11 +16,6 @@ rosbuild_find_ros_package(dynamic_reconfigure)
 include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 gencfg()
 
-#uncomment if you have defined messages
-rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
-
 add_subdirectory(src/lib)
 add_subdirectory(src/pilot)
 add_subdirectory(src/commander)

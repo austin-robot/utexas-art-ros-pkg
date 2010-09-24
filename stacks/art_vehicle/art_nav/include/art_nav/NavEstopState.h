@@ -15,7 +15,7 @@
 #ifndef __NAV_ESTOP_STATE_H__
 #define __NAV_ESTOP_STATE_H__
 
-#include <art_nav/EstopState.h>
+#include <art_msgs/EstopState.h>
 #include <art_nav/FSMstate.h>
 
 class NavEstopState: FSMstate
@@ -41,7 +41,7 @@ public:
     this->state = istate;
   }
 
-  NavEstopState(const art_nav::EstopState &estop_msg)
+  NavEstopState(const art_msgs::EstopState &estop_msg)
   {
     this->state = (NavEstopState::state_t) estop_msg.state;
   }

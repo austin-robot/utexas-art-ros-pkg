@@ -18,7 +18,6 @@
   <depend package="dynamic_reconfigure" />
   <depend package="joy"/>
   <depend package="nav_msgs"/>
-  <depend package="rosbagmigration"/>
   <depend package="roscpp"/>
   <depend package="rospy"/>
   <depend package="std_msgs"/>

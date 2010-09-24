@@ -17,10 +17,10 @@ import roslib;
 roslib.load_manifest(PKG_NAME)
 import rospy
 
-from art_nav.msg import Behavior
-from art_nav.msg import EstopState
-from art_nav.msg import NavigatorCommand
-from art_nav.msg import NavigatorState
+from art_msgs.msg import Behavior
+from art_msgs.msg import EstopState
+from art_msgs.msg import NavigatorCommand
+from art_msgs.msg import NavigatorState
 
 last_state_ = EstopState()
 new_state_ = EstopState()

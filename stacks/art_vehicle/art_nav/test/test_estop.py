@@ -11,11 +11,11 @@ import roslib;
 roslib.load_manifest('art_nav')
 
 import rospy
-from art_nav.msg import Behavior
-from art_nav.msg import EstopState
-from art_map.msg import MapID
-from art_nav.msg import NavigatorCommand
-from art_nav.msg import NavigatorState
+from art_msgs.msg import Behavior
+from art_msgs.msg import EstopState
+from art_msgs.msg import MapID
+from art_msgs.msg import NavigatorCommand
+from art_msgs.msg import NavigatorState
 
 import sys
 

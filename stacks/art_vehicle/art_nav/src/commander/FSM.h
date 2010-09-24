@@ -52,7 +52,7 @@ class CmdrFSM
 public:
 
   // state transition action method pointer
-  typedef art_nav::Order (CmdrFSM::*action_t)(CmdrEvent event);
+  typedef art_msgs::Order (CmdrFSM::*action_t)(CmdrEvent event);
 
   // state transition table entry
   typedef struct
@@ -64,7 +64,7 @@ public:
   CmdrFSM(Commander *cmdr_ptr, int verbosity);
   ~CmdrFSM() {};
 
-  art_nav::Order control(const art_nav::NavigatorState *_navstate);
+  art_msgs::Order control(const art_msgs::NavigatorState *_navstate);
 
   CmdrState State(void)
   {
@@ -76,7 +76,7 @@ private:
 
   int verbose;
   Commander *cmdr;
-  art_nav::NavigatorState navstate;
+  art_msgs::NavigatorState navstate;
   CmdrState prev;
   CmdrState state;
   transtion_t ttable[CmdrEvent::N_events][CmdrState::N_states];
@@ -98,23 +98,23 @@ private:
   //////////////////////////////////////////////////////////////////////
 
   // error actions
-  art_nav::Order ActionError(CmdrEvent event);
-  art_nav::Order ActionFail(CmdrEvent event);
-  art_nav::Order ActionWait(CmdrEvent event);
+  art_msgs::Order ActionError(CmdrEvent event);
+  art_msgs::Order ActionFail(CmdrEvent event);
+  art_msgs::Order ActionWait(CmdrEvent event);
 
   // steady state actions
-  art_nav::Order ActionInDone(CmdrEvent event);  
-  art_nav::Order ActionInInit(CmdrEvent event);  
-  art_nav::Order ActionInRoad(CmdrEvent event);  
+  art_msgs::Order ActionInDone(CmdrEvent event);  
+  art_msgs::Order ActionInInit(CmdrEvent event);  
+  art_msgs::Order ActionInRoad(CmdrEvent event);  
 
   // state entry actions
-  art_nav::Order ActionToDone(CmdrEvent event);
-  art_nav::Order ActionToRoad(CmdrEvent event);
+  art_msgs::Order ActionToDone(CmdrEvent event);
+  art_msgs::Order ActionToRoad(CmdrEvent event);
 
   // re-planning transitions
-  art_nav::Order BlockedInRoad(CmdrEvent event);
-  art_nav::Order ReplanInRoad(CmdrEvent event);
-  art_nav::Order InitToRoad(CmdrEvent event);
+  art_msgs::Order BlockedInRoad(CmdrEvent event);
+  art_msgs::Order ReplanInRoad(CmdrEvent event);
+  art_msgs::Order InitToRoad(CmdrEvent event);
 };
 
 #endif // __CMDR_FSM_H__

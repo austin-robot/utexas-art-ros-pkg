@@ -29,23 +29,23 @@
 #include <art_map/euclidean_distance.h>
 #include <art_map/PolyOps.h>
 
-#include <art_nav/Behavior.h>
-#include <art_nav/NavigatorCommand.h>
-#include <art_nav/NavigatorState.h>
-#include <art_nav/Observers.h>
+#include <art_msgs/Behavior.h>
+#include <art_msgs/NavigatorCommand.h>
+#include <art_msgs/NavigatorState.h>
+#include <art_msgs/Observers.h>
 #include <nav_msgs/Odometry.h>
 
 #include <art_nav/NavBehavior.h>
 
 // Provide short names for some messages so they can more easily be
 // packaged differently.
-using art_nav::Behavior;
-using art_nav::NavigatorCommand;
-using art_nav::NavigatorState;
-using art_nav::Observers;
-using art_nav::Observation;
+using art_msgs::Behavior;
+using art_msgs::NavigatorCommand;
+using art_msgs::NavigatorState;
+using art_msgs::Observers;
+using art_msgs::Observation;
 using nav_msgs::Odometry;
-using art_nav::Order;
+using art_msgs::Order;
 
 typedef struct
 {
@@ -71,9 +71,9 @@ public:
   Estop	*estop;
 
   // public data used by controllers
-  art_nav::Order order;                 // current commander order
-  art_nav::NavigatorState navdata;      // current navigator state data
-  nav_msgs::Odometry estimate;          // estimated control position
+  art_msgs::Order order;               // current commander order
+  art_msgs::NavigatorState navdata;    // current navigator state data
+  nav_msgs::Odometry estimate;         // estimated control position
   nav_msgs::Odometry *odometry;
 
   // public methods

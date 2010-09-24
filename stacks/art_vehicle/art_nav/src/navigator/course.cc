@@ -89,19 +89,19 @@ void Course::begin_run_cycle(void)
   // This order may have been issued before Commander saw the
   // last_waypt Navigator returned in a previous cycle.  Make sure the
   // order reflects the current situation.
-  int limit = art_nav::Order::N_WAYPTS; // search limit
+  int limit = art_msgs::Order::N_WAYPTS; // search limit
   while (ElementID(order->waypt[0].id) != ElementID(navdata->last_waypt)
          && --limit > 0)
     {
       ROS_DEBUG_STREAM("waypoint " << ElementID(order->waypt[1].id).name().str
                        << " already reached, advance order->waypt[] array");
       // advance order->waypt array by one
-      for (unsigned i = 1; i < art_nav::Order::N_WAYPTS; ++i)
+      for (unsigned i = 1; i < art_msgs::Order::N_WAYPTS; ++i)
         order->waypt[i-1] = order->waypt[i];
     }
 
   // log current order attributes
-  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
+  for (unsigned i = 0; i < art_msgs::Order::N_WAYPTS; ++i)
     ROS_DEBUG("waypt[%u] %s (%.3f,%.3f), E%d G%d L%d P%d S%d X%d Z%d",
               i, ElementID(order->waypt[i].id).name().str,
               order->waypt[i].mapxy.x,
@@ -961,7 +961,7 @@ bool Course::new_waypts(void)
   if (saved_replan_num!=order->replan_num)
     return true;
 
-  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
+  for (unsigned i = 0; i < art_msgs::Order::N_WAYPTS; ++i)
     if (saved_waypt_id[i] != order->waypt[i].id)
       return true;
 
@@ -989,7 +989,7 @@ ElementID Course::replan_roadblock(void)
   saved_replan_num=order->replan_num;
 
   // save current order way-points
-  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
+  for (unsigned i = 0; i < art_msgs::Order::N_WAYPTS; ++i)
     {
       saved_waypt_id[i] = order->waypt[i].id;
       if (verbose >= 4)
@@ -1053,7 +1053,7 @@ Course::direction_t Course::intersection_direction(void)
 //
 float Course::stop_waypt_distance(bool same_lane)
 {
-  for (unsigned i = 1; i < art_nav::Order::N_WAYPTS; ++i)
+  for (unsigned i = 1; i < art_msgs::Order::N_WAYPTS; ++i)
     {
       // only consider way-points in the current lane
       if (same_lane
@@ -1173,7 +1173,7 @@ float Course::uturn_distance(void)
 //
 int Course::uturn_order_index(void)
 {
-  for (unsigned i = 1; i < art_nav::Order::N_WAYPTS-1; ++i)
+  for (unsigned i = 1; i < art_msgs::Order::N_WAYPTS-1; ++i)
     {
       // only consider way-points in the current lane
       if (!ElementID(order->waypt[i].id).same_lane(ElementID(order->waypt[0].id)))
@@ -1471,7 +1471,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
 
 bool Course::spot_ahead()
 {
-  for (uint i=0; i<art_nav::Order::N_WAYPTS-1;i++)
+  for (uint i=0; i<art_msgs::Order::N_WAYPTS-1;i++)
     if (order->waypt[i].is_spot &&
 	order->waypt[i+1].is_spot &&
 	order->waypt[i].id.pt==1 &&
@@ -1528,7 +1528,7 @@ mapxy_list_t Course::calculate_spot_points(const std::vector<WayPointNode>& new_
 {
   mapxy_list_t spot_points;
 
-  for (uint i=0; i<art_nav::Order::N_WAYPTS-1;i++)
+  for (uint i=0; i<art_msgs::Order::N_WAYPTS-1;i++)
     if (new_waypts[i].is_spot &&
 	new_waypts[i+1].is_spot &&
 	new_waypts[i].id.pt==1 &&
@@ -1580,7 +1580,7 @@ mapxy_list_t Course::calculate_spot_points()
 {
   mapxy_list_t spot_points;
 
-  for (uint i=0; i<art_nav::Order::N_WAYPTS-1;i++)
+  for (uint i=0; i<art_msgs::Order::N_WAYPTS-1;i++)
     if (order->waypt[i].is_spot &&
 	order->waypt[i+1].is_spot &&
 	order->waypt[i].id.pt==1 &&

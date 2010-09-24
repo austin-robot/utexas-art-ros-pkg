@@ -23,10 +23,10 @@
 #include <art_servo/steering.h>
 #include <art_map/ZoneOps.h>
 
-#include <art_nav/CarCommand.h>
+#include <art_msgs/CarCommand.h>
 #include <art_nav/NavEstopState.h>
 #include <art_nav/NavRoadState.h>
-//#include <art_nav/Observers.h>
+//#include <art_msgs/Observers.h>
 
 #include "navigator_internal.h"
 #include "course.h"
@@ -63,7 +63,7 @@ public:
 
 private:
 
-  void processNavCmd(const art_nav::NavigatorCommand::ConstPtr &cmdIn);
+  void processNavCmd(const art_msgs::NavigatorCommand::ConstPtr &cmdIn);
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void processRoadMap(const art_msgs::ArtLanes::ConstPtr &cmdIn);
   void processRelays(const art_servo::IOadrState::ConstPtr &sigIn);
@@ -115,7 +115,7 @@ NavQueueMgr::NavQueueMgr()
 
 /** Handle command input. */
 void NavQueueMgr::processNavCmd(const
-                                art_nav::NavigatorCommand::ConstPtr &cmdIn)
+                                art_msgs::NavigatorCommand::ConstPtr &cmdIn)
 {
   ROS_DEBUG_STREAM("Navigator order:"
                    << NavBehavior(cmdIn->order.behavior).Name());
@@ -199,9 +199,9 @@ bool NavQueueMgr::setup(ros::NodeHandle node)
                                   &NavQueueMgr::processRelays, this, noDelay);
 
   // topics to write
-  car_cmd_ = node.advertise<art_nav::CarCommand>("pilot/cmd", qDepth);
+  car_cmd_ = node.advertise<art_msgs::CarCommand>("pilot/cmd", qDepth);
   nav_state_ =
-    node.advertise<art_nav::NavigatorState>("navigator/state", qDepth);
+    node.advertise<art_msgs::NavigatorState>("navigator/state", qDepth);
   signals_cmd_ = node.advertise<art_servo::IOadrCommand>("ioadr/cmd", qDepth);
 
   return true;
@@ -282,7 +282,7 @@ void NavQueueMgr::SetRelays(void)
 /** Send a command to the pilot */
 void NavQueueMgr::SetSpeed(pilot_command_t pcmd)
 {
-  art_nav::CarCommand cmd;
+  art_msgs::CarCommand cmd;
   cmd.header.stamp = ros::Time::now();
   cmd.header.frame_id = ArtFrames::vehicle;
 

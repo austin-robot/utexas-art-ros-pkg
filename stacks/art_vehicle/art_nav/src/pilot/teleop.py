@@ -22,8 +22,8 @@ from PyQt4 import QtCore
 import roslib;
 roslib.load_manifest(PKG_NAME)
 import rospy
-from art_nav.msg import CarControl
-from art_nav.msg import CarCommand
+from art_msgs.msg import CarControl
+from art_msgs.msg import CarCommand
 
 g_topic = rospy.Publisher('pilot/cmd', CarCommand)
 rospy.init_node('teleop')

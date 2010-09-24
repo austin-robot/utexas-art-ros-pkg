@@ -45,10 +45,10 @@
 #include <art_common/ArtVehicle.h>
 #include <art_common/ArtHertz.h>
 
-#include <art_nav/CarCommand.h>
+#include <art_msgs/CarCommand.h>
 #include <art_nav/PilotConfig.h>
 
-#include <art_nav/LearningCommand.h>
+#include <art_msgs/LearningCommand.h>
 
 #include "learned_controller.h"
 #include "speed.h"
@@ -66,7 +66,7 @@ tools, it also responds to Twist messages on the cmd_vel topic.
 
 Subscribes:
 
-- \b pilot/cmd [art_nav::CarCommand] velocity and steering angle command
+- \b pilot/cmd [art_msgs::CarCommand] velocity and steering angle command
 - \b vel_cmd [geometry_msgs::Twist] standard ROS velocity and angle command
 - \b odom [nav_msgs::Odometry] estimate of robot position and velocity.
 
@@ -125,8 +125,8 @@ namespace
   nav_msgs::Odometry odom_msg_;
 
   // pilot command messages
-  art_nav::CarControl goal_msg_;
-  art_nav::LearningCommand current_learning_cmd_;
+  art_msgs::CarControl goal_msg_;
+  art_msgs::LearningCommand current_learning_cmd_;
   
   ros::Time goal_time_;                 // time of last CarCommand
   geometry_msgs::Twist twist_msg_;
@@ -189,7 +189,7 @@ int getParameters(int argc, char *argv[])
   return 0;
 }
 
-void setGoal(const art_nav::CarControl *command)
+void setGoal(const art_msgs::CarControl *command)
 {
   //ROS_DEBUG("setting (velocity ,angle) to (%.3f, %.3f)",
   //          command->velocity, command->angle);
@@ -224,12 +224,12 @@ void setGoal(const art_nav::CarControl *command)
     }
 }
 
-void processCommand(const art_nav::CarCommand::ConstPtr &msg)
+void processCommand(const art_msgs::CarCommand::ConstPtr &msg)
 {
   goal_time_ = msg->header.stamp;
   ROS_DEBUG("pilot command (v,a) = (%.3f, %.3f)",
             msg->control.velocity, msg->control.angle);
-  art_nav::CarControl car_ctl = msg->control;
+  art_msgs::CarControl car_ctl = msg->control;
   setGoal(&car_ctl);
 }
 
@@ -239,7 +239,7 @@ void processTwist(const geometry_msgs::Twist::ConstPtr &twistIn)
   twist_msg_ = *twistIn;
 
   // convert to a CarControl message for setGoal()
-  art_nav::CarControl car_ctl;
+  art_msgs::CarControl car_ctl;
   car_ctl.velocity = twistIn->linear.x;
   car_ctl.angle = Steering::steering_angle(car_ctl.velocity, twistIn->angular.z);
 
@@ -290,7 +290,7 @@ void processSteering(const art_servo::SteeringState::ConstPtr &steeringIn)
 }
 
 
-void processLearning(const art_nav::LearningCommand::ConstPtr &learningIn)
+void processLearning(const art_msgs::LearningCommand::ConstPtr &learningIn)
 {
   current_learning_cmd_.pilotActive = learningIn->pilotActive;
   ROS_INFO("Pilot Active set to %d", current_learning_cmd_.pilotActive);

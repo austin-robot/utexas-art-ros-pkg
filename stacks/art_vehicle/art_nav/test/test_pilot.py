@@ -15,8 +15,8 @@ roslib.load_manifest('art_nav')
 roslib.load_manifest('nav_msgs')
 
 import rospy
-from art_nav.msg import CarCommand
-from art_nav.msg import CarControl
+from art_msgs.msg import CarCommand
+from art_msgs.msg import CarControl
 from nav_msgs.msg import Odometry
 
 have_odom = False;

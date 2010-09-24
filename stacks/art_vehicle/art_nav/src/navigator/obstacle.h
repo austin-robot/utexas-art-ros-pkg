@@ -14,12 +14,12 @@
 #include <vector>
 #include "ntimer.h"
 
-#include <art_nav/Observers.h>
+#include <art_msgs/Observers.h>
 
 // Provide short names for these messages so they can easily be moved
 // to a different package.
-using art_nav::Observers;
-using art_nav::Observation;
+using art_msgs::Observers;
+using art_msgs::Observation;
 
 /** @brief Navigator obstacle class.
  *
@@ -166,8 +166,8 @@ class Obstacle
   // convenience pointers to Navigator class data
   PolyOps* pops;			// polygon operations class
   Course* course;			// course planning class
-  art_nav::Order *order;                // current commander order
-  art_nav::NavigatorState *navdata;     // current navigator state data
+  art_msgs::Order *order;               // current commander order
+  art_msgs::NavigatorState *navdata;    // current navigator state
   nav_msgs::Odometry *odom;             // current odometry position
   nav_msgs::Odometry *estimate;         // estimated control position
 

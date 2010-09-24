@@ -45,16 +45,16 @@ Commander::~Commander()
  * @param _navstate has current Navigator state
  * @return next Navigator order, finished when behavior is DONE.
 */
-art_nav::Order Commander::command(const art_nav::NavigatorState &_navstate)
+art_msgs::Order Commander::command(const art_msgs::NavigatorState &_navstate)
 {
   navstate = &_navstate;       // save state pointer in class variable
 
-  order = art_nav::Order();             // begin with empty order
+  order = art_msgs::Order();             // begin with empty order
   //order.max_speed = 0.0;
   //order.min_speed = 0.0;
 
   // handle initial startup sequence
-  if (navstate->estop.state != art_nav::EstopState::Run)
+  if (navstate->estop.state != art_msgs::EstopState::Run)
     {
       // do nothing if Navigator not running
       ROS_DEBUG("Waiting for Navigator to enter Run state.");
@@ -111,7 +111,7 @@ bool Commander::next_checkpoint(void)
 //
 // on entry: route contains one or more waypoints starting at current one
 //
-art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
+art_msgs::Order Commander::prepare_order(art_msgs::Behavior::_value_type behavior)
 {
   order.behavior.value = behavior;
   ROS_DEBUG_STREAM("order.behavior = " << NavBehavior(order.behavior).Name());
@@ -121,7 +121,7 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
   order.chkpt[0] = goal.toWayPoint();
   order.chkpt[1] = goal2.toWayPoint();
 
-  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS; ++i)
+  for (unsigned i = 0; i < art_msgs::Order::N_WAYPTS; ++i)
     {
       WayPointEdge curr_edge;
       
@@ -196,7 +196,7 @@ art_nav::Order Commander::prepare_order(art_nav::Behavior::_value_type behavior)
   order.replan_num=replan_num;
   order.next_uturn=-1;
 
-  for (unsigned i = 0; i < art_nav::Order::N_WAYPTS-1; ++i)
+  for (unsigned i = 0; i < art_msgs::Order::N_WAYPTS-1; ++i)
     if (order.waypt[i].id.seg == order.waypt[i+1].id.seg
 	&& order.waypt[i].id.lane != order.waypt[i+1].id.lane &&
 	!order.waypt[i].is_lane_change)

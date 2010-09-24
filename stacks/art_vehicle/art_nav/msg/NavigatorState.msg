@@ -6,8 +6,8 @@ Header header
 EstopState estop
 RoadState road
 
-art_map/MapID last_waypt		# last way-point reached
-art_map/MapID replan_waypt		# next way-point for replan
+art_msgs/MapID last_waypt		# last way-point reached
+art_msgs/MapID replan_waypt		# next way-point for replan
 
 int32 cur_poly                          # current polygon, -1 if none
 

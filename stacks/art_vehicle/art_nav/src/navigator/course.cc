@@ -898,7 +898,7 @@ bool Course::lane_waypoint_reached(void)
  *  Called from the topic subscription callback when new lanes data
  *  arrive.
  */
-void Course::lanes_message(const art_map::ArtLanes &lanes)
+void Course::lanes_message(const art_msgs::ArtLanes &lanes)
 {
   // copy polygons from message
   polygons.resize(lanes.polygons.size());

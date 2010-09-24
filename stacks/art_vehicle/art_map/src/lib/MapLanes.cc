@@ -794,13 +794,13 @@ void MapLanes::MakeTransitionPolygon(WayPointNode w1, WayPointNode w2,
  *
  * @return number of polygons added
  */
-int MapLanes::getAllLanes(art_map::ArtLanes *lanes)
+int MapLanes::getAllLanes(art_msgs::ArtLanes *lanes)
 {
   lanes->polygons.clear();
 
   for(unsigned int i = 0; i < filtPolys.size(); i++)
     {
-      art_map::ArtQuadrilateral temp = filtPolys.at(i).GetQuad();
+      art_msgs::ArtQuadrilateral temp = filtPolys.at(i).GetQuad();
       lanes->polygons.push_back(temp);
     }
 
@@ -808,7 +808,7 @@ int MapLanes::getAllLanes(art_map::ArtLanes *lanes)
 }
 
 
-int MapLanes::getLanes(art_map::ArtLanes *lanes, MapXY here)
+int MapLanes::getLanes(art_msgs::ArtLanes *lanes, MapXY here)
 {
   if (range < 0)
     return getAllLanes(lanes);
@@ -817,7 +817,7 @@ int MapLanes::getLanes(art_map::ArtLanes *lanes, MapXY here)
 
   for(unsigned int i = 0; i < filtPolys.size(); i++)
     {
-      art_map::ArtQuadrilateral temp = filtPolys.at(i).GetQuad();
+      art_msgs::ArtQuadrilateral temp = filtPolys.at(i).GetQuad();
       float dist = Euclidean::DistanceTo(MapXY(temp.midpoint), here);
       
       if(dist <= range)
@@ -834,7 +834,7 @@ int MapLanes::getLanes(art_map::ArtLanes *lanes, MapXY here)
   return 0;
 }
 
-int MapLanes::getVisionLanes(art_map::ArtLanes *lanes, float x, float y,
+int MapLanes::getVisionLanes(art_msgs::ArtLanes *lanes, float x, float y,
                              float heading)
 {
   if (range < 0)
@@ -851,7 +851,7 @@ int MapLanes::getVisionLanes(art_map::ArtLanes *lanes, float x, float y,
   poly current = allPolys.at(index);
   for(unsigned int i = 0; i < filtPolys.size(); i++)
     {
-      art_map::ArtQuadrilateral temp = filtPolys.at(i).GetQuad();
+      art_msgs::ArtQuadrilateral temp = filtPolys.at(i).GetQuad();
 
       if (temp.start_way.lane != current.start_way.lane
           || temp.start_way.seg != current.start_way.seg

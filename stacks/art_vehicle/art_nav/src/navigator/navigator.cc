@@ -41,7 +41,7 @@ Navigator::Navigator(nav_msgs::Odometry *odom_msg)
   navdata.road_blocked = false;
   navdata.reverse = false;
   navdata.have_zones = false;
-  art_map::MapID null_waypt = ElementID().toMapID();
+  art_msgs::MapID null_waypt = ElementID().toMapID();
   navdata.last_waypt = null_waypt;
   navdata.replan_waypt = null_waypt;
 

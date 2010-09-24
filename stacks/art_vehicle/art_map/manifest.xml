@@ -12,6 +12,7 @@
 
   <depend package="angles"/>
   <depend package="art_common"/>
+  <depend package="art_msgs"/>
   <depend package="geometry_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="roscpp"/>

@@ -20,8 +20,8 @@
 #include <stdio.h>
 #include <art/epsilon.h>
 #include <art_map/coordinates.h>
-#include <art_map/MapID.h>
-#include <art_map/WayPoint.h>
+#include <art_msgs/MapID.h>
+#include <art_msgs/WayPoint.h>
 
 /** @brief global ART types definitions. */
 
@@ -57,7 +57,7 @@ public:
     lane = _lane;
     pt = _pt;
   };
-  ElementID(art_map::MapID mid)
+  ElementID(art_msgs::MapID mid)
   {
     seg = mid.seg;
     lane = mid.lane;
@@ -65,9 +65,9 @@ public:
   };
 
   /** Convert ElementID to MapID message. */
-  art_map::MapID toMapID()
+  art_msgs::MapID toMapID()
   {
-    art_map::MapID mid;
+    art_msgs::MapID mid;
     mid.seg = this->seg;
     mid.lane = this->lane;
     mid.pt = this->pt;
@@ -165,7 +165,7 @@ public:
   // constructors
   WayPointNode(){ clear();};
   WayPointNode(const MapXY &point) : map(point) { clear();};
-  WayPointNode(const art_map::WayPoint &wp)
+  WayPointNode(const art_msgs::WayPoint &wp)
   {
     ll.latitude = wp.latitude;
     ll.longitude = wp.longitude;
@@ -214,9 +214,9 @@ public:
   };
 
   /** Convert WayPointNode to WayPoint message. */
-  art_map::WayPoint toWayPoint(void)
+  art_msgs::WayPoint toWayPoint(void)
   {
-    art_map::WayPoint wp;
+    art_msgs::WayPoint wp;
     wp.latitude = this->ll.latitude;
     wp.longitude = this->ll.longitude;
     wp.mapxy.x = this->map.x;

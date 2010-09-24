@@ -174,20 +174,20 @@ poly FilteredPolygon::GetPolygon()
 }
 
 /** returns quadrilateral message */
-art_map::ArtQuadrilateral FilteredPolygon::GetQuad()
+art_msgs::ArtQuadrilateral FilteredPolygon::GetQuad()
 {
   poly p = GetPolygon(); 
-  art_map::ArtQuadrilateral q;
-  q.poly.points.resize(art_map::ArtQuadrilateral::quad_size);
+  art_msgs::ArtQuadrilateral q;
+  q.poly.points.resize(art_msgs::ArtQuadrilateral::quad_size);
 
-  q.poly.points[art_map::ArtQuadrilateral::bottom_left].x = p.p1.x;
-  q.poly.points[art_map::ArtQuadrilateral::bottom_left].y = p.p1.y;
-  q.poly.points[art_map::ArtQuadrilateral::top_left].x = p.p2.x;
-  q.poly.points[art_map::ArtQuadrilateral::top_left].y = p.p2.y;
-  q.poly.points[art_map::ArtQuadrilateral::top_right].x = p.p3.x;
-  q.poly.points[art_map::ArtQuadrilateral::top_right].y = p.p3.y;
-  q.poly.points[art_map::ArtQuadrilateral::bottom_right].x = p.p4.x;
-  q.poly.points[art_map::ArtQuadrilateral::bottom_right].y = p.p4.y;
+  q.poly.points[art_msgs::ArtQuadrilateral::bottom_left].x = p.p1.x;
+  q.poly.points[art_msgs::ArtQuadrilateral::bottom_left].y = p.p1.y;
+  q.poly.points[art_msgs::ArtQuadrilateral::top_left].x = p.p2.x;
+  q.poly.points[art_msgs::ArtQuadrilateral::top_left].y = p.p2.y;
+  q.poly.points[art_msgs::ArtQuadrilateral::top_right].x = p.p3.x;
+  q.poly.points[art_msgs::ArtQuadrilateral::top_right].y = p.p3.y;
+  q.poly.points[art_msgs::ArtQuadrilateral::bottom_right].x = p.p4.x;
+  q.poly.points[art_msgs::ArtQuadrilateral::bottom_right].y = p.p4.y;
 
   q.midpoint.x = p.midpoint.x;
   q.midpoint.y = p.midpoint.y;

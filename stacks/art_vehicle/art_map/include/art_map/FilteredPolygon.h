@@ -5,7 +5,7 @@
 // Michael Quinlan
 // $Id$
 
-#include <art_map/ArtQuadrilateral.h>
+#include <art_msgs/ArtQuadrilateral.h>
 #include <art_map/KF.h>
 #include <art_map/Matrix.h>
 #include <art_map/PolyOps.h>
@@ -30,7 +30,7 @@ class FilteredPolygon
 
   void SetPolygon(poly p);
   poly GetPolygon();
-  art_map::ArtQuadrilateral GetQuad();
+  art_msgs::ArtQuadrilateral GetQuad();
 
  private:
   poly polygon_;

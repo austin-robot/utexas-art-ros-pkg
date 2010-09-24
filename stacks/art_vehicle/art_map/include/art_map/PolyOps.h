@@ -26,7 +26,7 @@
 #include <set>
 #include <map>
 
-#include <art_map/ArtLanes.h>
+#include <art_msgs/ArtLanes.h>
 #include <art_map/coordinates.h>
 #include <art_map/types.h>
 
@@ -73,12 +73,12 @@ public:
   poly() {};
 
   /** copy constructor from corresponding message */
-  poly(const art_map::ArtQuadrilateral &msg)
+  poly(const art_msgs::ArtQuadrilateral &msg)
   {
-    p1 = MapXY(msg.poly.points[art_map::ArtQuadrilateral::bottom_left]);
-    p2 = MapXY(msg.poly.points[art_map::ArtQuadrilateral::top_left]);
-    p3 = MapXY(msg.poly.points[art_map::ArtQuadrilateral::top_right]);
-    p4 = MapXY(msg.poly.points[art_map::ArtQuadrilateral::bottom_right]);
+    p1 = MapXY(msg.poly.points[art_msgs::ArtQuadrilateral::bottom_left]);
+    p2 = MapXY(msg.poly.points[art_msgs::ArtQuadrilateral::top_left]);
+    p3 = MapXY(msg.poly.points[art_msgs::ArtQuadrilateral::top_right]);
+    p4 = MapXY(msg.poly.points[art_msgs::ArtQuadrilateral::bottom_right]);
     midpoint = MapXY(msg.midpoint);
 
     heading = msg.heading;

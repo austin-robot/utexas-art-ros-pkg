@@ -26,7 +26,7 @@
 #include <art/error.h>
 #include <art/conversions.h>
 
-#include <art_map/ArtLanes.h>
+#include <art_msgs/ArtLanes.h>
 #include <art_map/FilteredPolygon.h>
 #include <art_map/DrawLanes.h>
 #include <art_map/Graph.h>
@@ -58,9 +58,9 @@ public:
 
   int MapRNDF(Graph* _graph, float _max_poly_size=MIN_POLY_SIZE);
 
-  int getAllLanes(art_map::ArtLanes *lanes);
-  int getLanes(art_map::ArtLanes *lanes, MapXY here);
-  int getVisionLanes(art_map::ArtLanes *lanes, float x, float y, float heading);
+  int getAllLanes(art_msgs::ArtLanes *lanes);
+  int getLanes(art_msgs::ArtLanes *lanes, MapXY here);
+  int getVisionLanes(art_msgs::ArtLanes *lanes, float x, float y, float heading);
 
   void SetGPS(double centerX, double centerY)
   {

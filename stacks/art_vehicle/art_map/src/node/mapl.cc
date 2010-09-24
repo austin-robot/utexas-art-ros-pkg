@@ -20,7 +20,7 @@
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/MarkerArray.h>
 
-#include <art_map/ArtLanes.h>
+#include <art_msgs/ArtLanes.h>
 #include <art_map/Graph.h>
 #include <art_map/MapLanes.h>
 #include <art_map/RNDF.h>
@@ -37,8 +37,8 @@ Subscribes:
 
 Publishes:
 
-- @b roadmap_global [art_map::ArtLanes] global road map lanes (latched topic)
-- @b roadmap_local [art_map::ArtLanes] local area road map lanes
+- @b roadmap_global [art_msgs::ArtLanes] global road map lanes (latched topic)
+- @b roadmap_local [art_msgs::ArtLanes] local area road map lanes
 - @b visualization_marker_array [visualization_msgs::MarkerArray]
      markers for map visualization
 
@@ -78,7 +78,7 @@ private:
   void publishMapMarks(ros::Publisher &pub,
                        const std::string &map_name,
                        ros::Duration life,
-                       const art_map::ArtLanes &lane_data);
+                       const art_msgs::ArtLanes &lane_data);
 
   // parameters:
   double range_;                ///< radius of local lanes to report (m)
@@ -196,11 +196,11 @@ int MapLanesDriver::Setup(ros::NodeHandle node)
 
   // Local road map publisher
   roadmap_local_ =
-    node.advertise<art_map::ArtLanes>("roadmap_local", qDepth);
+    node.advertise<art_msgs::ArtLanes>("roadmap_local", qDepth);
 
   // Use latched publisher for global road map and visualization topics
   roadmap_global_ =
-    node.advertise<art_map::ArtLanes>("roadmap_global", 1, true);
+    node.advertise<art_msgs::ArtLanes>("roadmap_global", 1, true);
   mapmarks_ = node.advertise <visualization_msgs::MarkerArray>
     ("visualization_marker_array", 1);
 
@@ -240,7 +240,7 @@ void MapLanesDriver::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
 void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
                                      const std::string &map_name,
                                      ros::Duration life,
-                                     const art_map::ArtLanes &lane_data)
+                                     const art_msgs::ArtLanes &lane_data)
 {
   if (pub.getNumSubscribers() == 0)     // no subscribers?
     return;
@@ -371,7 +371,7 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
 /** Publish global road map */
 void MapLanesDriver::publishGlobalMap(void)
 {
-  art_map::ArtLanes lane_data;
+  art_msgs::ArtLanes lane_data;
   if (0 == map_->getAllLanes(&lane_data))
     {
       ROS_WARN("no map data available to publish");
@@ -394,7 +394,7 @@ void MapLanesDriver::publishGlobalMap(void)
 /** Publish current local road map */
 void MapLanesDriver::publishLocalMap(void)
 {
-  art_map::ArtLanes lane_data;
+  art_msgs::ArtLanes lane_data;
   if (0 != map_->getLanes(&lane_data, MapXY(odom_msg_.pose.pose.position)))
     {
       ROS_DEBUG("no map data available to publish");

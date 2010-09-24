@@ -7,7 +7,7 @@
   </description>
   <author>Jack O'Quin</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <review status="experimental" notes=""/>
   <url>http://ros.org/wiki/art_msgs</url>
 
   <depend package="geometry_msgs"/>

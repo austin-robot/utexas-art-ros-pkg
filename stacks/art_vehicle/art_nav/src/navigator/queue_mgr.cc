@@ -65,7 +65,7 @@ private:
 
   void processNavCmd(const art_nav::NavigatorCommand::ConstPtr &cmdIn);
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
-  void processRoadMap(const art_map::ArtLanes::ConstPtr &cmdIn);
+  void processRoadMap(const art_msgs::ArtLanes::ConstPtr &cmdIn);
   void processRelays(const art_servo::IOadrState::ConstPtr &sigIn);
   void PublishState(void);
   void SetRelays(void);
@@ -140,7 +140,7 @@ void NavQueueMgr::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
 }
 
 /** Handle road map polygons. */
-void NavQueueMgr::processRoadMap(const art_map::ArtLanes::ConstPtr &mapIn)
+void NavQueueMgr::processRoadMap(const art_msgs::ArtLanes::ConstPtr &mapIn)
 {
   ROS_DEBUG_STREAM(mapIn->polygons.size() << " lanes polygons received");
   map_time_ = mapIn->header.stamp;

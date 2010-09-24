@@ -15,7 +15,7 @@
 #include <vector>
 
 #include <art/infinity.h>
-#include <art_map/ArtLanes.h>
+#include <art_msgs/ArtLanes.h>
 #include <art_map/coordinates.h>
 #include <art_map/zones.h>
 
@@ -103,7 +103,7 @@ class Course
    * @param lanes pointer to the lanes message in the player message
    * queue.  Must copy the data before returning.
    */
-  void lanes_message(const art_map::ArtLanes &lanes);
+  void lanes_message(const art_msgs::ArtLanes &lanes);
 
   /** @brief log a vector of polygons */
   void log(const char *str, const poly_list_t &polys);

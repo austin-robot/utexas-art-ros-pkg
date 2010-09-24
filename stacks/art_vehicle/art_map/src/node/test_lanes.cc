@@ -21,7 +21,7 @@
 
 #include <ros/ros.h>
 
-#include <art_map/ArtLanes.h>
+#include <art_msgs/ArtLanes.h>
 #include <art_map/euclidean_distance.h>
 #include <art_map/MapLanes.h>
 #include <art_map/zones.h>
@@ -36,10 +36,10 @@
 */
 
 // TODO These should go in a header somewhere
-static int32_t bottom_left  = art_map::ArtQuadrilateral::bottom_left;
-static int32_t top_left     = art_map::ArtQuadrilateral::top_left;
-static int32_t top_right    = art_map::ArtQuadrilateral::top_right;
-static int32_t bottom_right = art_map::ArtQuadrilateral::bottom_right;
+static int32_t bottom_left  = art_msgs::ArtQuadrilateral::bottom_left;
+static int32_t top_left     = art_msgs::ArtQuadrilateral::top_left;
+static int32_t top_right    = art_msgs::ArtQuadrilateral::top_right;
+static int32_t bottom_right = art_msgs::ArtQuadrilateral::bottom_right;
 
 
 // default parameters
@@ -258,7 +258,7 @@ void parse_args(int argc, char *argv[])
 }
 
 /** Print polygon data in human-readable format */
-void PrintPolygons(const art_map::ArtLanes &ldata)
+void PrintPolygons(const art_msgs::ArtLanes &ldata)
 {
   uint32_t count = ldata.polygons.size();
 
@@ -304,7 +304,7 @@ void PrintPolygons(const art_map::ArtLanes &ldata)
 }
 
 /** write polygon data to space-delimited file */
-void OutputPolygons(const art_map::ArtLanes &ldata)
+void OutputPolygons(const art_msgs::ArtLanes &ldata)
 {
   uint32_t count = ldata.polygons.size();
 
@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
 
   // Fill in lanedata with all polygons within range of our
   // current position.
-  art_map::ArtLanes lanedata;
+  art_msgs::ArtLanes lanedata;
   rc = mapl->getAllLanes(&lanedata);
   if (rc < 0)
     {

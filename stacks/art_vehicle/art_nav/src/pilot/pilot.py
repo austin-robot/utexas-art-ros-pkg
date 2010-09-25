@@ -322,7 +322,7 @@ def Halt(cur_speed) :
       adjustVelocity(cur_speed, -cur_speed)
       return
     
-    elif (cur_speed < epsilon.speed) :
+    elif (cur_speed < Epsilon.speed) :
       # Already stopped.  Ease up on the brake to reduce strain on
       # the actuator.  Brake hold position *must* be adequate to
       # prevent motion, even on a hill.
@@ -380,10 +380,10 @@ Backward = 2
 
  # speed_range
 def speed_range(speed) :
-    if (speed > epsilon.speed):         # moving forward?
+    if (speed > Epsilon.speed):         # moving forward?
       return Forward
 
-    if (speed >= -epsilon.speed):	# close to zero?
+    if (speed >= -Epsilon.speed):	# close to zero?
       return Stopped
 
     return Backward

@@ -46,7 +46,6 @@ Training mode collects data while a human driver operates the vehicle.
 #include <math.h>
 
 #include <art/conversions.h>		// A/D conversion
-#include <art_servo/steering.h>		// public steering interface
 #include <art_msgs/ArtVehicle.h>
 
 #include "../servo.h"

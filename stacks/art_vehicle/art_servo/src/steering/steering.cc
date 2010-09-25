@@ -27,7 +27,7 @@
 This driver provides an interface to the steering servo for the ART
 robot vehicle.
 
-@see <@ref art_servo/steering.h> for steering angle conversions and constants.
+@see <art/steering.h> for steering angle conversions and constants.
 
 Publishes
 

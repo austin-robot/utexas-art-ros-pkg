@@ -61,7 +61,7 @@ from art_msgs.msg import Epsilon
 
 from art_nav.cfg import PilotConfig
 
-import steering
+from art_common import steering
 import speed
 
 import sys

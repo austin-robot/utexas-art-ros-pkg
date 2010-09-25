@@ -17,7 +17,7 @@
 #include "course.h"
 #include "obstacle.h"
 #include "voronoi_zone.h"
-#include <art_servo/steering.h>
+#include <art/steering.h>
 #include "safety.h"
 #include "halt.h"
 

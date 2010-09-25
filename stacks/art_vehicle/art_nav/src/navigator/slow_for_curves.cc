@@ -10,7 +10,7 @@
 #include <float.h>
 
 #include <art/epsilon.h>
-#include <art_servo/steering.h>
+#include <art/steering.h>
 #include <art_map/coordinates.h>
 
 #include "navigator_internal.h"

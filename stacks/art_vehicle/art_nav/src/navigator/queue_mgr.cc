@@ -20,7 +20,7 @@
 
 #include <art_servo/IOadrCommand.h>
 #include <art_servo/IOadrState.h>
-#include <art_servo/steering.h>
+#include <art/steering.h>
 #include <art_map/ZoneOps.h>
 
 #include <art_msgs/CarCommand.h>

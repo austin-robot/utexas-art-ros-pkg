@@ -16,7 +16,7 @@
 #include "course.h"
 #include "parking.h"
 #include <art_map/rotate_translate_transform.h>
-#include <art_servo/steering.h>
+#include <art/steering.h>
 
 #include "safety.h"
 #include "stop.h"

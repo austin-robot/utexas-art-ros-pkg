@@ -30,6 +30,10 @@
 #include <dynamic_reconfigure/server.h>
 #include <dynamic_reconfigure/SensorLevels.h>
 
+#include <art_msgs/ArtVehicle.h>
+#include <art_msgs/ArtHertz.h>
+#include <art_msgs/CarCommand.h>
+
 #include <art_servo/BrakeCommand.h>
 #include <art_servo/BrakeState.h>
 #include <art_servo/Shifter.h>
@@ -37,15 +41,12 @@
 #include <art_servo/SteeringState.h>
 #include <art_servo/ThrottleCommand.h>
 #include <art_servo/ThrottleState.h>
-#include <art_servo/steering.h>
 
 #include <art/conversions.h>
 #include <art/epsilon.h>
 #include <art/pid2.h>
-#include <art_msgs/ArtVehicle.h>
-#include <art_msgs/ArtHertz.h>
+#include <art/steering.h>
 
-#include <art_msgs/CarCommand.h>
 #include <art_nav/PilotConfig.h>
 
 #include <art_msgs/LearningCommand.h>

@@ -25,7 +25,7 @@
 #include <art_servo/Shifter.h>
 #include <art_servo/SteeringState.h>
 #include <art_servo/ThrottleState.h>
-#include <art_servo/steering.h>
+#include <art/steering.h>
 
 #include <art_msgs/GpsInfo.h>
 

@@ -13,7 +13,7 @@
 
 #include "navigator_internal.h"
 #include "course.h"
-#include <art_servo/steering.h>
+#include <art/steering.h>
 #include <art_map/coordinates.h>
 #include <art_nav/estimate.h>
 using art_msgs::ArtVehicle;

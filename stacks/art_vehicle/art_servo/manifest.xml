@@ -16,10 +16,6 @@
   <depend package="rospy"/>
   <depend package="std_msgs"/>
 
-  <export>
-    <cpp cflags="-I${prefix}/include"/>
-  </export>
-
 </package>
 
 

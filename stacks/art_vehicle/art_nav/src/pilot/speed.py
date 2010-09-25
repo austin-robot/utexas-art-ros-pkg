@@ -34,7 +34,8 @@ roslib.load_manifest('art_nav')
 
 import rospy
 import math
-import pid
+
+from art_common import pid
 
 EPSILON_BRAKE = 0.01
 EPSILON_THROTTLE = 0.01

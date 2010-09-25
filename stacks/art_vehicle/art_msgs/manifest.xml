@@ -1,8 +1,7 @@
 <package>
   <description brief="ART vehicle messages">
 
-     This package defines messages specific to ART autonomous vehicle
-     with minimal build dependencies.
+     This package defines messages specific to ART autonomous vehicle.
 
   </description>
   <author>Jack O'Quin</author>

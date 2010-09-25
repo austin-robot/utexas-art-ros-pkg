@@ -18,8 +18,8 @@
 
 #include <art/frames.h>
 
-#include <art_servo/IOadrCommand.h>
-#include <art_servo/IOadrState.h>
+#include <art_msgs/IOadrCommand.h>
+#include <art_msgs/IOadrState.h>
 #include <art/steering.h>
 #include <art_map/ZoneOps.h>
 
@@ -66,7 +66,7 @@ private:
   void processNavCmd(const art_msgs::NavigatorCommand::ConstPtr &cmdIn);
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void processRoadMap(const art_msgs::ArtLanes::ConstPtr &cmdIn);
-  void processRelays(const art_servo::IOadrState::ConstPtr &sigIn);
+  void processRelays(const art_msgs::IOadrState::ConstPtr &sigIn);
   void PublishState(void);
   void SetRelays(void);
   void SetSpeed(pilot_command_t pcmd);
@@ -148,9 +148,9 @@ void NavQueueMgr::processRoadMap(const art_msgs::ArtLanes::ConstPtr &mapIn)
 }
 
 /** Handle relays state message. */
-void NavQueueMgr::processRelays(const art_servo::IOadrState::ConstPtr &sigIn)
+void NavQueueMgr::processRelays(const art_msgs::IOadrState::ConstPtr &sigIn)
 {
-  using art_servo::IOadrState;
+  using art_msgs::IOadrState;
 
   bool left_on = (sigIn->relays && IOadrState::TURN_LEFT);
   if (left_on != signal_on_left_)
@@ -202,7 +202,7 @@ bool NavQueueMgr::setup(ros::NodeHandle node)
   car_cmd_ = node.advertise<art_msgs::CarCommand>("pilot/cmd", qDepth);
   nav_state_ =
     node.advertise<art_msgs::NavigatorState>("navigator/state", qDepth);
-  signals_cmd_ = node.advertise<art_servo::IOadrCommand>("ioadr/cmd", qDepth);
+  signals_cmd_ = node.advertise<art_msgs::IOadrCommand>("ioadr/cmd", qDepth);
 
   return true;
 }
@@ -241,31 +241,31 @@ void NavQueueMgr::SetRelays(void)
       || alarm_on_ != (bool) nav->navdata.alarm)
     {
       // something needs to change
-      art_servo::IOadrCommand sig_cmd;
+      art_msgs::IOadrCommand sig_cmd;
 
       // set or reset left signal relay
       if (nav->navdata.signal_left)
-        sig_cmd.relays_on = art_servo::IOadrState::TURN_LEFT;
+        sig_cmd.relays_on = art_msgs::IOadrState::TURN_LEFT;
       else
-        sig_cmd.relays_off = art_servo::IOadrState::TURN_LEFT;
+        sig_cmd.relays_off = art_msgs::IOadrState::TURN_LEFT;
 
       // or in right signal relay value
       if (nav->navdata.signal_right)
-        sig_cmd.relays_on |= art_servo::IOadrState::TURN_RIGHT;
+        sig_cmd.relays_on |= art_msgs::IOadrState::TURN_RIGHT;
       else
-        sig_cmd.relays_off |= art_servo::IOadrState::TURN_RIGHT;
+        sig_cmd.relays_off |= art_msgs::IOadrState::TURN_RIGHT;
 
       // or in flasher relay value
       if (nav->navdata.flasher)
-        sig_cmd.relays_on |= art_servo::IOadrState::FLASHER;
+        sig_cmd.relays_on |= art_msgs::IOadrState::FLASHER;
       else
-        sig_cmd.relays_off |= art_servo::IOadrState::FLASHER;
+        sig_cmd.relays_off |= art_msgs::IOadrState::FLASHER;
 
       // or in alarm relay value
       if (nav->navdata.alarm)
-        sig_cmd.relays_on |= art_servo::IOadrState::ALARM;
+        sig_cmd.relays_on |= art_msgs::IOadrState::ALARM;
       else
-        sig_cmd.relays_off |= art_servo::IOadrState::ALARM;
+        sig_cmd.relays_off |= art_msgs::IOadrState::ALARM;
 
       ROS_DEBUG("setting relays: left turn %s, right turn %s, "
                 "flasher %s, alarm %s",

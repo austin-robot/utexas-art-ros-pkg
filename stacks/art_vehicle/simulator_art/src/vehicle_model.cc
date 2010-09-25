@@ -21,10 +21,10 @@
 #include <art/frames.h>
 #include <art/UTM.h>
 
-#include <art_servo/BrakeState.h>
-#include <art_servo/Shifter.h>
-#include <art_servo/SteeringState.h>
-#include <art_servo/ThrottleState.h>
+#include <art_msgs/BrakeState.h>
+#include <art_msgs/Shifter.h>
+#include <art_msgs/SteeringState.h>
+#include <art_msgs/ThrottleState.h>
 #include <art/steering.h>
 
 #include <art_msgs/GpsInfo.h>
@@ -87,7 +87,7 @@ void ArtVehicleModel::setup(void)
 // data updates must be done while holding the msg_lock_.
 //
 void
-ArtVehicleModel::brakeReceived(const art_servo::BrakeState::ConstPtr &msg)
+ArtVehicleModel::brakeReceived(const art_msgs::BrakeState::ConstPtr &msg)
 {
   //ROS_DEBUG("brake state received: position %.3f", msg->position);
   boost::mutex::scoped_lock lock(msg_lock_);
@@ -95,7 +95,7 @@ ArtVehicleModel::brakeReceived(const art_servo::BrakeState::ConstPtr &msg)
 }
 
 void
-ArtVehicleModel::shifterReceived(const art_servo::Shifter::ConstPtr &msg)
+ArtVehicleModel::shifterReceived(const art_msgs::Shifter::ConstPtr &msg)
 {
   ROS_DEBUG("shifter state received: gear %u", msg->gear);
   boost::mutex::scoped_lock lock(msg_lock_);
@@ -103,7 +103,7 @@ ArtVehicleModel::shifterReceived(const art_servo::Shifter::ConstPtr &msg)
 }
 
 void 
-ArtVehicleModel::steeringReceived(const art_servo::SteeringState::ConstPtr &msg)
+ArtVehicleModel::steeringReceived(const art_msgs::SteeringState::ConstPtr &msg)
 {
   //ROS_DEBUG("steering state received: %.1f (degrees)", msg->angle);
   boost::mutex::scoped_lock lock(msg_lock_);
@@ -111,7 +111,7 @@ ArtVehicleModel::steeringReceived(const art_servo::SteeringState::ConstPtr &msg)
 }
 
 void
-ArtVehicleModel::throttleReceived(const art_servo::ThrottleState::ConstPtr &msg)
+ArtVehicleModel::throttleReceived(const art_msgs::ThrottleState::ConstPtr &msg)
 {
   //ROS_DEBUG("throttle state received: position %.3f", msg->position);
   boost::mutex::scoped_lock lock(msg_lock_);
@@ -168,7 +168,7 @@ void ArtVehicleModel::ModelAcceleration(geometry_msgs::Twist *odomVel,
 
   // Set velocity sign based on gear.
   odomVel->linear.x = speed;            // forward movement
-  if (shifter_gear_ ==  art_servo::Shifter::Reverse)
+  if (shifter_gear_ ==  art_msgs::Shifter::Reverse)
     odomVel->linear.x = -speed;         // reverse movement
 
   // set yaw rate (radians/second) from velocity and steering angle

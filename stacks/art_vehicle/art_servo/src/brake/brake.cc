@@ -22,8 +22,8 @@
 
 #include <art/pid2.h>			// PID control 
 
-#include <art_servo/BrakeCommand.h>
-#include <art_servo/BrakeState.h>
+#include <art_msgs/BrakeCommand.h>
+#include <art_msgs/BrakeState.h>
 
 #include <art_msgs/ArtHertz.h>
 
@@ -180,7 +180,7 @@ int Shutdown()
   return 0;
 }
 
-void ProcessCommand(const art_servo::BrakeCommand::ConstPtr &cmd)
+void ProcessCommand(const art_msgs::BrakeCommand::ConstPtr &cmd)
 {
   uint32_t request = cmd->request;
 
@@ -195,10 +195,10 @@ void ProcessCommand(const art_servo::BrakeCommand::ConstPtr &cmd)
 
   switch (request)
     {
-    case art_servo::BrakeCommand::Absolute:
+    case art_msgs::BrakeCommand::Absolute:
       set_point = limit_travel(cmd->position);
       break;
-    case art_servo::BrakeCommand::Relative:
+    case art_msgs::BrakeCommand::Relative:
       set_point = limit_travel(brake_pos + cmd->position);
       break;
     default:
@@ -216,7 +216,7 @@ void ProcessCommand(const art_servo::BrakeCommand::ConstPtr &cmd)
 //
 float PollDevice(void)
 {
-  art_servo::BrakeState bs;             // brake state message
+  art_msgs::BrakeState bs;             // brake state message
 
   // read the primary hardware sensor status
   dev->get_state(&bs.position, &bs.potentiometer, &bs.encoder, &bs.pressure);
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
   // topics to read and write
   brake_cmd = node.subscribe(NODE "/cmd", qDepth, ProcessCommand,
                              ros::TransportHints().tcpNoDelay(true));
-  brake_state = node.advertise<art_servo::BrakeState>(NODE "/state", qDepth);
+  brake_state = node.advertise<art_msgs::BrakeState>(NODE "/state", qDepth);
 
   if (GetParameters() != 0)
     return 1;

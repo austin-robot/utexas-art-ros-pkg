@@ -13,8 +13,8 @@ import roslib;
 roslib.load_manifest('art_servo')
 
 import rospy
-from art_servo.msg import BrakeCommand
-from art_servo.msg import BrakeState
+from art_msgs.msg import BrakeCommand
+from art_msgs.msg import BrakeState
 
 def log_brake_state(state):
     rospy.logdebug("brake position: %.3f  (time %.6f)",

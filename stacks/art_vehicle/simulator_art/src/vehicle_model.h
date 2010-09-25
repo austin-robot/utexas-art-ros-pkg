@@ -27,11 +27,12 @@
 // ROS interfaces
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
+
+#include <art_msgs/BrakeState.h>
+#include <art_msgs/Shifter.h>
+#include <art_msgs/SteeringState.h>
+#include <art_msgs/ThrottleState.h>
 #include <nav_msgs/Odometry.h>
-#include <art_servo/BrakeState.h>
-#include <art_servo/Shifter.h>
-#include <art_servo/SteeringState.h>
-#include <art_servo/ThrottleState.h>
 
 // Corresponding ROS relative names
 #define BRAKE_STATE    "brake/state"
@@ -55,7 +56,7 @@ public:
 
     // servo control status
     brake_position_ = 1.0;
-    shifter_gear_ = art_servo::Shifter::Drive;
+    shifter_gear_ = art_msgs::Shifter::Drive;
     steering_angle_ = 0.0;
     throttle_position_ = 0.0;
   }
@@ -90,10 +91,10 @@ private:
   ros::Subscriber throttle_sub_;
 
   // servo message callbacks
-  void brakeReceived(const art_servo::BrakeState::ConstPtr &msg);
-  void shifterReceived(const art_servo::Shifter::ConstPtr &msg);
-  void steeringReceived(const art_servo::SteeringState::ConstPtr &msg);
-  void throttleReceived(const art_servo::ThrottleState::ConstPtr &msg);
+  void brakeReceived(const art_msgs::BrakeState::ConstPtr &msg);
+  void shifterReceived(const art_msgs::Shifter::ConstPtr &msg);
+  void steeringReceived(const art_msgs::SteeringState::ConstPtr &msg);
+  void throttleReceived(const art_msgs::ThrottleState::ConstPtr &msg);
 
   // servo control status
   //

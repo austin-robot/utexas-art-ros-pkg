@@ -44,13 +44,13 @@ from geometry_msgs.msg import Twist
 from dynamic_reconfigure import server
 from dynamic_reconfigure.msg import SensorLevels
 
-from art_servo.msg import BrakeCommand
-from art_servo.msg import BrakeState
-from art_servo.msg import Shifter
-from art_servo.msg import SteeringCommand
-from art_servo.msg import SteeringState
-from art_servo.msg import ThrottleCommand
-from art_servo.msg import ThrottleState
+from art_msgs.msg import BrakeCommand
+from art_msgs.msg import BrakeState
+from art_msgs.msg import Shifter
+from art_msgs.msg import SteeringCommand
+from art_msgs.msg import SteeringState
+from art_msgs.msg import ThrottleCommand
+from art_msgs.msg import ThrottleState
 
 from art_msgs.msg import ArtHertz
 from art_msgs.msg import ArtVehicle
@@ -83,17 +83,17 @@ Subscribes:
 - \b vel_cmd [geometry_msgs.Twist] standard ROS velocity and angle command
 - \b odom [nav_msgs.Odometry] estimate of robot position and velocity.
 
-- \b brake/state [art_servo.BrakeState] brake status.
-- \b shifter/state [art_servo.Shifter] shifter relays status.
-- \b steering/state [art_servo.SteeringState] steering status.
-- \b throttle/state [art_servo.ThrottleState] throttle status.
+- \b brake/state [art_msgs.BrakeState] brake status.
+- \b shifter/state [art_msgs.Shifter] shifter relays status.
+- \b steering/state [art_msgs.SteeringState] steering status.
+- \b throttle/state [art_msgs.ThrottleState] throttle status.
 
 Publishes:
 
-- \b brake/cmd [art_servo.BrakeCommand] brake commands.
-- \b shifter/cmd [art_servo.Shifter] shifter commands.
-- \b steering/cmd [art_servo.SteeringCommand] steering commands.
-- \b throttle/cmd [art_servo.ThrottleCommand] throttle commands.
+- \b brake/cmd [art_msgs.BrakeCommand] brake commands.
+- \b shifter/cmd [art_msgs.Shifter] shifter commands.
+- \b steering/cmd [art_msgs.SteeringCommand] steering commands.
+- \b throttle/cmd [art_msgs.ThrottleCommand] throttle commands.
 
 """
  # global variables

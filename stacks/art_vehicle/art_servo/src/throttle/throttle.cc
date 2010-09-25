@@ -11,8 +11,8 @@
 #include <ros/ros.h>
 
 #include <art_msgs/ArtHertz.h>
-#include <art_servo/ThrottleCommand.h>
-#include <art_servo/ThrottleState.h>
+#include <art_msgs/ThrottleCommand.h>
+#include <art_msgs/ThrottleState.h>
 
 #include "devthrottle.h"		// servo device interface
 
@@ -27,11 +27,11 @@ vehicle.
 
 Publishes
 
-- \b throttle/state [art_servo::ThrottleState] throttle status.
+- \b throttle/state [art_msgs::ThrottleState] throttle status.
 
 Subscribes
 
-- \b throttle/cmd [art_servo::ThrottleCommand] throttle commands.
+- \b throttle/cmd [art_msgs::ThrottleCommand] throttle commands.
 
 Sets the desired throttle position.  At position 1.0 the throttle is
 fully open, fully closed at 0.0 (idle).  There are both absolute and
@@ -75,7 +75,7 @@ public:
 
 private:
 
-  void GetCmd(const art_servo::ThrottleCommand::ConstPtr &cmd);
+  void GetCmd(const art_msgs::ThrottleCommand::ConstPtr &cmd);
   void PollDevice(void);
 
   // configuration parameters
@@ -136,7 +136,7 @@ int Throttle::Setup(ros::NodeHandle node)
   throttle_cmd_ =
     node.subscribe("throttle/cmd", qDepth, &Throttle::GetCmd, this, noDelay);
   throttle_state_ =
-    node.advertise<art_servo::ThrottleState>("throttle/state", qDepth);
+    node.advertise<art_msgs::ThrottleState>("throttle/state", qDepth);
 
   return 0;
 }
@@ -150,7 +150,7 @@ int Throttle::Shutdown()
   return 0;
 }
 
-void Throttle::GetCmd(const art_servo::ThrottleCommand::ConstPtr &cmd)
+void Throttle::GetCmd(const art_msgs::ThrottleCommand::ConstPtr &cmd)
 {
   // ignore all throttle command messages when in training mode
   if (training_)
@@ -158,10 +158,10 @@ void Throttle::GetCmd(const art_servo::ThrottleCommand::ConstPtr &cmd)
 
   switch (cmd->request)
     {
-    case art_servo::ThrottleCommand::Absolute:
+    case art_msgs::ThrottleCommand::Absolute:
       dev_->throttle_absolute(cmd->position);
       break;
-    case art_servo::ThrottleCommand::Relative:
+    case art_msgs::ThrottleCommand::Relative:
       dev_->throttle_relative(cmd->position);
       break;
     default:
@@ -180,7 +180,7 @@ void Throttle::PollDevice(void)
   int rc = dev_->query_status();        // get controller status
   if (rc == 0)				// any news?
     {
-      art_servo::ThrottleState msg;
+      art_msgs::ThrottleState msg;
 
       msg.position = dev_->get_position();
       dev_->query_rpms(&msg.rpms);

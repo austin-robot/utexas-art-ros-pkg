@@ -11,9 +11,9 @@
 #include <art_msgs/ArtHertz.h>
 #include <art/conversions.h>
 
-#include <art_servo/Shifter.h>
-#include <art_servo/IOadrCommand.h>
-#include <art_servo/IOadrState.h>
+#include <art_msgs/Shifter.h>
+#include <art_msgs/IOadrCommand.h>
+#include <art_msgs/IOadrState.h>
 
 #include "dev8x.h"			// IOADR8x device interface
 
@@ -86,8 +86,8 @@ private:
 
   void GetSetRelays(void);
   void PollDevice(void);
-  void processOutput(const art_servo::IOadrCommand::ConstPtr &cmd);
-  void processShifter(const art_servo::Shifter::ConstPtr &shifterIn);
+  void processOutput(const art_msgs::IOadrCommand::ConstPtr &cmd);
+  void processShifter(const art_msgs::Shifter::ConstPtr &shifterIn);
 
   std::vector<poll_parms_t *> poll_list_; // poll list
 
@@ -110,7 +110,7 @@ private:
   uint8_t relay_bits_;
 
   // current device input state
-  art_servo::IOadrState ioMsg_;         // controller state message
+  art_msgs::IOadrState ioMsg_;         // controller state message
 
   // hardware IOADR8x interface
   dev8x *dev_;
@@ -171,7 +171,7 @@ IOadr::IOadr()
   if (do_shifter_)
     {
       ROS_INFO("providing shifter interface");
-      shifter_gear_ = art_servo::Shifter::Drive;
+      shifter_gear_ = art_msgs::Shifter::Drive;
     }
 
   if (mynh.hasParam("poll_list"))
@@ -208,7 +208,7 @@ int IOadr::Setup(ros::NodeHandle node)
       shifter_cmd_ = node.subscribe("shifter/cmd", qDepth,
                                     &IOadr::processShifter, this, noDelay);
       shifter_state_ =
-        node.advertise<art_servo::Shifter>("shifter/state", qDepth);
+        node.advertise<art_msgs::Shifter>("shifter/state", qDepth);
     }
   else
     {
@@ -216,7 +216,7 @@ int IOadr::Setup(ros::NodeHandle node)
       ioadr_cmd_ = node.subscribe("ioadr/cmd", qDepth,
                                   &IOadr::processOutput, this, noDelay);
       ioadr_state_ =
-        node.advertise<art_servo::IOadrState>("ioadr/state", qDepth);
+        node.advertise<art_msgs::IOadrState>("ioadr/state", qDepth);
     }
 
   // create device interface class
@@ -253,7 +253,7 @@ int IOadr::Shutdown()
   return 0;
 }
 
-void IOadr::processOutput(const art_servo::IOadrCommand::ConstPtr &cmd)
+void IOadr::processOutput(const art_msgs::IOadrCommand::ConstPtr &cmd)
 {
   relay_mask_ |= (cmd->relays_on | cmd->relays_off);
   relay_bits_ |= cmd->relays_on;
@@ -262,10 +262,10 @@ void IOadr::processOutput(const art_servo::IOadrCommand::ConstPtr &cmd)
 
 // Callback when shifter command arrives.
 // (only subscribed when do_shifter_ is true)
-void IOadr::processShifter(const art_servo::Shifter::ConstPtr &shifterIn)
+void IOadr::processShifter(const art_msgs::Shifter::ConstPtr &shifterIn)
 {
   // save requested gear when doing shifter simulation
-  if (shifterIn->gear != art_servo::Shifter::Reset
+  if (shifterIn->gear != art_msgs::Shifter::Reset
       && port_ == "/dev/null")
     shifter_gear_ = shifterIn->gear;
   ROS_INFO("Shifter command: gear %u", shifterIn->gear);
@@ -327,17 +327,17 @@ int IOadr::poll_ShifterInd(int ch)
       uint8_t gear;
       uint8_t digitalB_bits = ~data;
       if (digitalB_bits & 0x80)
-	gear = art_servo::Shifter::Park;
+	gear = art_msgs::Shifter::Park;
       else if (digitalB_bits & 0x40)
-	gear = art_servo::Shifter::Reverse;
+	gear = art_msgs::Shifter::Reverse;
       else if (digitalB_bits & 0x20)
-	gear = art_servo::Shifter::Neutral;
+	gear = art_msgs::Shifter::Neutral;
       else if (digitalB_bits & 0x10)
-	gear = art_servo::Shifter::Drive;
+	gear = art_msgs::Shifter::Drive;
       else
         // there should only be one bit on at a time, so this should
         // not occur
-	gear = art_servo::Shifter::Reset;
+	gear = art_msgs::Shifter::Reset;
 
       // save current gear number
       shifter_gear_ = gear;
@@ -369,7 +369,7 @@ void IOadr::PollDevice(void)
 
   if (do_shifter_)                      // publishing shifter state?
     {
-      art_servo::Shifter shifter_msg;
+      art_msgs::Shifter shifter_msg;
       shifter_msg.header.stamp = ros::Time::now();
       shifter_msg.gear = shifter_gear_;
       shifter_msg.relays = ioMsg_.relays;

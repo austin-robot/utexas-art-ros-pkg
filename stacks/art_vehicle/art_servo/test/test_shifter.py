@@ -13,7 +13,7 @@ import roslib;
 roslib.load_manifest('art_servo')
 
 import rospy
-from art_servo.msg import Shifter
+from art_msgs.msg import Shifter
 
 def log_shifter_state(state):
     rospy.logdebug("shifter gear: %u, relays: %02x (time %.6f)",

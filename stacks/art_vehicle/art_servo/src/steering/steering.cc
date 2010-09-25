@@ -13,9 +13,9 @@
 #include <art_msgs/ArtHertz.h>
 #include <art/polynomial.h>
 
-#include <art_servo/SteeringCommand.h>
-#include <art_servo/SteeringState.h>
-#include <art_servo/IOadrState.h>
+#include <art_msgs/SteeringCommand.h>
+#include <art_msgs/SteeringState.h>
+#include <art_msgs/IOadrState.h>
 
 #include "devsteer.h"			// servo device interface
 #include "testwheel.h"			// steering wheel self-test
@@ -31,17 +31,17 @@ robot vehicle.
 
 Publishes
 
-- @b steering/state [art_servo::SteeringState]
+- @b steering/state [art_msgs::SteeringState]
 
 Subscribes:
 
-- @b ioadr/state [art_servo::IOadrState]
+- @b ioadr/state [art_msgs::IOadrState]
 
   - if omitted, the steering position is assumed to start at 0.0
   (centered) and all requested steering positions are assumed to be
   reached accurately.
 
-- @b steering/cmd [art_servo::SteeringCommand]
+- @b steering/cmd [art_msgs::SteeringCommand]
 
 Sets the desired steering angle (in degrees).  Position
 max_steer_degrees is fully left, 0.0 is centered, -max_steer_degrees
@@ -85,8 +85,8 @@ public:
 private:
 
   // internal methods
-  void	GetCmd(const art_servo::SteeringCommand::ConstPtr &cmdIn);
-  void	GetPos(const art_servo::IOadrState::ConstPtr &ioIn);
+  void	GetCmd(const art_msgs::SteeringCommand::ConstPtr &cmdIn);
+  void	GetPos(const art_msgs::IOadrState::ConstPtr &ioIn);
   void	PublishStatus(void);
   void	calibrate_wheel_position(void);
   void	read_wheel_angle(void);
@@ -239,7 +239,7 @@ int ArtSteer::Setup(ros::NodeHandle node)
   steering_cmd_ =
     node.subscribe("steering/cmd", qDepth, &ArtSteer::GetCmd, this, noDelay);
   steering_state_ =
-    node.advertise<art_servo::SteeringState>("steering/state", qDepth);
+    node.advertise<art_msgs::SteeringState>("steering/state", qDepth);
   ioadr_state_ =
     node.subscribe("ioadr/state", qDepth, &ArtSteer::GetPos, this, noDelay);
 
@@ -254,15 +254,15 @@ int ArtSteer::Shutdown()
 }
 
 
-void ArtSteer::GetCmd(const art_servo::SteeringCommand::ConstPtr &cmdIn)
+void ArtSteer::GetCmd(const art_msgs::SteeringCommand::ConstPtr &cmdIn)
 {
   switch (cmdIn->request)
     {
-    case art_servo::SteeringCommand::Degrees:
+    case art_msgs::SteeringCommand::Degrees:
       ROS_DEBUG(" %.3f degrees (absolute) steering request", cmdIn->angle);
       set_point_ = limit_travel(cmdIn->angle);
       break;
-    case art_servo::SteeringCommand::Relative:
+    case art_msgs::SteeringCommand::Relative:
       // Should this option be supported at all?  Initially it will
       // give bogus results.
       ROS_DEBUG(" %.3f degrees (relative) steering request", cmdIn->angle);
@@ -275,7 +275,7 @@ void ArtSteer::GetCmd(const art_servo::SteeringCommand::ConstPtr &cmdIn)
     }
 }
 
-void ArtSteer::GetPos(const art_servo::IOadrState::ConstPtr &ioIn)
+void ArtSteer::GetPos(const art_msgs::IOadrState::ConstPtr &ioIn)
 {
   if (dev_->simulate_)                  // not using real sensor?
     return;
@@ -336,7 +336,7 @@ void ArtSteer::read_wheel_angle(void)
 // publish current device status
 void ArtSteer::PublishStatus(void)
 {
-  art_servo::SteeringState msg;         // steering state message
+  art_msgs::SteeringState msg;         // steering state message
 
   // report the angle and voltage from the steering position sensor
   msg.angle = steering_angle_;

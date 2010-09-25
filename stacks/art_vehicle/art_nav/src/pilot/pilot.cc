@@ -34,13 +34,13 @@
 #include <art_msgs/ArtHertz.h>
 #include <art_msgs/CarCommand.h>
 
-#include <art_servo/BrakeCommand.h>
-#include <art_servo/BrakeState.h>
-#include <art_servo/Shifter.h>
-#include <art_servo/SteeringCommand.h>
-#include <art_servo/SteeringState.h>
-#include <art_servo/ThrottleCommand.h>
-#include <art_servo/ThrottleState.h>
+#include <art_msgs/BrakeCommand.h>
+#include <art_msgs/BrakeState.h>
+#include <art_msgs/Shifter.h>
+#include <art_msgs/SteeringCommand.h>
+#include <art_msgs/SteeringState.h>
+#include <art_msgs/ThrottleCommand.h>
+#include <art_msgs/ThrottleState.h>
 
 #include <art/conversions.h>
 #include <art/epsilon.h>
@@ -71,17 +71,17 @@ Subscribes:
 - \b vel_cmd [geometry_msgs::Twist] standard ROS velocity and angle command
 - \b odom [nav_msgs::Odometry] estimate of robot position and velocity.
 
-- \b brake/state [art_servo::BrakeState] brake status.
-- \b shifter/state [art_servo::Shifter] shifter relays status.
-- \b steering/state [art_servo::SteeringState] steering status.
-- \b throttle/state [art_servo::ThrottleState] throttle status.
+- \b brake/state [art_msgs::BrakeState] brake status.
+- \b shifter/state [art_msgs::Shifter] shifter relays status.
+- \b steering/state [art_msgs::SteeringState] steering status.
+- \b throttle/state [art_msgs::ThrottleState] throttle status.
 
 Publishes:
 
-- \b brake/cmd [art_servo::BrakeCommand] brake commands.
-- \b shifter/cmd [art_servo::Shifter] shifter commands.
-- \b steering/cmd [art_servo::SteeringCommand] steering commands.
-- \b throttle/cmd [art_servo::ThrottleCommand] throttle commands.
+- \b brake/cmd [art_msgs::BrakeCommand] brake commands.
+- \b shifter/cmd [art_msgs::Shifter] shifter commands.
+- \b steering/cmd [art_msgs::SteeringCommand] steering commands.
+- \b throttle/cmd [art_msgs::ThrottleCommand] throttle commands.
 
 */
 
@@ -111,14 +111,14 @@ namespace
 
   // servo control
   float brake_position_ = 1.0;
-  uint8_t shifter_gear_ = art_servo::Shifter::Drive;
+  uint8_t shifter_gear_ = art_msgs::Shifter::Drive;
   float steering_angle_ = 0.0;
   float throttle_position_ = 0.0;
 
-  art_servo::BrakeCommand    brake_msg_;
-  art_servo::Shifter         shifter_msg_;
-  art_servo::SteeringCommand steering_msg_;
-  art_servo::ThrottleCommand throttle_msg_;
+  art_msgs::BrakeCommand    brake_msg_;
+  art_msgs::Shifter         shifter_msg_;
+  art_msgs::SteeringCommand steering_msg_;
+  art_msgs::ThrottleCommand throttle_msg_;
 
   ros::Time shift_time_;                // time last shift requested
 
@@ -264,27 +264,27 @@ void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
             mps2mph(odom_msg_.twist.twist.linear.x));
 }
 
-void processBrake(const art_servo::BrakeState::ConstPtr &brakeIn)
+void processBrake(const art_msgs::BrakeState::ConstPtr &brakeIn)
 {
   brake_position_ = brakeIn->position;
   speed_->set_brake_position(brake_position_);
   ROS_DEBUG("Brake reports position %.3f", brake_position_);
 }
 
-void processThrottle(const art_servo::ThrottleState::ConstPtr &throttleIn)
+void processThrottle(const art_msgs::ThrottleState::ConstPtr &throttleIn)
 {
   throttle_position_ = throttleIn->position;
   speed_->set_throttle_position(throttle_position_);
   ROS_DEBUG("Throttle reports position %.3f", throttle_position_);
 }
 
-void processShifter(const art_servo::Shifter::ConstPtr &shifterIn)
+void processShifter(const art_msgs::Shifter::ConstPtr &shifterIn)
 {
   shifter_gear_ = shifterIn->gear;
   ROS_DEBUG("Shifter reports gear %d", shifter_gear_);
 }
 
-void processSteering(const art_servo::SteeringState::ConstPtr &steeringIn)
+void processSteering(const art_msgs::SteeringState::ConstPtr &steeringIn)
 {
   steering_angle_ = steeringIn->angle;
   ROS_DEBUG("Steering reports angle %.1f (degrees)", steering_angle_);
@@ -501,7 +501,7 @@ void speedControl(float speed)
 	{
 	  shifting_state = Transmission::ShiftReverse;
           shifter_msg_.header.stamp = ros::Time::now();
-          shifter_msg_.gear = art_servo::Shifter::Reverse;
+          shifter_msg_.gear = art_msgs::Shifter::Reverse;
           shifter_cmd_.publish(shifter_msg_);
           shift_time_ = ros::Time::now();
 	}
@@ -514,11 +514,11 @@ void speedControl(float speed)
 
     case Transmission::ShiftReverse:
       // make sure the transmission actually shifted
-      if (shifter_gear_ != art_servo::Shifter::Reverse)
+      if (shifter_gear_ != art_msgs::Shifter::Reverse)
 	{
 	  // repeat shift command until it works
           shifter_msg_.header.stamp = ros::Time::now();
-          shifter_msg_.gear = art_servo::Shifter::Reverse;
+          shifter_msg_.gear = art_msgs::Shifter::Reverse;
           shifter_cmd_.publish(shifter_msg_);
 	  shift_time_ = ros::Time::now();
           ROS_DEBUG("repeated shift command at %.6f", shift_time_.toSec());
@@ -528,7 +528,7 @@ void speedControl(float speed)
                >= shift_duration)
 	{
           shifter_msg_.header.stamp = ros::Time::now();
-          shifter_msg_.gear = art_servo::Shifter::Reset;
+          shifter_msg_.gear = art_msgs::Shifter::Reset;
           shifter_cmd_.publish(shifter_msg_);
 	  if (Backward == goal_range)
 	    {
@@ -545,7 +545,7 @@ void speedControl(float speed)
 	    {
 	      shifting_state = Transmission::ShiftDrive;
               shifter_msg_.header.stamp = ros::Time::now();
-              shifter_msg_.gear = art_servo::Shifter::Drive;
+              shifter_msg_.gear = art_msgs::Shifter::Drive;
               shifter_cmd_.publish(shifter_msg_);
 	      shift_time_ = ros::Time::now();
 	    }
@@ -562,7 +562,7 @@ void speedControl(float speed)
 	{
 	  shifting_state = Transmission::ShiftDrive;
           shifter_msg_.header.stamp = ros::Time::now();
-          shifter_msg_.gear = art_servo::Shifter::Drive;
+          shifter_msg_.gear = art_msgs::Shifter::Drive;
           shifter_cmd_.publish(shifter_msg_);
 	  shift_time_ = ros::Time::now();
 	}
@@ -575,11 +575,11 @@ void speedControl(float speed)
 
     case Transmission::ShiftDrive:
       // make sure the transmission actually shifted
-      if (shifter_gear_ != art_servo::Shifter::Drive)
+      if (shifter_gear_ != art_msgs::Shifter::Drive)
 	{
 	  // repeat shift command until it works
           shifter_msg_.header.stamp = ros::Time::now();
-          shifter_msg_.gear = art_servo::Shifter::Drive;
+          shifter_msg_.gear = art_msgs::Shifter::Drive;
           shifter_cmd_.publish(shifter_msg_);
 	  shift_time_ = ros::Time::now();
           ROS_DEBUG("repeated shift command at %.6f", shift_time_.toSec());
@@ -589,7 +589,7 @@ void speedControl(float speed)
                >= shift_duration)
 	{
           shifter_msg_.header.stamp = ros::Time::now();
-          shifter_msg_.gear = art_servo::Shifter::Reset;
+          shifter_msg_.gear = art_msgs::Shifter::Reset;
           shifter_cmd_.publish(shifter_msg_);
 	  if (Forward == goal_range)
 	    {
@@ -606,7 +606,7 @@ void speedControl(float speed)
 	    {
 	      shifting_state = Transmission::ShiftReverse;
               shifter_msg_.header.stamp = ros::Time::now();
-              shifter_msg_.gear = art_servo::Shifter::Reverse;
+              shifter_msg_.gear = art_msgs::Shifter::Reverse;
               shifter_cmd_.publish(shifter_msg_);
 	      shift_time_ = ros::Time::now();
 	    }
@@ -639,23 +639,23 @@ int setup(ros::NodeHandle node)
 
   
   // initialize servo command interfaces and messages
-  brake_cmd_ = node.advertise<art_servo::BrakeCommand>("brake/cmd", qDepth);
+  brake_cmd_ = node.advertise<art_msgs::BrakeCommand>("brake/cmd", qDepth);
   brake_msg_.header.frame_id = art_msgs::ArtVehicle::frame_id;
-  brake_msg_.request = art_servo::BrakeCommand::Absolute;
+  brake_msg_.request = art_msgs::BrakeCommand::Absolute;
   brake_msg_.position = 1.0;
 
-  shifter_cmd_ = node.advertise<art_servo::Shifter>("shifter/cmd", qDepth);
+  shifter_cmd_ = node.advertise<art_msgs::Shifter>("shifter/cmd", qDepth);
   shifter_msg_.header.frame_id = art_msgs::ArtVehicle::frame_id;
 
   steering_cmd_ =
-    node.advertise<art_servo::SteeringCommand>("steering/cmd", qDepth);
+    node.advertise<art_msgs::SteeringCommand>("steering/cmd", qDepth);
   steering_msg_.header.frame_id = art_msgs::ArtVehicle::frame_id;
-  steering_msg_.request = art_servo::SteeringCommand::Degrees;
+  steering_msg_.request = art_msgs::SteeringCommand::Degrees;
 
   throttle_cmd_ =
-    node.advertise<art_servo::ThrottleCommand>("throttle/cmd", qDepth);
+    node.advertise<art_msgs::ThrottleCommand>("throttle/cmd", qDepth);
   throttle_msg_.header.frame_id = art_msgs::ArtVehicle::frame_id;
-  throttle_msg_.request = art_servo::ThrottleCommand::Absolute;
+  throttle_msg_.request = art_msgs::ThrottleCommand::Absolute;
   throttle_msg_.position = 0.0;
 
   //

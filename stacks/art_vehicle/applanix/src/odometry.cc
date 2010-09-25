@@ -46,7 +46,7 @@ data are in the \b /odom frame of reference.
 #include <art_msgs/GpsInfo.h>
 #include <tf/transform_broadcaster.h>
 
-#include <art_servo/Shifter.h>
+#include <art_msgs/Shifter.h>
 #include <art/frames.h>
 #include <art/UTM.h>
 
@@ -59,7 +59,7 @@ namespace
 {
   // transmission gear information
   ros::Subscriber shifter_sub_;         // shifter position ROS topic
-  uint8_t shifter_gear_ = art_servo::Shifter::Drive;
+  uint8_t shifter_gear_ = art_msgs::Shifter::Drive;
 
   // command parameters
   int qDepth = 1;                       // ROS topic queue size
@@ -268,7 +268,7 @@ bool getOdom(Position::Position3D *odom_pos3d, ros::Time *odom_time,
 
   // Invert speed if the vehicle is going in reverse.
   double speed = adata.grp1.speed;	// in meters/second
-  if (shifter_gear_ == art_servo::Shifter::Reverse)
+  if (shifter_gear_ == art_msgs::Shifter::Reverse)
     speed = -speed;			// handle reverse movement
 
   // Fill in Position3D velocity in /vehicle frame.  Y velocity should
@@ -285,7 +285,7 @@ bool getOdom(Position::Position3D *odom_pos3d, ros::Time *odom_time,
 }  
 
 /** subscriber callback for current shifter position data */
-void getShifter(const art_servo::Shifter::ConstPtr &shifterIn)
+void getShifter(const art_msgs::Shifter::ConstPtr &shifterIn)
 {
   if (shifter_gear_ != shifterIn->gear)
     ROS_INFO("Gear changed from %u to %u",

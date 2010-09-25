@@ -15,7 +15,7 @@ roslib.load_manifest('art_servo')
 import sys
 import string
 import rospy
-from art_servo.msg import Shifter
+from art_msgs.msg import Shifter
 
 # global variables
 cur_gear = None

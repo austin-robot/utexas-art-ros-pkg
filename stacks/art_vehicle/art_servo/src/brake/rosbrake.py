@@ -12,8 +12,8 @@ import roslib;
 roslib.load_manifest('art_servo')
 
 import rospy
-from art_servo.msg import BrakeCommand
-from art_servo.msg import BrakeState
+from art_msgs.msg import BrakeCommand
+from art_msgs.msg import BrakeState
 
 import sys
 import getopt

@@ -15,8 +15,8 @@ roslib.load_manifest('art_servo')
 import sys
 import string
 import rospy
-from art_servo.msg import IOadrCommand
-from art_servo.msg import IOadrState
+from art_msgs.msg import IOadrCommand
+from art_msgs.msg import IOadrState
 
 # global variables
 

@@ -13,9 +13,9 @@ import roslib;
 roslib.load_manifest('art_servo')
 
 import rospy
-from art_msgs.msg  import ArtVehicle
-from art_servo.msg import SteeringCommand
-from art_servo.msg import SteeringState
+from art_msgs.msg import ArtVehicle
+from art_msgs.msg import SteeringCommand
+from art_msgs.msg import SteeringState
 
 max_steer_degrees = ArtVehicle.max_steer_degrees
 

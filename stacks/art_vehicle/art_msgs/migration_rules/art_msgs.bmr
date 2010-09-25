@@ -160,3 +160,50 @@ string frame_id
 	def update(self, old_msg, new_msg):
                 # message moved, no change to any fields
 		new_msg = old_msg
+
+class update__art_nav_CarCommand__a9c426b2a11ce63f7116e941449a149d(MessageUpdateRule):
+	old_type = "art_nav/CarCommand"
+	old_full_text = """
+# car control command with timestamp
+
+Header     header
+CarControl control
+
+================================================================================
+MSG: roslib/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.secs: seconds (stamp_secs) since epoch
+# * stamp.nsecs: nanoseconds since stamp_secs
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id
+
+================================================================================
+MSG: art_nav/CarControl
+# car control command
+
+float32 velocity                # forward velocity (m/s), negative is reverse
+float32 angle                   # steering angle (degrees)
+"""
+
+	new_type = "art_msgs/CarCommand"
+	new_full_text = old_full_text
+
+	order = 0
+	migrated_types = []
+
+	valid = True
+
+	def update(self, old_msg, new_msg):
+                # message moved, no change to any fields
+		new_msg = old_msg
+

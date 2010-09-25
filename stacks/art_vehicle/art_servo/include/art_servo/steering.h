@@ -12,7 +12,7 @@
 #define _STEERING_H
 
 #include <angles/angles.h>
-#include <art_common/ArtVehicle.h>
+#include <art_msgs/ArtVehicle.h>
 
 /** @brief 
  *
@@ -51,13 +51,13 @@ namespace Steering {
    */
   static inline float steering_angle(float v, float y)
   {
-    float steer_radians = atan2f(art_common::ArtVehicle::wheelbase * y,v);
+    float steer_radians = atan2f(art_msgs::ArtVehicle::wheelbase * y,v);
     float steer_degrees = angles::to_degrees(steer_radians);
 
     steer_degrees = fminf(steer_degrees,
-                          art_common::ArtVehicle::max_steer_degrees);
+                          art_msgs::ArtVehicle::max_steer_degrees);
     steer_degrees = fmaxf(steer_degrees,
-                          -art_common::ArtVehicle::max_steer_degrees);
+                          -art_msgs::ArtVehicle::max_steer_degrees);
 
     return steer_degrees;
   }
@@ -68,11 +68,11 @@ namespace Steering {
   static inline double angle_to_yaw(double v, float angle)
   {
     return v * (tanf(angles::from_degrees(angle))
-                / art_common::ArtVehicle::wheelbase);
+                / art_msgs::ArtVehicle::wheelbase);
   }
 
   const double maximum_yaw =
-    angle_to_yaw(steer_speed_min, art_common::ArtVehicle::max_steer_degrees);
+    angle_to_yaw(steer_speed_min, art_msgs::ArtVehicle::max_steer_degrees);
 }
 
 #endif // _STEERING_H

@@ -14,7 +14,7 @@
 # has the functions this file needs to do its job.
 
 import math
-from art_common.msg import ArtVehicle
+from art_msgs.msg import ArtVehicle
 
 ## @brief 
 #

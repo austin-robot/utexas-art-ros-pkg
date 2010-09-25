@@ -21,8 +21,8 @@
 #include <art_map/coordinates.h>
 using namespace Coordinates;
 #include <art_map/rotate_translate_transform.h>
-#include <art_common/ArtVehicle.h>
-using art_common::ArtVehicle;
+#include <art_msgs/ArtVehicle.h>
+using art_msgs::ArtVehicle;
 
 // PFB: TODO: get all left lanes and take first one going other
 // direction.

@@ -9,8 +9,10 @@
   <license>BSD</license>
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/art_common</url>
-  <depend package="roscpp"/>
+
   <depend package="angles"/>
+  <depend package="art_msgs"/>
+  <depend package="roscpp"/>
   <depend package="tf"/>
 
   <export>

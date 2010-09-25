@@ -8,7 +8,7 @@
  */
 
 #include <math.h>
-#include <art_common/ArtVehicle.h>
+#include <art_msgs/ArtVehicle.h>
 #include <art/epsilon.h>
 #include <art_map/euclidean_distance.h>
 #include <art_map/coordinates.h>
@@ -116,7 +116,7 @@ namespace Estimate
   void front_bumper_pose(const nav_msgs::Odometry &odom, 
                          nav_msgs::Odometry &est)
   {
-    Polar bump_rel(0,art_common::ArtVehicle::front_bumper_px);
+    Polar bump_rel(0,art_msgs::ArtVehicle::front_bumper_px);
     MapXY bump_abs =
       Coordinates::Polar_to_MapXY(bump_rel, MapPose(odom.pose.pose));
     est = odom;
@@ -127,7 +127,7 @@ namespace Estimate
   void front_axle_pose(const nav_msgs::Odometry &odom,
                        nav_msgs::Odometry &est)
   {
-    Polar axle_rel(0,art_common::ArtVehicle::wheelbase);
+    Polar axle_rel(0,art_msgs::ArtVehicle::wheelbase);
     MapXY axle_abs = Coordinates::Polar_to_MapXY(axle_rel,
                                                  MapPose(odom.pose.pose));
     est = odom;

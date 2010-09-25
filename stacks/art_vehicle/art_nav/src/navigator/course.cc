@@ -16,7 +16,7 @@
 #include <art_servo/steering.h>
 #include <art_map/coordinates.h>
 #include <art_nav/estimate.h>
-using art_common::ArtVehicle;
+using art_msgs::ArtVehicle;
 using Coordinates::bearing;
 using Coordinates::normalize;
 
@@ -1364,7 +1364,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
   float velocity = fmaxf(curr_velocity, Steering::steer_speed_min);
   nav_msgs::Odometry front_est;  
   Estimate::front_axle_pose(*estimate, front_est);
-  ros::Duration frequency(1.0 / art_common::ArtHertz::NAVIGATOR);
+  ros::Duration frequency(1.0 / art_msgs::ArtHertz::NAVIGATOR);
   ros::Time time_in_future = (ros::Time::now()
                               + frequency
                               + ros::Duration(velocity * spring_lookahead));

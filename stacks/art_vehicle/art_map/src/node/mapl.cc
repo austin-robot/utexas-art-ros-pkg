@@ -16,7 +16,7 @@
 #include <ros/ros.h>
 #include <tf/tf.h>
 
-#include <art_common/ArtHertz.h>
+#include <art_msgs/ArtHertz.h>
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/MarkerArray.h>
 
@@ -25,7 +25,7 @@
 #include <art_map/MapLanes.h>
 #include <art_map/RNDF.h>
 
-#include <art_common/ArtVehicle.h>
+#include <art_msgs/ArtVehicle.h>
 
 /** @file
 
@@ -147,7 +147,7 @@ MapLanesDriver::MapLanesDriver(void)
  */
 void MapLanesDriver::markCar(visualization_msgs::MarkerArray &markers)
 {
-  using art_common::ArtVehicle;
+  using art_msgs::ArtVehicle;
   visualization_msgs::Marker car;
   car.header.stamp = ros::Time::now();
   car.header.frame_id = "/vehicle";
@@ -412,7 +412,7 @@ void MapLanesDriver::publishLocalMap(void)
 
   // publish local map with temporary duration
   publishMapMarks(mapmarks_, "local_roadmap",
-                  ros::Duration(art_common::ArtHertz::MAPLANES), lane_data);
+                  ros::Duration(art_msgs::ArtHertz::MAPLANES), lane_data);
 }
 
 /** Spin function for driver thread */
@@ -420,7 +420,7 @@ void MapLanesDriver::Spin()
 {
   publishGlobalMap();                   // publish global map once at start
 
-  ros::Rate cycle(art_common::ArtHertz::MAPLANES); // set driver cycle rate
+  ros::Rate cycle(art_msgs::ArtHertz::MAPLANES); // set driver cycle rate
 
   // Loop publishing MapLanes state until driver Shutdown().
   while(ros::ok())

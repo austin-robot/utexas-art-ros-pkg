@@ -22,7 +22,7 @@ FollowSafely::~FollowSafely() {};
 void FollowSafely::configure()
 {
   ros::NodeHandle nh("~");
-  using art_common::ArtVehicle;
+  using art_msgs::ArtVehicle;
 
   // How close is close enough for stopping before an obstacle?
   // Should at least include front bumper offset and minimum separation.

@@ -13,13 +13,11 @@ import roslib;
 roslib.load_manifest('art_servo')
 
 import rospy
+from art_msgs.msg  import ArtVehicle
 from art_servo.msg import SteeringCommand
 from art_servo.msg import SteeringState
 
-# Maximum steering angle (in degrees) is defined for C++ in art_common
-# <art/vehicle.hh>.  There is no python version of that header, so
-# define it as a global variable here.
-max_steer_degrees = 29.0
+max_steer_degrees = ArtVehicle.max_steer_degrees
 
 def log_steering_state(state):
     rospy.logdebug("steering angle, sensor: %.3f %.3f (time %.6f)",

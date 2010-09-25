@@ -11,7 +11,7 @@
 #ifndef _HERTZ_H
 #define _HERTZ_H
 
-#warning DEPRECATED: use art_common/ArtHertz message, instead
+#warning DEPRECATED: use art_msgs/ArtHertz message, instead
 
 /** @file
     

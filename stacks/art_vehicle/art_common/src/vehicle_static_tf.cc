@@ -11,8 +11,8 @@
 #include <tf/transform_broadcaster.h>
 
 #include <art/frames.h>
-#include <art_common/ArtHertz.h>
-#include <art_common/ArtVehicle.h>
+#include <art_msgs/ArtHertz.h>
+#include <art_msgs/ArtVehicle.h>
 
 /**  \file
 
@@ -38,7 +38,7 @@ namespace
   /// These are *static* transforms, so it's safe to post-date them
   //  into the future.  Otherwise, some transform listeners will see
   //  old data at times.
-  ros::Duration transform_post_date_(1.0/art_common::ArtHertz::VEHICLE_TF);
+  ros::Duration transform_post_date_(1.0/art_msgs::ArtHertz::VEHICLE_TF);
 
   // class for generating vehicle-relative frame IDs
   ArtFrames::VehicleRelative vr_;
@@ -78,14 +78,14 @@ int main(int argc, char** argv)
   tf::TransformBroadcaster tf_broadcaster;
   vr_.getPrefixParam();                 // get vehicle-relative tf prefix
 
-  ros::Rate cycle(art_common::ArtHertz::VEHICLE_TF); // set driver cycle rate
+  ros::Rate cycle(art_msgs::ArtHertz::VEHICLE_TF); // set driver cycle rate
   
   ROS_INFO(NODE ": starting main loop");
 
   // main loop
   while(ros::ok())
     {
-      using namespace art_common;
+      using art_msgs::ArtVehicle;
 
       // Velodyne 3D LIDAR
       broadcastTF(&tf_broadcaster, ArtFrames::velodyne,

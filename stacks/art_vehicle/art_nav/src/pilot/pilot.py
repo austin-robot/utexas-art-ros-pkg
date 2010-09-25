@@ -52,13 +52,13 @@ from art_servo.msg import SteeringState
 from art_servo.msg import ThrottleCommand
 from art_servo.msg import ThrottleState
 
-from art_common.msg import ArtHertz
-from art_common.msg import ArtVehicle
-from art_common.msg import conversions
-from art_common.msg import epsilon
-
+from art_msgs.msg import ArtHertz
+from art_msgs.msg import ArtVehicle
 from art_msgs.msg import CarCommand
 from art_msgs.msg import CarControl
+from art_msgs.msg import Conversions
+from art_msgs.msg import Epsilon
+
 from art_nav.cfg import PilotConfig
 
 import steering
@@ -608,10 +608,10 @@ def main(argv) :
 # Should I avoid usage of these functions? Maybe Conversions should
 # have been converted to a python file instead.
 def mph2mps(mph) :
-    return mph * conversions.METERS_PER_MILE / conversions.SECONDS_PER_HOUR
+    return mph * Conversions.METERS_PER_MILE / Conversions.SECONDS_PER_HOUR
 
 def mps2mph(mps) :
-    return mps * conversions.SECONDS_PER_HOUR / conversions.METERS_PER_MILE
+    return mps * Conversions.SECONDS_PER_HOUR / Conversions.METERS_PER_MILE
 
 if __name__ == '__main__':
     try:

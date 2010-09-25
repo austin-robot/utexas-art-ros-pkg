@@ -10,7 +10,7 @@
 
 #include <ros/ros.h>
 
-#include <art_common/ArtHertz.h>
+#include <art_msgs/ArtHertz.h>
 #include <art_servo/ThrottleCommand.h>
 #include <art_servo/ThrottleState.h>
 
@@ -199,7 +199,7 @@ void Throttle::PollDevice(void)
 // Main function for device thread
 void Throttle::Main() 
 {
-  ros::Rate cycle(art_common::ArtHertz::THROTTLE); // set driver cycle rate
+  ros::Rate cycle(art_msgs::ArtHertz::THROTTLE); // set driver cycle rate
 
   while(ros::ok())
     {

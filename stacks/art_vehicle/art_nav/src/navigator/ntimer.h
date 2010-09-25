@@ -50,7 +50,7 @@ class NavTimer
       return false;			// timer not set
 
     // decrement time remaining by the duration of one cycle
-    time_remaining -= (1.0 / art_common::ArtHertz::NAVIGATOR);
+    time_remaining -= (1.0 / art_msgs::ArtHertz::NAVIGATOR);
     return (time_remaining <= 0.0);
   }
 

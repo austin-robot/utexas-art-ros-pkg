@@ -324,7 +324,7 @@ void NavQueueMgr::PublishState(void)
 /** Spin method for main thread */
 void NavQueueMgr::spin() 
 {
-  ros::Rate cycle(art_common::ArtHertz::NAVIGATOR);
+  ros::Rate cycle(art_msgs::ArtHertz::NAVIGATOR);
   while(ros::ok())
     {
       ros::spinOnce();                  // handle incoming messages

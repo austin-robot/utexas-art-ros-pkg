@@ -21,7 +21,7 @@
 void SlowForCurves::configure()
 {
   ros::NodeHandle nh("~");
-  using art_common::ArtVehicle;
+  using art_msgs::ArtVehicle;
 
   // TODO: lookahead_distance should probably be time in seconds.
   nh.param("lookahead_distance", lookahead_distance, 100.0);

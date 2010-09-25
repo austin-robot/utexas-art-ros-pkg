@@ -13,7 +13,7 @@
 
 #include <ros/ros.h>
 
-#include <art_common/ArtHertz.h>
+#include <art_msgs/ArtHertz.h>
 #include <art_map/ZoneOps.h>
 
 #include <art_msgs/NavigatorState.h>
@@ -280,7 +280,7 @@ public:
 
     // loop until end of mission
     ROS_INFO("begin mission");
-    ros::Rate cycle(art_common::ArtHertz::COMMANDER);
+    ros::Rate cycle(art_msgs::ArtHertz::COMMANDER);
     while(ros::ok())
       {
         ros::spinOnce();                  // handle incoming messages
@@ -337,7 +337,7 @@ public:
   bool wait_for_input()
   {
     ROS_INFO("Waiting for navigator input");
-    ros::Rate cycle(art_common::ArtHertz::COMMANDER);
+    ros::Rate cycle(art_msgs::ArtHertz::COMMANDER);
     while(ros::ok())
       {
         ros::spinOnce();                // handle incoming messages

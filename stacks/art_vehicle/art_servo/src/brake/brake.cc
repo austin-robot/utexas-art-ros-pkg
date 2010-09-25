@@ -25,7 +25,7 @@
 #include <art_servo/BrakeCommand.h>
 #include <art_servo/BrakeState.h>
 
-#include <art_common/ArtHertz.h>
+#include <art_msgs/ArtHertz.h>
 
 
 #include "devbrake.h"			// servo device interface
@@ -251,7 +251,7 @@ int main(int argc, char** argv)
   if (GetParameters() != 0)
     return 1;
 
-  ros::Rate cycle(art_common::ArtHertz::BRAKE); // set driver cycle rate
+  ros::Rate cycle(art_msgs::ArtHertz::BRAKE); // set driver cycle rate
 
   if (Setup() != 0)
     return 2;

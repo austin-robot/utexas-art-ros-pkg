@@ -42,7 +42,7 @@ void StopArea::configure()
 //
 Controller::result_t StopArea::control(pilot_command_t &pcmd)
 {
-  using art_common::ArtVehicle;
+  using art_msgs::ArtVehicle;
   float wayptdist = (course->stop_waypt_distance(true)
 		     - ArtVehicle::front_bumper_px);
 

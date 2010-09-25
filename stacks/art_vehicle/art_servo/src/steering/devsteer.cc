@@ -13,8 +13,8 @@
 #include <poll.h>
 
 #include <ros/ros.h>
-#include <art_common/ArtHertz.h>
-#include <art_common/ArtVehicle.h>
+#include <art_msgs/ArtHertz.h>
+#include <art_msgs/ArtVehicle.h>
 #include "devsteer.h"
 
 /////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ int devsteer::Configure()
   if (training)
     ROS_INFO("using training mode");
 
-  steering_rate = art_common::ArtVehicle::max_steer_degrees / 2.0;
+  steering_rate = art_msgs::ArtVehicle::max_steer_degrees / 2.0;
   mynh.getParam("steering_rate", steering_rate);
   ROS_INFO("steering rate is %.2f degrees/sec.", steering_rate);
 
@@ -124,7 +124,7 @@ int devsteer::get_angle(float &degrees)
       // simulate steering motion as a constant angular velocity
       float remaining_angle = req_angle - degrees;
       float degrees_per_cycle = (steering_rate /
-                                 art_common::ArtHertz::STEERING);
+                                 art_msgs::ArtHertz::STEERING);
 
       DBG("remaining angle %.3f, degrees per cycle %.3f",
           remaining_angle, degrees_per_cycle);

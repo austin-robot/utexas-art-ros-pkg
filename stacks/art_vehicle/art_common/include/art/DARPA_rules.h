@@ -27,13 +27,13 @@
 #include <math.h>
 #include <art/conversions.h>
 
-#include <art_common/ArtVehicle.h>
+#include <art_msgs/ArtVehicle.h>
 
 namespace DARPA_rules
 {
   // specific to our vehicle
-  const float vehicle_length = art_common::ArtVehicle::length;
-  const float vehicle_width = art_common::ArtVehicle::width;
+  const float vehicle_length = art_msgs::ArtVehicle::length;
+  const float vehicle_width = art_msgs::ArtVehicle::width;
 
   // A.4. Stay in lane
   // Stay at least this far away from the road's center line.

@@ -25,7 +25,7 @@
 #include <art/error.h>
 #include <art/infinity.h>
 
-#include <art_common/ArtHertz.h>
+#include <art_msgs/ArtHertz.h>
 #include <art_map/euclidean_distance.h>
 #include <art_map/PolyOps.h>
 

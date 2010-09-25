@@ -7,8 +7,8 @@
  *  $Id$
  */
 
-#include <art_common/ArtVehicle.h>
-using art_common::ArtVehicle;
+#include <art_msgs/ArtVehicle.h>
+using art_msgs::ArtVehicle;
 
 #include <art/DARPA_rules.h>
 #include "navigator_internal.h"

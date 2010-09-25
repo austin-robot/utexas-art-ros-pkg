@@ -15,7 +15,7 @@
  */
 
 #include <art/conversions.h>
-#include <art_common/ArtHertz.h>
+#include <art_msgs/ArtHertz.h>
 #include "speed.h"
 
 /**
@@ -149,10 +149,10 @@ void SpeedControlMatrix::adjust(float speed, float error,
   int row = delta_row(delta_mph);
   int col = speed_col(mps2mph(speed));
   float brake_delta =
-    (accel_matrix[row][col].brake_delta / art_common::ArtHertz::PILOT)
+    (accel_matrix[row][col].brake_delta / art_msgs::ArtHertz::PILOT)
     / 100.0;
   float throttle_delta =
-    (accel_matrix[row][col].throttle_delta / art_common::ArtHertz::PILOT)
+    (accel_matrix[row][col].throttle_delta / art_msgs::ArtHertz::PILOT)
     / 100.0;
 
   ROS_DEBUG("accel_matrix[%d][%d] contains {%.3f, %.3f}",

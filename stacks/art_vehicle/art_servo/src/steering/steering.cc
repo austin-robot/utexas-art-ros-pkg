@@ -10,7 +10,7 @@
 
 #include <ros/ros.h>
 
-#include <art_common/ArtHertz.h>
+#include <art_msgs/ArtHertz.h>
 #include <art/polynomial.h>
 
 #include <art_servo/SteeringCommand.h>
@@ -356,7 +356,7 @@ void ArtSteer::PublishStatus(void)
 // Main function for device thread
 void ArtSteer::Main() 
 {
-  ros::Rate cycle(art_common::ArtHertz::STEERING); // set driver cycle rate
+  ros::Rate cycle(art_msgs::ArtHertz::STEERING); // set driver cycle rate
 
   while(ros::ok())
     {

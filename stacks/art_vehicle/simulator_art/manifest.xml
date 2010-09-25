@@ -10,9 +10,6 @@
   <url>http://www.ros.org/wiki/simulator_art</url>
 
   <depend package="angles"/>
-  <!--
-  <depend package="art_common"/>
-  -->
   <depend package="art_msgs"/>
   <depend package="art_servo"/>
   <depend package="geometry_msgs"/>

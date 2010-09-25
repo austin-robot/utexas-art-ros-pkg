@@ -1,8 +1,8 @@
-/*
- *  Description:  Units conversion aids.
+/* -*- mode: C++ -*-
+ *
+ *  Units conversion aids.
  *
  *  Copyright (C) 2007, 2009 Austin Robot Technology                    
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -14,6 +14,8 @@
 /**  @file
    
      @brief Units conversion constants and functions.
+
+     @todo use art_msgs/Conversions definitions for multi-language support
  */
 
 #include <math.h>

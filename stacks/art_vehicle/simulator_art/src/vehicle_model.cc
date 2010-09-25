@@ -17,7 +17,6 @@
 #include <angles/angles.h>
 
 #include <art/conversions.h>
-#include <art/epsilon.h>
 #include <art/frames.h>
 #include <art/UTM.h>
 

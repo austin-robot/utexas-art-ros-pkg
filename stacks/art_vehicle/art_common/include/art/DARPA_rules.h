@@ -1,8 +1,8 @@
-/*
- *  Description:  DARPA Urban Challenge rules description
+/* -*- mode: C++ -*-
+ *
+ *  DARPA Urban Challenge rules description
  *
  *  Copyright (C) 2009 Austin Robot Technology                    
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$

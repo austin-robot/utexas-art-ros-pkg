@@ -1,8 +1,8 @@
-/*
+/* -*- mode: C++ -*-
+ *
  *  Description: Polynomial class
  *
  *  Copyright (C) 2009 Austin Robot Technology                    
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$

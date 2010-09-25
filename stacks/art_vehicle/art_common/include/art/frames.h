@@ -1,6 +1,6 @@
-/*
- *  Copyright (C) 2009 Austin Robot Technology
+/* -*- mode: C++ -*-
  *
+ *  Copyright (C) 2009 Austin Robot Technology
  *  License: Modified BSD Software License Agreement
  * 
  *  $Id$
@@ -11,6 +11,8 @@
      \brief ART vehicle frames of reference for ROS transforms.
 
      \author Jack O'Quin
+
+     @todo figure out a less klunky way to do this
 
  */
 

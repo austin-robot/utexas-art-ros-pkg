@@ -1,8 +1,8 @@
-/*
- *  Description: global ART epsilon definitions
+/* -*- mode: C++ -*-
+ *
+ *  ART epsilon definitions
  *
  *  Copyright (C) 2009 Austin Robot Technology                    
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -20,6 +20,10 @@
 
      These constants represent trivial differences in distance, speed,
      angle, etc.
+
+     @todo use art_msgs/Epsilon definitions for multi-language support
+
+     @todo make these specific to mapping and navigation components
  */
 
 namespace Epsilon

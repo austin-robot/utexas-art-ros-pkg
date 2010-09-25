@@ -1,8 +1,8 @@
-/*
- *  Description: global ART infinity definitions
+/* -*- mode: C++ -*-
+ *
+ *  Global ART infinity definitions
  *
  *  Copyright (C) 2009 Austin Robot Technology                    
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -18,6 +18,10 @@
      @brief global ART infinity definitions.
 
      These constants represent effectively infinite distances, times, etc.
+
+     @todo (if needed) make art_msgs definitions for multi-language support
+
+     @todo make these specific to mapping and navigation components
  */
 
 namespace Infinite

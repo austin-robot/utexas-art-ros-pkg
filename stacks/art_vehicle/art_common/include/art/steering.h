@@ -1,8 +1,8 @@
-/*
+/* -*- mode: C++ -*-
+ *
  *  Description:  common steering constants and calculations
  *
  *  Copyright (C) 2005, 2007, 2009 Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -19,7 +19,8 @@
  * Common steering constants and calculations.
  */
 
-namespace Steering {
+namespace Steering
+{
 
   /** Constants: */
   const float steer_speed_min = 3.8;	/* minimum speed for calculation */

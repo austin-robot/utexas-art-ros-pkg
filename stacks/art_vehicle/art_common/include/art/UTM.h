@@ -1,6 +1,7 @@
-/*
- *  Description: conversions between Latitude/Longitude and UTM
- *		 (Universal Transverse Mercator) coordinates.
+/* -*- mode: C++ -*-
+ *
+ *  Conversions between Latitude/Longitude and UTM
+ *              (Universal Transverse Mercator) coordinates.
  *
  *  License: Modified BSD Software License Agreement
  *
@@ -18,7 +19,6 @@
      from (Euclidean) UTM coordinates.
 
      @author Chuck Gantz- chuck.gantz@globalstar.com
-
  */
 
 #include <cmath>
@@ -42,8 +42,8 @@ namespace UTM
 // UTM Parameters
 #define UTM_K0		0.9996			// scale factor
 #define UTM_FE		500000.0		// false easting
-#define UTM_FN_N	0.0			// false northing on north hemisphere
-#define UTM_FN_S	10000000.0		// false northing on south hemisphere
+#define UTM_FN_N	0.0           // false northing, northern hemisphere
+#define UTM_FN_S	10000000.0    // false northing, southern hemisphere
 #define UTM_E2		(WGS84_E*WGS84_E)	// e^2
 #define UTM_E4		(UTM_E2*UTM_E2)		// e^4
 #define UTM_E6		(UTM_E4*UTM_E2)		// e^6
@@ -55,6 +55,8 @@ namespace UTM
  * Units in are floating point degrees (sign for east/west)
  *
  * Units out are meters
+ *
+ * @todo deprecate this interface in favor of LLtoUTM()
  */
 static inline void UTM(double lat, double lon, double *x, double *y)
 {
@@ -194,19 +196,29 @@ static inline void LLtoUTM(const double Lat, const double Long,
 	C = eccPrimeSquared*cos(LatRad)*cos(LatRad);
 	A = cos(LatRad)*(LongRad-LongOriginRad);
 
-	M = a*((1	- eccSquared/4		- 3*eccSquared*eccSquared/64	- 5*eccSquared*eccSquared*eccSquared/256)*LatRad 
-				- (3*eccSquared/8	+ 3*eccSquared*eccSquared/32	+ 45*eccSquared*eccSquared*eccSquared/1024)*sin(2*LatRad)
-									+ (15*eccSquared*eccSquared/256 + 45*eccSquared*eccSquared*eccSquared/1024)*sin(4*LatRad) 
-									- (35*eccSquared*eccSquared*eccSquared/3072)*sin(6*LatRad));
+	M = a*((1 - eccSquared/4 - 3*eccSquared*eccSquared/64
+                - 5*eccSquared*eccSquared*eccSquared/256) * LatRad 
+               - (3*eccSquared/8 + 3*eccSquared*eccSquared/32
+                  + 45*eccSquared*eccSquared*eccSquared/1024)*sin(2*LatRad)
+               + (15*eccSquared*eccSquared/256
+                  + 45*eccSquared*eccSquared*eccSquared/1024)*sin(4*LatRad) 
+               - (35*eccSquared*eccSquared*eccSquared/3072)*sin(6*LatRad));
 	
-	UTMEasting = (double)(k0*N*(A+(1-T+C)*A*A*A/6
-					+ (5-18*T+T*T+72*C-58*eccPrimeSquared)*A*A*A*A*A/120)
-					+ 500000.0);
+	UTMEasting = (double)
+          (k0*N*(A+(1-T+C)*A*A*A/6
+                 + (5-18*T+T*T+72*C-58*eccPrimeSquared)*A*A*A*A*A/120)
+           + 500000.0);
 
-	UTMNorthing = (double)(k0*(M+N*tan(LatRad)*(A*A/2+(5-T+9*C+4*C*C)*A*A*A*A/24
-				 + (61-58*T+T*T+600*C-330*eccPrimeSquared)*A*A*A*A*A*A/720)));
+	UTMNorthing = (double)
+          (k0*(M+N*tan(LatRad)
+               *(A*A/2+(5-T+9*C+4*C*C)*A*A*A*A/24
+                 + (61-58*T+T*T+600*C-330*eccPrimeSquared)*A*A*A*A*A*A/720)));
+
 	if(Lat < 0)
-		UTMNorthing += 10000000.0; //10000000 meter offset for southern hemisphere
+          {
+            //10000000 meter offset for southern hemisphere
+            UTMNorthing += 10000000.0;
+          }
 }
 
 /**
@@ -242,21 +254,24 @@ static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting,
 		NorthernHemisphere = 1;//point is in northern hemisphere
 	else
 	{
-		NorthernHemisphere = 0;//point is in southern hemisphere
-		y -= 10000000.0;//remove 10,000,000 meter offset used for southern hemisphere
+                //point is in southern hemisphere
+		NorthernHemisphere = 0;
+                //remove 10,000,000 meter offset used for southern hemisphere
+		y -= 10000000.0;
 	}
 
-	LongOrigin = (ZoneNumber - 1)*6 - 180 + 3;  //+3 puts origin in middle of zone
-
+        //+3 puts origin in middle of zone
+	LongOrigin = (ZoneNumber - 1)*6 - 180 + 3;
 	eccPrimeSquared = (eccSquared)/(1-eccSquared);
 
 	M = y / k0;
-	mu = M/(a*(1-eccSquared/4-3*eccSquared*eccSquared/64-5*eccSquared*eccSquared*eccSquared/256));
+	mu = M/(a*(1-eccSquared/4-3*eccSquared*eccSquared/64
+                   -5*eccSquared*eccSquared*eccSquared/256));
 
-	phi1Rad = mu	+ (3*e1/2-27*e1*e1*e1/32)*sin(2*mu) 
-				+ (21*e1*e1/16-55*e1*e1*e1*e1/32)*sin(4*mu)
-				+(151*e1*e1*e1/96)*sin(6*mu);
-	phi1 = phi1Rad*DEGREES_PER_RADIAN;
+	phi1Rad = mu + ((3*e1/2-27*e1*e1*e1/32)*sin(2*mu) 
+                        + (21*e1*e1/16-55*e1*e1*e1*e1/32)*sin(4*mu)
+                        + (151*e1*e1*e1/96)*sin(6*mu));
+	phi1 = phi1Rad * DEGREES_PER_RADIAN;
 
 	N1 = a/sqrt(1-eccSquared*sin(phi1Rad)*sin(phi1Rad));
 	T1 = tan(phi1Rad)*tan(phi1Rad);
@@ -264,12 +279,18 @@ static inline void UTMtoLL(const double UTMNorthing, const double UTMEasting,
 	R1 = a*(1-eccSquared)/pow(1-eccSquared*sin(phi1Rad)*sin(phi1Rad), 1.5);
 	D = x/(N1*k0);
 
-	Lat = phi1Rad - (N1*tan(phi1Rad)/R1)*(D*D/2-(5+3*T1+10*C1-4*C1*C1-9*eccPrimeSquared)*D*D*D*D/24
-					+(61+90*T1+298*C1+45*T1*T1-252*eccPrimeSquared-3*C1*C1)*D*D*D*D*D*D/720);
+	Lat = phi1Rad - ((N1*tan(phi1Rad)/R1)
+                         *(D*D/2
+                           -(5+3*T1+10*C1-4*C1*C1-9*eccPrimeSquared)*D*D*D*D/24
+                           +(61+90*T1+298*C1+45*T1*T1-252*eccPrimeSquared
+                             -3*C1*C1)*D*D*D*D*D*D/720));
+
 	Lat = Lat * DEGREES_PER_RADIAN;
 
-	Long = (D-(1+2*T1+C1)*D*D*D/6+(5-2*C1+28*T1-3*C1*C1+8*eccPrimeSquared+24*T1*T1)
-					*D*D*D*D*D/120)/cos(phi1Rad);
+	Long = ((D-(1+2*T1+C1)*D*D*D/6
+                 +(5-2*C1+28*T1-3*C1*C1+8*eccPrimeSquared+24*T1*T1)
+                 *D*D*D*D*D/120)
+                / cos(phi1Rad));
 	Long = LongOrigin + Long * DEGREES_PER_RADIAN;
 
 }

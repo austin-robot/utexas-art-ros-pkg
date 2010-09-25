@@ -1,8 +1,8 @@
-/*
- *  Description:  digital filter functions
+/* -*- mode: C++ -*-
+ *
+ *  Digital filter functions
  *
  *  Copyright (C) 2008 Austin Robot Technology                    
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -16,7 +16,7 @@
      @brief digital filter functions
  */
 
-/*
+/**
  * Exponentially weighted moving average filter.  Transfer function:
  *
  *	y[k] = a*x[k] + (1-a)*y[k-1]
@@ -34,13 +34,12 @@ static inline float EWMA_filter(float a, float xk, float yk1)
   return a*xk + (1-a)*yk1;
 }
 
-/*
+/**
  * Exponential smoothing factor corresponding to N periods.
  */
 static inline float EWMA_smoothing(int N)
 {
   return 2.0/(N + 1.0);
 }
-
 
 #endif /* _FILTER_H */

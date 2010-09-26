@@ -8,6 +8,6 @@
     <param name="deadzone" value="0.0" />
   </node>
 
-  <node pkg="art_nav" type="joy_teleop.py" name="joy_teleop" />
+  <node pkg="art_pilot" type="joy_teleop.py" name="joy_teleop" />
 
 </launch>

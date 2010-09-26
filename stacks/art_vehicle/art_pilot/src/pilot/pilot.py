@@ -35,7 +35,7 @@
 # TODO: Test this program using a simulator
 
 import roslib
-roslib.load_manifest('art_nav')
+roslib.load_manifest('art_pilot')
 import math
 
 import rospy
@@ -59,7 +59,7 @@ from art_msgs.msg import CarControl
 from art_msgs.msg import Conversions
 from art_msgs.msg import Epsilon
 
-from art_nav.cfg import PilotConfig
+from art_pilot.cfg import PilotConfig
 
 from art_common import steering
 import speed
@@ -79,7 +79,7 @@ tools, it also responds to Twist messages on the cmd_vel topic.
 
 Subscribes:
 
-- \b pilot/cmd [art_nav.CarCommand] velocity and steering angle command
+- \b pilot/cmd [art_pilot.CarCommand] velocity and steering angle command
 - \b vel_cmd [geometry_msgs.Twist] standard ROS velocity and angle command
 - \b odom [nav_msgs.Odometry] estimate of robot position and velocity.
 
@@ -573,8 +573,8 @@ def main(argv) :
     # I'm not sure how to do this part in Python
     """
     # declare dynamic reconfigure callback
-    dynamic_reconfigure::Server<art_nav::PilotConfig> srv;
-    dynamic_reconfigure::Server<art_nav::PilotConfig>::CallbackType
+    dynamic_reconfigure::Server<art_pilot::PilotConfig> srv;
+    dynamic_reconfigure::Server<art_pilot::PilotConfig>::CallbackType
             cb =  boost::bind(&reconfig, _1, _2);
     srv.setCallback(cb);
     """

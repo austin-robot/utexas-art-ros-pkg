@@ -47,7 +47,7 @@
 #include <art/pid2.h>
 #include <art/steering.h>
 
-#include <art_nav/PilotConfig.h>
+#include <art_pilot/PilotConfig.h>
 
 #include <art_msgs/LearningCommand.h>
 
@@ -107,7 +107,7 @@ namespace
   ros::Publisher throttle_cmd_;         // throttle command
 
   // configuration
-  art_nav::PilotConfig config_;         // dynamic configuration
+  art_pilot::PilotConfig config_;         // dynamic configuration
 
   // servo control
   float brake_position_ = 1.0;
@@ -308,7 +308,7 @@ void processLearning(const art_msgs::LearningCommand::ConstPtr &learningIn)
  * the same main thread as ros::spinOnce() and all the topic
  * subscription callbacks. If not, we need a lock.
  */
-void reconfig(art_nav::PilotConfig &newconfig, uint32_t level)
+void reconfig(art_pilot::PilotConfig &newconfig, uint32_t level)
 {
   ROS_INFO("pilot dynamic reconfigure, level 0x%x", level);
 
@@ -681,8 +681,8 @@ int main(int argc, char** argv)
     }
 
   // declare dynamic reconfigure callback
-  dynamic_reconfigure::Server<art_nav::PilotConfig> srv;
-  dynamic_reconfigure::Server<art_nav::PilotConfig>::CallbackType cb =
+  dynamic_reconfigure::Server<art_pilot::PilotConfig> srv;
+  dynamic_reconfigure::Server<art_pilot::PilotConfig>::CallbackType cb =
     boost::bind(&reconfig, _1, _2);
   srv.setCallback(cb);
 

@@ -14,7 +14,7 @@
 ##       stops when released, goes forward when positive, backward
 ##       when negative
 
-PKG_NAME = 'art_nav'
+PKG_NAME = 'art_pilot'
 
 import sys
 import math

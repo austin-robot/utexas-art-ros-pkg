@@ -18,6 +18,6 @@
 
   <!-- navigation components -->
   <node pkg="applanix" type="odometry" name="odometry" />
-  <node pkg="art_nav" type="pilot" name="pilot" />
+  <node pkg="art_pilot" type="pilot" name="pilot" />
 
 </launch>

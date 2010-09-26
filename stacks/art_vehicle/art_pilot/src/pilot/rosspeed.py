@@ -9,7 +9,7 @@
 # $Id$
 
 import roslib;
-roslib.load_manifest('art_nav')
+roslib.load_manifest('art_pilot')
 
 import rospy
 from nav_msgs.msg import Odometry

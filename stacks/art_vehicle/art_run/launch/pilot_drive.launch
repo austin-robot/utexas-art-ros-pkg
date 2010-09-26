@@ -28,7 +28,7 @@
 
   <!-- navigation components -->
   <node pkg="applanix" type="odometry" name="odometry" />
-  <node pkg="art_nav" type="$(optenv PILOT_NODE pilot)" name="pilot" />
+  <node pkg="art_pilot" type="$(optenv PILOT_NODE pilot)" name="pilot" />
 
   <!-- static transforms -->
   <include file="$(find art_run)/launch/static_transforms.launch"/>

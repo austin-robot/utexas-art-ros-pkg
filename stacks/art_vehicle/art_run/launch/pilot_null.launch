@@ -23,15 +23,6 @@
   </node>
 
   <!-- navigation components -->
-  <node pkg="art_nav" type="$(optenv PILOT_NODE pilot)" name="pilot" />
-
-  <!-- comment out, not working
-  <node pkg="rxtools" type="rxplot" name="steering_plot"
-        args="/steering/state/angle"/>
-  <node pkg="rxtools" type="rxplot" name="brake_plot"
-        args="/brake/state/angle"/>
-  <node pkg="rxtools" type="rxplot" name="shifter_plot"
-        args="/shifter/state/gear"/>
-  -->
+  <node pkg="art_pilot" type="$(optenv PILOT_NODE pilot)" name="pilot" />
 
 </launch>

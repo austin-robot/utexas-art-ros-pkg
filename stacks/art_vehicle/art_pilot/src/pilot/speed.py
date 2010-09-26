@@ -30,7 +30,7 @@
 # it should have the same behavior as the C++ version.
 
 import roslib
-roslib.load_manifest('art_nav')
+roslib.load_manifest('art_pilot')
 
 import rospy
 import math

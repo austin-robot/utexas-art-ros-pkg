@@ -11,7 +11,7 @@
 #   $Id$
 
 import roslib;
-roslib.load_manifest('art_nav')
+roslib.load_manifest('art_pilot')
 roslib.load_manifest('nav_msgs')
 
 import rospy

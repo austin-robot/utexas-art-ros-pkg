@@ -1,0 +1,74 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+
+Servo coordination for the ART automonous vehicle.
+
+
+\section pilot Pilot Node
+
+Speed and direction control node for the ART vehicle.
+
+\subsection pilot_examples Examples
+
+Run the ART pilot, accepting \b pilot/cmd messages.
+
+\verbatim
+  rosrun art_nav pilot
+\endverbatim
+
+\subsection pilot_rosapi Pilot ROS API
+
+Node name: \b pilot
+
+\subsubsection sub_topics Subscribes:
+
+  - \b pilot/cmd velocity and steering angle command
+  - \b vel_cmd standard ROS velocity and angle command
+  - \b odom estimate of robot position and velocity.
+  - \b brake/state brake status.
+  - \b shifter/state shifter relays status.
+  - \b steering/state steering status.
+  - \b throttle/state throttle status.
+
+\subsubsection pub_topics Publishes:
+
+  - \b brake/cmd brake commands.
+  - \b shifter/cmd shifter commands.
+  - \b steering/cmd steering commands.
+  - \b throttle/cmd throttle commands.
+  
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~maxspeed" : \b [double] Maximum speed for pilot requests (m/s). min: 0.0, default: 14.0, max: 25.0
+- \b "~minspeed" : \b [double] Minimum speed for pilot requests (in reverse) (m/s). min: -4.0, default: -3.0, max: 0.0
+- \b "~brake_hold" : \b [double] Brake hold command when stopped. min: 0.0, default: 0.7, max: 1.0
+- \b "~use_accel_matrix" : \b [bool] Use acceleration matrix for speed control. min: False, default: True, max: True
+- \b "~brake_kp" : \b [double] Brake PID proportional gain (Kp). min: -10.0, default: -0.12, max: 0.0
+- \b "~brake_ki" : \b [double] Brake PID integral gain (Ki). min: -10.0, default: -0.001, max: 0.0
+- \b "~brake_kd" : \b [double] Brake PID derivative gain (Kd). min: -10.0, default: 0.0, max: 0.0
+- \b "~throttle_kp" : \b [double] Throttle PID proportional gain (Kp). min: 0.0, default: 0.12, max: 10.0
+- \b "~throttle_ki" : \b [double] Throttle PID integral gain (Ki). min: 0.0, default: 0.001, max: 10.0
+- \b "~throttle_kd" : \b [double] Throttle PID derivative gain (Kd). min: 0.0, default: 0.54, max: 10.0
+
+\section teleop Tele-Operation client
+
+Graphical tele-operation client for ART pilot.
+
+\subsection teleop_examples Examples
+
+Run Qt script for sending speeds and steering angles to the pilot.
+
+\verbatim
+  rosrun art_nav teleop.py
+\endverbatim
+
+\subsection teleop_rosapi ROS API
+
+- Node name: \b teleop
+- Publishes: \b pilot/cmd: pilot commands.
+
+*/

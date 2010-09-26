@@ -13,7 +13,7 @@ LearnedSpeedControl::LearnedSpeedControl():
   ROS_WARN("Learned Speed Controller, load policy");
 
   // create agent and load file
-  loadPolicy("/home/robot/svn/utexas-art-ros-pkg/stacks/art_vehicle/art_nav/src/pilot/control1400.pol");
+  loadPolicy("/home/robot/svn/utexas-art-ros-pkg/stacks/art_vehicle/art_pilot/src/pilot/control1400.pol");
   //loadPolicy("control1400.pol");
 
   // init state vector

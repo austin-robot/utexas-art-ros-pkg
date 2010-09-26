@@ -2,73 +2,69 @@
 \mainpage
 \htmlinclude manifest.html
 
+Navigation nodes for controlling the ART autonomous vehicle.
 
-Navigation control for the ART automonous vehicle.
+This is a port to ROS of some of the Player 2D navigation code used on
+the vehicle for the 2007 DARPA Urban Challenge competition.
 
 
-\section pilot Pilot Node
+\section commander Commander Node
 
-Speed and direction control node for the ART vehicle.
+Global path planning for the ART autonomous vehicle.
 
-\subsection pilot_examples Examples
+\subsection commander_rosapi Commander ROS API
 
-Run the ART pilot, accepting \b pilot/cmd messages.
-
-\verbatim
-  rosrun art_nav pilot
-\endverbatim
-
-\subsection pilot_rosapi Pilot ROS API
-
-Node name: \b pilot
+Node name: \b commander
 
 \subsubsection sub_topics Subscribes:
 
-  - \b pilot/cmd velocity and steering angle command
-  - \b vel_cmd standard ROS velocity and angle command
-  - \b odom estimate of robot position and velocity.
-  - \b brake/state brake status.
-  - \b shifter/state shifter relays status.
-  - \b steering/state steering status.
-  - \b throttle/state throttle status.
+  - \b navigator/state navigator node state
 
 \subsubsection pub_topics Publishes:
 
-  - \b brake/cmd brake commands.
-  - \b shifter/cmd shifter commands.
-  - \b steering/cmd steering commands.
-  - \b throttle/cmd throttle commands.
+  - \b navigator/cmd way-point orders for the navigator node
   
 \subsubsection parameters ROS parameters
 
 Reads and maintains the following parameters on the ROS server
 
-- \b "~maxspeed" : \b [double] Maximum speed for pilot requests (m/s). min: 0.0, default: 14.0, max: 25.0
-- \b "~minspeed" : \b [double] Minimum speed for pilot requests (in reverse) (m/s). min: -4.0, default: -3.0, max: 0.0
-- \b "~brake_hold" : \b [double] Brake hold command when stopped. min: 0.0, default: 0.7, max: 1.0
-- \b "~use_accel_matrix" : \b [bool] Use acceleration matrix for speed control. min: False, default: True, max: True
-- \b "~brake_kp" : \b [double] Brake PID proportional gain (Kp). min: -10.0, default: -0.12, max: 0.0
-- \b "~brake_ki" : \b [double] Brake PID integral gain (Ki). min: -10.0, default: -0.001, max: 0.0
-- \b "~brake_kd" : \b [double] Brake PID derivative gain (Kd). min: -10.0, default: 0.0, max: 0.0
-- \b "~throttle_kp" : \b [double] Throttle PID proportional gain (Kp). min: 0.0, default: 0.12, max: 10.0
-- \b "~throttle_ki" : \b [double] Throttle PID integral gain (Ki). min: 0.0, default: 0.001, max: 10.0
-- \b "~throttle_kd" : \b [double] Throttle PID derivative gain (Kd). min: 0.0, default: 0.54, max: 10.0
+- \b "~mdf" : \b [string] Mission Definition File name
+- \b "~rndf" : \b [string] Road Network Definition File name
 
-\section teleop Tele-Operation client
 
-Graphical tele-operation client for ART pilot.
+\section navigator Navigator Node
 
-\subsection teleop_examples Examples
+Local path planning for the ART autonomous vehicle.
+
+\subsection navigator_rosapi Navigator ROS API
+
+Node name: \b navigator
+
+\subsubsection sub_topics Subscribes:
+
+  - \b navigator/cmd way-point orders from the commander node
+
+\subsubsection pub_topics Publishes:
+
+  - \b navigator/state current navigator state
+  - \b pilot/cmd velocity and steering angle for the pilot node
+
+
+\section estop E-stop Control Client
+
+Graphical client for E-stop control.
+
+\subsection estop_examples Examples
 
 Run Qt script for sending speeds and steering angles to the pilot.
 
 \verbatim
-  rosrun art_nav teleop.py
+  rosrun art_nav estop.py
 \endverbatim
 
-\subsection teleop_rosapi ROS API
+\subsection estop_rosapi ROS API
 
-- Node name: \b teleop
-- Publishes: \b pilot/cmd: pilot commands.
+- Node name: \b estop
+- Publishes: \b navigator/cmd: navigator E-stop commands.
 
 */

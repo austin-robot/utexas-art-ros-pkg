@@ -10,7 +10,7 @@
 #
 # $Id$
 
-PKG_NAME = 'art_nav'
+PKG_NAME = 'art_pilot'
 
 import sys
 import os

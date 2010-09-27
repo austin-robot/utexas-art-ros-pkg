@@ -60,8 +60,9 @@ void ArtVehicleModel::setup(void)
   ros::NodeHandle private_nh("~");
   private_nh.param("latitude",  origin_lat_,   29.446018);
   private_nh.param("longitude", origin_long_, -98.607024);
-  ROS_INFO("map GPS origin: latitude %.6f, longitude %.6f",
-           origin_lat_, origin_long_);
+  private_nh.param("elevation", origin_elev_, 100.0);
+  ROS_INFO("map GPS origin: latitude %.6f, longitude %.6f, elevation %.1f m",
+           origin_lat_, origin_long_, origin_elev_);
 
   // Convert latitude and longitude of map origin to UTM.
   UTM::LLtoUTM(origin_lat_, origin_long_,
@@ -192,23 +193,33 @@ void ArtVehicleModel::update(ros::Time sim_time)
   // Translate into ROS message format and publish
   odomMsg_.pose.pose.position.x = stgp_->est_pose.x + map_origin_x_;
   odomMsg_.pose.pose.position.y = stgp_->est_pose.y + map_origin_y_;
+  odomMsg_.pose.pose.position.z = origin_elev_;
   odomMsg_.pose.pose.orientation =
     tf::createQuaternionMsgFromYaw(stgp_->est_pose.a);
 
   odomMsg_.header.stamp = sim_time;
-  odomMsg_.header.frame_id = tf_prefix_ + ArtFrames::odom;
+  odomMsg_.header.frame_id = tf_prefix_ + ArtFrames::earth;
   odomMsg_.child_frame_id = tf_prefix_ + ArtFrames::vehicle;
   odom_pub_.publish(odomMsg_);
 
-  // broadcast odometry transform
-  tf::Quaternion odomQ;
-  tf::quaternionMsgToTF(odomMsg_.pose.pose.orientation, odomQ);
-  tf::Transform txOdom(odomQ, 
+  // broadcast /earth transform relative to sea level
+  tf::Quaternion vehicleQ;
+  tf::quaternionMsgToTF(odomMsg_.pose.pose.orientation, vehicleQ);
+  tf::Transform txEarth(vehicleQ, 
                        tf::Point(odomMsg_.pose.pose.position.x,
-                                 odomMsg_.pose.pose.position.y, 0.0));
+                                 odomMsg_.pose.pose.position.y,
+                                 odomMsg_.pose.pose.position.z));
+  tf_->sendTransform(tf::StampedTransform(txEarth, sim_time,
+                                          tf_prefix_ + ArtFrames::earth,
+                                          tf_prefix_ + ArtFrames::vehicle));
+
+  // Also publish /odom frame with same elevation as /vehicle and same
+  // orientation as /earth
+  tf::Transform txOdom(tf::Quaternion(0.0, 0.0, 0.0, 1.0), 
+                       tf::Point(0.0, 0.0, -odomMsg_.pose.pose.position.z));
   tf_->sendTransform(tf::StampedTransform(txOdom, sim_time,
                                           tf_prefix_ + ArtFrames::odom,
-                                          tf_prefix_ + ArtFrames::vehicle));
+                                          tf_prefix_ + ArtFrames::earth));
 
   // Also publish the ground truth pose and velocity, correcting for
   // Stage's screwed-up coord system.

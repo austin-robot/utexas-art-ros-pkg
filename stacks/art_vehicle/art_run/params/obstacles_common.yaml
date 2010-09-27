@@ -24,8 +24,8 @@ costmap:
     map_type: costmap                       # try voxel later
     rolling_window: true
     static_map: false
-    width: 100.0
-    height: 100.0
+    width: 150.0
+    height: 150.0
     resolution: 0.5
     publish_voxel_map: true
     track_unknown_space: true

@@ -64,7 +64,7 @@
 
 #include "vehicle_model.h"
 
-#define USAGE "artstage [-g] <worldfile>"
+#define USAGE "artstage [-g] [ <worldfile> ]"
 
 // ROS relative topic names
 #define FRONT_LASER "front_sick"

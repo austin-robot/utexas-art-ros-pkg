@@ -110,6 +110,7 @@ private:
 
   double origin_lat_;
   double origin_long_;
+  double origin_elev_;
   double origin_easting_;
   double origin_northing_;
   char   origin_zone_[20];

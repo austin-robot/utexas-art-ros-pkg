@@ -25,6 +25,9 @@
 
 namespace ArtFrames
 {
+  /** Earth frame of reference */
+  const std::string earth =     "earth";
+
   /** odometry frame of reference */
   const std::string odom =      "odom";
 

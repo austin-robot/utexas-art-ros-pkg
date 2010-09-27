@@ -305,16 +305,25 @@ void putPose(const Position::Position3D *odom_pos3d,
   geometry_msgs::Quaternion odom_quat;
   tf::quaternionTFToMsg(q, odom_quat);
 
-  // broadcast Transform from vehicle to odom
+  // broadcast Transform from /earth to /vehicle
+  geometry_msgs::TransformStamped earth_tf;
+  earth_tf.header.stamp = *odom_time;
+  earth_tf.header.frame_id = vr_.getFrame(ArtFrames::earth);
+  earth_tf.child_frame_id = vr_.getFrame(ArtFrames::vehicle);
+  earth_tf.transform.translation.x = odom_pos3d->pos.x;
+  earth_tf.transform.translation.y = odom_pos3d->pos.y;
+  earth_tf.transform.translation.z = odom_pos3d->pos.z;
+  earth_tf.transform.rotation = odom_quat;
+  odom_broad->sendTransform(earth_tf);
+
+  // broadcast Transform from /odom to /earth with same X, Y position
+  // and orientation, but same Z coordinate as /vehicle
   geometry_msgs::TransformStamped odom_tf;
   odom_tf.header.stamp = *odom_time;
   odom_tf.header.frame_id = vr_.getFrame(ArtFrames::odom);
-  odom_tf.child_frame_id = vr_.getFrame(ArtFrames::vehicle);
-  odom_tf.transform.translation.x = odom_pos3d->pos.x;
-  odom_tf.transform.translation.y = odom_pos3d->pos.y;
-  odom_tf.transform.translation.z = odom_pos3d->pos.z;
-  odom_tf.transform.rotation = odom_quat;
-
+  odom_tf.child_frame_id = vr_.getFrame(ArtFrames::earth);
+  odom_tf.transform.translation.z = -odom_pos3d->pos.z;
+  odom_tf.transform.rotation.w = 1.0;
   odom_broad->sendTransform(odom_tf);
 
   // publish the Odometry message

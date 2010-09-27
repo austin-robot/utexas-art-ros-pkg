@@ -17,6 +17,7 @@
 #include <tf/tf.h>
 
 #include <art_msgs/ArtHertz.h>
+#include <sensor_msgs/PointCloud.h>
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/MarkerArray.h>
 
@@ -75,6 +76,8 @@ private:
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void publishGlobalMap(void);
   void publishLocalMap(void);
+  void publishMapCloud(ros::Publisher &pub,
+                       const art_msgs::ArtLanes &lane_data);
   void publishMapMarks(ros::Publisher &pub,
                        const std::string &map_name,
                        ros::Duration life,
@@ -93,6 +96,12 @@ private:
   ros::Publisher roadmap_global_;       // global road map publisher
   ros::Publisher roadmap_local_;        // local road map publisher
   ros::Publisher mapmarks_;             // rviz visualization markers
+
+  ros::Publisher roadmap_cloud_;        // local road map point cloud
+
+  // this vector is only used while publishMapMarks() is running
+  // we define it here to avoid memory allocation on every cycle
+  sensor_msgs::PointCloud cloud_msg_;
 
   // this vector is only used while publishMapMarks() is running
   // we define it here to avoid memory allocation on every cycle
@@ -198,6 +207,11 @@ int MapLanesDriver::Setup(ros::NodeHandle node)
   roadmap_local_ =
     node.advertise<art_msgs::ArtLanes>("roadmap_local", qDepth);
 
+  // Local road map point cloud publisher
+  cloud_msg_.channels.clear();
+  roadmap_cloud_ =
+    node.advertise<sensor_msgs::PointCloud>("roadmap_cloud", qDepth);
+
   // Use latched publisher for global road map and visualization topics
   roadmap_global_ =
     node.advertise<art_msgs::ArtLanes>("roadmap_global", 1, true);
@@ -225,6 +239,46 @@ void MapLanesDriver::processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
       ROS_INFO("initial odometry received");
       initial_position_ = true;         // have position data now
     }
+}
+
+/** @brief Publish map point cloud
+ *
+ *  Converts polygon data into point cloud for clearing the occupancy
+ *  grid.
+ *
+ *  @param pub topic to publish
+ *  @param lane_data polygons to publish
+ */
+void MapLanesDriver::publishMapCloud(ros::Publisher &pub,
+                                     const art_msgs::ArtLanes &lane_data)
+{
+  if (pub.getNumSubscribers() == 0)     // no subscribers?
+    return;
+
+  // clear message array, this is a class variable to avoid memory
+  // allocation and deallocation on every cycle
+  cloud_msg_.points.resize(3 * lane_data.polygons.size());
+  cloud_msg_.header.frame_id = frame_id_;
+  cloud_msg_.header.stamp = ros::Time::now();
+
+  int top_left = art_msgs::ArtQuadrilateral::top_left;
+  int top_right = art_msgs::ArtQuadrilateral::top_right;
+
+  for (uint32_t i = 0; i < lane_data.polygons.size(); ++i)
+    {
+      cloud_msg_.points[3*i].x =
+        lane_data.polygons[i].midpoint.x;
+      cloud_msg_.points[3*i].y =
+        lane_data.polygons[i].midpoint.y;
+      cloud_msg_.points[3*i].z =
+        lane_data.polygons[i].midpoint.z;
+      cloud_msg_.points[3*i+1] =
+        lane_data.polygons[i].poly.points[top_left];
+      cloud_msg_.points[3*i+2] =
+        lane_data.polygons[i].poly.points[top_right];
+    }
+
+  pub.publish(cloud_msg_);
 }
 
 /** @brief Publish map visualization markers
@@ -413,6 +467,9 @@ void MapLanesDriver::publishLocalMap(void)
   // publish local map with temporary duration
   publishMapMarks(mapmarks_, "local_roadmap",
                   ros::Duration(art_msgs::ArtHertz::MAPLANES), lane_data);
+
+  // publish local map with temporary duration
+  publishMapCloud(roadmap_cloud_, lane_data);
 }
 
 /** Spin function for driver thread */

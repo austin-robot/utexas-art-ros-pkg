@@ -6,7 +6,8 @@ costmap:
     footprint: [[-1.3, -1.06], [-1.3, 1.06], [3.5, 1.06], [3.5, -1.06]]
 
     max_obstacle_height: 2.7                # ArtVehicle::velodyne_pz + 30cm
-    min_obstacle_height: 0.2                # ignore low obstacles
+    min_obstacle_height: -1.0               # allow road height variations
+    #min_obstacle_height: 0.2                # ignore low obstacles
 
     # KLUDGE: add elevation of 209m above sea level    
     #max_obstacle_height: 211.7               # ArtVehicle::velodyne_pz + 30cm
@@ -24,8 +25,8 @@ costmap:
     map_type: costmap                       # try voxel later
     rolling_window: true
     static_map: false
-    width: 150.0
-    height: 150.0
+    width: 160.0
+    height: 160.0
     resolution: 0.5
     publish_voxel_map: true
     track_unknown_space: true

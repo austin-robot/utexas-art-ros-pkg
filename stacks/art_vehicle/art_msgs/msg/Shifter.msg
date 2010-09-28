@@ -2,6 +2,8 @@
 #
 # Used to both request and report gear shifts.
 
+# $Id$
+
 # Our Arens Controls hardware mechanism requires holding the shift
 # relay on for one second before resetting it.  A command node must
 # request the desired gear, then wait a second before sending the

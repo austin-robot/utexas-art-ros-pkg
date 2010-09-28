@@ -1,5 +1,7 @@
 # ART brake controller state message
 
+# $Id$
+
 Header  header
 
 float32 position                # fractional position

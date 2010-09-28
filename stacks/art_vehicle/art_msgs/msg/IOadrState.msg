@@ -1,5 +1,7 @@
 # NCD IOADR8x controller state message for ART vehicle
 
+# $Id$
+
 Header  header
 
 # constant bit values for relays and digitalB inputs

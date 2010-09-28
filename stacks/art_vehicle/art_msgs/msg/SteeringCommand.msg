@@ -1,5 +1,7 @@
 # ART steering controller command message
 
+# $Id$
+
 # The maximum allowed steering angle is ArtVehicle::max_steer_degrees
 # (29 degrees) in either direction, defined in the art_msgs/ArtVehicle
 # message.

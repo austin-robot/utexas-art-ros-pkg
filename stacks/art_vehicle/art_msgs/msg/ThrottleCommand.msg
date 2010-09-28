@@ -1,5 +1,7 @@
 # ART throttle controller command message
 
+# $Id$
+
 Header  header
 
 # request types

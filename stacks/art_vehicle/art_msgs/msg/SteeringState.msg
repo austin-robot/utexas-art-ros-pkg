@@ -1,5 +1,7 @@
 # ART steering controller state message
 
+# $Id$
+
 Header  header
 
 float32 angle                   # steering angle in degrees

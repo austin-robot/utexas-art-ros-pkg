@@ -1,5 +1,7 @@
 # ART throttle controller state message
 
+# $Id$
+
 Header  header
 
 float32 position                # fractional position [0, 1]

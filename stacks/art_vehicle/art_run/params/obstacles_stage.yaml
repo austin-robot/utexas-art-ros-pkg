@@ -1,8 +1,10 @@
 # local obstacle grid parameters -- stage simulation
+# $Id$
+
 costmap:
     
     # sensor sources
-    observation_sources: front_sick
+    observation_sources: front_sick roadmap_cloud
 
     front_sick:
     
@@ -13,4 +15,4 @@ costmap:
         observation_persistence: 1.0
         obstacle_range: 100.0                # ignore closer readings
         raytrace_range: 100.0
-        sensor_frame: /front_sick
+        #sensor_frame: /front_sick

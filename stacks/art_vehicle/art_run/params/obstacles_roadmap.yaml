@@ -1,0 +1,17 @@
+# local obstacle grid road map point cloud parameters
+# $Id$
+
+costmap:
+    
+    roadmap_cloud:
+    
+        #min_obstacle_height: -1.0           # allow road height variations
+        clearing: true
+        data_type: PointCloud
+        expected_update_rate: 1.0
+        marking: true
+        observation_persistence: 1.0
+        obstacle_range: 80.0                # max readings range
+        raytrace_range: 80.0
+        #sensor_frame: /map
+        #topic: roadmap_cloud

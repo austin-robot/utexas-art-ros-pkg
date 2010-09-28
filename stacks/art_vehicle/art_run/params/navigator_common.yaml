@@ -1,0 +1,13 @@
+# common ART navigator parameters
+# $Id$
+
+lane_steer_time: 1.0
+lane_width_ratio: 0.5
+max_following_time: 8.0
+max_yaw_rate: 0.15
+min_following_time: 4.0
+min_lane_steer_dist: 7.0
+stop_deceleration: 2.0
+stop_latency: 0.6
+turning_heading_tune: 0.5
+turning_offset_tune: 0.4

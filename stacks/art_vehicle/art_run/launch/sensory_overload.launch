@@ -1,7 +1,10 @@
 <!-- -*- mode: XML -*- -->
 
 <!-- start nodes to acquire data from cameras and velodyne, with
-     corresponding odometry, GPS and coordinate transforms -->
+     corresponding odometry, GPS and coordinate transforms 
+
+     $Id$
+-->
 
 <launch>
 

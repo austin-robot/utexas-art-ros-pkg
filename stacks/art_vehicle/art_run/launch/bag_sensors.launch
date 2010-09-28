@@ -1,7 +1,11 @@
 <!-- -*- mode: XML -*- -->
 
 <!-- record bag from cameras and velodyne, with corresponding
-     odometry, GPS and coordinate transforms -->
+     odometry, GPS and coordinate transforms
+
+     $Id$
+
+  -->
 
 <launch>
   <node pkg="rosbag" type="rosbag" name="rosbag"

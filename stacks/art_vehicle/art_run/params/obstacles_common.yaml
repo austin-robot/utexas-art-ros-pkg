@@ -1,4 +1,6 @@
 # local obstacle grid common parameters
+# $Id$
+
 costmap:
 
     # vehicle dimensions based on ArtVehicle::halfwidth,

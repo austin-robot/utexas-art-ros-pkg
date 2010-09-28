@@ -2,6 +2,8 @@
 <!-- launch file for pilot with null servo interfaces
 
      Pass PILOT_NODE=pilot.py in environment to run Python version.
+
+     $Id$
   -->
 
 <launch>

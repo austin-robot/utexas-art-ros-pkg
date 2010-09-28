@@ -1,5 +1,8 @@
 <!-- -*- mode: XML -*- -->
-<!-- launch file for pilot with stage simulation -->
+<!-- launch file for pilot with stage simulation
+
+     $Id$
+  -->
 
 <launch>
   <!-- stage simulator for ART vehicle -->

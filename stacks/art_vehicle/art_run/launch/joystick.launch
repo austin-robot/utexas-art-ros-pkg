@@ -1,5 +1,8 @@
 <!-- -*- mode: XML -*- -->
-<!-- launch file for joystick teleoperation controller -->
+<!-- launch file for joystick teleoperation controller
+
+     $Id$
+  -->
 
 <launch>
 

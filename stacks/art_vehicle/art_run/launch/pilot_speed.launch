@@ -1,5 +1,8 @@
 <!-- -*- mode: XML -*- -->
-<!-- launch file for pilot controlling vehicle speed, human steering -->
+<!-- launch file for pilot controlling vehicle speed, human steering 
+
+     $Id$
+-->
 
 <launch>
   <!-- servo actuators -->

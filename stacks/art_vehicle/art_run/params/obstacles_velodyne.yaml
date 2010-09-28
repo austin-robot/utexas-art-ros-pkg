@@ -1,31 +1,19 @@
 # local obstacle grid Velodyne parameters
+# $Id$
+
 costmap:
     
     # sensor sources
-    #observation_sources: velodyne_obstacles roadmap_cloud
-    observation_sources: roadmap_cloud
+    observation_sources: velodyne_obstacles roadmap_cloud
 
-    #velodyne_obstacles:
-    #
-    #    clearing: true
-    #    data_type: PointCloud
-    #    expected_update_rate: 0.2           # twice actual frequency
-    #    marking: true
-    #    observation_persistence: 0.2
-    #    obstacle_range: 80.0                # max readings range
-    #    raytrace_range: 80.0
-    #    sensor_frame: /velodyne
-    #    topic: velodyne/obstacles
-
-    roadmap_cloud:
+    velodyne_obstacles:
     
-        #min_obstacle_height: -1.0           # allow road height variations
         clearing: true
         data_type: PointCloud
-        expected_update_rate: 1.0
+        expected_update_rate: 0.2           # twice actual frequency
         marking: true
-        observation_persistence: 1.0
+        observation_persistence: 0.2
         obstacle_range: 80.0                # max readings range
         raytrace_range: 80.0
-        sensor_frame: /map
-        topic: roadmap_cloud
+        #sensor_frame: /velodyne
+        topic: velodyne/obstacles

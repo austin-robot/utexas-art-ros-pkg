@@ -1,5 +1,8 @@
 <!-- -*- mode: XML -*- -->
-<!-- launch file for driving simulated vehicle from keyboard -->
+<!-- launch file for driving simulated vehicle from keyboard
+
+     $Id$
+  -->
 
 <launch>
 

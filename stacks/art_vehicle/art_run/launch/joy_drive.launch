@@ -1,5 +1,8 @@
 <!-- -*- mode: XML -*- -->
-<!-- launch file for driving vehicle with joystick -->
+<!-- launch file for driving vehicle with joystick
+
+     $Id$
+  -->
 
 <launch>
 

@@ -3,6 +3,8 @@
 
      WORLD = base name (without prefix) of world file and RNDF
              (default prc_large)
+
+     $Id$
   -->
 
 <launch>

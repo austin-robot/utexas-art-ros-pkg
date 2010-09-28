@@ -1,7 +1,10 @@
 <!-- -*- mode: XML -*- -->
 
 <!-- launch file for a human driving the real vehicle in training mode
-     (for acquiring control data).  -->
+     (for acquiring control data).  
+
+     $Id$
+-->
 
 <launch>
   <!-- servo actuators -->

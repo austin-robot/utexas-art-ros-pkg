@@ -26,7 +26,6 @@ last_state_ = EstopState()
 new_state_ = EstopState()
 new_behavior_ = Behavior.NONE
 
-state_ = rospy.Publisher('navigator/state', NavigatorState)
 cmd_ = rospy.Publisher('navigator/cmd', NavigatorCommand)
 rospy.init_node('estop')
 
@@ -140,9 +139,8 @@ class MainWindow(wx.Frame):
 
 class wxThread(threading.Thread):
 
-    def __init__(self, topic):
-        self.topic = topic
-        rospy.Subscriber('navigator/state', NavigatorState, check_state)
+    def __init__(self):
+        self.topic = rospy.Subscriber('navigator/state', NavigatorState, check_state)
         threading.Thread.__init__(self)
 
     def run(self):
@@ -157,6 +155,6 @@ if __name__ == '__main__':
     # run the program
     # needs two threads: GUI main loop and ROS event loop
     try:
-        wxThread(state_).start()
+        wxThread().start()
         rospy.spin()
     except rospy.ROSInterruptException: pass

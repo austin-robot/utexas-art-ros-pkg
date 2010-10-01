@@ -4,7 +4,7 @@
 costmap:
     
     # sensor sources
-    observation_sources: velodyne_obstacles roadmap_cloud
+    observation_sources: front_sick obstacles_clear
 
     velodyne_obstacles:
     

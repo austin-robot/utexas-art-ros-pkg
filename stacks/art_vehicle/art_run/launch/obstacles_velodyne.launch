@@ -10,7 +10,7 @@
   <node pkg="costmap_2d" type="costmap_2d_node"  name="obstacles">
     <rosparam file="$(find art_run)/params/obstacles_common.yaml" />
     <rosparam file="$(find art_run)/params/obstacles_velodyne.yaml" />
-    <rosparam file="$(find art_run)/params/obstacles_roadmap.yaml" />
+    <rosparam file="$(find art_run)/params/obstacles_clear.yaml" />
   </node>
 
   <!-- static transforms -->

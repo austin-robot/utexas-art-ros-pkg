@@ -4,7 +4,7 @@
 costmap:
     
     # sensor sources
-    observation_sources: front_sick roadmap_cloud
+    observation_sources: front_sick obstacles_clear
 
     front_sick:
     

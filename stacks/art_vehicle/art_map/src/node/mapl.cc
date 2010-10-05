@@ -72,7 +72,7 @@ public:
 
 private:
 
-  void markCar(visualization_msgs::MarkerArray &markers);
+  void markCar();
   void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn);
   void publishGlobalMap(void);
   void publishLocalMap(void);
@@ -96,6 +96,7 @@ private:
   ros::Publisher roadmap_global_;       // global road map publisher
   ros::Publisher roadmap_local_;        // local road map publisher
   ros::Publisher mapmarks_;             // rviz visualization markers
+  ros::Publisher car_image_;            // rviz marker for 3D image of car
 
   ros::Publisher roadmap_cloud_;        // local road map point cloud
 
@@ -154,7 +155,7 @@ MapLanesDriver::MapLanesDriver(void)
  *  @param pub topic to publish
  *  @param markers array to add car pose
  */
-void MapLanesDriver::markCar(visualization_msgs::MarkerArray &markers)
+void MapLanesDriver::markCar()
 {
   using art_msgs::ArtVehicle;
   visualization_msgs::Marker car;
@@ -190,8 +191,8 @@ void MapLanesDriver::markCar(visualization_msgs::MarkerArray &markers)
   // indefinite duration
   car.lifetime = ros::Duration();
 
-  // Add this polygon to the vector of markers to publish
-  markers.markers.push_back(car);
+  // publish this as a persistent topic
+  car_image_.publish(car);
 }
 
 /** Set up ROS topics */
@@ -217,6 +218,12 @@ int MapLanesDriver::Setup(ros::NodeHandle node)
     node.advertise<art_msgs::ArtLanes>("roadmap_global", 1, true);
   mapmarks_ = node.advertise <visualization_msgs::MarkerArray>
     ("visualization_marker_array", 1);
+
+  // add marker for odometry pose of car
+  car_image_ =
+    node.advertise <visualization_msgs::Marker>("visualization_marker",
+                                                1, true);
+  markCar();                            // publish persistent marker
 
   return 0;
 }
@@ -312,10 +319,6 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
   // clear message array, this is a class variable to avoid memory
   // allocation and deallocation on every cycle
   marks_msg_.markers.clear();
-
-  // add marker for odometry pose of car
-  // (too much data)
-  //markCar(marks_msg_);
 
   for (uint32_t i = 0; i < lane_data.polygons.size(); ++i)
     {

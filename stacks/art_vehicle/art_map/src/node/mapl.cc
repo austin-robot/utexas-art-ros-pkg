@@ -290,6 +290,9 @@ void MapLanesDriver::publishMapCloud(ros::Publisher &pub,
  *  @param map_name marker namespace
  *  @param life lifespan for these markers
  *  @param lane_data polygons to publish
+ *
+ *  @note Do not to send too much information to rviz every cycle.  If
+ *        it gets behind displaying them, it becomes unusable.
  */
 void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
                                      const std::string &map_name,
@@ -311,10 +314,12 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
   marks_msg_.markers.clear();
 
   // add marker for odometry pose of car
-  markCar(marks_msg_);
+  // (too much data)
+  //markCar(marks_msg_);
 
   for (uint32_t i = 0; i < lane_data.polygons.size(); ++i)
     {
+#if 0
       visualization_msgs::Marker mark;
       mark.header.stamp = now;
       mark.header.frame_id = frame_id_;
@@ -337,7 +342,7 @@ void MapLanesDriver::publishMapMarks(ros::Publisher &pub,
 
       // Add this polygon to the vector of markers to publish
       marks_msg_.markers.push_back(mark);
-
+#endif
       if (!lane_data.polygons[i].is_transition)
         {
           visualization_msgs::Marker lane;

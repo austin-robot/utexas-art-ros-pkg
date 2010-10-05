@@ -10,6 +10,18 @@ define sick_laser laser
   size [ 0.14 0.14 0.2 ]
 )
 
+define 2d_velodyne laser
+(
+  #range_min 0.0        
+  range_max 80.0
+  fov 360               # should be 2 pi radians, but it's not
+  samples 360
+
+  color "blue"
+  size [ 0.14 0.14 0.2 ]
+  origin [0.393 0.278 2.1 0.0]
+)
+
 define null_laser laser
 (
   range_min 0.0

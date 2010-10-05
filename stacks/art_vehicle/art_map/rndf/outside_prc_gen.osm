@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="CGImap 0.0.2">
+ <bounds minlat="30.3786900" minlon="-97.7346000" maxlat="30.3848000" maxlon="-97.7256300"/>
+ <node id="860386788" lat="30.3792890" lon="-97.7318657" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:01Z"/>
+ <node id="152741168" lat="30.3781920" lon="-97.7281980" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2185759" timestamp="2009-08-18T07:50:46Z"/>
+ <node id="152667627" lat="30.3858290" lon="-97.7332060" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T17:26:36Z"/>
+ <node id="152667656" lat="30.3971110" lon="-97.7286073" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:04Z"/>
+ <node id="152494017" lat="30.3762040" lon="-97.7315570" user="woodpeck_fixbot" uid="147510" visible="true" version="3" changeset="3221556" timestamp="2009-11-26T17:06:37Z"/>
+ <node id="152741211" lat="30.3776530" lon="-97.7281570" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:37Z"/>
+ <node id="860386776" lat="30.3776251" lon="-97.7333968" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="860386770" lat="30.3787563" lon="-97.7326228" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="860386756" lat="30.3787781" lon="-97.7326777" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:06:59Z"/>
+ <node id="152416743" lat="30.3803210" lon="-97.7339420" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T16:55:03Z"/>
+ <node id="152667363" lat="30.3674470" lon="-97.7408450" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:02Z"/>
+ <node id="860386771" lat="30.3786760" lon="-97.7324747" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152667654" lat="30.3947680" lon="-97.7294450" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:04Z"/>
+ <node id="152667352" lat="30.3614780" lon="-97.7433390" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:02Z"/>
+ <node id="152373864" lat="30.4018193" lon="-97.7284786" user="woodpeck_fixbot" uid="147510" visible="true" version="5" changeset="3221556" timestamp="2009-11-26T16:50:04Z"/>
+ <node id="152667646" lat="30.3943590" lon="-97.7296220" user="LansingPugh" uid="161371" visible="true" version="4" changeset="2333004" timestamp="2009-09-01T04:28:05Z"/>
+ <node id="860386778" lat="30.3775339" lon="-97.7332276" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152741200" lat="30.3781510" lon="-97.7280700" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:37Z"/>
+ <node id="152741162" lat="30.3779590" lon="-97.7282670" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:36Z"/>
+ <node id="152667644" lat="30.3942510" lon="-97.7296690" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:03Z"/>
+ <node id="152667662" lat="30.3997539" lon="-97.7283842" user="LansingPugh" uid="161371" visible="true" version="5" changeset="2333004" timestamp="2009-09-01T04:28:06Z"/>
+ <node id="860386785" lat="30.3793291" lon="-97.7319630" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:01Z"/>
+ <node id="152373863" lat="30.4027521" lon="-97.7285558" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T16:50:04Z"/>
+ <node id="860386779" lat="30.3786285" lon="-97.7325213" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152671635" lat="30.3833650" lon="-97.7317440" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:12:45Z"/>
+ <node id="152741171" lat="30.3783080" lon="-97.7281420" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T17:31:33Z"/>
+ <node id="152741195" lat="30.3785020" lon="-97.7278750" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:36Z"/>
+ <node id="860386757" lat="30.3794094" lon="-97.7322633" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="860386786" lat="30.3774828" lon="-97.7331938" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:01Z"/>
+ <node id="860386787" lat="30.3774135" lon="-97.7330711" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:01Z"/>
+ <node id="152667357" lat="30.3644000" lon="-97.7421370" user="LansingPugh" uid="161371" visible="true" version="4" changeset="2333004" timestamp="2009-09-01T04:28:02Z"/>
+ <node id="152667371" lat="30.3734460" lon="-97.7383410" user="LansingPugh" uid="161371" visible="true" version="4" changeset="2333004" timestamp="2009-09-01T04:28:03Z"/>
+ <node id="152667649" lat="30.3943780" lon="-97.7296090" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:03Z"/>
+ <node id="152381374" lat="30.3752318" lon="-97.7375908" user="LansingPugh" uid="161371" visible="true" version="5" changeset="2333004" timestamp="2009-09-01T04:28:03Z"/>
+ <node id="152741188" lat="30.3789100" lon="-97.7276220" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:36Z"/>
+ <node id="152741193" lat="30.3786660" lon="-97.7277680" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T17:31:33Z"/>
+ <node id="152667364" lat="30.3689420" lon="-97.7402260" user="LansingPugh" uid="161371" visible="true" version="4" changeset="2333004" timestamp="2009-09-01T04:28:03Z"/>
+ <node id="152671627" lat="30.3800130" lon="-97.7248780" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T17:26:50Z"/>
+ <node id="152381392" lat="30.3778309" lon="-97.7364922" user="LansingPugh" uid="161371" visible="true" version="5" changeset="2333004" timestamp="2009-09-01T04:28:04Z"/>
+ <node id="860386766" lat="30.3787234" lon="-97.7327327" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152667370" lat="30.3729910" lon="-97.7385420" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T17:26:35Z"/>
+ <node id="152667362" lat="30.3673990" lon="-97.7408650" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T17:26:35Z"/>
+ <node id="152667630" lat="30.3906690" lon="-97.7311730" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:03Z"/>
+ <node id="152667640" lat="30.3932650" lon="-97.7300840" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T17:26:36Z"/>
+ <node id="860386774" lat="30.3786906" lon="-97.7326820" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="860386760" lat="30.3787672" lon="-97.7328216" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152484724" lat="30.3797860" lon="-97.7292620" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-24T23:55:01Z"/>
+ <node id="152667367" lat="30.3704360" lon="-97.7396060" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:02Z"/>
+ <node id="152741201" lat="30.3780410" lon="-97.7281110" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T17:31:33Z"/>
+ <node id="152667354" lat="30.3624980" lon="-97.7429370" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T17:26:35Z"/>
+ <node id="152667360" lat="30.3665610" lon="-97.7411690" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:02Z"/>
+ <node id="152667657" lat="30.3983843" lon="-97.7284013" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T17:26:36Z"/>
+ <node id="152416747" lat="30.3836290" lon="-97.7325650" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T16:55:03Z"/>
+ <node id="152667653" lat="30.3944040" lon="-97.7296020" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T17:26:36Z"/>
+ <node id="152667621" lat="30.3829430" lon="-97.7343910" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:03Z"/>
+ <node id="152439396" lat="30.3804320" lon="-97.7305000" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T16:59:53Z"/>
+ <node id="860386773" lat="30.3792671" lon="-97.7320856" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152741207" lat="30.3777980" lon="-97.7281560" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:37Z"/>
+ <node id="152416749" lat="30.3845210" lon="-97.7321920" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T16:55:03Z"/>
+ <node id="152667637" lat="30.3922350" lon="-97.7305120" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="2610947" timestamp="2009-09-25T00:12:03Z"/>
+ <node id="860386763" lat="30.3776871" lon="-97.7334010" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152667655" lat="30.3959190" lon="-97.7289678" user="LansingPugh" uid="161371" visible="true" version="4" changeset="2333004" timestamp="2009-09-01T04:28:06Z"/>
+ <node id="152370223" lat="30.3709450" lon="-97.7393920" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T16:49:27Z"/>
+ <node id="152741173" lat="30.3785320" lon="-97.7280110" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:36Z"/>
+ <node id="860386769" lat="30.3793328" lon="-97.7322337" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152370256" lat="30.3660540" lon="-97.7413960" user="woodpeck_fixbot" uid="147510" visible="true" version="4" changeset="3221556" timestamp="2009-11-26T16:49:27Z"/>
+ <node id="152484721" lat="30.3789930" lon="-97.7276150" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T17:05:15Z"/>
+ <node id="860386754" lat="30.3794605" lon="-97.7323775" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:06:59Z"/>
+ <node id="152741154" lat="30.3777590" lon="-97.7282870" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2185759" timestamp="2009-08-18T07:50:46Z"/>
+ <node id="152741198" lat="30.3782440" lon="-97.7280290" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2185759" timestamp="2009-08-18T07:50:46Z"/>
+ <node id="152741165" lat="30.3780720" lon="-97.7282450" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:36Z"/>
+ <node id="860386755" lat="30.3788292" lon="-97.7327835" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:06:59Z"/>
+ <node id="152741203" lat="30.3779360" lon="-97.7281390" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2185759" timestamp="2009-08-18T07:50:46Z"/>
+ <node id="152667633" lat="30.3908460" lon="-97.7310990" user="LansingPugh" uid="161371" visible="true" version="4" changeset="2333004" timestamp="2009-09-01T04:28:04Z"/>
+ <node id="152439398" lat="30.3822610" lon="-97.7293980" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T16:59:54Z"/>
+ <node id="152741152" lat="30.3776450" lon="-97.7282780" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:21:36Z"/>
+ <node id="152427338" lat="30.3775060" lon="-97.7282190" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2185759" timestamp="2009-08-18T07:28:36Z"/>
+ <node id="152741159" lat="30.3778590" lon="-97.7282800" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="3221556" timestamp="2009-11-26T17:31:33Z"/>
+ <node id="152416745" lat="30.3817720" lon="-97.7333570" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2185759" timestamp="2009-08-18T07:27:55Z"/>
+ <node id="152667624" lat="30.3845440" lon="-97.7337450" user="LansingPugh" uid="161371" visible="true" version="4" changeset="2333004" timestamp="2009-09-01T04:28:04Z"/>
+ <node id="860386761" lat="30.3777455" lon="-97.7334941" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z"/>
+ <node id="152671630" lat="30.3802220" lon="-97.7253130" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2185759" timestamp="2009-08-18T07:45:59Z"/>
+ <node id="152671633" lat="30.3807880" lon="-97.7264720" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2610947" timestamp="2009-09-25T00:12:45Z"/>
+ <node id="152741176" lat="30.3789590" lon="-97.7277470" user="woodpeck_fixbot" uid="147510" visible="true" version="2" changeset="2185759" timestamp="2009-08-18T07:50:46Z"/>
+ <way id="15403301" user="balrog-kun" uid="20587" visible="true" version="2" changeset="4351805" timestamp="2010-04-07T08:36:54Z">
+  <nd ref="152671627"/>
+  <nd ref="152671630"/>
+  <nd ref="152671633"/>
+  <nd ref="152439398"/>
+  <nd ref="152671635"/>
+  <nd ref="152416747"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="Longhorn Boulevard"/>
+  <tag k="tiger:cfcc" v="A41"/>
+  <tag k="tiger:county" v="Travis, TX"/>
+  <tag k="tiger:name_base" v="Longhorn"/>
+  <tag k="tiger:name_type" v="Blvd"/>
+  <tag k="tiger:reviewed" v="no"/>
+  <tag k="tiger:separated" v="no"/>
+  <tag k="tiger:source" v="tiger_import_dch_v0.6_20070830"/>
+  <tag k="tiger:tlid" v="63929858:63929860:63929994"/>
+  <tag k="tiger:zip_left" v="78758"/>
+  <tag k="tiger:zip_right" v="78758"/>
+ </way>
+ <way id="15385226" user="balrog-kun" uid="20587" visible="true" version="2" changeset="4351805" timestamp="2010-04-07T07:40:36Z">
+  <nd ref="152484721"/>
+  <nd ref="152484724"/>
+  <nd ref="152439396"/>
+  <nd ref="152416745"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="Industrial Terrace"/>
+  <tag k="tiger:cfcc" v="A41"/>
+  <tag k="tiger:county" v="Travis, TX"/>
+  <tag k="tiger:name_base" v="Industrial"/>
+  <tag k="tiger:name_type" v="Ter"/>
+  <tag k="tiger:reviewed" v="no"/>
+  <tag k="tiger:separated" v="no"/>
+  <tag k="tiger:source" v="tiger_import_dch_v0.6_20070830"/>
+  <tag k="tiger:tlid" v="63929856:63929866:63929868"/>
+  <tag k="tiger:zip_left" v="78758"/>
+  <tag k="tiger:zip_right" v="78758"/>
+ </way>
+ <way id="15379108" user="balrog-kun" uid="20587" visible="true" version="2" changeset="4351805" timestamp="2010-04-07T07:22:09Z">
+  <nd ref="152416743"/>
+  <nd ref="152416745"/>
+  <nd ref="152416747"/>
+  <nd ref="152416749"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="Neils Thompson Drive"/>
+  <tag k="tiger:cfcc" v="A41"/>
+  <tag k="tiger:county" v="Travis, TX"/>
+  <tag k="tiger:name_base" v="Neils Thompson"/>
+  <tag k="tiger:name_type" v="Dr"/>
+  <tag k="tiger:reviewed" v="no"/>
+  <tag k="tiger:separated" v="no"/>
+  <tag k="tiger:source" v="tiger_import_dch_v0.6_20070830"/>
+  <tag k="tiger:tlid" v="63929854:63929855:63929857"/>
+  <tag k="tiger:zip_left" v="78758"/>
+  <tag k="tiger:zip_right" v="78758"/>
+ </way>
+ <way id="72470334" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z">
+  <nd ref="860386774"/>
+  <nd ref="860386776"/>
+  <nd ref="860386778"/>
+  <nd ref="860386779"/>
+  <nd ref="860386774"/>
+  <tag k="building" v="yes"/>
+ </way>
+ <way id="15409953" user="balrog-kun" uid="20587" visible="true" version="2" changeset="4351805" timestamp="2010-04-07T09:02:43Z">
+  <nd ref="152484721"/>
+  <nd ref="152741188"/>
+  <nd ref="152741193"/>
+  <nd ref="152741195"/>
+  <nd ref="152741198"/>
+  <nd ref="152741200"/>
+  <nd ref="152741201"/>
+  <nd ref="152741203"/>
+  <nd ref="152741207"/>
+  <nd ref="152741211"/>
+  <nd ref="152427338"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="Reid Drive"/>
+  <tag k="tiger:cfcc" v="A45"/>
+  <tag k="tiger:county" v="Travis, TX"/>
+  <tag k="tiger:name_base" v="Reid"/>
+  <tag k="tiger:name_type" v="Dr"/>
+  <tag k="tiger:reviewed" v="no"/>
+  <tag k="tiger:separated" v="yes"/>
+  <tag k="tiger:source" v="tiger_import_dch_v0.6_20070830"/>
+  <tag k="tiger:tlid" v="63969216"/>
+ </way>
+ <way id="15409951" user="balrog-kun" uid="20587" visible="true" version="2" changeset="4351805" timestamp="2010-04-07T09:02:42Z">
+  <nd ref="152427338"/>
+  <nd ref="152741152"/>
+  <nd ref="152741154"/>
+  <nd ref="152741159"/>
+  <nd ref="152741162"/>
+  <nd ref="152741165"/>
+  <nd ref="152741168"/>
+  <nd ref="152741171"/>
+  <nd ref="152741173"/>
+  <nd ref="152741176"/>
+  <nd ref="152484721"/>
+  <nd ref="152671633"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="Reid Drive"/>
+  <tag k="tiger:cfcc" v="A45"/>
+  <tag k="tiger:county" v="Travis, TX"/>
+  <tag k="tiger:name_base" v="Reid"/>
+  <tag k="tiger:name_type" v="Dr"/>
+  <tag k="tiger:reviewed" v="no"/>
+  <tag k="tiger:separated" v="yes"/>
+  <tag k="tiger:source" v="tiger_import_dch_v0.6_20070830"/>
+  <tag k="tiger:tlid" v="64061748"/>
+  <tag k="tiger:zip_left" v="78759"/>
+ </way>
+ <way id="15381634" user="balrog-kun" uid="20587" visible="true" version="2" changeset="4351805" timestamp="2010-04-07T07:30:27Z">
+  <nd ref="152439396"/>
+  <nd ref="152439398"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="Business Drive"/>
+  <tag k="tiger:cfcc" v="A41"/>
+  <tag k="tiger:county" v="Travis, TX"/>
+  <tag k="tiger:name_base" v="Business"/>
+  <tag k="tiger:name_type" v="Dr"/>
+  <tag k="tiger:reviewed" v="no"/>
+  <tag k="tiger:separated" v="no"/>
+  <tag k="tiger:source" v="tiger_import_dch_v0.6_20070830"/>
+  <tag k="tiger:tlid" v="63929859"/>
+  <tag k="tiger:zip_left" v="78758"/>
+  <tag k="tiger:zip_right" v="78758"/>
+ </way>
+ <way id="15388983" user="balrog-kun" uid="20587" visible="true" version="2" changeset="4351805" timestamp="2010-04-07T07:50:11Z">
+  <nd ref="152494017"/>
+  <nd ref="152484724"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="United Drive"/>
+  <tag k="tiger:cfcc" v="A41"/>
+  <tag k="tiger:county" v="Travis, TX"/>
+  <tag k="tiger:name_base" v="United"/>
+  <tag k="tiger:name_type" v="Dr"/>
+  <tag k="tiger:reviewed" v="no"/>
+  <tag k="tiger:separated" v="no"/>
+  <tag k="tiger:source" v="tiger_import_dch_v0.6_20070830"/>
+  <tag k="tiger:tlid" v="63982497"/>
+  <tag k="tiger:zip_left" v="78758"/>
+  <tag k="tiger:zip_right" v="78758"/>
+ </way>
+ <way id="15402827" user="BugBuster" uid="166129" visible="true" version="8" changeset="2681685" timestamp="2009-09-29T20:54:38Z">
+  <nd ref="152667352"/>
+  <nd ref="152667354"/>
+  <nd ref="152667357"/>
+  <nd ref="152370256"/>
+  <nd ref="152667360"/>
+  <nd ref="152667362"/>
+  <nd ref="152667363"/>
+  <nd ref="152667364"/>
+  <nd ref="152667367"/>
+  <nd ref="152370223"/>
+  <nd ref="152667370"/>
+  <nd ref="152667371"/>
+  <nd ref="152381374"/>
+  <nd ref="152381392"/>
+  <nd ref="152667621"/>
+  <nd ref="152667624"/>
+  <nd ref="152667627"/>
+  <nd ref="152667630"/>
+  <nd ref="152667633"/>
+  <nd ref="152667637"/>
+  <nd ref="152667640"/>
+  <nd ref="152667644"/>
+  <nd ref="152667646"/>
+  <nd ref="152667649"/>
+  <nd ref="152667653"/>
+  <nd ref="152667654"/>
+  <nd ref="152667655"/>
+  <nd ref="152667656"/>
+  <nd ref="152667657"/>
+  <nd ref="152667662"/>
+  <nd ref="152373864"/>
+  <nd ref="152373863"/>
+  <tag k="name" v="Union Pacific Railroad"/>
+  <tag k="railway" v="rail"/>
+  <tag k="tiger:cfcc" v="B11"/>
+  <tag k="tiger:county" v="Travis, TX"/>
+  <tag k="tiger:name_base" v="Missouri Pacific Railroad"/>
+  <tag k="tiger:reviewed" v="no"/>
+  <tag k="tiger:source" v="tiger_import_dch_v0.6_20070830"/>
+  <tag k="tiger:tlid" v="64023801:64023802:64023803:64023804:64023793:64023795:64023797:64023799:64025313:64025314; 64026189:64026190:64010667:64025357:64025358:63929778; 64026189:64026190:64010667:64025357:64025358:63929778"/>
+  <tag k="tiger:upload_uuid" v="bulk_upload.pl-d2be3ce0-24d6-40df-9a5f-7cd099f6eb32"/>
+ </way>
+ <way id="72470333" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z">
+  <nd ref="860386769"/>
+  <nd ref="860386770"/>
+  <nd ref="860386771"/>
+  <nd ref="860386773"/>
+  <nd ref="860386769"/>
+  <tag k="building" v="yes"/>
+ </way>
+ <way id="72470330" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z">
+  <nd ref="860386760"/>
+  <nd ref="860386761"/>
+  <nd ref="860386763"/>
+  <nd ref="860386766"/>
+  <nd ref="860386760"/>
+  <tag k="building" v="yes"/>
+ </way>
+ <way id="72470329" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:00Z">
+  <nd ref="860386754"/>
+  <nd ref="860386755"/>
+  <nd ref="860386756"/>
+  <nd ref="860386757"/>
+  <nd ref="860386754"/>
+  <tag k="building" v="yes"/>
+ </way>
+ <way id="72470336" user="moosejaw" uid="332709" visible="true" version="1" changeset="5493095" timestamp="2010-08-14T18:07:01Z">
+  <nd ref="860386785"/>
+  <nd ref="860386786"/>
+  <nd ref="860386787"/>
+  <nd ref="860386788"/>
+  <nd ref="860386785"/>
+  <tag k="building" v="yes"/>
+ </way>
+</osm>

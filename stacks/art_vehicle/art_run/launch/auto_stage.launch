@@ -25,4 +25,11 @@
     <param name="start_run" value="true" />
   </node>
 
+  <!-- run E-stop control GUI -->
+  <node pkg="art_nav" type="estop.py" name="estop_control" />
+
+  <!-- experimental obstacle grid 
+  <include file="$(find art_run)/launch/obstacles_stage.launch" />
+  -->
+
 </launch>

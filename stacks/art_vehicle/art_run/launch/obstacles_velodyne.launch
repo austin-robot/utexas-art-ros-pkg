@@ -12,6 +12,7 @@
     <rosparam file="$(find art_run)/params/obstacles_velodyne.yaml" />
     <rosparam file="$(find art_run)/params/obstacles_clear.yaml" />
   </node>
+  <node pkg="art_obstacles" type="clear_obstacles.py" name="clear_obstacles" />
 
   <!-- static transforms -->
   <include file="$(find art_run)/launch/static_transforms.launch"/>

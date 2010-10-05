@@ -14,5 +14,6 @@
     <rosparam file="$(find art_run)/params/obstacles_stage.yaml" />
     <rosparam file="$(find art_run)/params/obstacles_clear.yaml" />
   </node>
+  <node pkg="art_obstacles" type="clear_obstacles.py" name="clear_obstacles" />
 
 </launch>

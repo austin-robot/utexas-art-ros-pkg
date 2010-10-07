@@ -12,7 +12,7 @@ include "map.inc"
 include "sick.inc"
 
 # size of the world in meters
-size [686 620 2.0]
+size [875 923 2.0]
 
 # set the resolution of the underlying raytrace model in meters
 #resolution 0.02
@@ -28,9 +28,10 @@ window
 ( 
 #  size [664.000 620.000]
 
-  size [664.000 620.000]
-  center [-235.753 234.954]
-  scale 7.400
+  size [875.000 923.000]
+  center [-185.656 198.367]
+  scale 2.183
+
 )
 
 # load an image bitmap with non-blocking lanes
@@ -38,7 +39,7 @@ map
 ( 
   gui_grid 0
   bitmap "outside_prc_gen.png"
-  size [664.000 620.000 1.000]
+  size [875.000 923.000 1.000]
   name "outside_prc_gen"
   obstacle_return 0
   laser_return 0
@@ -50,7 +51,7 @@ car
   name "marvin"
   color "purple"
   # start in lane 3.2, heading West
-  pose [-236.498 236.641 0 -112.723]
+  pose [-303.643 373.809 0 -106.030]
   localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
   localization "gps"
 

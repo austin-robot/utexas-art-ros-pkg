@@ -143,8 +143,13 @@ bool build_RNDF()
 	  
 	  std::cout << "Center for RNDF is at lat/long: "<<
 	    std::setprecision(8)<<
-	    centerlat<<", "<<centerlong<<" "<<zone<<std::endl<<std::endl;
-	  
+	    centerlat<<", "<<centerlong<<" "<<zone<<std::endl;
+
+    std::cout << "X,Y coordiantes for map: \n"
+              << std::setprecision(8)<< "  min=(" << min_x << "," << max_x << ")\n  max=(" << max_x << "," << max_y << ")\n  centre=(" << (max_x+min_x)/2  << "," << (max_y+min_y)/2  << ")\n";
+    std::cout << std::setprecision(8) << "  Width=" << max_x-min_x << " m\n  Height=" << max_y-min_y << " m\n";
+
+    
 	  gps_latitude = centerlat;
 	  gps_longitude = centerlong;
 	  

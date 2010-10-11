@@ -4,7 +4,7 @@
 costmap:
     
     # sensor sources
-    observation_sources: front_sick obstacles_clear
+    observation_sources: velodyne_obstacles obstacles_clear
 
     velodyne_obstacles:
     
@@ -12,7 +12,7 @@ costmap:
         data_type: PointCloud
         expected_update_rate: 0.2           # twice actual frequency
         marking: true
-        observation_persistence: 0.2
+        observation_persistence: 1.0
         obstacle_range: 80.0                # max readings range
         raytrace_range: 80.0
         #sensor_frame: /velodyne

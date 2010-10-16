@@ -17,6 +17,8 @@
   <depend package="art_common"/>
   <depend package="art_map"/>
   <depend package="art_msgs"/>
+  <depend package="driver_base" />
+  <depend package="dynamic_reconfigure" />
   <depend package="nav_msgs"/>
   <depend package="roscpp"/>
   <depend package="rospy"/>

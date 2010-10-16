@@ -60,7 +60,7 @@ void StopLine::configure()
 
   nh.param("max_creep_distance", max_creep_distance,
            (double) ArtVehicle::length);
-  ROS_INFO("distance in which creep applies is %.3f m/s", max_creep_distance);
+  ROS_INFO("distance in which creep applies is %.3f m", max_creep_distance);
 
   nh.param("stop_deceleration", stop_deceleration, 0.2);
   ROS_INFO("desired stopping deceleration is %.3f m/s/s", stop_deceleration);

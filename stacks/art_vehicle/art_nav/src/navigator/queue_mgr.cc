@@ -2,17 +2,10 @@
  * Queue manager front end for ROS navigator node.
  *
  *  Copyright (C) 2007, 2010 Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
  */
-
-// define this to send turn signal messages based on driver feedback
-#define RELAY_FEEDBACK 1
-
-// define this to send turn signal messages on every cycle
-#define SPAM_SIGNALS 1
 
 #include <unistd.h>
 
@@ -70,9 +63,6 @@ private:
   void PublishState(void);
   void SetRelays(void);
   void SetSpeed(pilot_command_t pcmd);
-
-  // .cfg variables:
-  int verbose;				// log level verbosity
 
   // ROS topics
   ros::Publisher  car_cmd_;             // pilot CarCommand

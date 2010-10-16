@@ -174,14 +174,14 @@ void Course::configure()
 
   // how fast the maximum steer can be done
   nh.param("max_speed_for_sharp", max_speed_for_sharp ,3.0); 
-  ROS_INFO("maximum speed to go full yaw is %.3f m", max_speed_for_sharp);
+  ROS_INFO("maximum speed to go full yaw is %.3f m/s", max_speed_for_sharp);
 
   // how far in future to estimate for reactive steering
   nh.param("spring_lookahead", spring_lookahead, 0.0);
   ROS_INFO("spring lookahead distance is %.3f m", spring_lookahead);
 
   nh.param("real_max_yaw_rate", max_yaw_rate, Steering::maximum_yaw);
-  ROS_INFO("real_max_rate_rate is %.3f m", max_yaw_rate);
+  ROS_INFO("real maximum yaw rate is %.3f (radians/s)", max_yaw_rate);
 
   nh.param("zone_waypoint_radius", zone_waypoint_radius, 1.0);
   ROS_INFO("zone waypoint radius is %.3f m", zone_waypoint_radius);
@@ -190,7 +190,7 @@ void Course::configure()
   ROS_INFO("zone perimeter radius is %.3f m", zone_perimeter_radius);
 
   nh.param("spot_waypoint_radius", spot_waypoint_radius, 0.5);
-  ROS_INFO("zone waypoint radius is %.3f m", spot_waypoint_radius);
+  ROS_INFO("spot waypoint radius is %.3f m", spot_waypoint_radius);
 }
 
 /** Set heading for desired course.

@@ -2,6 +2,8 @@
 
 guid: 0800461000821aa5
 video_mode: 1280x960_mono8
+frame_id: front_left_camera
+camera_info_url: file:///cameras/calibration/left_front_calibration.yaml
 fps: 15
 iso_speed: 800
 

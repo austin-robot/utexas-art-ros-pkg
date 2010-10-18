@@ -1,7 +1,7 @@
 # Example camera parameters (Sony XCD-SX90CR)
 
 guid: 080046100082189c
-video_mode: 1280x960_mono
+video_mode: 1280x960_mono8
 fps: 15
 iso_speed: 800
 

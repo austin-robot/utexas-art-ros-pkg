@@ -58,10 +58,15 @@ float32 rear_SICK_yaw = 3.1415926535897931160  # (approximately PI)
 
 float32 front_right_camera_px= 0.52     # velodyne_px+0.127 (approx)
 float32 front_right_camera_py= 0.189    # velodyne_py-0.089 (approx)
-float32 front_right_camera_pz= 0.725    # velodyne_pz-0.216 (approx)
-float32 front_right_camera_yaw=-0.4974  # (approx -28.5 deg)
-float32 front_right_camera_pitch=0.0    # (assumed)
-float32 front_right_camera_roll=0.0     # (assumed)
+float32 front_right_camera_pz= 2.184    # velodyne_pz-0.216 (approx)
+#float32 front_right_camera_yaw=-0.4974  # (approx -28.5 deg)
+#float32 front_right_camera_pitch=0.0    # (assumed)
+#float32 front_right_camera_roll=0.0     # (assumed)
+# uses _optical frame of reference
+#float32 front_right_camera_roll=0.4974  # (approx -28.5 deg)
+float32 front_right_camera_roll = -1.5707963267948966
+float32 front_right_camera_pitch = 0.0    # (assumed)
+float32 front_right_camera_yaw = -2.0681963267948964   # rotate 90+28.5 degr right
 
 # Compute vehicle turning radius.  This is the distance from the
 # center of curvature to the vehicle origin in the middle of the

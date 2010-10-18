@@ -1,9 +1,32 @@
 #!/bin/sh
 
 # record bag from cameras and velodyne, with corresponding
-#   odometry, GPS and coordinate transforms
+# maplanes, odometry, GPS and coordinate transforms
 
-BAGS=${ROS_HOME:-~/.ros}/bags
+# run this with: roslaunch art_run sensory_overload.launch
 
-exec rosbag record -o $BAGS/camera/sensors /velodyne/rawscan /left_front/camera/image_raw/compressed /left_front/camera/camera_info /right_front/camera/image_raw/compressed /right_front/camera/camera_info /odom /gps /tf
+BAGS=${ROS_HOME:-~/.ros}/bags/sensors
+mkdir -p $BAGS
 
+rosbag record -o $BAGS/velodyne /velodyne/rawscan &
+
+rosbag record -o $BAGS/rviz /visualization_marker /visualization_marker_array &
+
+CAMERA1=/left_front/camera
+CAMERA2=/right_front/camera
+
+rosbag record -o $BAGS/camera \
+        $CAMERA1/image_raw/compressed $CAMERA1/camera_info \
+        $CAMERA2/image_raw/compressed $CAMERA2/camera_info &
+
+rosbag record -o $BAGS/other \
+        /odom /gps /tf \
+        /brake/cmd /brake/state \
+        /ioadr/cmd /ioadr/state \
+        /roadmap_global /roadmap_local /roadmap_cloud \
+        /shifter/cmd /shifter/state \
+        /steering/cmd /steering/state \
+        /throttle/cmd /throttle/state
+
+# kludgy way to terminate the other records when odometry finishes
+killall record

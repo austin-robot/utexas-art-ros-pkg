@@ -98,6 +98,7 @@ int devbrake::Open(const char *port_name)
     
   // tell device to run at 38400; command does not and cannot respond
   servo_write_only("BAUD38400\n");
+  sleep(3);
     
   // set actual baud rate
   rc = configure_raw_port(B38400 | CS8, 0);

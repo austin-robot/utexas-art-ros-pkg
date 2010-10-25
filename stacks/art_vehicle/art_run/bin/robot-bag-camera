@@ -6,5 +6,5 @@
 CAMERA=${1:-right_roof}
 BAGS=${ROS_HOME:-~/.ros}/bags
 
-exec rosbag record -o $BAGS/camera/sensors /$CAMERA/camera/image_raw/compressed /$CAMERA/camera/camera_info /odom /gps /tf
+exec rosbag record -o $BAGS/camera/sensors /$CAMERA/camera/image_raw/compressed /$CAMERA/camera/camera_info /odom /imu /gps /tf
 

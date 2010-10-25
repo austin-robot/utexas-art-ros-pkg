@@ -20,7 +20,7 @@ rosbag record -o $BAGS/camera \
         $CAMERA2/image_raw/compressed $CAMERA2/camera_info &
 
 rosbag record -o $BAGS/other \
-        /odom /gps /tf \
+        /odom /imu /gps /tf \
         /brake/cmd /brake/state \
         /ioadr/cmd /ioadr/state \
         /roadmap_global /roadmap_local /roadmap_cloud \

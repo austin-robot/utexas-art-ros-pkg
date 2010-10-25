@@ -29,10 +29,11 @@
 #include <tf/transform_broadcaster.h>
 
 #include <art_msgs/BrakeState.h>
+#include <sensor_msgs/Imu.h>
+#include <nav_msgs/Odometry.h>
 #include <art_msgs/Shifter.h>
 #include <art_msgs/SteeringState.h>
 #include <art_msgs/ThrottleState.h>
-#include <nav_msgs/Odometry.h>
 
 // Corresponding ROS relative names
 #define BRAKE_STATE    "brake/state"
@@ -67,7 +68,9 @@ public:
 	
 private:
 
-  void ModelAcceleration(geometry_msgs::Twist *odomVel, ros::Time sim_time);
+  void ModelAcceleration(geometry_msgs::Twist *odomVel,
+                         sensor_msgs::Imu *imu_msg,
+                         ros::Time sim_time);
 
   // Stage interfaces
   Stg::ModelPosition *stgp_;
@@ -83,6 +86,9 @@ private:
   nav_msgs::Odometry groundTruthMsg_;
   ros::Publisher ground_truth_pub_;
   ros::Time last_update_time_;
+
+  ros::Publisher imu_pub_;
+  ros::Publisher gps_pub_;
 
   // servo device interfaces
   ros::Subscriber brake_sub_;
@@ -116,8 +122,6 @@ private:
   char   origin_zone_[20];
   double map_origin_x_;
   double map_origin_y_;
-
-  ros::Publisher gps_pub_;
 };
 
 #endif // _VEHICLE_MODEL_H_

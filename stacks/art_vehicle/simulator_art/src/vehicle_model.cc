@@ -39,6 +39,8 @@ void ArtVehicleModel::setup(void)
     node_.advertise<nav_msgs::Odometry>(ns_prefix_ + "odom", qDepth);
   ground_truth_pub_ =
     node_.advertise<nav_msgs::Odometry>(ns_prefix_ + "ground_truth", qDepth);
+  imu_pub_ =
+    node_.advertise<sensor_msgs::Imu>(ns_prefix_ + "imu", qDepth);
   gps_pub_ =
     node_.advertise<art_msgs::GpsInfo>(ns_prefix_ + "gps", qDepth);
   
@@ -120,17 +122,20 @@ ArtVehicleModel::throttleReceived(const art_msgs::ThrottleState::ConstPtr &msg)
 
 /** Model vehicle acceleration
  *
- *  On entry: last_update_time_ = time of previous update.
- *  Updates: odomVel, the Odometry message Twist component
+ *  @pre last_update_time_ = time of previous update.
+ *  @param odomVel[out] -> the Odometry message Twist component
+ *  @param imuMsg[out] -> the IMU message
+ *  @param sim_time[in] current simulation time
  *
- *  Note: This simple model does not account for sideways slippage, so
+ *  @note This simple model does not account for sideways slippage, so
  *        odomVel->linear.y is always zero.  Similarly, roll, pitch
  *        and odomVel->linear.z are always zero, because Stage is a 2D
  *        simulation.
  *
- *  TODO: introduce some small random fluctuations
+ *  @todo introduce some small random fluctuations
  */
 void ArtVehicleModel::ModelAcceleration(geometry_msgs::Twist *odomVel,
+                                        sensor_msgs::Imu *imuMsg,
                                         ros::Time sim_time)
 {
   // MUST serialize with updates from incoming messages
@@ -160,11 +165,15 @@ void ArtVehicleModel::ModelAcceleration(geometry_msgs::Twist *odomVel,
   // compute seconds since last update (probably zero first time)
   double deltaT = ros::Duration(sim_time - last_update_time_).toSec();
   speed += accel * deltaT;              // adjust speed
+  imuMsg->linear_acceleration.x = accel;
 
   // Brake and throttle (by themselves) never cause reverse motion.
   // Only shifting into Reverse can do that.
   if (speed < 0.0)
-    speed = 0.0;
+    {
+      speed = 0.0;
+      imuMsg->linear_acceleration.x = 0.0;
+    }
 
   // Set velocity sign based on gear.
   odomVel->linear.x = speed;            // forward movement
@@ -174,6 +183,7 @@ void ArtVehicleModel::ModelAcceleration(geometry_msgs::Twist *odomVel,
   // set yaw rate (radians/second) from velocity and steering angle
   odomVel->angular.z = Steering::angle_to_yaw(odomVel->linear.x,
                                               steering_angle_);
+  imuMsg->angular_velocity.z = odomVel->angular.z;
 
   // set simulated vehicle velocity using the "car" steering model,
   // which uses steering angle in radians instead of yaw rate.
@@ -186,8 +196,10 @@ void ArtVehicleModel::ModelAcceleration(geometry_msgs::Twist *odomVel,
 // update vehicle dynamics model
 void ArtVehicleModel::update(ros::Time sim_time)
 {
+  sensor_msgs::Imu imu_msg;
+
   // model vehicle acceleration from servo actuators
-  ModelAcceleration(&odomMsg_.twist.twist, sim_time);
+  ModelAcceleration(&odomMsg_.twist.twist, &imu_msg, sim_time);
 
   // Get latest position data from Stage
   // Translate into ROS message format and publish
@@ -201,6 +213,12 @@ void ArtVehicleModel::update(ros::Time sim_time)
   odomMsg_.header.frame_id = tf_prefix_ + ArtFrames::earth;
   odomMsg_.child_frame_id = tf_prefix_ + ArtFrames::vehicle;
   odom_pub_.publish(odomMsg_);
+
+  // publish simulated IMU data
+  imu_msg.header.stamp = sim_time;
+  imu_msg.header.frame_id = tf_prefix_ + ArtFrames::vehicle;
+  imu_msg.orientation = odomMsg_.pose.pose.orientation;
+  imu_pub_.publish(imu_msg);
 
   // broadcast /earth transform relative to sea level
   tf::Quaternion vehicleQ;

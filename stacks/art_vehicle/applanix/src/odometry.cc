@@ -25,6 +25,8 @@ provides differential GPS and accurate inertial navigation.
 and velocity in three dimensions, including roll, pitch, and yaw.  All
 data are in the \b /odom frame of reference.
 
+- \b imu (sensor_msgs/Imu): Current inertial measurements from the Applanix.
+
 - \b gps (art_msgs/GpsInfo): Current GPS status from the Applanix.
 
 - \b tf: broadcast transform from \b vehicle frame to \b odom frame.
@@ -42,6 +44,7 @@ data are in the \b /odom frame of reference.
 #include <angles/angles.h>
 
 #include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <art_msgs/GpsInfo.h>
 #include <tf/transform_broadcaster.h>
@@ -293,11 +296,12 @@ void getShifter(const art_msgs::Shifter::ConstPtr &shifterIn)
   shifter_gear_ = shifterIn->gear;
 }
 
-/** Publish the current 3D Pose */
+/** Publish the current 3D Pose and accelerations */
 void putPose(const Position::Position3D *odom_pos3d,
              const ros::Time *odom_time,
              tf::TransformBroadcaster *odom_broad,
-             ros::Publisher *odom_pub)
+             ros::Publisher *odom_pub,
+             ros::Publisher *imu_pub)
 {
   // translate roll, pitch and yaw into a Quaternion
   tf::Quaternion q;
@@ -347,6 +351,20 @@ void putPose(const Position::Position3D *odom_pos3d,
   /// \todo figure covariances of Pose and Twist
 
   odom_pub->publish(odom_msg);
+
+  // publish the Imu message
+  sensor_msgs::Imu imu_msg;
+  imu_msg.header.stamp = *odom_time;
+  imu_msg.header.frame_id = vr_.getFrame(ArtFrames::vehicle);
+  imu_msg.orientation = odom_quat;
+  imu_msg.angular_velocity = odom_msg.twist.twist.angular;
+  imu_msg.linear_acceleration.x = adata.grp1.accel_lon;
+  imu_msg.linear_acceleration.y = adata.grp1.accel_trans;
+  imu_msg.linear_acceleration.z = - adata.grp1.accel_down;
+
+  /// \todo figure covariances of IMU data
+
+  imu_pub->publish(imu_msg);
 }
 
 void displayHelp() 
@@ -441,6 +459,8 @@ int main(int argc, char** argv)
   ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
   ros::Publisher odom_pub =
     node.advertise<nav_msgs::Odometry>("odom", qDepth);
+  ros::Publisher imu_pub =
+    node.advertise<sensor_msgs::Imu>("imu", qDepth);
   ros::Publisher gps_pub =
     node.advertise<art_msgs::GpsInfo>("gps", qDepth);
   tf::TransformBroadcaster odom_broadcaster;
@@ -462,7 +482,8 @@ int main(int argc, char** argv)
         {
           // publish transform and odometry only when there are new
           // Applanix data
-          putPose(&odom_pos3d, &odom_time, &odom_broadcaster, &odom_pub);
+          putPose(&odom_pos3d, &odom_time, &odom_broadcaster,
+                  &odom_pub, &imu_pub);
         }
 
       ros::spinOnce();                  // handle incoming messages

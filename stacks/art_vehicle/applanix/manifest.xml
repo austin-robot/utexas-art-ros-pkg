@@ -15,6 +15,7 @@
   <depend package="art_msgs"/>
   <depend package="nav_msgs"/>
   <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
   <depend package="tf"/>
 
   <!-- declare build dependency on pcap library -->

@@ -1,0 +1,32 @@
+<!-- -*- mode: XML -*- -->
+<!-- Launch file for driving real vehicle autonomously using
+     commander and navigator nodes.
+
+     WORLD = base name (without prefix) of world file, MDF and RNDF
+             (default prc_large)
+
+     $Id: auto_drive.launch 642 2010-09-28 01:56:59Z jack.oquin $
+  -->
+
+<launch>
+
+  <!-- start pilot and servo actuators -->
+  <include file="$(find art_run)/launch/digcs_pilot_drive.launch" />
+
+  <!-- start navigator -->
+  <node pkg="art_nav" type="navigator" name="navigator" >
+    <rosparam file="$(find art_run)/params/navigator_common.yaml" />
+  </node>
+
+  <!-- start commander -->
+  <node pkg="art_nav" type="commander" name="commander" >
+    <!-- for DigCS -->
+    <param name="speed_limit" value="1.0" />
+    <param name="mdf"
+           value="$(find art_nav)/test/$(optenv WORLD prc_large).mdf"/>
+  </node>
+
+  <!-- run E-stop control GUI -->
+  <node pkg="art_nav" type="estop.py" name="estop_control" />
+
+</launch>

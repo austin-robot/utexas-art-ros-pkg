@@ -29,8 +29,8 @@ window
 #  size [664.000 620.000]
 
   size [528.000 487.000]
-  center [-16.494 6.553]
-  scale 2.642
+  center [-11.734 -12.533]
+  scale 2.402
 )
 
 # load an image bitmap with non-blocking lanes
@@ -50,7 +50,7 @@ car
   name "marvin"
   color "purple"
   # start in lane 1.2, heading West
-  pose [-9.215 47.690 0 -85.064]
+  pose [-9.318 47.923 0 -89.522]
   localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
   localization "gps"
 

@@ -7,6 +7,7 @@ lane	1.1
 num_waypoints	2
 1.1.1	30.2876493	-97.7370069
 1.1.2	30.2874583	-97.7370123
+exit	1.1.2	2.1.1
 end_lane
 end_segment
 segment	2

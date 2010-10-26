@@ -1,0 +1,37 @@
+<!-- -*- mode: XML -*- -->
+<!-- Launch file for driving simulated vehicle autonomously using
+     commander and navigator nodes.
+
+     WORLD = base name (without prefix) of world file, MDF and RNDF
+             (default digcs)
+
+     $Id: auto_stage.launch 659 2010-10-05 02:20:37Z jack.oquin $
+  -->
+
+<launch>
+
+  <!-- start pilot and servo actuators -->
+  <include file="$(find art_run)/launch/pilot_stage.launch" />
+
+  <!-- start navigator -->
+  <node pkg="art_nav" type="navigator" name="navigator" >
+    <rosparam file="$(find art_run)/params/navigator_common.yaml" />
+  </node>
+
+  <!-- start commander, tell it to enter Run mode -->
+  <node pkg="art_nav" type="commander" name="commander" >  
+    <!-- for DigCS -->
+    <param name="speed_limit" value="1.0" />
+    <param name="mdf"
+           value="$(find art_nav)/test/$(optenv WORLD digcs).mdf"/>
+    <param name="start_run" value="true" />
+  </node>
+
+  <!-- run E-stop control GUI -->
+  <node pkg="art_nav" type="estop.py" name="estop_control" />
+
+  <!-- experimental obstacle grid 
+  <include file="$(find art_run)/launch/obstacles_stage.launch" />
+  -->
+
+</launch>

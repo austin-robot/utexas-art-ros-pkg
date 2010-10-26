@@ -21,11 +21,11 @@ costmap:
 
     # map parameters    
     #map_type: costmap                       # try voxel later
-    map_type: voxel
+    map_type: costmap
     rolling_window: true
     static_map: false
     width: 160.0
     height: 160.0
     resolution: 0.5
-    publish_voxel_map: true
+    publish_voxel_map: false
     track_unknown_space: true

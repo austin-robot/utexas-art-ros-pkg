@@ -1,0 +1,35 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch file for pilot with stage simulation
+
+     WORLD = base name (without prefix) of world file and RNDF
+             (default digcs)
+
+     $Id: pilot_stage.launch 641 2010-09-28 01:50:58Z jack.oquin $
+  -->
+
+<launch>
+  <!-- global parameters (in this namespace) -->
+  <!-- define use_sim_time first to avoid races as nodes start up -->
+  <param name="use_sim_time" value="true" />
+  <param name="rndf"
+         value="$(find art_map)/rndf/$(optenv WORLD digcs).rndf"/>
+
+  <!-- stage simulator for ART vehicle -->
+  <node pkg="simulator_art" type="artstage" name="artstage"
+        args="$(find simulator_art)/world/$(optenv WORLD digcs).world">
+    <rosparam
+       file="$(find simulator_art)/world/$(optenv WORLD digcs).yaml"/>
+  </node>
+
+  <!-- static transforms -->
+  <include file="$(find art_run)/launch/static_transforms.launch"/>
+
+  <!-- start maplanes node with corresponding RNDF -->
+  <node pkg="art_map" type="maplanes" name="maplanes">
+    <param name="frame_id" value="/map" />
+  </node>
+
+  <!-- Launch pilot with null servo actuators. -->
+  <include file="$(find art_run)/launch/digcs_pilot_null.launch"/>
+
+</launch>

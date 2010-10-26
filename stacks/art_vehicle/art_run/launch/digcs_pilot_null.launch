@@ -1,0 +1,33 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch file for pilot with null servo interfaces
+
+     Pass PILOT_NODE=pilot.py in environment to run Python version.
+
+     $Id: digcs_pilot_null.launch 641 2010-09-28 01:50:58Z jack.oquin $
+  -->
+
+<launch>
+  <!-- simulated servo actuators -->
+  <node pkg="art_servo" type="brake" name="brake">
+    <param name="~port" value="/dev/null"/>
+  </node>
+  <node pkg="art_servo" type="ioadr" name="ioadr">
+    <param name="~port" value="/dev/null"/>
+  </node>
+  <node pkg="art_servo" type="ioadr" name="shifter">
+    <param name="~port" value="/dev/null"/>
+  </node>
+  <node pkg="art_servo" type="steering" name="steering">
+    <param name="~port" value="/dev/null"/>
+  </node>
+  <node pkg="art_servo" type="throttle" name="throttle">
+    <param name="~port" value="/dev/null"/>
+  </node>
+
+  <!-- navigation components -->
+  <node pkg="art_pilot" type="$(optenv PILOT_NODE pilot)" name="pilot" />
+    <!-- for DigCS -->
+    <param name="brake_ki" value="0.0"/>
+  </node>
+
+</launch>

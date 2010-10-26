@@ -1,0 +1,59 @@
+
+# Desc: simulation of Road D at Pickle Research Campus.
+# CVS: $Id$
+
+# defines car-like robots
+include "car.inc"
+
+# defines 'map' object used for floorplans
+include "map.inc"
+
+# defines sick laser
+include "sick.inc"
+
+# size of the world in meters
+size [240 196 2.0]
+
+# set the resolution of the underlying raytrace model in meters
+#resolution 0.02
+resolution 0.1
+
+# run simulation and screen updates every 50ms to reduce overhead
+#gui_interval 50
+interval_sim 50
+
+
+# configure the GUI window
+window
+( 
+#  size [664.000 620.000]
+
+  size [528.000 487.000]
+  center [-16.494 6.553]
+  scale 2.642
+)
+
+# load an image bitmap with non-blocking lanes
+map
+( 
+  gui_grid 0
+  bitmap "digcs.png"
+  size [240.000 196.000 1.000]
+  name "digcs"
+  obstacle_return 0
+  laser_return 0
+)
+
+# create a robot
+car
+(
+  name "marvin"
+  color "purple"
+  # start in lane 1.2, heading West
+  pose [-9.215 47.690 0 -85.064]
+  localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
+  localization "gps"
+
+  sick_laser( samples 181 laser_sample_skip 1 origin [3.178 0 0.940 0] )
+ #sick_laser( samples 181 laser_sample_skip 1 origin [-1.140 0.0 0.94 180.0] )
+)

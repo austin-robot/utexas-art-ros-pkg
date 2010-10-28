@@ -52,7 +52,7 @@ def relays(relays_on, relays_off = 0):
     # TODO check if no change required, exit if so
     global cur_relays
     old_relays = cur_relays
-    if ((old_relays & ~relays_off) | relays_on == old_relays):
+    if ((old_relays & ~relays_off) | relays_on) == old_relays:
         rospy.loginfo('nothing to do, relays already 0x%02x', old_relays)
         return
 
@@ -60,11 +60,11 @@ def relays(relays_on, relays_off = 0):
     cmd.relays_on = relays_on
     cmd.relays_off = relays_off
     rospy.loginfo('sending command now')
-    topic.publish(cmd)
 
     global finished
     while not finished and not rospy.is_shutdown():
-        rospy.sleep(0.1)        # wait for relays to change
+        topic.publish(cmd)
+        rospy.sleep(0.5)        # wait for relays to change
 
     rospy.loginfo('finished setting relays')
 

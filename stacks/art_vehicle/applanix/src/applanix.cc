@@ -57,7 +57,7 @@ void DevApplanix::unpack_grp1(applanix_data_t *adata, GRP1_MSG *msg)
     {
       if (msg->data.alignment == ApplStatusFull)
 	{
-	  ROS_INFO("Differential GPS regained!");
+	  ROS_WARN("Differential GPS regained!");
 	  have_DGPS = true;
 	}
     }

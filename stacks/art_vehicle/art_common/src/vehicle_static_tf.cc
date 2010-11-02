@@ -56,7 +56,7 @@ void broadcastTF(tf::TransformBroadcaster *tf_broadcaster,
   geometry_msgs::Quaternion tf_quat;
   tf::quaternionTFToMsg(q, tf_quat);
 
-  // broadcast Transform from device to vehicle
+  // broadcast Transform from vehicle to device
   geometry_msgs::TransformStamped static_tf;
   static_tf.header.stamp = ros::Time::now() + transform_post_date_;
   static_tf.header.frame_id = vr_.getFrame(ArtFrames::vehicle);
@@ -67,6 +67,31 @@ void broadcastTF(tf::TransformBroadcaster *tf_broadcaster,
   static_tf.transform.rotation = tf_quat;
 
   tf_broadcaster->sendTransform(static_tf);
+}
+
+/** Publish the 3D pose of a device in the vehicle's frame of
+    reference, plus its optical frame. */
+void opticalTF(tf::TransformBroadcaster *tf_broadcaster,
+               std::string device_frame,
+               double x, double y, double z, 
+               double roll, double pitch, double yaw)
+{
+  // first broadcast the device frame
+  broadcastTF(tf_broadcaster, device_frame, x, y, z, roll, pitch, yaw);
+
+  // broadcast Transform from device to corresponding optical frame
+  geometry_msgs::TransformStamped optical_tf;
+  optical_tf.header.stamp = ros::Time::now() + transform_post_date_;
+  optical_tf.header.frame_id = vr_.getFrame(device_frame);
+  optical_tf.child_frame_id = vr_.getFrame(device_frame + "_optical");
+
+  // this Quaternion rotates the device frame into the optical frame
+  optical_tf.transform.rotation.w = 0.5;
+  optical_tf.transform.rotation.x = -0.5;
+  optical_tf.transform.rotation.y = 0.5;
+  optical_tf.transform.rotation.z = -0.5;
+
+  tf_broadcaster->sendTransform(optical_tf);
 }
 
 /** main program */
@@ -114,14 +139,23 @@ int main(int argc, char** argv)
                   ArtVehicle::rear_SICK_pitch,
                   ArtVehicle::rear_SICK_yaw);
 
-      // Front Right Camera
-      broadcastTF(&tf_broadcaster, ArtFrames::front_right_camera,
-                  ArtVehicle::front_right_camera_px,
-                  ArtVehicle::front_right_camera_py,
-                  ArtVehicle::front_right_camera_pz,
-                  ArtVehicle::front_right_camera_roll,
-                  ArtVehicle::front_right_camera_pitch,
-                  ArtVehicle::front_right_camera_yaw);
+      // Left front camera
+      opticalTF(&tf_broadcaster, ArtFrames::left_front_camera,
+                  ArtVehicle::left_front_camera_px,
+                  ArtVehicle::left_front_camera_py,
+                  ArtVehicle::left_front_camera_pz,
+                  ArtVehicle::left_front_camera_roll,
+                  ArtVehicle::left_front_camera_pitch,
+                  ArtVehicle::left_front_camera_yaw);
+
+      // Right front camera
+      opticalTF(&tf_broadcaster, ArtFrames::right_front_camera,
+                  ArtVehicle::right_front_camera_px,
+                  ArtVehicle::right_front_camera_py,
+                  ArtVehicle::right_front_camera_pz,
+                  ArtVehicle::right_front_camera_roll,
+                  ArtVehicle::right_front_camera_pitch,
+                  ArtVehicle::right_front_camera_yaw);
 
       ros::spinOnce();                  // handle incoming messages
       cycle.sleep();                    // sleep until next cycle

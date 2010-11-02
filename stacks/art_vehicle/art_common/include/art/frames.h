@@ -34,11 +34,16 @@ namespace ArtFrames
   /** vehicle-relative frame */
   const std::string vehicle =   "vehicle";
 
-  /** sensor frames of reference */
+  /** laser frames of reference */
   const std::string velodyne =  "velodyne";
   const std::string front_sick = "front_sick";
   const std::string rear_sick = "rear_sick";
-  const std::string front_right_camera = "front_right_camera";
+
+  /** camera device and optical frames of reference */
+  const std::string left_front_camera = "left_front_camera";
+  const std::string left_front_camera_optical = "left_front_camera_optical";
+  const std::string right_front_camera = "right_front_camera";
+  const std::string right_front_camera_optical = "right_front_camera_optical";
 
   class VehicleRelative
   {

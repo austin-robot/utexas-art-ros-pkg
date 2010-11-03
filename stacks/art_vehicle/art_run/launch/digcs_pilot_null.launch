@@ -25,7 +25,7 @@
   </node>
 
   <!-- navigation components -->
-  <node pkg="art_pilot" type="$(optenv PILOT_NODE pilot)" name="pilot" />
+  <node pkg="art_pilot" type="$(optenv PILOT_NODE pilot)" name="pilot" >
     <!-- for DigCS -->
     <param name="brake_ki" value="0.0"/>
   </node>

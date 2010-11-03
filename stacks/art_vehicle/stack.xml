@@ -8,8 +8,9 @@
   <license>BSD,GPL</license>  
   <review status="experimental" notes=""/>
   <url>http://ros.org/wiki/art_vehicle</url>
+
   <depend stack="camera_drivers" /> <!-- camera1394 -->
-  <depend stack="common_msgs" /> <!-- nav_msgs, geometry_msgs, sensor_msgs -->
+  <depend stack="common_msgs" /> <!-- nav_msgs, sensor_msgs, geometry_msgs, visualization_msgs -->
   <depend stack="driver_common" /> <!-- dynamic_reconfigure, driver_base -->
   <depend stack="geometry" /> <!-- tf, angles -->
   <depend stack="image_common" /> <!-- image_transport -->
@@ -19,6 +20,5 @@
   <depend stack="ros" /> <!-- rxtools, roscpp, roslib, std_msgs, rospy, rosbagmigration, rosbag -->
   <depend stack="simulator_stage" /> <!-- stage -->
   <depend stack="velodyne" /> <!-- velodyne_common -->
-  <depend stack="visualization_common" /> <!-- visualization_msgs -->
 
 </stack>

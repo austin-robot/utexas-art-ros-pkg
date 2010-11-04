@@ -9,6 +9,6 @@
   <!-- start pilot and servo actuators -->
   <include file="$(find art_run)/launch/pilot_stage.launch" />
 
-  <node pkg="art_pilot" type="teleop.py" name="teleop" />
+  <node pkg="$(optenv PILOT_PKG art_pilot)" type="teleop.py" name="teleop" />
 
 </launch>

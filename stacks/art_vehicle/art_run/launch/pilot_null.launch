@@ -25,6 +25,6 @@
   </node>
 
   <!-- navigation components -->
-  <node pkg="art_pilot" type="$(optenv PILOT_NODE pilot)" name="pilot" />
+  <include file="$(find art_run)/launch/pilot_node.launch" />
 
 </launch>

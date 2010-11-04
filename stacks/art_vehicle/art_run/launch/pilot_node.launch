@@ -1,0 +1,12 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch file to provide indirection for pilot node
+
+     Pass PILOT_PKG=pilot_experimental in environment to run sandbox version.
+     Pass PILOT_NODE=pilot.py in environment to run Python version.
+
+     $Id$
+  -->
+
+<launch>
+  <node pkg="$(optenv PILOT_PKG art_pilot)" type="$(optenv PILOT_NODE pilot)" name="pilot" />
+</launch>

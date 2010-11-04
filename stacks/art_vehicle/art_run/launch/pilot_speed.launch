@@ -21,6 +21,6 @@
 
   <!-- navigation components -->
   <node pkg="applanix" type="odometry" name="odometry" />
-  <node pkg="art_pilot" type="pilot" name="pilot" />
+  <include file="$(find art_run)/launch/pilot_node.launch" />
 
 </launch>

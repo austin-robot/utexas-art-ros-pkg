@@ -11,6 +11,6 @@
     <param name="deadzone" value="0.0" />
   </node>
 
-  <node pkg="art_pilot" type="joy_teleop.py" name="joy_teleop" />
+  <node pkg="$(optenv PILOT_PKG art_pilot)" type="joy_teleop.py" name="joy_teleop" />
 
 </launch>

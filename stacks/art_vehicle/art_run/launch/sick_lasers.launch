@@ -1,0 +1,32 @@
+<!-- -*- mode: XML -*- -->
+
+<!-- start nodes to acquire data from Sick lasers
+
+     $Id$
+-->
+
+<launch>
+
+  <node pkg="sicktoolbox_wrapper" type="sicklms" name="front_sick">
+    <!--
+    <param name="port" value="/dev/ttyUSB1" />
+    -->
+    <param name="port" value="/dev/laser_front" />
+    <param name="baud" value="38400" />
+    <param name="frame_id" value="/front_sick" />
+    <param name="inverted" value="true" />
+    <remap from="scan" to="front_sick" />
+  </node>
+
+  <node pkg="sicktoolbox_wrapper" type="sicklms" name="rear_sick">
+    <!--
+    <param name="port" value="/dev/ttyUSB2" />
+    -->
+    <param name="port" value="/dev/laser_rear" />
+    <param name="baud" value="38400" />
+    <param name="frame_id" value="/rear_sick" />
+    <param name="inverted" value="true" />
+    <remap from="scan" to="rear_sick" />
+  </node>
+
+</launch>

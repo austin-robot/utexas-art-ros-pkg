@@ -1,0 +1,17 @@
+# UDEV commands for ART vehicle (on Karmic)
+# NOTE: set "8250.nr_uarts=8" on kernel command line (in GRUB)
+
+KERNEL=="ttyS0",	SYMLINK="ioadr8x"
+KERNEL=="ttyS1",	SYMLINK="speedo"
+KERNEL=="ttyS4",	SYMLINK="shifter"
+KERNEL=="ttyS5",	SYMLINK="steering"
+KERNEL=="ttyS6",	SYMLINK="brake"
+KERNEL=="ttyS7",	SYMLINK="throttle"
+KERNEL=="ttyUSB1",	SYMLINK="spare_usb2"
+KERNEL=="ttyUSB2",	SYMLINK="laser_rear"
+KERNEL=="ttyUSB3",	SYMLINK="spare_usb3"
+KERNEL=="ttyUSB4",	SYMLINK="laser_front"
+
+# grant raw 1394 bus permissions to video group
+# (NOTE: this is insecure with 1394 disks attached)
+KERNEL=="raw1394", GROUP="video"

@@ -4,10 +4,16 @@
 #include <art_msgs/ArtQuadrilateral.h>
 
 namespace QuadOps {
-// determines if point lies in interior of given polygon points on
-  // edge segments are considered interior points
   bool pointInHull(float x, float y, const geometry_msgs::Point32 *p1, const geometry_msgs::Point32 *p2, const geometry_msgs::Point32 *p3, const geometry_msgs::Point32 *p4);  
 
   bool quickPointInPoly(float x, float y, const art_msgs::ArtQuadrilateral& p);
+
+  // Create a comparions operator so we can use ArtQuadrilateral's in stl::sets
+  struct quad_compare {
+    bool operator()(const art_msgs::ArtQuadrilateral& x, const art_msgs::ArtQuadrilateral& y) const {
+      return x.poly_id < y.poly_id;
+    }
+  };
+
 }
 #endif

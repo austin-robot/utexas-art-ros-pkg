@@ -38,7 +38,8 @@ float32 geom_pa = 0.0
 float32 velodyne_px = 0.393             # (approximately)
 float32 velodyne_py = 0.278             # (approximately)
 float32 velodyne_pz = 2.4               # (calibrated)
-float32 velodyne_yaw=-0.0343            # (approximately)
+#float32 velodyne_yaw=-0.0343           # (before remounting)
+float32 velodyne_yaw=-0.02155           # (approximately)
 float32 velodyne_pitch=0.016353735091186868 # (calculated)
 float32 velodyne_roll=0.0062133721370998124 # (calculated)
 

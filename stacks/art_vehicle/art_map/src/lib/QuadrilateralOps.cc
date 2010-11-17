@@ -3,7 +3,7 @@
 
 #include <art_map/types.h>
 
-namespace QuadOps {
+namespace quad_ops {
 // determines if point lies in interior of given polygon points on
   // edge segments are considered interior points
   bool pointInHull(float x, float y, const geometry_msgs::Point32 *p1, const geometry_msgs::Point32 *p2, const geometry_msgs::Point32 *p3, const geometry_msgs::Point32 *p4) {
@@ -54,6 +54,24 @@ namespace QuadOps {
       return true;
 
     return false;
-    //return pointOnEdges(x, y, p);
   }
+
+  // This function returns a ArtLanes containing all the ArtQuadrilaterals in 'quads' that are
+  // statisfied by the 'filter' being passed in
+  art_msgs::ArtLanes filterLanes(const art_msgs::ArtQuadrilateral& base_quad, const art_msgs::ArtLanes& quads, bool(*filter)(const art_msgs::ArtQuadrilateral&, const art_msgs::ArtQuadrilateral&)) {
+    int seg_id = base_quad.start_way.seg;
+    int lane_id = base_quad.start_way.lane;
+    int poly_id = base_quad.poly_id;
+
+    art_msgs::ArtLanes filtered;
+    size_t num_quads = quads.polygons.size();
+    for (size_t i=0; i<num_quads; i++) {
+      const art_msgs::ArtQuadrilateral* p= &(quads.polygons[i]);
+      if (filter(base_quad,quads.polygons[i]))  {
+        filtered.polygons.push_back(*p);
+      }
+    }
+    return filtered;
+  }
+  
 }

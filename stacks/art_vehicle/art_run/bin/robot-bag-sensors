@@ -8,9 +8,9 @@
 BAGS=${ROS_HOME:-~/.ros}/bags/sensors
 mkdir -p $BAGS
 
+### NOTE: soon we need to start recording the new format...
+#rosbag record -o $BAGS/velodyne /velodyne/packets &
 rosbag record -o $BAGS/velodyne /velodyne/rawscan &
-
-rosbag record -o $BAGS/rviz /visualization_marker /visualization_marker_array &
 
 CAMERA1=/left_front/camera
 CAMERA2=/right_front/camera
@@ -19,14 +19,4 @@ rosbag record -o $BAGS/camera \
         $CAMERA1/image_raw/compressed $CAMERA1/camera_info \
         $CAMERA2/image_raw/compressed $CAMERA2/camera_info &
 
-rosbag record -o $BAGS/other \
-        /odom /imu /gps /tf \
-        /brake/cmd /brake/state \
-        /ioadr/cmd /ioadr/state \
-        /roadmap_global /roadmap_local /roadmap_cloud \
-        /shifter/cmd /shifter/state \
-        /steering/cmd /steering/state \
-        /throttle/cmd /throttle/state
-
-# kludgy way to terminate the other records when odometry finishes
-killall record
+exec robot-bag-core

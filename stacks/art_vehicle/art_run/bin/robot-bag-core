@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# record bag with core topics, including maplanes, odometry, GPS and
+# coordinate transforms
+
+# run this with: roslaunch art_run sensory_overload.launch
+
+BAGS=${ROS_HOME:-~/.ros}/bags/sensors
+mkdir -p $BAGS
+
+rosbag record -o $BAGS/rviz /visualization_marker /visualization_marker_array &
+
+rosbag record -o $BAGS/other \
+        /odom /imu /gps /tf \
+        /brake/cmd /brake/state \
+        /ioadr/cmd /ioadr/state \
+        /roadmap_global /roadmap_local /roadmap_cloud \
+        /shifter/cmd /shifter/state \
+        /steering/cmd /steering/state \
+        /throttle/cmd /throttle/state
+
+# kludgy way to terminate the other records when odometry finishes
+killall record

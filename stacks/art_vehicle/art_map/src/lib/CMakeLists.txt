@@ -12,5 +12,4 @@ rosbuild_add_library(artmap
   SmoothCurve.cc
   VisualLanes.cc
   ZoneOps.cc
-  QuadrilateralOps.cc
 )

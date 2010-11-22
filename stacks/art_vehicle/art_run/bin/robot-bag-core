@@ -14,6 +14,7 @@ rosbag record -o $BAGS/other \
         /odom /imu /gps /tf \
         /brake/cmd /brake/state \
         /ioadr/cmd /ioadr/state \
+        /navigator/cmd /navigator/state \
         /roadmap_global /roadmap_local /roadmap_cloud \
         /shifter/cmd /shifter/state \
         /steering/cmd /steering/state \

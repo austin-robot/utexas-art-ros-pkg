@@ -9,6 +9,9 @@
 # $Id$
 #
 
+# make print compatible with python 2.6 and 3.0
+from __future__ import print_function
+
 import roslib;
 roslib.load_manifest('art_servo')
 
@@ -74,7 +77,7 @@ def shift(gear):
 
 def usage():
     "print usage message"
-    print """
+    print("""
 Usage:
 
     rosrun art_servo shift.py <gear>
@@ -82,7 +85,7 @@ Usage:
 Where <gear> is one of: park, reverse, neutral, drive.  These names
 are not case-sensitive, and may be abbreviated to the first character.
 
-"""
+""")
 
 if __name__ == '__main__':
 
@@ -107,7 +110,7 @@ if __name__ == '__main__':
         gear_name = expand_abbrev[gear_name]
 
     if not gear_name in gears:
-        print 'unknown gear:', gear_name
+        print('unknown gear:', gear_name)
         usage()
         exit(2)
 

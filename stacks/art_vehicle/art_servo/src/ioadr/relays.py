@@ -9,6 +9,9 @@
 # $Id$
 #
 
+# make print compatible with python 2.6 and 3.0
+from __future__ import print_function
+
 import roslib;
 roslib.load_manifest('art_servo')
 
@@ -70,7 +73,7 @@ def relays(relays_on, relays_off = 0):
 
 def usage():
     "print usage message"
-    print """
+    print("""
 Usage:
 
     rosrun art_servo relays.py <set> [<clear>]
@@ -83,7 +86,7 @@ Not implemented:
   FLASHER, ALARM, LASER_FRONT, LASER_TOP, TURN_LEFT, or TURN_RIGHT.
   These names are not case-sensitive.
 
-"""
+""")
 
 if __name__ == '__main__':
 
@@ -108,7 +111,7 @@ if __name__ == '__main__':
     #    gear_name = expand_abbrev[gear_name]
     #
     #if not gear_name in gears:
-    #    print 'unknown gear:', gear_name
+    #    print('unknown gear:', gear_name)
     #    usage()
     #    exit(2)
     #

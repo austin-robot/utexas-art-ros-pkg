@@ -7,6 +7,9 @@
 #
 # $Id$
 
+# make print compatible with python 2.6 and 3.0
+from __future__ import print_function
+
 import roslib;
 roslib.load_manifest('art_nav')
 
@@ -55,34 +58,31 @@ def estop(behavior, new_state):
 
 def usage():
     "print usage message"
-    print 'usage: estop.py <state>'
-    print ''
-    print 'options'
-    print '    p    Pause'
-    print '    q    Quit (Done)'
-    print '    r    Run'
+    print('usage: estop.py <state>')
+    print('')
+    print('options')
+    print('    p    Pause')
+    print('    q    Quit (Done)')
+    print('    r    Run')
     sys.exit(9)
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print 'exactly one parameter expected'
+        print('exactly one parameter expected')
         usage()
 
     option = sys.argv[1]
     if option == 'p':
-        print 'Running'
         new_state = EstopState.Pause
         behavior = Behavior.Pause
     elif option == 'r':
-        print 'Pausing'
         new_state = EstopState.Run
         behavior = Behavior.Run
     elif option == 'q':
-        print 'Done'
         new_state = EstopState.Done
         behavior = Behavior.Quit
     else:
-        print 'unknown parameter:', option
+        print('unknown parameter:', option)
         usage()
 
     try:

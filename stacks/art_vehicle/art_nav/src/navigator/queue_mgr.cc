@@ -9,6 +9,8 @@
 
 #include <unistd.h>
 
+#include <dynamic_reconfigure/server.h>
+
 #include <art/frames.h>
 
 #include <art_msgs/IOadrCommand.h>
@@ -47,7 +49,7 @@ public:
   NavQueueMgr();
   ~NavQueueMgr()
     {
-      delete nav;
+      delete nav_;
     };
 
   bool setup(ros::NodeHandle node);
@@ -61,6 +63,7 @@ private:
   void processRoadMap(const art_msgs::ArtLanes::ConstPtr &cmdIn);
   void processRelays(const art_msgs::IOadrState::ConstPtr &sigIn);
   void PublishState(void);
+  void reconfig(Config &newconfig, uint32_t level);
   void SetRelays(void);
   void SetSpeed(pilot_command_t pcmd);
 
@@ -89,18 +92,21 @@ private:
   ros::Time map_time_;
 
   // navigator implementation class
-  Navigator *nav;
+  Navigator *nav_;
+
+  // configuration callback
+  dynamic_reconfigure::Server<Config> ccb_;
 };
 
-// constructor, requesting overwrite of commands
+/** constructor */
 NavQueueMgr::NavQueueMgr()
 {
-  // create control driver
-  nav = new Navigator(&odom_msg_);
-  nav->configure();
-  
   signal_on_left_ = signal_on_right_ = false;
   flasher_on_ = alarm_on_ = false;
+
+  // create control driver, declare dynamic reconfigure callback
+  nav_ = new Navigator(&odom_msg_);
+  ccb_.setCallback(boost::bind(&NavQueueMgr::reconfig, this, _1, _2));
 }
 
 /** Handle command input. */
@@ -110,7 +116,7 @@ void NavQueueMgr::processNavCmd(const
   ROS_DEBUG_STREAM("Navigator order:"
                    << NavBehavior(cmdIn->order.behavior).Name());
   cmd_time_ = cmdIn->header.stamp;
-  nav->order = cmdIn->order;
+  nav_->order = cmdIn->order;
 }
 
 /** Handle Odometry input. */
@@ -134,7 +140,7 @@ void NavQueueMgr::processRoadMap(const art_msgs::ArtLanes::ConstPtr &mapIn)
 {
   ROS_DEBUG_STREAM(mapIn->polygons.size() << " lanes polygons received");
   map_time_ = mapIn->header.stamp;
-  nav->course->lanes_message(*mapIn);
+  nav_->course->lanes_message(*mapIn);
 }
 
 /** Handle relays state message. */
@@ -169,6 +175,23 @@ void NavQueueMgr::processRelays(const art_msgs::IOadrState::ConstPtr &sigIn)
       ROS_INFO("alarm now %s", (alarm_on? "on": "off"));
       alarm_on_ = alarm_on;
     }
+}
+
+
+/** handle dynamic reconfigure service request
+ *
+ * @param newconfig new configuration from dynamic reconfigure client,
+ *        becomes the service reply message as updated here.
+ * @param level SensorLevels value (0xffffffff on initial call)
+ *
+ * This is done without any locking because it is called in the same
+ * thread as ros::spinOnce() and the topic subscription callbacks.
+ */
+void NavQueueMgr::reconfig(Config &newconfig, uint32_t level)
+{
+  ROS_INFO("navigator dynamic reconfigure, level 0x%x", level);
+  nav_->config_ = newconfig;
+  nav_->configure();
 }
 
 /** Set up ROS topics for navigator node */
@@ -209,8 +232,8 @@ bool NavQueueMgr::shutdown()
   SetSpeed(cmd);
 
 #if 0
-  nav->obstacle->lasers->unsubscribe_lasers();
-  nav->odometry->unsubscribe();
+  nav_->obstacle->lasers->unsubscribe_lasers();
+  nav_->odometry->unsubscribe();
 #endif
 
   return 0;
@@ -221,48 +244,48 @@ bool NavQueueMgr::shutdown()
  *  @pre signal_on_left_, signal_on_right_, flasher_on_ and alarm_on_
  *       reflect the most recently reported states of those relays;
  *
- *  @pre nav->navdata contains desired signal relay states
+ *  @pre nav_->navdata contains desired signal relay states
  */
 void NavQueueMgr::SetRelays(void)
 {
-  if (signal_on_left_ != (bool) nav->navdata.signal_left
-      || signal_on_right_ != (bool) nav->navdata.signal_right
-      || flasher_on_ != (bool) nav->navdata.flasher
-      || alarm_on_ != (bool) nav->navdata.alarm)
+  if (signal_on_left_ != (bool) nav_->navdata.signal_left
+      || signal_on_right_ != (bool) nav_->navdata.signal_right
+      || flasher_on_ != (bool) nav_->navdata.flasher
+      || alarm_on_ != (bool) nav_->navdata.alarm)
     {
       // something needs to change
       art_msgs::IOadrCommand sig_cmd;
 
       // set or reset left signal relay
-      if (nav->navdata.signal_left)
+      if (nav_->navdata.signal_left)
         sig_cmd.relays_on = art_msgs::IOadrState::TURN_LEFT;
       else
         sig_cmd.relays_off = art_msgs::IOadrState::TURN_LEFT;
 
       // or in right signal relay value
-      if (nav->navdata.signal_right)
+      if (nav_->navdata.signal_right)
         sig_cmd.relays_on |= art_msgs::IOadrState::TURN_RIGHT;
       else
         sig_cmd.relays_off |= art_msgs::IOadrState::TURN_RIGHT;
 
       // or in flasher relay value
-      if (nav->navdata.flasher)
+      if (nav_->navdata.flasher)
         sig_cmd.relays_on |= art_msgs::IOadrState::FLASHER;
       else
         sig_cmd.relays_off |= art_msgs::IOadrState::FLASHER;
 
       // or in alarm relay value
-      if (nav->navdata.alarm)
+      if (nav_->navdata.alarm)
         sig_cmd.relays_on |= art_msgs::IOadrState::ALARM;
       else
         sig_cmd.relays_off |= art_msgs::IOadrState::ALARM;
 
       ROS_DEBUG("setting relays: left turn %s, right turn %s, "
                 "flasher %s, alarm %s",
-                (nav->navdata.signal_left? "on": "off"),
-                (nav->navdata.signal_right? "on": "off"),
-                (nav->navdata.flasher? "on": "off"),
-                (nav->navdata.alarm? "on": "off"));
+                (nav_->navdata.signal_left? "on": "off"),
+                (nav_->navdata.signal_right? "on": "off"),
+                (nav_->navdata.flasher? "on": "off"),
+                (nav_->navdata.alarm? "on": "off"));
 
       // send command to relay driver
       signals_cmd_.publish(sig_cmd);
@@ -292,23 +315,23 @@ void NavQueueMgr::SetSpeed(pilot_command_t pcmd)
 /** Publish current navigator state data */
 void NavQueueMgr::PublishState(void)
 {
-  nav->navdata.header.stamp = ros::Time::now();
-  nav->navdata.header.frame_id = ArtFrames::vehicle;
+  nav_->navdata.header.stamp = ros::Time::now();
+  nav_->navdata.header.frame_id = ArtFrames::vehicle;
 
   ROS_DEBUG("Publishing Navigator state = %s, %s, last_waypt %s"
 	    ", replan_waypt %s, R%d S%d Z%d, next waypt %s, goal chkpt %s",
-	    NavEstopState(nav->navdata.estop).Name(),
-	    NavRoadState(nav->navdata.road).Name(),
-	    ElementID(nav->navdata.last_waypt).name().str,
-	    ElementID(nav->navdata.replan_waypt).name().str,
-	    (bool) nav->navdata.reverse,
-	    (bool) nav->navdata.stopped,
-	    (bool) nav->navdata.have_zones,
-	    ElementID(nav->navdata.last_order.waypt[1].id).name().str,
-	    ElementID(nav->navdata.last_order.chkpt[0].id).name().str);
+	    NavEstopState(nav_->navdata.estop).Name(),
+	    NavRoadState(nav_->navdata.road).Name(),
+	    ElementID(nav_->navdata.last_waypt).name().str,
+	    ElementID(nav_->navdata.replan_waypt).name().str,
+	    (bool) nav_->navdata.reverse,
+	    (bool) nav_->navdata.stopped,
+	    (bool) nav_->navdata.have_zones,
+	    ElementID(nav_->navdata.last_order.waypt[1].id).name().str,
+	    ElementID(nav_->navdata.last_order.chkpt[0].id).name().str);
 
   // Publish this info for all subscribers
-  nav_state_.publish(nav->navdata);
+  nav_state_.publish(nav_->navdata);
 }
 
 /** Spin method for main thread */
@@ -320,7 +343,7 @@ void NavQueueMgr::spin()
       ros::spinOnce();                  // handle incoming messages
 
       // invoke appropriate Navigator method, pass result to Pilot
-      SetSpeed(nav->navigate());
+      SetSpeed(nav_->navigate());
 
       SetRelays();
 

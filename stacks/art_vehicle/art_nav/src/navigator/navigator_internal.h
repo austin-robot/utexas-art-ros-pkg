@@ -37,6 +37,9 @@
 
 #include <art_nav/NavBehavior.h>
 
+#include "art_nav/NavigatorConfig.h"
+typedef art_nav::NavigatorConfig Config;
+
 // Provide short names for some messages so they can more easily be
 // packaged differently.
 using art_msgs::Behavior;
@@ -82,6 +85,8 @@ public:
 
   // configure parameters
   void configure();
+
+  Config config_;                       // configuration parameters
 
   // decrease pilot command velocity, obeying min_speed
   void reduce_speed_with_min(pilot_command_t &pcmd, float new_speed)

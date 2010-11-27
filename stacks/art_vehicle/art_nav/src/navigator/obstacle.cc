@@ -28,6 +28,7 @@ Obstacle::Obstacle(Navigator *_nav, int _verbose)
   odom = nav->odometry;
   order = &nav->order;
   pops = nav->pops;
+  config_ = &nav->config_;
 
   // TODO Make this a parameter
   max_range = 80.0;
@@ -180,6 +181,14 @@ void Obstacle::closest_in_lane(const poly_list_t &lane,
 
 void Obstacle::configure()
 {
+  blockage_timeout_secs = config_->blockage_timeout_secs;
+  lane_width_ratio = config_->lane_width_ratio;
+  lane_scan_angle = config_->lane_scan_angle;
+  max_obstacle_dist = config_->max_obstacle_dist;
+  min_approach_speed = config_->min_approach_speed;
+  offensive_driving = config_->offensive_driving;
+
+#if 0
   ros::NodeHandle nh("~");
 
   nh.param( "blockage_timeout_secs", blockage_timeout_secs, 9.0);
@@ -209,6 +218,7 @@ void Obstacle::configure()
   nh.param("offensive_driving", offensive_driving, false); 
   ROS_INFO("\tuse %s driving style",
 	  (offensive_driving? "offensive": "defensive"));
+#endif
 }
 
 // returns true if obstacle is within the specified lane

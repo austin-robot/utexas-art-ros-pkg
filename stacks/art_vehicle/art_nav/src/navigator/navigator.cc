@@ -93,8 +93,6 @@ pilot_command_t Navigator::navigate(void)
 /** Configure parameters */
 void Navigator::configure()
 {
-  ROS_INFO("Navigator configuration options:");
-
   // configure controller methods
   estop->configure();
   course->configure();

@@ -191,6 +191,8 @@ void NavQueueMgr::reconfig(Config &newconfig, uint32_t level)
 {
   ROS_INFO("navigator dynamic reconfigure, level 0x%x", level);
   nav_->config_ = newconfig;
+
+  // recursively configure every controller
   nav_->configure();
 }
 

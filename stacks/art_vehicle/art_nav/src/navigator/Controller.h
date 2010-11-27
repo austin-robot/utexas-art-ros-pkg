@@ -65,6 +65,7 @@ public:
     odom = nav->odometry;
     order = &nav->order;
     pops = nav->pops;
+    config_ = &nav->config_;
 
     // start the controller from its reset state
     // (any subordinate controller constructors will reset themselves)
@@ -120,6 +121,7 @@ protected:
   nav_msgs::Odometry *odom;
   art_msgs::Order *order;
   PolyOps *pops;
+  Config *config_;
 
   // reset this controller only
   virtual void reset_me(void) {};

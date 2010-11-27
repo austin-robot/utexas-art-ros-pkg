@@ -76,6 +76,7 @@ void Run::configure()
 {
   ros::NodeHandle nh("~");
   
+#if 0
   // look ahead distance for initialize behavior
   nh.param("initialize_distance", initialize_distance, 10.0);
   ROS_INFO("initialize look ahead distance is %.3f m", initialize_distance);
@@ -87,6 +88,11 @@ void Run::configure()
   // maximum speed we will ever request (in meters/second)
   nh.param("maxspeed", max_speed, 15.0);
   ROS_INFO("maximum speed is %.3f m/s", max_speed);
+#endif
+
+  initialize_distance = config_->initialize_distance;
+  initialize_min_angle = config_->initialize_min_angle;
+  max_speed = config_->maxspeed;
 
   // configure subordinate controllers
   halt->configure();

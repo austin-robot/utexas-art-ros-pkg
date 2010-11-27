@@ -134,7 +134,7 @@ class Course
   bool plan_valid(void)
   {
     // check that in the current order waypts match
-    for (int i = 0; i < plan_waypt_limit; ++i)
+    for (int i = 0; i < Order::N_WAYPTS; ++i)
       {
 	if (plan_waypt[i] != order->waypt[i].id)
 	  return false;			// need a new plan
@@ -335,7 +335,6 @@ class Course
   double max_yaw_rate;
   double min_lane_change_dist;
   double min_lane_steer_dist;
-  int    plan_waypt_limit;
   double spot_waypoint_radius;
   double spring_lookahead;
   double turning_latency;
@@ -353,6 +352,7 @@ class Course
   art_msgs::NavigatorState *navdata;   // current navigator state data
   nav_msgs::Odometry *odom;             // current odometry position
   nav_msgs::Odometry *estimate;         // estimated control position
+  Config *config_;
 
   /** @brief head directly for next reachable way-point */
   Polar head_for_waypt(float target_dist);
@@ -360,7 +360,7 @@ class Course
   /** @brief set new plan way-points */
   void set_plan_waypts(void)
   {
-    for (int i = 0; i < plan_waypt_limit; ++i)
+    for (int i = 0; i < Order::N_WAYPTS; ++i)
       plan_waypt[i] = order->waypt[i].id;
   }
 

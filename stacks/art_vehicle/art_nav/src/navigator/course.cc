@@ -35,6 +35,7 @@ Course::Course(Navigator *_nav, int _verbose)
   odom = nav->odometry;
   order = &nav->order;
   pops = nav->pops;
+  config_ = &nav->config_;
 
   // initialize polygon vectors
   plan.clear();
@@ -117,6 +118,25 @@ void Course::begin_run_cycle(void)
 
 void Course::configure()
 {
+  // dynamic reconfigure parameters
+  lane_change_secs = config_->lane_change_secs;
+  lane_steer_time = config_->lane_steer_time;
+  heading_change_ratio = config_->heading_change_ratio;
+  turning_latency = config_->turning_latency;
+  k_error = config_->turning_offset_tune;
+  k_theta = config_->turning_heading_tune;
+  yaw_ratio = config_->yaw_ratio;
+  k_int = config_->turning_int_tune;
+  min_lane_change_dist = config_->min_lane_change_dist;
+  min_lane_steer_dist = config_->min_lane_steer_dist;
+  max_speed_for_sharp = config_->max_speed_for_sharp;
+  spring_lookahead = config_->spring_lookahead;
+  max_yaw_rate = config_->real_max_yaw_rate;
+  zone_waypoint_radius = config_->zone_waypoint_radius;
+  zone_perimeter_radius = config_->zone_perimeter_radius;
+  spot_waypoint_radius = config_->spot_waypoint_radius;
+
+#if 0
   ros::NodeHandle nh("~");
 
   // how far away (in seconds) we aim when changing lanes
@@ -165,13 +185,6 @@ void Course::configure()
   ROS_INFO("minimum lane steering distance is %.3f meters",
           min_lane_steer_dist);
 
-  // plan way-point limit.  Only for testing Navigator's ability to
-  // run with a truncated course plan.  Do not set otherwise.
-  nh.param("plan_waypt_limit", plan_waypt_limit, (int) Order::N_WAYPTS);
-  if (plan_waypt_limit < 2 || plan_waypt_limit > Order::N_WAYPTS)
-    plan_waypt_limit = Order::N_WAYPTS;
-  ROS_INFO("plan_waypt limit is %d", plan_waypt_limit);
-
   // how fast the maximum steer can be done
   nh.param("max_speed_for_sharp", max_speed_for_sharp ,3.0); 
   ROS_INFO("maximum speed to go full yaw is %.3f m/s", max_speed_for_sharp);
@@ -191,6 +204,7 @@ void Course::configure()
 
   nh.param("spot_waypoint_radius", spot_waypoint_radius, 0.5);
   ROS_INFO("spot waypoint radius is %.3f m", spot_waypoint_radius);
+#endif
 }
 
 /** Set heading for desired course.
@@ -693,7 +707,7 @@ void Course::find_travel_lane(bool rejoin)
       if (verbose >= 6) log("debug plan", plan);
 
       // add polygons leading to the target waypt entries
-      for (int i = 1; i < plan_waypt_limit; ++i)
+      for (int i = 1; i < Order::N_WAYPTS; ++i)
 	{
 	  // Do not repeat polygons for repeated way-points in the order.
 	  if (ElementID(order->waypt[i-1].id)

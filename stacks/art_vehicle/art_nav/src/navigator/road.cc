@@ -202,6 +202,7 @@ void Road::cancel_all_timers(void)
 
 void Road::configure()
 {
+#if 0
   ros::NodeHandle nh("~");
 
   nh.param("passing_delay", passing_delay, 5.0);
@@ -217,6 +218,12 @@ void Road::configure()
 
   nh.param("stop_line_delay", stop_line_delay, 1.0);
   ROS_INFO("stop line delay is %.3f seconds", stop_line_delay);
+#endif
+
+  passing_delay = config_->passing_delay;
+  precedence_delay = config_->precedence_delay;
+  roadblock_delay = config_->roadblock_delay;
+  stop_line_delay = config_->stop_line_delay;
 
   //evade->configure();
   follow_lane->configure();

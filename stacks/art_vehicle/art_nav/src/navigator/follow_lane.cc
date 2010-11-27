@@ -132,11 +132,15 @@ FollowLane::~FollowLane()
 
 void FollowLane::configure()
 {
+#if 0
   ros::NodeHandle nh("~");
 
   // Speed to use when there is no plan available.
   nh.param("lost_speed", lost_speed, 2.0);
   ROS_INFO("speed when lost is %.3f m/s", lost_speed);
+#endif
+
+  lost_speed = config_->lost_speed;
 
   //avoid->configure();
   follow_safely->configure();

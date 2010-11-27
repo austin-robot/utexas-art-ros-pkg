@@ -26,10 +26,14 @@ StopArea::~StopArea() {};
 // configuration method
 void StopArea::configure()
 {
+  stop_approach_speed = config_->stop_approach_speed;
+
+#if 0
   ros::NodeHandle nh("~");
 
   nh.param("stop_approach_speed", stop_approach_speed, 3.0);
   ROS_INFO("stop line approach speed is %.3f m/s", stop_approach_speed);
+#endif
 };
 
 // Slow down if stop line safety area reached.

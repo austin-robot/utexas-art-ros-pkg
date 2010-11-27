@@ -21,6 +21,12 @@ FollowSafely::~FollowSafely() {};
 
 void FollowSafely::configure()
 {
+  close_stopping_distance = config_->close_stopping_distance;
+  max_following_time = config_->max_following_time;
+  min_following_time = config_->min_following_time;
+  desired_following_time = config_->desired_following_time;
+
+#if 0
   ros::NodeHandle nh("~");
   using art_msgs::ArtVehicle;
 
@@ -41,6 +47,7 @@ void FollowSafely::configure()
   ROS_INFO("minimum, desired and maximum following times: "
 	  "%.1f, %.1f, %.1f secs",
 	  min_following_time, desired_following_time, max_following_time);
+#endif
 }
 
 // Set desired speed for avoiding obstacles within a lane.

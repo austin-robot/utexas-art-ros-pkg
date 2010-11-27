@@ -262,6 +262,7 @@ bool Uturn::circle_and_line_intersect(MapXY c, float r,
 
 void Uturn::configure()
 {
+#if 0
   ros::NodeHandle nh("~");
 
   nh.param("uturn_speed", uturn_speed, 2.0);
@@ -278,6 +279,12 @@ void Uturn::configure()
            angles::from_degrees(45));
   ROS_INFO("U-turn stop heading is %.3f radians (%.3f degrees)",
            uturn_stop_heading, angles::to_degrees(uturn_stop_heading));
+#endif
+
+  uturn_speed = config_->uturn_speed;
+  uturn_threshold = config_->uturn_threshold;
+  uturn_yaw_rate = config_->uturn_yaw_rate;
+  uturn_stop_heading = config_->uturn_stop_heading;
 
   //safety->configure();
   stop->configure();

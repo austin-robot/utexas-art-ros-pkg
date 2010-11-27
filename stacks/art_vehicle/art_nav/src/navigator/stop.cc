@@ -51,6 +51,13 @@ Stop::~Stop() {};
 // configuration method
 void Stop::configure()
 {
+  min_stop_distance = config_->min_stop_distance;
+  stop_creep_speed = config_->stop_creep_speed;
+  max_creep_distance = config_->max_creep_distance;
+  stop_deceleration = config_->stop_deceleration;
+  stop_latency = config_->stop_latency;
+
+#if 0
   ros::NodeHandle nh("~");
 
   nh.param("min_stop_distance", min_stop_distance, 5.0);
@@ -70,6 +77,7 @@ void Stop::configure()
   //nh.param("stop_latency", stop_latency, 1.5);
   nh.param("stop_latency", stop_latency, 0.0);
   ROS_INFO("stopping latency is %.3f sec", stop_latency);
+#endif
 };
 
 Controller::result_t Stop::control(pilot_command_t &pcmd)

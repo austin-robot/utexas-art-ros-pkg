@@ -20,6 +20,14 @@
 
 void SlowForCurves::configure()
 {
+  lookahead_distance = config_->lookahead_distance;
+  max_deceleration = config_->max_deceleration;
+  min_speed_when_slowing_for_curves =
+    config_->min_speed_when_slowing_for_curves;
+  max_yaw_rate = config_->max_yaw_rate;
+  min_curve_length = config_->min_curve_length;
+
+#if 0
   ros::NodeHandle nh("~");
   using art_msgs::ArtVehicle;
 
@@ -39,6 +47,7 @@ void SlowForCurves::configure()
   ROS_INFO("turn min speed when slowing for curves is %.3f meters/second",
            min_speed_when_slowing_for_curves);
   ROS_INFO("turn min curve length is %.3f meters", min_curve_length);
+#endif
 }
 
 Controller::result_t SlowForCurves::control(pilot_command_t &pcmd)

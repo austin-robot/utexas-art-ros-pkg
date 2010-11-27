@@ -43,7 +43,7 @@ class commands:
     def baud(self):   
         """ Set baud rate
         """
-        print "setting brake baud rate"
+        print("setting brake baud rate")
         self.ser.setBaudrate(9600)
         self.ser.write("BAUD38400\r")
         time.sleep(3)
@@ -56,25 +56,25 @@ class commands:
         """ Send command and wait for response
         """
 
-        print cmd
+        print(cmd)
         cmd+=" RW\r"
     
         self.ser.write(cmd)
         status=self.ser.readline()
         if status == '':
-            print "Device not responding"
+            print("Device not responding")
         else:
             lstatus=status.split('\r')
             for x in lstatus:
                 if x:
-                    print "Device returns (0x%x)\n" % (int(x))
+                    print("Device returns (0x%x)\n" % (int(x)))
         return status
 
     def setup(self):
         """ Run brake setup routine
         """
 
-        print "initializing brake on %s" % (TTY)
+        print("initializing brake on " + TTY)
         self.servo_cmd("ZS")		# reset all status bits
         self.servo_cmd("UCI")        # disable right (pos, on) limit
         self.servo_cmd("UDI")        # disable left (neg, off) limit
@@ -111,7 +111,7 @@ class commands:
         """ Release brake
         """
 
-        print "disengaging brake"
+        print("disengaging brake")
         self.servo_cmd("Zr")
         self.servo_cmd("Zl")
         self.servo_cmd("MP P=0 G")
@@ -120,7 +120,7 @@ class commands:
     def full(self):
         """ Engage brake fully
         """
-        print "setting brake fully on"
+        print("setting brake fully on")
         self.servo_cmd("MT T=200")
         self.servo_cmd("Zr")
         self.servo_cmd("Zl")
@@ -132,26 +132,26 @@ class commands:
     def pos(self):
         """ Return brake position info
         """
-        print "motor position:"
+        print("motor position:")
         self.servo_cmd("RP")
-        print "potentiometer value:"
+        print("potentiometer value:")
         self.servo_cmd("c=UEA Rc")
-        print "brake pressure:"
+        print("brake pressure:")
         self.servo_cmd("c=UAA Rc")
-        print "position error limit:"
+        print("position error limit:")
         self.servo_cmd("c=E Rc")
 
 
     def st(self):
         """ Print status of motor
         """
-        print "current status"
+        print("current status")
         self.servo_cmd("")
 
 def usage(progname):
     """ print usage message
     """
-    print "\n", progname, """[-h] command [ <serial-port> ]
+    print("\n" + str(progname) + """[-h] command [ <serial-port> ]
 
  -h, --help\tprint this message
 
@@ -164,7 +164,7 @@ def usage(progname):
     \tst\tprint current status
 
  default serial-port: /dev/brake
-"""
+""")
 
 # main program
 def main(argv=None):
@@ -186,18 +186,18 @@ def main(argv=None):
         o, params = getopt.gnu_getopt(argv[1:], 'h', ('help'))
 
     except getopt.error, msg:
-        print msg
-        print "for help use --help"
+        print(msg)
+        print("for help use --help")
         return 8
 
     for k,v in o:
         opts[k] = v
-    if opts.has_key('-h') or opts.has_key('--help'):
+    if '-h' in opts or '--help' in opts:
         usage(progname)
         return 9
     if len(params) < 1:
         usage(progname)
-        print "no command provided"
+        print("no command provided")
         return 8
 
     if len(params) == 2:
@@ -221,11 +221,11 @@ def main(argv=None):
             c.st()
         else:
             usage(progname)
-            print "invalid command provided"
+            print("invalid command provided")
             return 7
 
     except serial.serialutil.SerialException, ioerror:
-        print ioerror
+        print(ioerror)
         return 1
 
 

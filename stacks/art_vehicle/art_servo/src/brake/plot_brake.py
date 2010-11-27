@@ -54,8 +54,8 @@ class brakeData:
         "Fit a polynomial function of potentiometer to pressure voltages. "
         (self.pr_poly, resid, rank, singularvalues,
          rcond) = numpy.polyfit(self.s_pot, self.s_pr, order, full=True)
-        print "polynomial coefficients: ", self.pr_poly
-        print "residual: ", resid
+        print("polynomial coefficients: " + str(self.pr_poly))
+        print("residual: " + str(resid))
 
     def plot(self, save=False):
         """ Plot some interesting data from the brake test run.
@@ -180,13 +180,13 @@ b = brakeData()
 
 def usage(progname):
     "Print usage message."
-    print "\n", progname, """[-h] [ <file.bag> ]
+    print("\n" + str(progname) + """[-h] [ <file.bag> ]
 
  -h, --help        print this message
  -i, --interactive display plots to terminal (default: save as files)
 
 Run some unit tests of the ART brake data analysis package.
- """
+ """)
 
 # main program -- for either script or interactive use
 def main(argv=None):
@@ -205,8 +205,8 @@ def main(argv=None):
         opts, files = getopt.gnu_getopt(argv[1:], 'hi',
                                         ('help', 'interactive'))
     except getopt.error, msg:
-        print msg
-        print "for help use --help"
+        print(msg)
+        print("for help use --help")
         return 9
 
     save = True

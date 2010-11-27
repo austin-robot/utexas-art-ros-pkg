@@ -72,12 +72,12 @@ class brakeTopics:
         rospy.Subscriber('brake/state', BrakeState, self.get_state)
         rospy.init_node('rosbrake')
         if verbose:
-            print 'begin acquiring brake data -- interrupt when finished'
+            print('begin acquiring brake data -- interrupt when finished')
         try:
             rospy.spin()           # invoke callbacks as data arrive
         except rospy.ROSInterruptException: pass
         if verbose:
-            print 'done acquiring brake data'
+            print('done acquiring brake data')
 
     def plot(self, save=False, plotall=False):
         """ Plot some interesting data from the brake test run.
@@ -96,7 +96,7 @@ b = brakeTopics()
 
 def usage(progname):
     "Print usage message."
-    print "\n", progname, """[-h] [ <file.bag> ]
+    print("\n" + str(progname) + """[-h] [ <file.bag> ]
 
  -a, --all         generate all available plots (default: just position)
  -h, --help        print this message
@@ -107,7 +107,7 @@ def usage(progname):
 If a bag file is specified, read brake topics from it, saving plots of
 the data.  Otherwise, read the ROS topics directly from the running
 system.
- """
+ """)
 
 # main program -- for either script or interactive use
 def main(argv=None):
@@ -127,8 +127,8 @@ def main(argv=None):
         opts, files = getopt.gnu_getopt(argv[1:], 'ahi',
                                         ('all', 'help', 'interactive'))
     except getopt.error, msg:
-        print msg
-        print "for help use --help"
+        print(msg)
+        print("for help use --help")
         return 9
 
     plotall = False
@@ -144,17 +144,17 @@ def main(argv=None):
             save = False
 
     if len(files) < 1:
-        print "no bag file, reading brake topics directly"
+        print("no bag file, reading brake topics directly")
         b.get_data()
         b.plot(save, plotall)
 
     elif len(files) == 1:
-        print "Analyzing " + files[0]
+        print("Analyzing " + files[0])
         b.get_bag(files[0])
         b.plot(save, plotall)
 
     else:
-        print "only one ROS bag file can be processed at a time"
+        print("only one ROS bag file can be processed at a time")
         usage(progname)
         return 9
 

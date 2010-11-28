@@ -118,7 +118,7 @@ protected:
   nav_msgs::Odometry *odom;
   art_msgs::Order *order;
   PolyOps *pops;
-  Config *config_;
+  const Config *config_;
 
   // reset this controller only
   virtual void reset_me(void) {};

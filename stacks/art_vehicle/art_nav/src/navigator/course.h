@@ -352,7 +352,7 @@ class Course
   art_msgs::NavigatorState *navdata;   // current navigator state data
   nav_msgs::Odometry *odom;             // current odometry position
   nav_msgs::Odometry *estimate;         // estimated control position
-  Config *config_;
+  const Config *config_;
 
   /** @brief head directly for next reachable way-point */
   Polar head_for_waypt(float target_dist);

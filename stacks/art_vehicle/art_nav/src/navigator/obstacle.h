@@ -159,7 +159,7 @@ class Obstacle
   art_msgs::NavigatorState *navdata;    // current navigator state
   nav_msgs::Odometry *odom;             // current odometry position
   nav_msgs::Odometry *estimate;         // estimated control position
-  Config *config_;                      // current configuration
+  const Config *config_;                // current configuration
 
   // returns true if obstacle is within the specified lane
   bool in_lane(MapXY location, const poly_list_t &lane, int start_index);

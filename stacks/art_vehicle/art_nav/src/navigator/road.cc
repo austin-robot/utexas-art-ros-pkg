@@ -200,40 +200,6 @@ void Road::cancel_all_timers(void)
   stop_line_timer->Cancel();
 }
 
-void Road::configure()
-{
-#if 0
-  ros::NodeHandle nh("~");
-
-  nh.param("passing_delay", passing_delay, 5.0);
-  ROS_INFO("passing delay is %.3f seconds", passing_delay);
-
-  nh.param("precedence_delay", precedence_delay, 10.0);
-  ROS_INFO("intersection precedence delay is %.3f seconds",
-	  precedence_delay);
-
-  nh.param("roadblock_delay", roadblock_delay, 5.0);
-  ROS_INFO("roadblock delay is %.3f seconds",
-	  roadblock_delay);
-
-  nh.param("stop_line_delay", stop_line_delay, 1.0);
-  ROS_INFO("stop line delay is %.3f seconds", stop_line_delay);
-#endif
-
-  passing_delay = config_->passing_delay;
-  precedence_delay = config_->precedence_delay;
-  roadblock_delay = config_->roadblock_delay;
-  stop_line_delay = config_->stop_line_delay;
-
-  //evade->configure();
-  follow_lane->configure();
-  follow_safely->configure();
-  halt->configure();
-  //passing->configure();
-  uturn->configure();
-  //zone->configure();
-}
-
 Controller::result_t Road::control(pilot_command_t &pcmd)
 {
   // get next event
@@ -456,7 +422,7 @@ Controller::result_t Road::ActionInPass(pilot_command_t &pcmd)
 	      passing_first=false;
 	      // TODO: should only reset blockage timer the first time through
 	      obstacle->blocked();
-	      roadblock_timer->Restart(roadblock_delay);
+	      roadblock_timer->Restart(config_->roadblock_delay);
 	      result = Unsafe;
 	    }
 	}
@@ -571,14 +537,14 @@ Controller::result_t Road::ActionInWaitStop(pilot_command_t &pcmd)
       prev_nobjects = obs.nobjects;
       ART_MSG(1, "Cars having precedence at this intersection: %d.",
 	      prev_nobjects);
-      precedence_timer->Start(precedence_delay);
+      precedence_timer->Start(config_->precedence_delay);
     }
 
   // catch intersection precedence violation
   if (precedence_timer->Check())
     {
       ART_MSG(1, "Intersection precedence %.1f second timeout, go ahead.",
-	      precedence_delay);
+	      config_->precedence_delay);
       stop_line_timer->Cancel();
       precedence_timer->Cancel();
       pending_event = NavRoadEvent::Merge;
@@ -749,7 +715,7 @@ Controller::result_t Road::ActionToWaitPass(pilot_command_t &pcmd)
     {
       // success: prepare to pass
       course->signal_pass();
-      passing_timer->Restart(passing_delay);
+      passing_timer->Restart(config_->passing_delay);
       return ActionInWaitPass(pcmd);
     }
   else
@@ -765,8 +731,8 @@ Controller::result_t Road::ActionToWaitStop(pilot_command_t &pcmd)
 {
   ART_MSG(1, "Waiting for intersection precedence.");
   course->signal_for_direction(course->intersection_direction());
-  stop_line_timer->Start(stop_line_delay);
-  precedence_timer->Start(precedence_delay);
+  stop_line_timer->Start(config_->stop_line_delay);
+  precedence_timer->Start(config_->precedence_delay);
   prev_nobjects = -1;
   return ActionInWaitStop(pcmd);
 }  

@@ -25,7 +25,6 @@ public:
 
   Run(Navigator *navptr, int _verbose);
   ~Run();
-  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
@@ -43,15 +42,12 @@ private:
   MapPose blockage_pose;
   float blockage_waypt_dist;
   int last_replan;
-#if 0
+#if NOT_PORTED_TO_ROS
   NavTimer *escape_timer;
 #endif
 
+#if NOT_PORTED_TO_ROS
   // .cfg variables
-  double initialize_distance;
-  double initialize_min_angle;
-  double max_speed;
-#if 0
   bool  escape;
   float escape_distance;
   double escape_timeout_secs;
@@ -61,7 +57,7 @@ private:
   // subordinate controllers
   Halt		*halt;
   Road		*road;
-#if 0
+#if NOT_PORTED_TO_ROS
   Safety	*safety;
   VoronoiZone	*unstuck;
 #endif

@@ -16,7 +16,7 @@
 
 #include "halt.h"
 #include "road.h"
-#if 0
+#if NOT_PORTED_TO_ROS
 #include "safety.h"
 #include "voronoi_zone.h"
 #endif
@@ -38,7 +38,7 @@ Run::Run(Navigator *navptr, int _verbose):
 {
   halt =	new Halt(navptr, _verbose);
   road =	new Road(navptr, _verbose);
-#if 0
+#if NOT_PORTED_TO_ROS
   safety =	new Safety(navptr, _verbose);
   unstuck =	new VoronoiZone(navptr, _verbose);
 
@@ -51,7 +51,7 @@ Run::~Run()
 {
   delete halt;
   delete road;
-#if 0
+#if NOT_PORTED_TO_ROS
   delete safety;
   delete unstuck;
 
@@ -62,62 +62,13 @@ Run::~Run()
 // go to escape state
 void Run::begin_escape(void)
 {
-#if 0
+#if NOT_PORTED_TO_ROS
   unstuck->reset();
   blockage_pose = estimate->pos;
   blockage_waypt_dist =
     Euclidean::DistanceToWaypt(estimate->pos, order->waypt[1]);
   escape_timer->Start(escape_timeout_secs);
   set_go_state(Escape);
-#endif
-}
-
-void Run::configure()
-{
-  ros::NodeHandle nh("~");
-  
-#if 0
-  // look ahead distance for initialize behavior
-  nh.param("initialize_distance", initialize_distance, 10.0);
-  ROS_INFO("initialize look ahead distance is %.3f m", initialize_distance);
-
-  // minimum angle to accept current containing poly as good
-  nh.param("initialize_min_angle", initialize_min_angle, M_PI/4);
-  ROS_INFO("initialize minimum angle is %.3f radians", initialize_min_angle);
-
-  // maximum speed we will ever request (in meters/second)
-  nh.param("maxspeed", max_speed, 15.0);
-  ROS_INFO("maximum speed is %.3f m/s", max_speed);
-#endif
-
-  initialize_distance = config_->initialize_distance;
-  initialize_min_angle = config_->initialize_min_angle;
-  max_speed = config_->maxspeed;
-
-  // configure subordinate controllers
-  halt->configure();
-  road->configure();
-
-#if 0
-  // attempt to escape if blockage detected
-  escape = cf->ReadBool(section, "escape", true);
-  ART_MSG(2, "\tescape is %s", (escape? "true": "false"));
-
-  // distance to travel while escaping a blockage
-  escape_distance = cf->ReadFloat(section, "escape_distance", 30.0);
-  ART_MSG(2, "\tescape distance is %.3f m", escape_distance);
-
-  // time limit for Escape state
-  escape_timeout_secs = cf->ReadFloat(section, "escape_timeout_secs", 60.0);
-  ART_MSG(2, "\tescape time is %.3f seconds", escape_timeout_secs);
-
-  // make extra safety check at end of cycle (should not be necessary)
-  extra_safety_check = cf->ReadBool(section, "extra_safety_check", false);
-  ART_MSG(2, "\textra safety check is %s",
-	  (extra_safety_check? "true": "false"));
-
-  safety->configure();
-  unstuck->configure();
 #endif
 }
 
@@ -150,7 +101,7 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
   
   // initialize pilot command to speed limit, straight ahead
   pcmd.yawRate = 0.0;
-  pcmd.velocity = fminf(order->max_speed, max_speed);
+  pcmd.velocity = fminf(order->max_speed, config_->max_speed);
   
   // estimate current dead reckoning position based on time of current
   // cycle and latest odometry course and speed
@@ -180,7 +131,7 @@ Controller::result_t Run::control(pilot_command_t &pcmd)
       result = NotImplemented;
     }
 
-#if 0
+#if NOT_PORTED_TO_ROS
   if (extra_safety_check)
     {
       // make safety check for obstacle in our immediate path
@@ -357,7 +308,8 @@ void Run::reset(void)
 
   halt->reset();
   road->reset();
-#if 0
+
+#if NOT_PORTED_TO_ROS
   safety->reset();
 #endif
 }
@@ -383,7 +335,7 @@ ElementID Run::starting_waypt(void)
 {
   ElementID waypt;
 
-#if 0
+#if NOT_PORTED_TO_ROS
   // first look for a containing zone
   segment_id_t starting_zone =
     ZoneOps::containing_zone(course->zones, MapXY(estimate->pos));
@@ -408,8 +360,8 @@ ElementID Run::starting_waypt(void)
   // not in a zone -- find an appropriate lane polygon
   int index = pops->getStartingPoly(MapPose(estimate->pose.pose),
 				    course->polygons,
-				    initialize_distance,
-				    initialize_min_angle);
+				    config_->initialize_distance,
+				    config_->initialize_min_angle);
 
   if (index < 0)
     {

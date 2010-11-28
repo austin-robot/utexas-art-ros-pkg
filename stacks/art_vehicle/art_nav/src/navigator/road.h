@@ -29,7 +29,6 @@ public:
 
   Road(Navigator *navptr, int _verbose);
   ~Road();
-  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
@@ -77,12 +76,6 @@ private:
   NavTimer		*precedence_timer;
   NavTimer		*roadblock_timer;
   NavTimer		*stop_line_timer;
-
-  // .cfg variables
-  double passing_delay;
-  double precedence_delay;
-  double roadblock_delay;
-  double stop_line_delay;
 
   // add a transition to the table
   void Add(NavRoadEvent::event_t event, action_t action,

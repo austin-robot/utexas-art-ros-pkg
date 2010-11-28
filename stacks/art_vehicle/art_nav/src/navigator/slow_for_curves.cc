@@ -18,45 +18,12 @@
 #include "course.h"
 #include "slow_for_curves.h"
 
-void SlowForCurves::configure()
-{
-  lookahead_distance = config_->lookahead_distance;
-  max_deceleration = config_->max_deceleration;
-  min_speed_when_slowing_for_curves =
-    config_->min_speed_when_slowing_for_curves;
-  max_yaw_rate = config_->max_yaw_rate;
-  min_curve_length = config_->min_curve_length;
-
-#if 0
-  ros::NodeHandle nh("~");
-  using art_msgs::ArtVehicle;
-
-  // TODO: lookahead_distance should probably be time in seconds.
-  nh.param("lookahead_distance", lookahead_distance, 100.0);
-  nh.param("max_deceleration", max_deceleration, 0.4);
-  nh.param("min_speed_when_slowing_for_curves", 
-           min_speed_when_slowing_for_curves, 3.0);
-  nh.param("max_yaw_rate", max_yaw_rate, 
-           Steering::angle_to_yaw(min_speed_when_slowing_for_curves,
-                                  ArtVehicle::max_steer_degrees)); 
-  nh.param("min_curve_length", min_curve_length, 1.5);
-
-  ROS_INFO("turn lookahead distance is %.3f meters", lookahead_distance);
-  ROS_INFO("turn max yaw rate is %.3f radians/second", max_yaw_rate);
-  ROS_INFO("turn max deceleration is %.3f meters/second^2", max_deceleration);
-  ROS_INFO("turn min speed when slowing for curves is %.3f meters/second",
-           min_speed_when_slowing_for_curves);
-  ROS_INFO("turn min curve length is %.3f meters", min_curve_length);
-#endif
-}
-
 Controller::result_t SlowForCurves::control(pilot_command_t &pcmd)
 {
   
-  if (pcmd.velocity < min_speed_when_slowing_for_curves)
+  if (pcmd.velocity < config_->min_speed_for_curves)
     {
-      if (verbose>=3)
-	ART_MSG(3,"Already going slow: %.3f",pcmd.velocity);
+      ROS_DEBUG("Already going slow: %.3f", pcmd.velocity);
       return OK;
     }
   
@@ -65,9 +32,10 @@ Controller::result_t SlowForCurves::control(pilot_command_t &pcmd)
   int start_index = pops->getClosestPoly(course->plan,
                                          MapPose(estimate->pose.pose));
 
+  // TODO: lookahead_distance should probably be time in seconds.
   int stop_index = pops->index_of_downstream_poly(course->plan,
 						  start_index,
-						  lookahead_distance);
+						  config_->lookahead_distance);
 	
   float max_speed = max_safe_speed(course->plan,
 				   start_index,
@@ -76,7 +44,7 @@ Controller::result_t SlowForCurves::control(pilot_command_t &pcmd)
 
   // Never slow down below min_speed... if the commanded velocity is larger.
   // This prevents a bogusly sharp turn bring the car to a complete stop.
-  max_speed = fmaxf(min_speed_when_slowing_for_curves, max_speed);
+  max_speed = fmaxf(config_->min_speed_for_curves, max_speed);
 	
   // XXX: Scale the yawRate. Is this the right thing to do? Test.
   // PFB: Not needed because heading slowdown will be taken care of
@@ -96,11 +64,14 @@ float SlowForCurves::max_safe_speed(const std::vector<poly>& polygons,
 				    const int& stop_index,
 				    const float& max) {
   //Check for bogus input
-  if(start_index < 0 || start_index >= (int)polygons.size() ||
-     stop_index < 0 || stop_index >= (int)polygons.size() ||
-     start_index >= stop_index)
+  if (start_index < 0
+      || start_index >= (int)polygons.size()
+      || stop_index < 0
+      || stop_index >= (int)polygons.size()
+      || start_index >= stop_index)
     {
-      ART_MSG(3,"bogus input: start_index %d and stop_index %d",start_index, stop_index);
+      ROS_INFO("bogus input: start_index %d and stop_index %d",
+               start_index, stop_index);
       return -1;
     }
 
@@ -134,7 +105,7 @@ float SlowForCurves::max_safe_speed(const std::vector<poly>& polygons,
 
     float length = 0;
     int end = begin;
-    while(end < stop_index && length < min_curve_length) {
+    while(end < stop_index && length < config_->min_curve_length) {
       length += (polygons.at(end).length +
 		 polygons.at(end+1).length)/2.0;
       end++;
@@ -144,13 +115,13 @@ float SlowForCurves::max_safe_speed(const std::vector<poly>& polygons,
       Coordinates::normalize(polygons[end].heading - polygons[begin].heading);
 		
     float max_then =
-      fmaxf(min_speed_when_slowing_for_curves,
+      fmaxf(config_->min_speed_for_curves,
 	    course->max_speed_for_change_in_heading(dheading, length, 
-						    max_speed, max_yaw_rate));
+						    max_speed, config_->max_yaw_rate));
 		
     float max_now =
       course->max_speed_for_slow_down(max_then, distance, 
-				      max_speed, max_deceleration);
+				      max_speed, config_->max_deceleration);
  
     if (max_now < max_speed) {
       limiting_id = polygons.at(begin).poly_id;

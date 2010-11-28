@@ -47,46 +47,6 @@ StopLine::StopLine(Navigator *navptr, int _verbose):
 
 StopLine::~StopLine() {};
 
-// configuration method
-void StopLine::configure()
-{
-  min_stop_distance = config_->min_stop_distance;
-  stop_creep_speed = config_->stop_creep_speed;
-  max_creep_distance = config_->max_creep_distance;
-  stop_deceleration = config_->stop_deceleration;
-  stop_distance = config_->stop_distance;
-  stop_latency = config_->stop_latency;
-
-#if 0
-  ros::NodeHandle nh("~");
-
-  nh.param("min_stop_distance", min_stop_distance, 5.0);
-  ROS_INFO("minimum distance to begin stopping is %.3f m", min_stop_distance);
-
-  nh.param("stop_creep_speed", stop_creep_speed, 1.0);
-  ROS_INFO("speed while creeping forward is %.3f m/s", stop_creep_speed);
-
-  nh.param("max_creep_distance", max_creep_distance,
-           (double) ArtVehicle::length);
-  ROS_INFO("distance in which creep applies is %.3f m", max_creep_distance);
-
-  nh.param("stop_deceleration", stop_deceleration, 0.2);
-  ROS_INFO("desired stopping deceleration is %.3f m/s/s", stop_deceleration);
-
-  // Distance from front bumper to stop.  Give it a small overshoot to
-  // aim for point just beyond the actual stop line.  When the stop
-  // polygon is reached, the controller will request full brake, while
-  // the car is going slowly.
-  nh.param("stop_distance", stop_distance,
-           DARPA_rules::stop_line_to_bumper+1.0);
-  ROS_INFO("desired stopping distance is %.3f m", stop_distance);
-
-  // stop_latency compensates for latency in the braking system
-  nh.param("stop_latency", stop_latency, 1.5);
-  ROS_INFO("stopping latency is %.3f sec", stop_latency);
-#endif
-};
-
 /** Set speed for steady deceleration to stop way-point
  *
  * @pre
@@ -109,10 +69,10 @@ Controller::result_t StopLine::control(pilot_command_t &pcmd,
   float wayptdist =
     (Euclidean::DistanceToWaypt(MapPose(estimate->pose.pose),
                                 course->stop_waypt)
-     - ArtVehicle::front_bumper_px + stop_distance);
+     - ArtVehicle::front_bumper_px + config_->stop_distance);
   // stop_latency compensates for latency in the braking system.
   float abs_speed = fabsf(estimate->twist.twist.linear.x);
-  float latencydist = abs_speed * stop_latency;
+  float latencydist = abs_speed * config_->stop_latency;
   float D = wayptdist - latencydist;
 
   // According to the model, deceleration should be constant, but in
@@ -126,7 +86,7 @@ Controller::result_t StopLine::control(pilot_command_t &pcmd,
   ElementID stop_id = course->stop_waypt.id;
   
   // see if it is time to begin stopping
-  if ((D <= min_stop_distance || A >= stop_deceleration)
+  if ((D <= config_->min_stop_distance || A >= config_->stop_deceleration)
       && !stopping)
     {
       stopping = true;
@@ -143,7 +103,7 @@ Controller::result_t StopLine::control(pilot_command_t &pcmd,
       // check whether front bumper is within stop way-point polygon
       Polar front_bumper(0.0, ArtVehicle::front_bumper_px);
 
-      if (D <= stop_distance ||
+      if (D <= config_->stop_distance ||
 	  pops->pointInPoly(front_bumper, MapPose(estimate->pose.pose),
                             course->stop_poly))
 	{
@@ -168,18 +128,18 @@ Controller::result_t StopLine::control(pilot_command_t &pcmd,
 	  if (pcmd.velocity < 0.0)
 	    pcmd.velocity = 0.0;	// do not change direction
 	}
-      else if (D <= max_creep_distance)
+      else if (D <= config_->max_creep_distance)
 	{
 	  creeping=true;
 	  // stopped too soon, keep creeping forward
-	  pcmd.velocity = fminf(pcmd.velocity, stop_creep_speed);
+	  pcmd.velocity = fminf(pcmd.velocity, config_->stop_creep_speed);
 	}
 
       if (verbose >= 2)
 	{
 	  ART_MSG(8, "stop %.3f m away for waypoint %s (%.3f,%.3f),"
 		  " %.3f m latency",
-		  wayptdist-stop_distance, stop_id.name().str,
+		  wayptdist - config_->stop_distance, stop_id.name().str,
 		  course->stop_waypt.map.x, course->stop_waypt.map.y,
 		  latencydist);
 	  ART_MSG(8, "current, desired speed %.3f m/s, %.3f m/s,"

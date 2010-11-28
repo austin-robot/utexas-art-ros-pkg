@@ -23,7 +23,6 @@ public:
 
   FollowLane(Navigator *navptr, int _verbose);
   ~FollowLane();
-  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
@@ -40,9 +39,6 @@ private:
       Zone,
       ZoneExit,
     } way_type_t;
-
-  // .cfg variables
-  double lost_speed;
 
   //Avoid       *avoid;
   FollowSafely	*follow_safely;

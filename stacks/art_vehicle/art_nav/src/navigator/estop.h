@@ -27,7 +27,6 @@ public:
 
   Estop(Navigator *navptr, int _verbose);
   ~Estop();
-  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 

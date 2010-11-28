@@ -56,7 +56,7 @@ Obstacle::Obstacle(Navigator *_nav, int _verbose)
 //
 bool Obstacle::car_approaching()
 {
-  if (offensive_driving)
+  if (config_->offensive_driving)
     return false;
 
   Observation::_oid_type oid = Observers::Nearest_forward;
@@ -76,7 +76,7 @@ bool Obstacle::car_approaching()
     ART_MSG(6, "obstacle observed closing at %.3fm/s, absolute speed %.3f",
 	    rel_speed, abs_speed);
 
-  return (abs_speed > min_approach_speed);
+  return (abs_speed > config_->min_approach_speed);
 }
 
 // Return distance to closest obstacle ahead in course plan.
@@ -179,48 +179,6 @@ void Obstacle::closest_in_lane(const poly_list_t &lane,
 	    ahead, behind);
 }
 
-void Obstacle::configure()
-{
-  blockage_timeout_secs = config_->blockage_timeout_secs;
-  lane_width_ratio = config_->lane_width_ratio;
-  lane_scan_angle = config_->lane_scan_angle;
-  max_obstacle_dist = config_->max_obstacle_dist;
-  min_approach_speed = config_->min_approach_speed;
-  offensive_driving = config_->offensive_driving;
-
-#if 0
-  ros::NodeHandle nh("~");
-
-  nh.param( "blockage_timeout_secs", blockage_timeout_secs, 9.0);
-  ROS_INFO("\tblockage timeout is %.1f", blockage_timeout_secs);
-
-  // lane width ratio (in range of 0.01 to 1.0)
-  nh.param( "lane_width_ratio", lane_width_ratio, 0.3);
-  lane_width_ratio = fmaxf(lane_width_ratio, 0.01f);
-  lane_width_ratio = fminf(lane_width_ratio, 1.0f);
-  ROS_INFO("\tlane width ratio is %.3f", lane_width_ratio);
-
-  // lane scan angle (in range of 0 to pi)
-  nh.param("lane_scan_angle", lane_scan_angle, M_PI/3.0);
-  lane_scan_angle = fmaxf(lane_scan_angle, 0.0f);
-  lane_scan_angle = fminf(lane_scan_angle, (float) M_PI);
-  ROS_INFO("\tlane scan angle is %.3f radians", lane_scan_angle);
-
-  // distance at which we start paying attention to an obstacle
-  nh.param("max_obstacle_dist", max_obstacle_dist, 100.0);
-  ROS_INFO("\tmaximum obstacle distance considered is %.3f meters",
-	  max_obstacle_dist);
-
-  // minimum approach speed considered dangerous
-  nh.param("min_approach_speed", min_approach_speed, 2.0);
-  ROS_INFO("\tminimum approach speed is %.3f m/s", min_approach_speed);
-
-  nh.param("offensive_driving", offensive_driving, false); 
-  ROS_INFO("\tuse %s driving style",
-	  (offensive_driving? "offensive": "defensive"));
-#endif
-}
-
 // returns true if obstacle is within the specified lane
 bool Obstacle::in_lane(MapXY location, const poly_list_t &lane,
 		       int start_index)
@@ -234,7 +192,7 @@ bool Obstacle::in_lane(MapXY location, const poly_list_t &lane,
   for (unsigned j = start_index; j < lane.size(); j++)
     {
       poly curPoly = lane[j];
-      if (pops->pointInPoly_ratio(location, curPoly, lane_width_ratio))
+      if (pops->pointInPoly_ratio(location, curPoly, config_->lane_width_ratio))
 	{
 	  // this obstacle is within that lane
 	  if (verbose >= 5)

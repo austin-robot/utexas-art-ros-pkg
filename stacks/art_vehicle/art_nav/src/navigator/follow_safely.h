@@ -18,15 +18,9 @@ public:
 
   FollowSafely(Navigator *navptr, int _verbose);
   ~FollowSafely();
-  void configure();
   result_t control(pilot_command_t &pcmd);
 
 private:
-  // .cfg variables
-  double close_stopping_distance;
-  double desired_following_time;
-  double max_following_time;
-  double min_following_time;
 
   // adjust speed to maintain a safe following time
   void adjust_speed(pilot_command_t &pcmd, float obs_dist);

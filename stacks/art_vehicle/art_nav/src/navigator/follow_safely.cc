@@ -19,37 +19,6 @@ FollowSafely::FollowSafely(Navigator *navptr, int _verbose):
 
 FollowSafely::~FollowSafely() {};
 
-void FollowSafely::configure()
-{
-  close_stopping_distance = config_->close_stopping_distance;
-  max_following_time = config_->max_following_time;
-  min_following_time = config_->min_following_time;
-  desired_following_time = config_->desired_following_time;
-
-#if 0
-  ros::NodeHandle nh("~");
-  using art_msgs::ArtVehicle;
-
-  // How close is close enough for stopping before an obstacle?
-  // Should at least include front bumper offset and minimum separation.
-  nh.param("close_stopping_distance", close_stopping_distance,
-           (DARPA_rules::min_forw_sep_travel
-            + ArtVehicle::front_bumper_px
-            + 7.0));
-  ROS_INFO("close stopping distance is %.3f meters",
-           close_stopping_distance);
-
-  // maximum, minimum and desired following times (in seconds)
-  nh.param("max_following_time", max_following_time, 7.0);
-  nh.param("min_following_time", min_following_time, 3.0);
-  nh.param("desired_following_time", desired_following_time,
-           (max_following_time + min_following_time)/2.0f);
-  ROS_INFO("minimum, desired and maximum following times: "
-	  "%.1f, %.1f, %.1f secs",
-	  min_following_time, desired_following_time, max_following_time);
-#endif
-}
-
 // Set desired speed for avoiding obstacles within a lane.
 //
 //  returns:
@@ -92,8 +61,8 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
   // A 2 sec minimum following time at 10mph will cause us to brake
   // hard when still about two car lengths away (~9m).  One length is
   // the minimum distance allowed by the DARPA rules.
-  if ((following_time <= min_following_time)
-      || (location <= close_stopping_distance))
+  if ((following_time <= config_->min_following_time)
+      || (location <= config_->close_stopping_distance))
     {
       // be safe, request immediate stop
       pcmd.velocity = 0.0;
@@ -114,12 +83,12 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
 	  result = Blocked;
 	}
     }
-  else if (following_time < desired_following_time)
+  else if (following_time < config_->desired_following_time)
     {
       adjust_speed(pcmd, location); // speed up a bit
     }
   else if (nav->navdata.stopped
-	   || (following_time > desired_following_time))
+	   || (following_time > config_->desired_following_time))
     {
       adjust_speed(pcmd, location); // slow down a bit
     }
@@ -146,7 +115,7 @@ void FollowSafely::adjust_speed(pilot_command_t &pcmd, float obs_dist)
 {
   // try to adjust speed to achieve desired following time, obeying
   // the speed limit (ignore order->min_speed when following)
-  float adjusted_speed = fminf(obs_dist / desired_following_time,
+  float adjusted_speed = fminf(obs_dist / config_->desired_following_time,
 			       order->max_speed);
 
   // at any rate, do not go faster than the desired speed already set

@@ -74,9 +74,6 @@ public:
 
   virtual ~Controller() {};
 
-  // null configuration method
-  virtual void configure() {};
-
   // generic controller method
   virtual result_t control(pilot_command_t &pcmd)
   {

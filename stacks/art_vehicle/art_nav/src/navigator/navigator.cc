@@ -93,9 +93,6 @@ pilot_command_t Navigator::navigate(void)
 /** Configure parameters */
 void Navigator::configure()
 {
-  // configure controller methods
-  estop->configure();
   course->configure();
-  obstacle->configure();
 }
 

@@ -260,36 +260,6 @@ bool Uturn::circle_and_line_intersect(MapXY c, float r,
   return intersects;
 }
 
-void Uturn::configure()
-{
-#if 0
-  ros::NodeHandle nh("~");
-
-  nh.param("uturn_speed", uturn_speed, 2.0);
-  ROS_INFO("U-turn speed is %.1f m/s", uturn_speed);
-
-  nh.param("uturn_threshold", uturn_threshold, 1.0);
-  ROS_INFO("U-turn threshold is %.3f m", uturn_threshold);
-
-  // enough to always generate a full-lock turn at any speed
-  nh.param("uturn_yaw_rate", uturn_yaw_rate, 1.5);
-  ROS_INFO("U-turn yaw rate is %.3f radians/s", uturn_yaw_rate);
-
-  nh.param("uturn_stop_heading", uturn_stop_heading,
-           angles::from_degrees(45));
-  ROS_INFO("U-turn stop heading is %.3f radians (%.3f degrees)",
-           uturn_stop_heading, angles::to_degrees(uturn_stop_heading));
-#endif
-
-  uturn_speed = config_->uturn_speed;
-  uturn_threshold = config_->uturn_threshold;
-  uturn_yaw_rate = config_->uturn_yaw_rate;
-  uturn_stop_heading = config_->uturn_stop_heading;
-
-  //safety->configure();
-  stop->configure();
-}
-
 // perform U-turn
 //
 // All these calculations are done using the absolute value of the
@@ -330,8 +300,8 @@ Controller::result_t Uturn::control(pilot_command_t &pcmd)
     }
 
   // set Pilot command for slow speed, hard left turn
-  pcmd.velocity = fminf(pcmd.velocity, uturn_speed);
-  pcmd.yawRate = uturn_yaw_rate;
+  pcmd.velocity = fminf(pcmd.velocity, config_->uturn_speed);
+  pcmd.yawRate = config_->uturn_yaw_rate;
 
   // The car's heading monotonically approaches that of the goal
   // way-point from right to left.  Due to lane heading differences,
@@ -385,11 +355,11 @@ Controller::result_t Uturn::control(pilot_command_t &pcmd)
 	
 	float arc_length = estimate_uturn_distance(true, desired_arc_length);
 #if 0
- 	if (remaining_angle <= uturn_stop_heading
+ 	if (remaining_angle <= config_->uturn_stop_heading
 	    || arc_length > desired_arc_length)
 #else   // Pat's way (Pat want to make sure we are catching this on
 	// both sides, so normalize the heading):
-	if (fabs(Coordinates::normalize(remaining_angle)) <= uturn_stop_heading)
+	if (fabs(Coordinates::normalize(remaining_angle)) <= config_->uturn_stop_heading)
 #endif
 	  {
 	    // The car has a clear path to the goal heading or the
@@ -401,7 +371,7 @@ Controller::result_t Uturn::control(pilot_command_t &pcmd)
 	  }
 
 	if (stop->control(pcmd, arc_length,
-			  uturn_threshold, uturn_speed) == Finished)
+			  config_->uturn_threshold, config_->uturn_speed) == Finished)
 	  {
 	    set_state(Backward);
 	    navdata->reverse = true;
@@ -432,7 +402,7 @@ Controller::result_t Uturn::control(pilot_command_t &pcmd)
 						     desired_arc_length);
 
 	  // continue backing
-	  if (stop->control(pcmd, arc_length, uturn_threshold) == Finished)
+	  if (stop->control(pcmd, arc_length, config_->uturn_threshold) == Finished)
 	    {
 	      // this is far enough
 	      set_state(Forward);

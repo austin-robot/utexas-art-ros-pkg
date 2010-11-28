@@ -18,19 +18,11 @@ public:
   SlowForCurves(Navigator *navptr, int _verbose):
     Controller(navptr, _verbose), current_limiting_id(0) {}
   ~SlowForCurves() {}
-  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
 
 private:
-  
-  // .cfg variables
-  double lookahead_distance;
-  double max_yaw_rate;
-  double max_deceleration;
-  double min_speed_when_slowing_for_curves;
-  double min_curve_length;
   
   // state
   int current_limiting_id;

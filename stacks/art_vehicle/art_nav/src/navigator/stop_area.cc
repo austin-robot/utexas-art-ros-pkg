@@ -23,19 +23,6 @@ StopArea::StopArea(Navigator *navptr, int _verbose):
 
 StopArea::~StopArea() {};
 
-// configuration method
-void StopArea::configure()
-{
-  stop_approach_speed = config_->stop_approach_speed;
-
-#if 0
-  ros::NodeHandle nh("~");
-
-  nh.param("stop_approach_speed", stop_approach_speed, 3.0);
-  ROS_INFO("stop line approach speed is %.3f m/s", stop_approach_speed);
-#endif
-};
-
 // Slow down if stop line safety area reached.
 //
 // exit:
@@ -54,7 +41,7 @@ Controller::result_t StopArea::control(pilot_command_t &pcmd)
     return NotApplicable;
 
   // reduce speed within stop line safety area
-  nav->reduce_speed_with_min(pcmd, stop_approach_speed);
+  nav->reduce_speed_with_min(pcmd, config_->stop_approach_speed);
 
   if (!in_safety_area)
     {

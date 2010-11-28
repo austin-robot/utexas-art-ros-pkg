@@ -53,14 +53,11 @@ class Obstacle
   {
     if (verbose >= 5)
       ART_MSG(3, "Starting blockage timer");
-    blockage_timer->Start(blockage_timeout_secs);
+    blockage_timer->Start(config_->blockage_timeout_secs);
   }
 
   /** @brief is there a car approaching from ahead in our lane? */
   bool car_approaching();
-
-  /** @brief set configuration variables. */
-  void configure();
 
   /** @brief return distance to closest obstacle ahead in course plan */
   float closest_ahead_in_plan(void);
@@ -150,14 +147,6 @@ class Obstacle
   // blockage timer
   NavTimer *blockage_timer;
   bool was_stopped;			// previous cycle's stop state
-
-  // .cfg variables
-  double blockage_timeout_secs;
-  double lane_width_ratio;
-  double lane_scan_angle;
-  double max_obstacle_dist;
-  double min_approach_speed;
-  bool   offensive_driving;
 
   // constructor parameters
   int verbose;				// message verbosity level

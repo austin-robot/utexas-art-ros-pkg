@@ -120,20 +120,20 @@ void Course::configure()
 {
   // dynamic reconfigure parameters
   lane_change_secs = config_->lane_change_secs;
-  lane_steer_time = config_->lane_steer_time;
+  //lane_steer_time = config_->lane_steer_time;
   heading_change_ratio = config_->heading_change_ratio;
   turning_latency = config_->turning_latency;
   k_error = config_->turning_offset_tune;
   k_theta = config_->turning_heading_tune;
-  yaw_ratio = config_->yaw_ratio;
+  //yaw_ratio = config_->yaw_ratio;
   k_int = config_->turning_int_tune;
-  min_lane_change_dist = config_->min_lane_change_dist;
+  //min_lane_change_dist = config_->min_lane_change_dist;
   min_lane_steer_dist = config_->min_lane_steer_dist;
   max_speed_for_sharp = config_->max_speed_for_sharp;
   spring_lookahead = config_->spring_lookahead;
   max_yaw_rate = config_->real_max_yaw_rate;
   zone_waypoint_radius = config_->zone_waypoint_radius;
-  zone_perimeter_radius = config_->zone_perimeter_radius;
+  //zone_perimeter_radius = config_->zone_perimeter_radius;
   spot_waypoint_radius = config_->spot_waypoint_radius;
 
 #if 0

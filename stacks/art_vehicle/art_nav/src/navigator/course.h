@@ -329,17 +329,17 @@ class Course
   double k_int;
   double k_theta;
   double lane_change_secs;
-  double lane_steer_time;
+  //double lane_steer_time;
   double last_error;
   double max_speed_for_sharp;
   double max_yaw_rate;
-  double min_lane_change_dist;
+  //double min_lane_change_dist;
   double min_lane_steer_dist;
   double spot_waypoint_radius;
   double spring_lookahead;
   double turning_latency;
-  double yaw_ratio;
-  double zone_perimeter_radius;
+  //double yaw_ratio;
+  //double zone_perimeter_radius;
   double zone_waypoint_radius;
 
   // constructor parameters

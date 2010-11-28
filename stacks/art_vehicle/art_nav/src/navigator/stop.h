@@ -17,7 +17,6 @@ public:
 
   Stop(Navigator *navptr, int _verbose);
   ~Stop();
-  void configure();
 
   // regular control method -- not supported
   result_t control(pilot_command_t &pcmd);
@@ -28,17 +27,11 @@ public:
   void reset(void);
 
 private:
-  // .cfg variables
-  double min_stop_distance;             // minimum distance to begin stopping
-  double stop_creep_speed;              // speed while creeping forward
-  double stop_deceleration;             // desired deceleration
-  double stop_latency;                  // stop control latency in seconds
 
   // controller state
   bool stopping;                        // stopping initiated
   bool creeping;                        // creeping up to line
   double initial_speed;                 // initial speed while stopping
-  double max_creep_distance;            // applicable distance for creep
 };
 
 #endif // __STOP_H__

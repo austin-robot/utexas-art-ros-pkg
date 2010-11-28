@@ -41,13 +41,6 @@ private:
   //Safety *safety;
   Stop	*stop;
 
-  // .cfg variables
-  double uturn_near;
-  double uturn_speed;
-  double uturn_threshold;
-  double uturn_yaw_rate;
-  double uturn_stop_heading;
-
   // private data
   float goal_heading;			// heading of goal way-point
   poly uturn_exit;		        // current U-turn exit poly

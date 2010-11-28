@@ -48,38 +48,6 @@ Stop::Stop(Navigator *navptr, int _verbose):
 
 Stop::~Stop() {};
 
-// configuration method
-void Stop::configure()
-{
-  min_stop_distance = config_->min_stop_distance;
-  stop_creep_speed = config_->stop_creep_speed;
-  max_creep_distance = config_->max_creep_distance;
-  stop_deceleration = config_->stop_deceleration;
-  stop_latency = config_->stop_latency;
-
-#if 0
-  ros::NodeHandle nh("~");
-
-  nh.param("min_stop_distance", min_stop_distance, 5.0);
-  ROS_INFO("minimum distance to begin stopping is %.3f m", min_stop_distance);
-
-  nh.param("stop_creep_speed", stop_creep_speed, 1.0);
-  ROS_INFO("speed while creeping forward is %.3f m/s", stop_creep_speed);
-
-  nh.param("max_creep_distance", max_creep_distance,
-           (double) ArtVehicle::length);
-  ROS_INFO("distance in which creep applies is %.3f m/s", max_creep_distance);
-
-  nh.param("stop_deceleration", stop_deceleration, 0.2);
-  ROS_INFO("desired stopping deceleration is %.3f m/s/s", stop_deceleration);
-
-  // stop_latency compensates for latency in the braking system
-  //nh.param("stop_latency", stop_latency, 1.5);
-  nh.param("stop_latency", stop_latency, 0.0);
-  ROS_INFO("stopping latency is %.3f sec", stop_latency);
-#endif
-};
-
 Controller::result_t Stop::control(pilot_command_t &pcmd)
 {
   ART_ERROR("Stop::control() requires a float distance parameter,");
@@ -107,7 +75,7 @@ Controller::result_t Stop::control(pilot_command_t &pcmd,
 
   // stop_latency compensates for latency in the braking system.
   float abs_speed = fabsf(estimate->twist.twist.linear.x);
-  float latencydist = abs_speed * stop_latency;
+  float latencydist = abs_speed * config_->stop_latency;
   float D = distance - latencydist;
 
   // According to the model, deceleration should be constant, but in
@@ -120,7 +88,7 @@ Controller::result_t Stop::control(pilot_command_t &pcmd,
   float A = V*V/(2.0*D);
 
   // see if it is time to begin stopping
-  if ((D <= min_stop_distance || A >= stop_deceleration)
+  if ((D <= config_->min_stop_distance || A >= config_->stop_deceleration)
       && !stopping)
     {
       stopping = true;
@@ -152,13 +120,13 @@ Controller::result_t Stop::control(pilot_command_t &pcmd,
 	  if (pcmd.velocity < 0.0)
 	    pcmd.velocity = 0.0;	// do not change direction
 	}
-      else if (D <= max_creep_distance)
+      else if (D <= config_->max_creep_distance)
 	{
 	  if (!creeping && verbose)
 	    ART_MSG(2, "begin creeping while %.3fm distant", distance);
 	  creeping = true;
 	  // stopped too soon, keep creeping forward
-	  pcmd.velocity = fminf(pcmd.velocity, stop_creep_speed);
+	  pcmd.velocity = fminf(pcmd.velocity, config_->stop_creep_speed);
 	}
 
       if (verbose >= 2)

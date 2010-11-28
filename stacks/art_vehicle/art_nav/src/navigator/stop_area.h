@@ -18,13 +18,10 @@ public:
 
   StopArea(Navigator *navptr, int _verbose);
   ~StopArea();
-  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
 private:
-  // .cfg variables
-  double stop_approach_speed;          // speed while approaching stop
 
   // controller state
   bool in_safety_area;

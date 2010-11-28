@@ -130,25 +130,6 @@ FollowLane::~FollowLane()
   delete stop_line;
 };
 
-void FollowLane::configure()
-{
-#if 0
-  ros::NodeHandle nh("~");
-
-  // Speed to use when there is no plan available.
-  nh.param("lost_speed", lost_speed, 2.0);
-  ROS_INFO("speed when lost is %.3f m/s", lost_speed);
-#endif
-
-  lost_speed = config_->lost_speed;
-
-  //avoid->configure();
-  follow_safely->configure();
-  slow_for_curves->configure();
-  stop_area->configure();
-  stop_line->configure();
-}
-
 // follow lane in the normal direction
 //
 // result:
@@ -211,7 +192,7 @@ Controller::result_t FollowLane::control(pilot_command_t &pcmd)
 
   // slow down if no plan
   if (course->plan.empty())
-    nav->reduce_speed_with_min(pcmd, lost_speed);
+    nav->reduce_speed_with_min(pcmd, config_->lost_speed);
 
   bool in_safety_area = (in_intersection
 			 || stop_area->control(pcmd) == OK);

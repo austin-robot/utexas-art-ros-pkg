@@ -77,12 +77,6 @@ void Estop::Add(NavEstopEvent::event_t event, action_t action,
   xp->next = to_state;
 }
 
-void Estop::configure()
-{
-  halt->configure();
-  run->configure();
-}
-
 Controller::result_t Estop::control(pilot_command_t &pcmd)
 {
   event = current_event();

@@ -431,8 +431,9 @@ int devsteer::send_cmd(const char *string)
 	      ROS_ERROR("error: %s", strerror(rc));
 	      break;			// retry servo command
 	    }
-          ROS_DEBUG(DEVICE " read() returns %d %c(0x%02X)",
-		    bytes, buffer[linelen], buffer[linelen]);
+          ROS_DEBUG_NAMED("details",
+                          DEVICE " read() returns %d %c(0x%02X)",
+                          bytes, buffer[linelen], buffer[linelen]);
 	  if (bytes==0)
 	    continue;
 	  else if (buffer[linelen] != '\r') // not end of line?

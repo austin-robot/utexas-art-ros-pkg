@@ -18,6 +18,7 @@
   <depend package="art_servo"/>
   <depend package="camera1394"/>
   <depend package="joy" />
+  <depend package="nodelet" />
   <depend package="rosbag" />
   <depend package="sicktoolbox_wrapper"/>
   <depend package="simulator_art"/>

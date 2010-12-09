@@ -8,15 +8,16 @@
   <license>BSD,GPL</license>  
   <review status="experimental" notes=""/>
   <url>http://ros.org/wiki/art_vehicle</url>
-
   <depend stack="camera_drivers" /> <!-- camera1394 -->
-  <depend stack="common_msgs" /> <!-- nav_msgs, sensor_msgs, geometry_msgs -->
+  <depend stack="common" /> <!-- nodelet -->
+  <depend stack="common_msgs" /> <!-- nav_msgs, geometry_msgs, sensor_msgs -->
   <depend stack="driver_common" /> <!-- dynamic_reconfigure, driver_base -->
   <depend stack="geometry" /> <!-- tf, angles -->
   <depend stack="image_common" /> <!-- image_transport -->
   <depend stack="image_pipeline" /> <!-- image_view -->
   <depend stack="image_transport_plugins" /> <!-- compressed_image_transport, theora_image_transport -->
   <depend stack="joystick_drivers" /> <!-- joy -->
+  <depend stack="laser_drivers" /> <!-- sicktoolbox_wrapper -->
   <depend stack="ros" /> <!-- roscpp, roslib, std_msgs, rospy, rosbagmigration, rosbag -->
   <depend stack="simulator_stage" /> <!-- stage -->
   <depend stack="velodyne" /> <!-- velodyne_common -->

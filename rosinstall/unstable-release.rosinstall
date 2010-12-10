@@ -1,0 +1,14 @@
+- other:
+    local-name: /opt/ros/unstable/ros
+- other:
+    local-name: /opt/ros/unstable/stacks
+- svn:
+    uri: http://utexas-art-ros-pkg.googlecode.com/svn/trunk
+    local-name: utexas-art
+- svn:
+    uri: https://code.ros.org/svn/ros/stacks/ros_release/trunk 
+    local-name: ros_release
+- svn:
+    uri: https://code.ros.org/svn/ros/stacks/release/trunk 
+    local-name: release
+

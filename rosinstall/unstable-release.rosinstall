@@ -9,6 +9,6 @@
     uri: https://code.ros.org/svn/ros/stacks/ros_release/trunk 
     local-name: ros_release
 - svn:
-    uri: https://code.ros.org/svn/ros/stacks/release/trunk 
+    uri: https://code.ros.org/svn/release/trunk 
     local-name: release
 

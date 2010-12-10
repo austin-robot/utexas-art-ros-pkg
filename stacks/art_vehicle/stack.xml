@@ -19,6 +19,7 @@
   <depend stack="joystick_drivers" /> <!-- joy -->
   <depend stack="laser_drivers" /> <!-- sicktoolbox_wrapper -->
   <depend stack="ros" /> <!-- roscpp, roslib, std_msgs, rospy, rosbagmigration, rosbag -->
+  <depend stack="ros_comm" /> <!-- for cturtle to diamondback migration -->
   <depend stack="simulator_stage" /> <!-- stage -->
   <depend stack="velodyne" /> <!-- velodyne_common -->
   <depend stack="visualization_common" /> <!-- visualization_msgs -->

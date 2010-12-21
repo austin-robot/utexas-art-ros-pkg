@@ -1,0 +1,78 @@
+Installing and configuring Ubuntu Lucid (64-bit) on the car:
+
+
+
+DONE:
+
+* use alternate install CD:
+
+* first configure MD RAID1; this is tricky:
+
+  - create root partitions on both disks (bootable)
+  - create swap partitions on both disks (2x memory size)
+  - create RAID1 partitions using those same-size pairs
+
+* install as usual
+
+  - create robot user (full name Austin Robot)
+
+* reboot from HD when finished
+
+* customizations:
+
+  - keyboard
+  - screen saver
+
+* apt-get install (optional):
+
+  emacs
+  git-core
+  gkrellm
+
+* install and activate proprietary nVidia driver
+
+* install google chrome browser (optional)
+
+  it's easiest to download it from google using firefox
+
+* install ROS cturtle:
+
+  sudo sh -c 'echo "deb http://code.ros.org/packages/ros/ubuntu lucid main" > /etc/apt/sources.list.d/ros-latest.list'
+  wget http://code.ros.org/packages/ros.key -O - | sudo apt-key add -
+  sudo apt-get update
+  sudo apt-get install ros-cturtle-base
+
+* install utexas-art ROS repositories
+
+  sudo apt-get install python-setuptools
+  sudo easy_install -U rosinstall
+  rosinstall ~/ros/cturtle_art http://utexas-art-ros-pkg.googlecode.com/svn/trunk/rosinstall/marvin.rosinstall
+
+TODO:
+
+* get camera permissions working, added this to 60-art-udev.rules
+
+  KERNEL=="raw1394", GROUP="video"
+
+* add robot to video group
+
+* need more ttyS* entries. set this in /etc/default/grub:
+
+  GRUB_CMDLINE_LINUX="8250.nr_uarts=8"
+
+* UDEV symlinks not being set.
+
+  change KERNEL= syntax to KERNEL== in 60-art-udev.rules
+
+* eliminate "error: biosdisk read" on boot
+
+  Ubuntu Bug #396564 for grub2
+  Workaround: disable (nonexistent) floppy drive in BIOS
+  (speeds up the boot slightly)
+
+* set ROS_PARALLEL_JOBS to -j4
+
+
+SKIPPED:
+
+* not installing Player (needs 64-bit work anyway)

@@ -25,6 +25,7 @@ DONE:
 
 * apt-get install (optional):
 
+  coriander
   emacs
   git-core
   gkrellm
@@ -48,8 +49,6 @@ DONE:
   sudo easy_install -U rosinstall
   rosinstall ~/ros/cturtle_art http://utexas-art-ros-pkg.googlecode.com/svn/trunk/rosinstall/marvin.rosinstall
 
-TODO:
-
 * get camera permissions working, added this to 60-art-udev.rules
 
   KERNEL=="raw1394", GROUP="video"
@@ -59,18 +58,6 @@ TODO:
 * need more ttyS* entries. set this in /etc/default/grub:
 
   GRUB_CMDLINE_LINUX="8250.nr_uarts=8"
-
-* UDEV symlinks not being set.
-
-  change KERNEL= syntax to KERNEL== in 60-art-udev.rules
-
-* eliminate "error: biosdisk read" on boot
-
-  Ubuntu Bug #396564 for grub2
-  Workaround: disable (nonexistent) floppy drive in BIOS
-  (speeds up the boot slightly)
-
-* set ROS_PARALLEL_JOBS to -j4
 
 
 SKIPPED:

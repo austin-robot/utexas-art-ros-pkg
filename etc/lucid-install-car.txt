@@ -25,6 +25,7 @@ DONE:
 
 * apt-get install (optional):
 
+  avahi-discover
   coriander
   emacs
   git-core

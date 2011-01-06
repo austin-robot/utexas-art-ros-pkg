@@ -1,7 +1,3 @@
-- other:
-    local-name: /opt/ros/cturtle/ros
-- other:
-    local-name: /opt/ros/cturtle/stacks
 - svn:
     uri: https://utexas-art-ros-pkg.googlecode.com/svn/trunk
     local-name: utexas-art

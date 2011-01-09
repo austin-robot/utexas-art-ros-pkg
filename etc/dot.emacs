@@ -46,9 +46,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if (eq window-system 'x)
     (progn
-      (global-set-key "\C-x\C-c" nil)	; avoid annoying typos
-      (global-set-key "\C-z" nil)	; (best to disable C-z with X)
-      (global-set-key "\C-x\C-z" nil)	; (disable C-x C-z, too)
+      ;;(global-set-key "\C-x\C-c" nil)	; avoid annoying typos
+      ;;(global-set-key "\C-z" nil)	; (best to disable C-z with X)
+      ;;(global-set-key "\C-x\C-z" nil)	; (disable C-x C-z, too)
       ;;(setq x-symbol-default-coding 'iso-8859-1)
 
       (if (eq 0 (user-uid))	; running as "root"?

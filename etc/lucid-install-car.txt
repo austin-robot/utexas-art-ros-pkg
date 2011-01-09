@@ -49,6 +49,7 @@ DONE:
 
   sudo apt-get install python-setuptools
   sudo easy_install -U rosinstall
+  rosinstall ~/ros/cturtle_art /opt/ros/cturtle
   rosinstall ~/ros/cturtle_art http://utexas-art-ros-pkg.googlecode.com/svn/trunk/rosinstall/marvin.rosinstall
 
 * get camera permissions working, added this to 60-art-udev.rules

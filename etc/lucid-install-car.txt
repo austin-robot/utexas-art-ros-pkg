@@ -30,7 +30,9 @@ DONE:
   emacs
   git-core
   gkrellm
+  gparted
   libdc1394-utils
+  mdadm
 
 * install and activate proprietary nVidia driver
 

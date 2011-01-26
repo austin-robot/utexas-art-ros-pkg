@@ -8,23 +8,23 @@ alias dr='env | fgrep ROS'
 #export PATH=$PATH:~/Desktop/android-sdk-linux_86/tools
 
 ## set ROS overlay name (Workspace is a symlink)
-OVR=cturtle_art
+#OVR=cturtle_art
 #OVR=unstable_art
 #OVR=unstable_camera
-#OVR=Workspace
+OVR=Workspace
 if [ -r ~/ros/$OVR/setup.sh ]
 then
         export ROS_MASTER_URI=http://$HOSTNAME.local:11311
 
-        source ~/ros/$OVR/setup.sh
+        source ~/ros/$OVR/setup.bash
 
         export ROS_HOME=~/.ros
         export ROSCONSOLE_CONFIG_FILE=$ROS_HOME/config/rosconsole.config
-        #export ROS_PARALLEL_JOBS=-j12
 
         # add art_run/bin to $PATH
         if [ $(which rospack) ]
-        then ART_RUN=$(rospack find art_run)
+        then ART_RUN=$(rospack find art_run 2>/dev/null)
+	else ART_RUN=""
         fi
         if [ "$ART_RUN" != "" ] && [ -d $ART_RUN/bin ]
         then export PATH=$ART_RUN/bin:$PATH

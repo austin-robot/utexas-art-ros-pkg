@@ -17,7 +17,7 @@
 
   <export>
     <cpp cflags="-I${prefix}/include" />
-    <rosbagmigration rule_file="migration_rules/art_msgs.bmr" />
+    <rosbag migration_rule_file="migration_rules/art_msgs.bmr"/>
   </export>
 
 </package>

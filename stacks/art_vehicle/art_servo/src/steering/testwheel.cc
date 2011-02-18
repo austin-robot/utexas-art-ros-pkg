@@ -104,7 +104,7 @@ int testwheel::Run(float steering_angle)
       {
 	if (timer->Check())
 	  {
-	    ROS_ERROR("steering self-test failed (timeout)");
+	    ROS_ERROR("steering self-test move failed (timeout)");
 	    result = -EBUSY;
 	  }
 	else if (fabs(steering_angle - target_angle) <= tolerance)
@@ -129,7 +129,7 @@ int testwheel::Run(float steering_angle)
       {
 	if (timer->Check())
 	  {
-	    ROS_ERROR("steering self-test failed (timeout)");
+	    ROS_ERROR("steering self-test move back failed (timeout)");
 	    result = -EBUSY;
 	  }
 	else if (fabs(steering_angle - start_angle) <= tolerance)

@@ -81,7 +81,7 @@ public:
   // Quicksilver command methods
   int	get_angle(float &degrees);
   int	get_encoder(float &ticks);
-  int	get_encoder(long &iticks);
+  int	get_encoder(int32_t &iticks);
   int	set_initial_angle(float position);
   int	steering_absolute(float position);
   int	steering_relative(float position);
@@ -101,19 +101,19 @@ public:
   int	verbose;			// log output verbosity
   float	req_angle;			// requested angle (absolute)
   float	starting_angle;			// starting wheel angle
-  long	starting_ticks;			// starting wheel encoder ticks
-  long	center_ticks;			// center wheel encoder ticks
+  int32_t starting_ticks;               // starting wheel encoder ticks
+  int32_t center_ticks;                 // center wheel encoder ticks
 
   int	configure_steering(void);
   int	encoder_goto(float degrees);
   int	send_cmd(const char *string);
   int	servo_cmd(const char *string);
-  int	write_register(int reg, long val);
+  int	write_register(int reg, int32_t val);
 
   // convert steering angle to encoder ticks
-  inline long degrees2ticks(float degrees)
+  inline int32_t degrees2ticks(float degrees)
   {
-    return (long) lrint(degrees * TICKS_PER_DEGREE) + center_ticks;
+    return (int32_t) lrint(degrees * TICKS_PER_DEGREE) + center_ticks;
   }
 
 };

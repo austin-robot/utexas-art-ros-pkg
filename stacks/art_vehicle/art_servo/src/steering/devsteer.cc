@@ -147,7 +147,7 @@ int devsteer::get_angle(float &degrees)
 // get steering encoder value -- converted to float
 int devsteer::get_encoder(float &ticks)
 {
-  long iticks;
+  int32_t iticks;
   int rc = get_encoder(iticks);
   if (rc == 0)
     ticks = (float) iticks;
@@ -160,7 +160,7 @@ int devsteer::get_encoder(float &ticks)
 //
 // iticks = current encoder position, if I/O successful
 //
-int devsteer::get_encoder(long &iticks)
+int devsteer::get_encoder(int32_t &iticks)
 {
   int rc = send_cmd("@16 12 1\r");
   if (rc == 0 && have_tty)
@@ -208,13 +208,13 @@ int devsteer::set_initial_angle(float position)
   rc = get_encoder(starting_ticks);
   if (rc == 0)
     {
-      // Since starting_angle is the our current wheel angle, its
-      // negative is the offset of the center wheel position.
+      // Since starting_angle is the current wheel angle, its negative
+      // is the offset of the center wheel position.
       starting_angle = position;
       center_ticks = 
-	(long) lrint(-starting_angle * TICKS_PER_DEGREE) + starting_ticks;
+	(int32_t) lrint(-starting_angle * TICKS_PER_DEGREE) + starting_ticks;
 
-      ROS_INFO("starting ticks = %ld, center ticks = %ld",
+      ROS_INFO("starting ticks = %d, center ticks = %d",
                starting_ticks, center_ticks);
 
       // Attempt to set encoder soft stop limits.  If that fails, run
@@ -335,20 +335,20 @@ int devsteer::configure_steering(void)
 // send encoder position absolute steering command
 int devsteer::encoder_goto(float degrees)
 {
-  long ticks = degrees2ticks(degrees);
+  int32_t ticks = degrees2ticks(degrees);
 
-  ROS_DEBUG("setting steering angle to %.3f (%ld ticks)", degrees, ticks);
+  ROS_DEBUG("setting steering angle to %.3f (%d ticks)", degrees, ticks);
 
   // Send Position to Stepper (Register 20)
   return write_register(20, ticks);
 }
 
-// Write an integer value to a Quicksilver register.
-int devsteer::write_register(int reg, long val)
+// Write a 32-bit integer value to a Quicksilver register.
+int devsteer::write_register(int reg, int32_t val)
 {
   char string[MAX_SERVO_CMD_BUFFER];
-  ROS_DEBUG("writing %ld to register %d", val, reg);
-  snprintf(string, MAX_SERVO_CMD_BUFFER, "@16 11 %d %ld\r", reg, val);
+  ROS_DEBUG("writing %d to register %d", val, reg);
+  snprintf(string, MAX_SERVO_CMD_BUFFER, "@16 11 %d %d\r", reg, val);
   return servo_cmd(string);
 }
 

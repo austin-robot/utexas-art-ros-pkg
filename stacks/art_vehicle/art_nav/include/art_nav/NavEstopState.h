@@ -25,10 +25,11 @@ public:
   // navigator E-stop control states
   typedef enum
     {
-      Pause,				// E-stop pause (initial state)
-      Run,				// E-stop run enabled
-      Done,				// mission finished (disabled)
-      N_states
+      Pause = art_msgs::EstopState::Pause,
+      Run = art_msgs::EstopState::Run,
+      Done = art_msgs::EstopState::Done,
+      Suspend = art_msgs::EstopState::Suspend,
+      N_states = art_msgs::EstopState::N_states
     } state_t;
 
   NavEstopState()

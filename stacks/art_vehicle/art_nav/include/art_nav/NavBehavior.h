@@ -23,14 +23,15 @@ public:
   // Navigator behaviors (lower numbers have higher priority)
   typedef enum
     {
-      Abort,
-      Quit,
-      Pause,
-      Run,
-      Initialize,
-      Go,
-      None,
-      N_behaviors
+      Abort = art_msgs::Behavior::Abort,
+      Quit = art_msgs::Behavior::Quit,
+      Pause = art_msgs::Behavior::Pause,
+      Run = art_msgs::Behavior::Run,
+      Suspend = art_msgs::Behavior::Suspend,
+      Initialize = art_msgs::Behavior::Initialize,
+      Go = art_msgs::Behavior::Go,
+      None = art_msgs::Behavior::NONE,
+      N_behaviors = art_msgs::Behavior::N_behaviors
     } nav_behavior_t;
 
   // return behavior name as a C string
@@ -42,6 +43,7 @@ public:
 	"Quit",
 	"Pause",
 	"Run",
+	"Suspend",
 	"Initialize",
 	"Go",
 	"None",

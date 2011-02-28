@@ -23,8 +23,7 @@
   </node>
   <node pkg="art_servo" type="steering" name="steering">
     <param name="~port" value="/dev/steering"/>
-    <!-- <param name="~diagnostic" value="True"/>
-      -->
+    <param name="~diagnostic" value="True"/>
   </node>
   <node pkg="art_servo" type="throttle" name="throttle">
     <param name="~port" value="/dev/throttle"/>

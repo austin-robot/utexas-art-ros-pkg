@@ -172,6 +172,7 @@ int devsteer::get_encoder(int32_t &iticks)
 	{
 	  iticks = (pos_high << 16) + pos_low;
           ROS_DEBUG(" " DEVICE " response: `%s'", buffer);
+	  diag_msg_.encoder = iticks;
 	}
       else
 	{
@@ -180,6 +181,39 @@ int devsteer::get_encoder(int32_t &iticks)
 	}
     }
   return rc;
+}
+
+// get steering status word
+//
+// returns: 0 if successful, errno value otherwise
+//
+// isw = current status, if I/O successful
+//
+int devsteer::get_status_word(uint16_t &status)
+{
+  int rc = send_cmd("@16 20\r");
+  if (rc == 0 && have_tty)
+    {
+      unsigned int isw;
+      if (1 == sscanf(buffer, "# 10 0014 %4x", &isw))
+	{
+	  status = isw;
+          ROS_DEBUG(" " DEVICE " status: `%s'", buffer);
+	}
+      else
+	{
+	  ROS_WARN(" " DEVICE " unexpected response: `%s'", buffer);
+	  rc = EINVAL;
+	}
+    }
+  return rc;
+}
+
+// publish current diagnostic information
+void devsteer::publish_diag(const ros::Publisher &diag_pub)
+{
+  get_status_word(diag_msg_.status_word);
+  diag_pub.publish(diag_msg_);
 }
 
 // set the initial steering wheel angle
@@ -213,6 +247,7 @@ int devsteer::set_initial_angle(float position)
       starting_angle = position;
       center_ticks = 
 	(int32_t) lrint(-starting_angle * TICKS_PER_DEGREE) + starting_ticks;
+      diag_msg_.center_ticks = center_ticks;
 
       ROS_INFO("starting ticks = %d, center ticks = %d",
                starting_ticks, center_ticks);
@@ -248,6 +283,7 @@ int devsteer::set_initial_angle(float position)
   // angle zero.
   starting_angle = position;
   center_ticks = 0;			// TODO: remove obsolete variable
+  diag_msg_.center_ticks = center_ticks;
   starting_ticks = degrees2ticks(starting_angle);
   ROS_INFO("starting ticks = %ld, center ticks = %ld",
            starting_ticks, center_ticks);
@@ -336,7 +372,7 @@ int devsteer::configure_steering(void)
 int devsteer::encoder_goto(float degrees)
 {
   int32_t ticks = degrees2ticks(degrees);
-
+  diag_msg_.last_request = ticks;
   ROS_DEBUG("setting steering angle to %.3f (%d ticks)", degrees, ticks);
 
   // Send Position to Stepper (Register 20)

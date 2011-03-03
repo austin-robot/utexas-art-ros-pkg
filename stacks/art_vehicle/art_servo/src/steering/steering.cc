@@ -100,6 +100,7 @@ private:
   ros::Subscriber ioadr_state_;         // ioadr/state (position sensor)
   ros::Subscriber steering_cmd_;        // steering/cmd
   ros::Publisher  steering_state_;      // steering/state
+  ros::Publisher  steering_diag_;	// steering/diag
 
   devsteer *dev_;			// servo device interface
   float	steering_angle_;                // current steering angle (degrees)
@@ -240,6 +241,8 @@ int ArtSteer::Setup(ros::NodeHandle node)
     node.subscribe("steering/cmd", qDepth, &ArtSteer::GetCmd, this, noDelay);
   steering_state_ =
     node.advertise<art_msgs::SteeringState>("steering/state", qDepth);
+  steering_diag_ =
+    node.advertise<art_msgs::SteeringDiagnostics>("steering/diag", qDepth);
   ioadr_state_ =
     node.subscribe("ioadr/state", qDepth, &ArtSteer::GetPos, this, noDelay);
 
@@ -347,6 +350,7 @@ void ArtSteer::PublishStatus(void)
     {
       // attempt to read current encoder position
       dev_->get_encoder(msg.encoder);
+      dev_->publish_diag(steering_diag_);
     }
 
   msg.header.stamp = ros::Time::now();

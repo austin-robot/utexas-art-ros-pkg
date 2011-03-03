@@ -47,6 +47,7 @@ Training mode collects data while a human driver operates the vehicle.
 
 #include <art/conversions.h>		// A/D conversion
 #include <art_msgs/ArtVehicle.h>
+#include <art_msgs/SteeringDiagnostics.h>
 
 #include "../servo.h"
 
@@ -82,6 +83,7 @@ public:
   int	get_angle(float &degrees);
   int	get_encoder(float &ticks);
   int	get_encoder(int32_t &iticks);
+  void  publish_diag(const ros::Publisher &diag_pub);
   int	set_initial_angle(float position);
   int	steering_absolute(float position);
   int	steering_relative(float position);
@@ -106,9 +108,12 @@ public:
 
   int	configure_steering(void);
   int	encoder_goto(float degrees);
+  int	get_status_word(uint16_t &status);
   int	send_cmd(const char *string);
   int	servo_cmd(const char *string);
   int	write_register(int reg, int32_t val);
+
+  art_msgs::SteeringDiagnostics diag_msg_;
 
   // convert steering angle to encoder ticks
   inline int32_t degrees2ticks(float degrees)

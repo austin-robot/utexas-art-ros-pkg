@@ -47,6 +47,7 @@ case $CMD in
 	echo -e "\tleft\tturn steering wheel left"
 	echo -e "\tright\tturn steering wheel right"
 	echo -e "\tsetup\tinitialize steering servo"
+	echo -e "\tstatus\tread internal status word"
 	echo -e "\ndefault serial-port: /dev/steering"
 	exit 1
 	;;
@@ -86,6 +87,11 @@ case $CMD in
   right) 
 	echo "turning steering wheel a little to the right"
 	servo_cmd "@16 11 20 50000"
+	rc=$?
+	;;
+  status) 
+	echo "reading internal status word"
+	servo_cmd "@16 20"
 	rc=$?
 	;;
   *)

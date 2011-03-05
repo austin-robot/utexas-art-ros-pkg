@@ -43,6 +43,7 @@ case $CMD in
 	echo -e "\ncommand options:"
 	echo -e "\tcenter\tcenter steering wheel"
 	echo -e "\tconfig\tconfigure port"
+	echo -e "\temt\tenable multi-tasking"
 	echo -e "\thelp\tprint this help message"
 	echo -e "\tleft\tturn steering wheel left"
 	echo -e "\tright\tturn steering wheel right"
@@ -92,6 +93,11 @@ case $CMD in
   status) 
 	echo "reading internal status word"
 	servo_cmd "@16 20"
+	rc=$?
+	;;
+  emt) 
+	echo "enable multi-tasking"
+	servo_cmd "@16 225"
 	rc=$?
 	;;
   *)

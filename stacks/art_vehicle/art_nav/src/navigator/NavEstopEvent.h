@@ -25,6 +25,7 @@ public:
       Pause,				// E-stop pause
       Quit,				// run finished normally
       Run,				// E-stop run enabled
+      Suspend,				// suspend autonomous operation
       None,				// no E-stop event this cycle
       N_events
     } event_t;
@@ -38,6 +39,7 @@ public:
 	"Pause",
 	"Quit",
 	"Run",
+	"Suspend",
 	"None",
       };
     return event_name[this->event];

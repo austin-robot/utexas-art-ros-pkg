@@ -18,12 +18,23 @@
 Estop::Estop(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
 {
+  // initialize transition table, unused entries cause an error action
+  for (int event = 0; event < (int) NavEstopEvent::N_events; ++event)
+    for (int state = 0; state < (int) NavEstopState::N_states; ++state)
+      {
+	transtion_t *xp = &ttable[event][state];
+	xp->action = &Estop::ActionError;
+	xp->next = (NavEstopState::state_t) state;
+      }
+
   // initialize transition table:
 
   Add(NavEstopEvent::Abort,	&Estop::ActionToAbort,
       NavEstopState::Pause,	NavEstopState::Done);
   Add(NavEstopEvent::Abort,	&Estop::ActionToAbort,
       NavEstopState::Run,	NavEstopState::Done);
+  Add(NavEstopEvent::Abort,	&Estop::ActionToAbort,
+      NavEstopState::Suspend,	NavEstopState::Done);
   Add(NavEstopEvent::Abort,	&Estop::ActionInDone,
       NavEstopState::Done,	NavEstopState::Done);
 
@@ -31,6 +42,8 @@ Estop::Estop(Navigator *navptr, int _verbose):
       NavEstopState::Pause,	NavEstopState::Pause);
   Add(NavEstopEvent::None,	&Estop::ActionInRun,
       NavEstopState::Run,	NavEstopState::Run);
+  Add(NavEstopEvent::None,	&Estop::ActionInSuspend,
+      NavEstopState::Suspend,	NavEstopState::Suspend);
   Add(NavEstopEvent::None,	&Estop::ActionInDone,
       NavEstopState::Done,	NavEstopState::Done);
 
@@ -38,6 +51,8 @@ Estop::Estop(Navigator *navptr, int _verbose):
       NavEstopState::Pause,	NavEstopState::Pause);
   Add(NavEstopEvent::Pause,	&Estop::ActionToPause,
       NavEstopState::Run,	NavEstopState::Pause);
+  Add(NavEstopEvent::Pause,	&Estop::ActionToPause,
+      NavEstopState::Suspend,	NavEstopState::Pause);
   Add(NavEstopEvent::Pause,	&Estop::ActionInDone,
       NavEstopState::Done,	NavEstopState::Done);
 
@@ -45,14 +60,29 @@ Estop::Estop(Navigator *navptr, int _verbose):
       NavEstopState::Pause,	NavEstopState::Done);
   Add(NavEstopEvent::Quit,	&Estop::ActionToDone,
       NavEstopState::Run,	NavEstopState::Done);
+  Add(NavEstopEvent::Quit,	&Estop::ActionToDone,
+      NavEstopState::Suspend,	NavEstopState::Done);
   Add(NavEstopEvent::Quit,	&Estop::ActionInDone,
       NavEstopState::Done,	NavEstopState::Done);
 
+  // note that the Run behavior is (currently) ignored in the Suspend
+  // state, so we must Pause first before Run
   Add(NavEstopEvent::Run,	&Estop::ActionToRun,
       NavEstopState::Pause,	NavEstopState::Run);
   Add(NavEstopEvent::Run,	&Estop::ActionInRun,
       NavEstopState::Run,	NavEstopState::Run);
+  Add(NavEstopEvent::Run,	&Estop::ActionInSuspend,
+      NavEstopState::Suspend,	NavEstopState::Suspend);
   Add(NavEstopEvent::Run,	&Estop::ActionInDone,
+      NavEstopState::Done,	NavEstopState::Done);
+
+  Add(NavEstopEvent::Suspend,	&Estop::ActionToSuspend,
+      NavEstopState::Pause,	NavEstopState::Suspend);
+  Add(NavEstopEvent::Suspend,	&Estop::ActionToSuspend,
+      NavEstopState::Run,	NavEstopState::Suspend);
+  Add(NavEstopEvent::Suspend,	&Estop::ActionInSuspend,
+      NavEstopState::Suspend,	NavEstopState::Suspend);
+  Add(NavEstopEvent::Suspend,	&Estop::ActionInDone,
       NavEstopState::Done,	NavEstopState::Done);
 
   // allocate subordinate controllers
@@ -129,6 +159,10 @@ NavEstopEvent Estop::current_event(void)
 	  nevent = NavEstopEvent::Run;
 	  break;
 
+	case NavBehavior::Suspend:
+	  nevent = NavEstopEvent::Suspend;
+	  break;
+
 	default:
 	  // Other behaviors are handled by lower-level controllers,
 	  // only while in Run state.  They do not affect the E-stop
@@ -163,6 +197,15 @@ void Estop::reset_me(void)
 // state transition action methods
 //////////////////////////////////////////////////////////////////////
 
+Controller::result_t Estop::ActionError(pilot_command_t &pcmd)
+{
+  ROS_FATAL("Invalid Navigator E-stop event %s, state %s",
+            event.Name(), prev.Name());
+  halt->control(pcmd);
+  pending_event = NavEstopEvent::Abort;
+  return NotImplemented;
+}
+
 // steady state actions
 
 Controller::result_t Estop::ActionInDone(pilot_command_t &pcmd)
@@ -171,6 +214,13 @@ Controller::result_t Estop::ActionInDone(pilot_command_t &pcmd)
   navdata->alarm = false;
   return halt->control(pcmd);
 }  
+
+Controller::result_t Estop::ActionInPause(pilot_command_t &pcmd)
+{
+  navdata->flasher = true;
+  navdata->alarm = false;
+  return halt->control(pcmd);
+}
 
 Controller::result_t Estop::ActionInRun(pilot_command_t &pcmd)
 {
@@ -183,7 +233,7 @@ Controller::result_t Estop::ActionInRun(pilot_command_t &pcmd)
   return result;
 }
 
-Controller::result_t Estop::ActionInPause(pilot_command_t &pcmd)
+Controller::result_t Estop::ActionInSuspend(pilot_command_t &pcmd)
 {
   navdata->flasher = true;
   navdata->alarm = false;
@@ -212,7 +262,13 @@ Controller::result_t Estop::ActionToPause(pilot_command_t &pcmd)
 
 Controller::result_t Estop::ActionToRun(pilot_command_t &pcmd)
 {
-  /// @todo implement 5 second pause before actually starting
+  /// @todo implement 5 second hesitation before actually starting
   ART_MSG(1, "Robot running!");
   return ActionInRun(pcmd);
+}
+
+Controller::result_t Estop::ActionToSuspend(pilot_command_t &pcmd)
+{
+  ART_MSG(1, "Autonomous operation suspended!");
+  return ActionInSuspend(pcmd);
 }

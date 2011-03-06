@@ -295,6 +295,13 @@ void NavQueueMgr::SetRelays(void)
 /** Send a command to the pilot */
 void NavQueueMgr::SetSpeed(pilot_command_t pcmd)
 {
+  if (NavEstopState(nav_->navdata.estop) == NavEstopState::Suspend)
+    {
+      ROS_DEBUG_THROTTLE(20,
+                         "Navigator suspended, not sending pilot commands.");
+      return;
+    }
+
   art_msgs::CarCommand cmd;
   cmd.header.stamp = ros::Time::now();
   cmd.header.frame_id = ArtFrames::vehicle;

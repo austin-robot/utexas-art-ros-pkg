@@ -73,7 +73,7 @@ class MainWindow(wx.Frame):
 
     def __init__(self, parent, title):
 
-        wx.Frame.__init__(self, parent, title=title, size=wx.Size(450,200))
+        wx.Frame.__init__(self, parent, title=title, size=wx.Size(600,200))
         self.statusbar = self.CreateStatusBar()
 
         # Setting up the menu.
@@ -91,8 +91,10 @@ class MainWindow(wx.Frame):
         toolbar.AddLabelTool(wx.ID_EXIT, '', wx.Bitmap(pkg_icon('exit')))
         toolbar.AddLabelTool(wx.ID_FORWARD, '',
                              wx.Bitmap(pkg_icon('player_play')))
-        toolbar.AddLabelTool(wx.ID_STOP, '',
+        toolbar.AddLabelTool(wx.ID_CANCEL, '',
                              wx.Bitmap(pkg_icon('player_pause')))
+        toolbar.AddLabelTool(wx.ID_STOP, '',
+                             wx.Bitmap(pkg_icon('player_stop')))
 	toolbar.Realize()
 
         self.Bind(wx.EVT_TOOL, self.halt, id=wx.ID_EXIT)
@@ -100,6 +102,7 @@ class MainWindow(wx.Frame):
 
         self.Bind(wx.EVT_TOOL, self.run, id=wx.ID_FORWARD)
         self.Bind(wx.EVT_TOOL, self.pause, id=wx.ID_STOP)
+        self.Bind(wx.EVT_TOOL, self.suspend, id=wx.ID_CANCEL)
 
         panel = wx.Panel(self, -1)
         panel.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
@@ -116,25 +119,34 @@ class MainWindow(wx.Frame):
         keycode = event.GetKeyCode()
         if keycode == wx.WXK_UP:
             self.run(event)
-        elif keycode == wx.WXK_DOWN or keycode == wx.WXK_PAUSE:
+        elif keycode == wx.WXK_DOWN:
             self.pause(event)
+        elif keycode == wx.WXK_PAUSE:
+            self.suspend(event)
         else:
             event.Skip()
 
     def pause(self, e):
-        "request pause state"
+        "request immediate stop"
         global new_behavior_, new_state_
         new_state_ = EstopState.Pause
         new_behavior_ = Behavior.Pause
-        self.statusbar.SetStatusText('Pausing')
+        self.statusbar.SetStatusText('Stopping')
         pass
 
     def run(self, e):
-        "request run state"
+        "request autonomous run"
         global new_behavior_, new_state_
         new_state_ = EstopState.Run
         new_behavior_ = Behavior.Run
         self.statusbar.SetStatusText('Running')
+
+    def suspend(self, e):
+        "request suspension of autonomous operation"
+        global new_behavior_, new_state_
+        new_state_ = EstopState.Suspend
+        new_behavior_ = Behavior.Suspend
+        self.statusbar.SetStatusText('Suspending')
 
 
 class wxThread(threading.Thread):

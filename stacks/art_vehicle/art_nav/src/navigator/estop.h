@@ -71,11 +71,14 @@ private:
   // state transition action methods
   //////////////////////////////////////////////////////////////////////
 
+  result_t ActionError(pilot_command_t &pcmd);
+
   // steady state actions
 
   result_t ActionInDone(pilot_command_t &pcmd);
-  result_t ActionInRun(pilot_command_t &pcmd);
   result_t ActionInPause(pilot_command_t &pcmd);
+  result_t ActionInRun(pilot_command_t &pcmd);
+  result_t ActionInSuspend(pilot_command_t &pcmd);
 
   // state entry actions
 
@@ -83,6 +86,7 @@ private:
   result_t ActionToDone(pilot_command_t &pcmd);
   result_t ActionToPause(pilot_command_t &pcmd);
   result_t ActionToRun(pilot_command_t &pcmd);
+  result_t ActionToSuspend(pilot_command_t &pcmd);
 };
 
 #endif // __ESTOP_HH__

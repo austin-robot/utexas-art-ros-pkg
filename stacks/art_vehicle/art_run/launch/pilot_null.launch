@@ -19,6 +19,7 @@
   </node>
   <node pkg="art_servo" type="steering" name="steering">
     <param name="~port" value="/dev/null"/>
+    <param name="~simulate" value="True"/>
   </node>
   <node pkg="art_servo" type="throttle" name="throttle">
     <param name="~port" value="/dev/null"/>

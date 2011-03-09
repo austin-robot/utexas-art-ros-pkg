@@ -93,16 +93,17 @@ public:
   int64_t GetTime();
 
   // configuration options
-  bool	center_on_exit;			// center steering during shutdown()
-  std::string port;			// tty port name
-  bool	training;			// use training mode
-  double steering_rate;			// steering velocity (deg/sec)
+  bool	center_on_exit_;          // center steering during shutdown()
+  std::string port_;              // tty port name
+  bool	training_;                // use training mode
+  double steering_rate_;          // steering velocity (deg/sec)
 
-  int	verbose;			// log output verbosity
-  float	req_angle;			// requested angle (absolute)
-  float	starting_angle;			// starting wheel angle
-  int32_t starting_ticks;               // starting wheel encoder ticks
-  int32_t center_ticks;                 // center wheel encoder ticks
+  float	req_angle_;                    // requested angle (absolute)
+  float	starting_angle_;               // starting wheel angle
+  int32_t starting_ticks_;             // starting wheel encoder ticks
+  int32_t center_ticks_;               // center wheel encoder ticks
+
+  art_msgs::SteeringDiagnostics diag_msg_;
 
   int	configure_steering(void);
   int	encoder_goto(float degrees);
@@ -111,18 +112,16 @@ public:
   int	servo_cmd(const char *string);
   int	write_register(int reg, int32_t val);
 
-  art_msgs::SteeringDiagnostics diag_msg_;
-
   // convert steering angle to encoder ticks
   inline int32_t degrees2ticks(float degrees)
   {
-    return (int32_t) lrint(degrees * TICKS_PER_DEGREE) + center_ticks;
+    return (int32_t) lrint(degrees * TICKS_PER_DEGREE) + center_ticks_;
   }
 
   // convert encoder ticks to steering angle
   inline float ticks2degrees(uint32_t ticks)
   {
-    return (ticks - center_ticks) / TICKS_PER_DEGREE;
+    return (ticks - center_ticks_) / TICKS_PER_DEGREE;
   }
 
 };

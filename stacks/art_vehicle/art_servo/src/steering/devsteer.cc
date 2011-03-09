@@ -33,16 +33,15 @@ int64_t devsteer::GetTime()
 
 devsteer::devsteer()
 {
-  verbose = 0;
-  req_angle = 0.0;
+  req_angle_ = 0.0;
 }
 
 int devsteer::Open()
 {
   // open the serial port
-  int rc = this->Servo::Open(port.c_str(), (O_RDWR|O_NOCTTY|O_NONBLOCK));
+  int rc = this->Servo::Open(port_.c_str(), (O_RDWR|O_NOCTTY|O_NONBLOCK));
   if (fd < 0) {
-    ROS_ERROR("Couldn't open %s (%s)", port.c_str(), strerror(errno));
+    ROS_ERROR("Couldn't open %s (%s)", port_.c_str(), strerror(errno));
     return -1;
   }
     
@@ -53,8 +52,8 @@ int devsteer::Open()
   rc = configure_steering();
   if (rc != 0) goto fail;
 
-  req_angle = starting_angle = 0.0;	// initialize position
-  starting_ticks = 0;			//   assuming wheel is centered
+  req_angle_ = starting_angle_ = 0.0;	// initialize position
+  starting_ticks_ = 0;			//   assuming wheel is centered
 
   return rc;
 
@@ -65,7 +64,7 @@ int devsteer::Open()
 
 int devsteer::Close()
 {
-  if (center_on_exit)
+  if (center_on_exit_)
     steering_absolute(0.0);		// center steering wheel
   return this->Servo::Close();
 }
@@ -75,25 +74,23 @@ int devsteer::Configure()
   // use private node handle to get parameters
   ros::NodeHandle mynh("~");
 
-  port = "/dev/null";
-  mynh.getParam("port", port);
-  ROS_INFO_STREAM("steering port = " << port);
+  port_ = "/dev/null";
+  mynh.getParam("port", port_);
+  ROS_INFO_STREAM("steering port = " << port_);
 
-  center_on_exit = false;
-  mynh.getParam("center_on_exit", center_on_exit);
-  if (center_on_exit)
+  mynh.param("center_on_exit", center_on_exit_, false);
+  if (center_on_exit_)
     ROS_INFO("center steering on exit");
   else
     ROS_INFO("do not center steering on exit");
 
-  training = false;
-  mynh.getParam("training", training);
-  if (training)
+  mynh.param("training", training_, false);
+  if (training_)
     ROS_INFO("using training mode");
 
-  steering_rate = art_msgs::ArtVehicle::max_steer_degrees / 2.0;
-  mynh.getParam("steering_rate", steering_rate);
-  ROS_INFO("steering rate is %.2f degrees/sec.", steering_rate);
+  steering_rate_ = art_msgs::ArtVehicle::max_steer_degrees / 2.0;
+  mynh.getParam("steering_rate", steering_rate_);
+  ROS_INFO("steering rate is %.2f degrees/sec.", steering_rate_);
 
   return 0;
 }
@@ -132,8 +129,8 @@ int devsteer::get_angle(float &degrees)
   else
     {
       // simulate steering motion as a constant angular velocity
-      float remaining_angle = req_angle - degrees;
-      float degrees_per_cycle = (steering_rate /
+      float remaining_angle = req_angle_ - degrees;
+      float degrees_per_cycle = (steering_rate_ /
                                  art_msgs::ArtHertz::STEERING);
 
       DBG("remaining angle %.3f, degrees per cycle %.3f",
@@ -141,7 +138,7 @@ int devsteer::get_angle(float &degrees)
 
       if (fabs(remaining_angle) <= degrees_per_cycle)
 	{
-	  degrees = req_angle;
+	  degrees = req_angle_;
 	}
       else
 	{
@@ -249,18 +246,18 @@ int devsteer::set_initial_angle(float position)
   // but may vary in subsequent runs if the controller has not been
   // reset.  That variable is used by degrees2ticks() as a conversion
   // offset.
-  rc = get_encoder(starting_ticks);
+  rc = get_encoder(starting_ticks_);
   if (rc == 0)
     {
       // Since starting_angle is the current wheel angle, its negative
       // is the offset of the center wheel position.
-      starting_angle = position;
-      center_ticks = 
-	(int32_t) lrint(-starting_angle * TICKS_PER_DEGREE) + starting_ticks;
-      diag_msg_.center_ticks = center_ticks;
+      starting_angle_ = position;
+      center_ticks_ = 
+	(int32_t) lrint(-starting_angle_ * TICKS_PER_DEGREE) + starting_ticks_;
+      diag_msg_.center_ticks = center_ticks_;
 
       ROS_INFO("starting ticks = %d, center ticks = %d",
-               starting_ticks, center_ticks);
+               starting_ticks_, center_ticks_);
 
       // Attempt to set encoder soft stop limits.  If that fails, run
       // without them.  They are a safety net, limiting travel to 30
@@ -269,8 +266,8 @@ int devsteer::set_initial_angle(float position)
       // mechanical steering limit is about 31 degrees.  We avoid
       // hitting that limit lest it damage the stepper motor or its
       // linkage.
-      write_register(39, center_ticks - 300001); // soft stop lower
-      write_register(40, center_ticks + 300001); // soft stop upper
+      write_register(39, center_ticks_ - 300001); // soft stop lower
+      write_register(40, center_ticks_ + 300001); // soft stop upper
 
       // Send Profile Move Continuous (PMC) command.  If successful,
       // from now on any value written to data register 20 will
@@ -291,13 +288,13 @@ int devsteer::set_initial_angle(float position)
   // command has not been issued, this does not cause any movement.
   // Subsequently, encoder position zero will correspond to wheel
   // angle zero.
-  starting_angle = position;
-  center_ticks = 0;			// TODO: remove obsolete variable
-  diag_msg_.center_ticks = center_ticks;
-  starting_ticks = degrees2ticks(starting_angle);
+  starting_angle_ = position;
+  center_ticks_ = 0;			// TODO: remove obsolete variable
+  diag_msg_.center_ticks = center_ticks_;
+  starting_ticks_ = degrees2ticks(starting_angle_);
   ROS_INFO("starting ticks = %ld, center ticks = %ld",
-           starting_ticks, center_ticks);
-  rc = write_register(20, starting_ticks); // initial wheel position
+           starting_ticks_, center_ticks_);
+  rc = write_register(20, starting_ticks_); // initial wheel position
   if (rc != 0)
     {
       ROS_ERROR(DEVICE " failed to set initial wheel encoder position.");
@@ -310,8 +307,8 @@ int devsteer::set_initial_angle(float position)
   // request a position more than 29 degrees from center.  The
   // mechanical steering limit is about 31 degrees.  We avoid hitting
   // that limit lest it damage the stepper motor or its linkage.
-  write_register(39, center_ticks - 300001); // soft stop lower
-  write_register(40, center_ticks + 300001); // soft stop upper
+  write_register(39, center_ticks_ - 300001); // soft stop lower
+  write_register(40, center_ticks_ + 300001); // soft stop upper
 
   // Send Profile Move Continuous (PMC) command.  If successful, from
   // now on any value written to data register 20 will immediately
@@ -329,14 +326,14 @@ int devsteer::set_initial_angle(float position)
 int devsteer::steering_absolute(float position)
 {
   DBG("steering_absolute(%.3f)", position);
-  req_angle = limit_travel(position);
-  return encoder_goto(req_angle);
+  req_angle_ = limit_travel(position);
+  return encoder_goto(req_angle_);
 }
  
 int devsteer::steering_relative(float delta)
 {
   DBG("steering_relative(%.3f)", delta);
-  return steering_absolute(req_angle + delta);
+  return steering_absolute(req_angle_ + delta);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -512,7 +509,7 @@ int devsteer::send_cmd(const char *string)
  */
 int devsteer::servo_cmd(const char *string)
 {
-  if (training)
+  if (training_)
     return 0;				// send no commands
 
   int rc = send_cmd(string);

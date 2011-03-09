@@ -35,7 +35,6 @@ devsteer::devsteer()
 {
   verbose = 0;
   req_angle = 0.0;
-  simulate_ = false;
 }
 
 int devsteer::Open()
@@ -46,8 +45,6 @@ int devsteer::Open()
     ROS_ERROR("Couldn't open %s (%s)", port.c_str(), strerror(errno));
     return -1;
   }
-
-  simulate_ = !have_tty;
     
   // set actual baud rate
   rc = configure_raw_port((B57600|CS8), 0);
@@ -115,9 +112,22 @@ int devsteer::get_angle(float &degrees)
 
   if (have_tty)				// using actual device?
     {
+#if 0
       // This is OK, we use the position sensor instead...
       ROS_WARN("steering angle not available from device (not implemented)");
       return ENOSYS;
+#else
+      int32_t iticks;
+      rc = get_encoder(iticks);
+      if (rc == 0)
+	{
+	  degrees = ticks2degrees(iticks);
+	}
+      else
+	{
+	  ROS_WARN("encoder read failure, cannot estimate position");
+	}
+#endif
     }
   else
     {

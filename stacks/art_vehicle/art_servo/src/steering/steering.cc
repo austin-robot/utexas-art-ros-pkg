@@ -93,6 +93,7 @@ private:
 
   // .cfg variables:
   bool	diagnostic_;			// enable diagnostic mode
+  bool  simulate_;			// simulate sensor input
   int	calibration_periods_;		// number of sensor calibration cycles
   double sensor_timeout_;		// sensor timeout (sec)
 
@@ -189,6 +190,11 @@ ArtSteer::ArtSteer()
   if (diagnostic_)
     ROS_INFO("using diagnostic mode");
 
+  // simulate sensor input parameter
+  mynh.param("simulate", simulate_, false);
+  if (simulate_)
+    ROS_INFO("simulating position sensor");
+
   calibration_periods_ = 19;
   mynh.getParam("calibration_periods", calibration_periods_);
   ROS_INFO("calibrate steering sensor for %d cycles.", calibration_periods_);
@@ -280,7 +286,7 @@ void ArtSteer::GetCmd(const art_msgs::SteeringCommand::ConstPtr &cmdIn)
 
 void ArtSteer::GetPos(const art_msgs::IOadrState::ConstPtr &ioIn)
 {
-  if (dev_->simulate_)                  // not using real sensor?
+  if (simulate_)			// not using real sensor?
     return;
 
   // save steering position sensor voltage, convert to degrees
@@ -323,7 +329,7 @@ void ArtSteer::calibrate_wheel_position(void)
     }
 }
 
-// Get simulated wheel angle from driver (if real device not available).
+// Get simulated wheel angle from driver (if real sensor not available).
 void ArtSteer::read_wheel_angle(void)
 {
   int rc = dev_->get_angle(steering_angle_);
@@ -366,7 +372,7 @@ void ArtSteer::Main()
     {
       ros::spinOnce();                  // handle incoming commands
 
-      if (dev_->simulate_)
+      if (simulate_)			// not using real position sensor
         read_wheel_angle();
 
       // Processing depends on driver state.  These tests reverse the

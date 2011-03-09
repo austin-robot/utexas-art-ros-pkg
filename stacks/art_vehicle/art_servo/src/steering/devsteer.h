@@ -88,8 +88,6 @@ public:
   int	steering_absolute(float position);
   int	steering_relative(float position);
 
-  bool  simulate_;
-
  private:
 
   int64_t GetTime();
@@ -119,6 +117,12 @@ public:
   inline int32_t degrees2ticks(float degrees)
   {
     return (int32_t) lrint(degrees * TICKS_PER_DEGREE) + center_ticks;
+  }
+
+  // convert encoder ticks to steering angle
+  inline float ticks2degrees(uint32_t ticks)
+  {
+    return (ticks - center_ticks) / TICKS_PER_DEGREE;
   }
 
 };

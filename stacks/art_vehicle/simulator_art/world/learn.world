@@ -20,8 +20,9 @@ resolution 0.1
 
 # run simulation and screen updates every 50ms to reduce overhead
 #gui_interval 50
-interval_sim 50
-
+#interval_sim 50
+interval_sim 100  # simulation timestep in milliseconds
+interval_real 100  # real-time interval between simulation updates in milliseconds 
 
 # configure the GUI window
 window

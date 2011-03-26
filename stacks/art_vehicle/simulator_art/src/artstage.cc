@@ -61,8 +61,10 @@
 
 #if ROS_VERSION_MINIMUM(1, 4, 0)        // Diamondback or later?
 #include <rosgraph_msgs/Clock.h>
+typedef rosgraph_msgs::Clock Clock;
 #else                                   // Cturtle or earlier?
 #include <roslib/Clock.h>
+typedef roslib::Clock Clock;
 #endif
 
 #include <art/frames.h>                 // ART vehicle frames of reference
@@ -80,7 +82,7 @@ class StageNode
   private:
     // Messages that we'll send or receive
     sensor_msgs::LaserScan *laserMsgs;
-    roslib::Clock clockMsg;
+    Clock clockMsg;
 
     // roscpp-related bookkeeping
     ros::NodeHandle n_;
@@ -273,7 +275,7 @@ StageNode::SubscribeModels()
     // set up vehicle model ROS topics
     vehicleModels_[r]->setup();
   }
-  clock_pub_ = n_.advertise<roslib::Clock>("/clock",10);
+  clock_pub_ = n_.advertise<Clock>("/clock",10);
   return(0);
 }
 

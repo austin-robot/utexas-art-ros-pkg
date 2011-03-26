@@ -57,8 +57,13 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <sensor_msgs/LaserScan.h>
+#include <tf/transform_broadcaster.h>
+
+#if ROS_VERSION_MINIMUM(1, 4, 0)        // Diamondback or later?
+#include <rosgraph_msgs/Clock.h>
+#else                                   // Cturtle or earlier?
 #include <roslib/Clock.h>
-#include "tf/transform_broadcaster.h"
+#endif
 
 #include <art/frames.h>                 // ART vehicle frames of reference
 

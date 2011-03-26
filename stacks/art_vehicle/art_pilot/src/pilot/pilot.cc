@@ -1,41 +1,41 @@
 /*
- *  Copyright (C) 2005, 2007, 2009 Austin Robot Technology
- *
+ *  Copyright (C) 2005-2011 Austin Robot Technology
  *  License: Modified BSD Software License Agreement
  * 
  *  $Id$
  */
 
-/**  \file
+/**  @file
  
      ROS node for controlling direction and speed of the ART
      autonomous vehicle.
 
-     \todo check that devices are responding, (optionally) stop if
-     they are not
-
-     \todo (optionally) stop if no commands received recently.
-
-     \todo provide state feedback
-
-     \todo shift to Park, when appropriate
+     @todo make pilot driver a class
+     @todo make speed interface more general
+     @todo make each device a subclass of a common driver interface
+     @todo (optionally) stop if no commands received recently.
+     @todo shift to Park, when appropriate
  
-     \author Jack O'Quin
+     @author Jack O'Quin
 
  */
 
 #include <ros/ros.h>
-#include <nav_msgs/Odometry.h>
-#include <geometry_msgs/Twist.h>
+
+#include <angles/angles.h>
+#include <driver_base/SensorLevels.h>
 #include <dynamic_reconfigure/server.h>
-#include <dynamic_reconfigure/SensorLevels.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 
 #include <art_msgs/ArtVehicle.h>
 #include <art_msgs/ArtHertz.h>
-#include <art_msgs/CarCommand.h>
-
 #include <art_msgs/BrakeCommand.h>
 #include <art_msgs/BrakeState.h>
+#include <art_msgs/CarAccel.h>
+#include <art_msgs/CarCommand.h>
+#include <art_msgs/LearningCommand.h>
+#include <art_msgs/PilotState.h>
 #include <art_msgs/Shifter.h>
 #include <art_msgs/SteeringCommand.h>
 #include <art_msgs/SteeringState.h>
@@ -48,13 +48,13 @@
 #include <art/steering.h>
 
 #include <art_pilot/PilotConfig.h>
-
-#include <art_msgs/LearningCommand.h>
+typedef art_pilot::PilotConfig Config;
 
 #include "learned_controller.h"
 #include "speed.h"
 
-#define NODE "pilot"
+typedef art_msgs::DriverState DriverState;
+
 
 /**
  @brief controls the ART vehicle brake, throttle, steering and transmission
@@ -62,26 +62,27 @@
 The pilot receives CarCommand messages from the navigator, then
 translates them into commands to the servo motor actuators for
 controlling the speed and direction of the vehicle.  It gets odometry
-information from a separate node.  For compatibility with other ROS
-tools, it also responds to Twist messages on the cmd_vel topic.
+information from a separate node.
 
 Subscribes:
 
-- \b pilot/cmd [art_msgs::CarCommand] velocity and steering angle command
-- \b vel_cmd [geometry_msgs::Twist] standard ROS velocity and angle command
-- \b odom [nav_msgs::Odometry] estimate of robot position and velocity.
+- @b pilot/accel [art_msgs::CarAccel] acceleration and steering command
+- @b pilot/cmd [art_msgs::CarCommand] velocity and steering angle command
+- @b imu [sensor_msgs::Imu] estimate of robot accelerations
+- @b odom [nav_msgs::Odometry] estimate of robot position and velocity.
 
-- \b brake/state [art_msgs::BrakeState] brake status.
-- \b shifter/state [art_msgs::Shifter] shifter relays status.
-- \b steering/state [art_msgs::SteeringState] steering status.
-- \b throttle/state [art_msgs::ThrottleState] throttle status.
+- @b brake/state [art_msgs::BrakeState] brake status.
+- @b shifter/state [art_msgs::Shifter] shifter relays status.
+- @b steering/state [art_msgs::SteeringState] steering status.
+- @b throttle/state [art_msgs::ThrottleState] throttle status.
 
 Publishes:
 
-- \b brake/cmd [art_msgs::BrakeCommand] brake commands.
-- \b shifter/cmd [art_msgs::Shifter] shifter commands.
-- \b steering/cmd [art_msgs::SteeringCommand] steering commands.
-- \b throttle/cmd [art_msgs::ThrottleCommand] throttle commands.
+- @b pilot/state [art_msgs::PilotState] current pilot state information.
+- @b brake/cmd [art_msgs::BrakeCommand] brake commands.
+- @b shifter/cmd [art_msgs::Shifter] shifter commands.
+- @b steering/cmd [art_msgs::SteeringCommand] steering commands.
+- @b throttle/cmd [art_msgs::ThrottleCommand] throttle commands.
 
 */
 
@@ -89,30 +90,30 @@ Publishes:
 namespace
 {
 
-  // ROS topics used by this driver
-  ros::Subscriber car_cmd_;             // pilot command
-  ros::Subscriber twist_cmd_;           // Twist command
-  ros::Subscriber odom_state_;          // odometry
+  // ROS topics used by this node
+  ros::Subscriber accel_cmd_;           // CarAccel command
+  ros::Subscriber car_cmd_;             // CarCommand
 
   ros::Subscriber brake_state_;
+  ros::Subscriber imu_state_;           // inertial measurements
+  ros::Subscriber odom_state_;          // odometry
   ros::Subscriber shifter_state_;
   ros::Subscriber steering_state_;
   ros::Subscriber throttle_state_;
 
-  ros::Subscriber learning_state_;
+  ros::Subscriber learning_cmd_;
 
   ros::Publisher brake_cmd_;            // brake command
+  ros::Publisher pilot_state_;          // pilot state
   ros::Publisher shifter_cmd_;          // shifter command
   ros::Publisher steering_cmd_;         // steering command
   ros::Publisher throttle_cmd_;         // throttle command
 
   // configuration
-  art_pilot::PilotConfig config_;         // dynamic configuration
+  Config config_;                       // dynamic configuration
 
   // servo control
   float brake_position_ = 1.0;
-  uint8_t shifter_gear_ = art_msgs::Shifter::Drive;
-  float steering_angle_ = 0.0;
   float throttle_position_ = 0.0;
 
   art_msgs::BrakeCommand    brake_msg_;
@@ -120,183 +121,169 @@ namespace
   art_msgs::SteeringCommand steering_msg_;
   art_msgs::ThrottleCommand throttle_msg_;
 
-  ros::Time shift_time_;                // time last shift requested
-
   // Odometry data
+  sensor_msgs::Imu imu_msg_;
   nav_msgs::Odometry odom_msg_;
 
-  // pilot command messages
-  art_msgs::CarControl goal_msg_;
-  art_msgs::LearningCommand current_learning_cmd_;
-  
-  ros::Time goal_time_;                 // time of last CarCommand
-  geometry_msgs::Twist twist_msg_;
+  ros::Time current_time_;              // time current cycle began
+  ros::Time shift_time_;                // time last shift requested
 
-  SpeedControl *speed_ = NULL;          // speed control
+  // times when messages received
+  ros::Time brake_time_;
+  ros::Time goal_time_;                 // latest goal command
+  ros::Time imu_time_;
+  ros::Time odom_time_;
+  ros::Time shifter_time_;
+  ros::Time steering_time_;
+  ros::Time throttle_time_;
+
+  art_msgs::PilotState pstate_msg_;     // pilot state message
+
+  boost::shared_ptr<SpeedControl> speed_; // speed control
 };
 
-// clamp value to range: [lower, upper]
-static inline float clamp(float value, float lower, float upper)
+/** clamp value to range
+ *
+ *  @lower minimum value of range
+ *  @value data to compare
+ *  @upper maximum value of range
+ *  @return @a value unless it is outside [@a lower, @a upper];
+ *          or the nearest limit, otherwise.
+ */
+static inline float clamp(float lower, float value, float upper)
 {
-  return (value > upper? upper: (value < lower? lower: value));
+  return std::max(lower, std::min(value, upper));
 }
 
 /** allocate appropriate speed control subclass for this configuration */
-void allocateSpeedControl(void)
+void allocateSpeedControl(const Config &newconfig)
 {
 
-  if (config_.use_learned_controller) 
+  if (newconfig.use_learned_controller) 
     {
       ROS_INFO("using RL learned controller for speed control");
-      speed_ = new LearnedSpeedControl();
+      speed_.reset(new LearnedSpeedControl());
     }
-  else if (config_.use_accel_matrix)
+  else if (newconfig.use_accel_matrix)
     {
       ROS_INFO("using acceleration matrix for speed control");
-      speed_ = new SpeedControlMatrix();
+      speed_.reset(new SpeedControlMatrix());
     }
   else
     {
       ROS_INFO("using brake and throttle PID for speed control");
-      speed_ = new SpeedControlPID();
+      speed_.reset(new SpeedControlPID());
     }
 
   // initialize brake and throttle positions in speed controller
+  // TODO remove this, it is ugly
   speed_->set_brake_position(brake_position_);
   speed_->set_throttle_position(throttle_position_);
 }
 
-/** deallocate speed control subclass */
-void deallocateSpeedControl(void)
+/** validate target CarCommand2 values */
+void validateTarget(void)
 {
-  if (speed_)
-    {
-      ROS_DEBUG("stopping pilot speed control");
-      delete speed_;
-      speed_ = NULL;
-    }
+  pstate_msg_.target.goal_velocity = clamp(config_.minspeed,
+                                           pstate_msg_.target.goal_velocity,
+                                           config_.maxspeed);
+  ROS_DEBUG("target velocity goal is %.2f m/s",
+            pstate_msg_.target.goal_velocity);
+
+  // TODO clamp angle to permitted range
+  ROS_DEBUG("target steering angle is %.3f (degrees)",
+            angles::to_degrees(pstate_msg_.target.steering_angle));
 }
 
-/** get node parameters */
-int getParameters(int argc, char *argv[])
-{
-  // use private node handle to get parameters
-  ros::NodeHandle private_nh("~");
-
-  // Allocate speed controller.  This needs to happen before setup()
-  // starts reading topics.
-  allocateSpeedControl();
-
-  return 0;
-}
-
-void setGoal(const art_msgs::CarControl *command)
-{
-  //ROS_DEBUG("setting (velocity ,angle) to (%.3f, %.3f)",
-  //          command->velocity, command->angle);
-
-  if (goal_msg_.velocity != command->velocity)
-    {
-      ROS_DEBUG("changing speed goal from %.2f m/s to %.2f",
-                goal_msg_.velocity, command->velocity);
-
-      if (config_.maxspeed > 0 && command->velocity > config_.maxspeed)
-        {
-          ROS_WARN("excessive speed of %.2f m/s requested", command->velocity);
-          goal_msg_.velocity = config_.maxspeed;
-        }
-      else if (config_.minspeed < 0 && command->velocity < config_.minspeed)
-        {
-          ROS_WARN("excessive reverse speed of %.2f m/s requested",
-                   command->velocity);
-          goal_msg_.velocity = config_.minspeed;
-        }
-      else
-        {
-          goal_msg_.velocity = command->velocity;
-        }
-    }
-
-  if (goal_msg_.angle != command->angle)
-    {
-      ROS_DEBUG("changing steering angle from %.3f to %.3f (degrees)",
-                goal_msg_.angle, command->angle);
-      goal_msg_.angle = command->angle;
-    }
-}
-
-void processCommand(const art_msgs::CarCommand::ConstPtr &msg)
+void processCarAccel(const art_msgs::CarAccel::ConstPtr &msg)
 {
   goal_time_ = msg->header.stamp;
-  ROS_DEBUG("pilot command (v,a) = (%.3f, %.3f)",
-            msg->control.velocity, msg->control.angle);
-  art_msgs::CarControl car_ctl = msg->control;
-  setGoal(&car_ctl);
+  pstate_msg_.target = msg->control;
+  validateTarget();
 }
 
-// This allows pilot to accept ROS cmd_vel messages
-void processTwist(const geometry_msgs::Twist::ConstPtr &twistIn)
+// will be deprecated
+void processCarCommand(const art_msgs::CarCommand::ConstPtr &msg)
 {
-  twist_msg_ = *twistIn;
+  goal_time_ = msg->header.stamp;
+  pstate_msg_.target.acceleration = 0.0; // use some default?
+  pstate_msg_.target.goal_velocity = msg->control.velocity;
+  pstate_msg_.target.steering_angle = angles::from_degrees(msg->control.angle);
+  if (pstate_msg_.target.goal_velocity > 0.0)
+    pstate_msg_.target.gear = art_msgs::CarControl2::Drive;
+  else if (pstate_msg_.target.goal_velocity < 0.0)
+    pstate_msg_.target.gear = art_msgs::CarControl2::Reverse;
+  validateTarget();
+}
 
-  // convert to a CarControl message for setGoal()
-  art_msgs::CarControl car_ctl;
-  car_ctl.velocity = twistIn->linear.x;
-  car_ctl.angle = Steering::steering_angle(car_ctl.velocity, twistIn->angular.z);
-
-  setGoal(&car_ctl);
+void processImu(const sensor_msgs::Imu::ConstPtr &imuIn)
+{
+  imu_time_ = imuIn->header.stamp;
+  pstate_msg_.imu.state = art_msgs::DriverState::RUNNING;
+  pstate_msg_.current.acceleration = imuIn->linear_acceleration.x;
+  imu_msg_ = *imuIn;                    // save entire message
 }
 
 void processOdom(const nav_msgs::Odometry::ConstPtr &odomIn)
 {
-  ROS_DEBUG("Odometry pose: (%.3f, %.3f, %.3f), (%.3f, %.3f, %.3f)",
-            odomIn->pose.pose.position.x,
-            odomIn->pose.pose.position.y,
-            odomIn->pose.pose.position.z,
-            odomIn->twist.twist.linear.x,
-            odomIn->twist.twist.linear.y,
-            odomIn->twist.twist.linear.z);
-
+  odom_time_ = odomIn->header.stamp;
+  pstate_msg_.odom.state = art_msgs::DriverState::RUNNING;
+  pstate_msg_.current.goal_velocity = odomIn->twist.twist.linear.x;
   odom_msg_ = *odomIn;
-
-  ROS_DEBUG("current velocity = %.3f m/sec, (%02.f mph)",
-            odom_msg_.twist.twist.linear.x,
-            mps2mph(odom_msg_.twist.twist.linear.x));
 }
 
 void processBrake(const art_msgs::BrakeState::ConstPtr &brakeIn)
 {
+  brake_time_ = brakeIn->header.stamp;
+  pstate_msg_.brake.state = art_msgs::DriverState::RUNNING;
   brake_position_ = brakeIn->position;
   speed_->set_brake_position(brake_position_);
-  ROS_DEBUG("Brake reports position %.3f", brake_position_);
 }
 
 void processThrottle(const art_msgs::ThrottleState::ConstPtr &throttleIn)
 {
+  throttle_time_ = throttleIn->header.stamp;
+  pstate_msg_.throttle.state = art_msgs::DriverState::RUNNING;
   throttle_position_ = throttleIn->position;
   speed_->set_throttle_position(throttle_position_);
-  ROS_DEBUG("Throttle reports position %.3f", throttle_position_);
 }
 
 void processShifter(const art_msgs::Shifter::ConstPtr &shifterIn)
 {
-  shifter_gear_ = shifterIn->gear;
-  ROS_DEBUG("Shifter reports gear %d", shifter_gear_);
+  shifter_time_ = shifterIn->header.stamp;
+  pstate_msg_.shifter.state = art_msgs::DriverState::RUNNING;
+  /// @todo reconcile CarControl2 and Shifter gear numbers
+  switch (shifterIn->gear)
+    {
+    case art_msgs::Shifter::Drive:
+      pstate_msg_.current.gear = art_msgs::CarControl2::Drive;
+      break;
+    case art_msgs::Shifter::Park:
+      pstate_msg_.current.gear = art_msgs::CarControl2::Park;
+      break;
+    case art_msgs::Shifter::Reverse:
+      pstate_msg_.current.gear = art_msgs::CarControl2::Reverse;
+      break;
+    default:
+      ROS_WARN_STREAM("Unexpected gear number: " << shifterIn->gear
+                      << " (ignored)");
+    }
 }
 
 void processSteering(const art_msgs::SteeringState::ConstPtr &steeringIn)
 {
-  steering_angle_ = steeringIn->angle;
-  ROS_DEBUG("Steering reports angle %.1f (degrees)", steering_angle_);
+  steering_time_ = steeringIn->header.stamp;
+  pstate_msg_.steering.state = steeringIn->driver.state;
+  pstate_msg_.current.steering_angle = angles::from_degrees(steeringIn->angle);
 }
 
-
+/// @todo create a better learning interface (perhaps a service?)
 void processLearning(const art_msgs::LearningCommand::ConstPtr &learningIn)
 {
-  current_learning_cmd_.pilotActive = learningIn->pilotActive;
-  ROS_INFO("Pilot Active set to %d", current_learning_cmd_.pilotActive);
+  pstate_msg_.preempted = (learningIn->pilotActive == 0);
+  ROS_INFO_STREAM("Pilot is "
+                  << (pstate_msg_.preempted? "preempted": "active"));
 }
-
 
 /** handle dynamic reconfigure service request
  *
@@ -304,73 +291,73 @@ void processLearning(const art_msgs::LearningCommand::ConstPtr &learningIn)
  *        becomes the service reply message as updated here.
  * @param level SensorLevels value (0xffffffff on initial call)
  *
- * This is done without any locking because I believe it is called in
- * the same main thread as ros::spinOnce() and all the topic
- * subscription callbacks. If not, we need a lock.
+ * This is done without any locking because it is called in the same
+ * thread as ros::spinOnce() and all the topic subscription callbacks.
  */
-void reconfig(art_pilot::PilotConfig &newconfig, uint32_t level)
+void reconfig(Config &newconfig, uint32_t level)
 {
-  ROS_INFO("pilot dynamic reconfigure, level 0x%x", level);
+  ROS_INFO("pilot dynamic reconfigure, level 0x%08x", level);
 
-  // need to reallocate speed controller when use_accel_matrix changes
-  // or use_learned_controller changes
-  bool realloc = (newconfig.use_accel_matrix != config_.use_accel_matrix ||
-                  newconfig.use_learned_controller != config_.use_learned_controller);
-
-  if (realloc)
+  if (level & driver_base::SensorLevels::RECONFIGURE_CLOSE)
     {
-      deallocateSpeedControl();
+      allocateSpeedControl(newconfig);
     }
 
   config_ = newconfig;
-
-  if (realloc)
-    {
-      allocateSpeedControl();
-    }
 }
 
-// Adjust velocity to match goal.
-//
-//  cur_speed	absolute value of current velocity in m/sec
-//  speed_delta	difference between that and our immediate goal
+void halt(float cur_speed);             // forward declaration
+
+/** Adjust velocity to match goal.
+ *  
+ *  @param cur_speed absolute value of current velocity in m/s
+ *  @param error difference between that and our immediate goal
+ */
 void adjustVelocity(float cur_speed, float error)
 {
+  if (pstate_msg_.steering.state != DriverState::RUNNING
+      || pstate_msg_.odom.state != DriverState::RUNNING)
+    {
+      // critical component failure: halt the car
+      halt(cur_speed);
+      return;
+    }
+
   // Adjust brake and throttle settings.
   speed_->adjust(cur_speed, error,
                  &brake_msg_.position, &throttle_msg_.position);
 
-  brake_msg_.position = clamp(brake_msg_.position, 0.0, 1.0);
+  brake_msg_.position = clamp(0.0, brake_msg_.position, 1.0);
   if (fabsf(brake_msg_.position - brake_position_) > EPSILON_BRAKE)
     {
-      brake_msg_.header.stamp = ros::Time::now();
+      brake_msg_.header.stamp = current_time_;
       brake_cmd_.publish(brake_msg_);
     }
 
-  throttle_msg_.position = clamp(throttle_msg_.position, 0.0, 1.0);
+  throttle_msg_.position = clamp(0.0, throttle_msg_.position, 1.0);
   if (fabsf(throttle_msg_.position - throttle_position_) > EPSILON_THROTTLE)
     {
-      throttle_msg_.header.stamp = ros::Time::now();
+      throttle_msg_.header.stamp = current_time_;
       throttle_cmd_.publish(throttle_msg_);
     }
 }
 
-// Halt -- soft version of hardware E-Stop.
-//
-//  The goal is to bring the vehicle to a halt as quickly as possible,
-//  while remaining safely under control.  Normally, navigator sends
-//  gradually declining speed requests when bringing the vehicle to a
-//  controlled stop.  The only abrupt requests we see are in
-//  "emergency" stop situations, when there was a pause request, or no
-//  clear path around an obstacle.
-//
-//  cur_speed	absolute value of current velocity in m/sec
-//
-void Halt(float cur_speed)
+/** halt -- soft version of hardware E-Stop.
+ *  
+ *   The goal is to bring the vehicle to a halt as quickly as possible,
+ *   while remaining safely under control.  Normally, navigator sends
+ *   gradually declining speed requests when bringing the vehicle to a
+ *   controlled stop.  The only abrupt requests we see are in
+ *   "emergency" stop situations, when there was a pause request, or no
+ *   clear path around an obstacle.
+ *  
+ *   @param cur_speed absolute value of current velocity in m/sec
+ */
+void halt(float cur_speed)
 {
   // At high speed use adjustVelocity() to slow the vehicle down some
   // before slamming on the brakes.  Even with ABS to avoid lock-up,
-  // it seems safer to bring the vehicle to a more gradual stop.
+  // it should be safer to bring the vehicle to a more gradual stop.
 
 #define SAFE_FULL_BRAKE_SPEED mph2mps(45) // 45 mph (in m/sec)
 
@@ -386,7 +373,7 @@ void Halt(float cur_speed)
       // prevent motion, even on a hill.
       //
       // TODO: detect motion after stopping and apply more brake.
-      brake_msg_.header.stamp = ros::Time::now();
+      brake_msg_.header.stamp = current_time_;
       brake_msg_.position = config_.brake_hold;
       brake_cmd_.publish(brake_msg_);
     }
@@ -398,36 +385,85 @@ void Halt(float cur_speed)
       //  an exception to the general rule of never applying brake and
       //  throttle together.  There seems to be enough inertia in the
       //  brake mechanism for this to be safe.
-      ros::Time now = ros::Time::now();
-      throttle_msg_.header.stamp = now;
+      throttle_msg_.header.stamp = current_time_;
       throttle_msg_.position = 0.0;
       throttle_cmd_.publish(throttle_msg_);
-      brake_msg_.header.stamp = now;
+      brake_msg_.header.stamp = current_time_;
       brake_msg_.position = 1.0;
       brake_cmd_.publish(brake_msg_);
     }
 }
 
-// Adjust steering angle.
-//
-// We do not use PID control, because the odometry does not provide
-// accurate yaw speed feedback.  Instead, we directly compute the
-// corresponding steering angle.  We can use open loop control at this
-// level, because navigator monitors our actual course and will
-// request any steering changes needed to reach its goal.
-//
+/** Adjust steering angle.
+ *  
+ *  We do not use PID control, because the odometry does not provide
+ *  accurate yaw speed feedback.  Instead, we directly compute the
+ *  corresponding steering angle.  We can use open loop control at this
+ *  level, because navigator monitors our actual course and will
+ *  request any steering changes needed to reach its goal.
+ *
+ *  @todo Limit angle actually requested based on current velocity to
+ *  avoid sudden turns at high speeds.
+ */
 void adjustSteering()
 {
-  static float cur_degrees = 360.0;     // (an impossible value)
-
-  // Set the steering angle in degrees.
-  if (cur_degrees != goal_msg_.angle)
+  if (pstate_msg_.current.steering_angle != pstate_msg_.target.steering_angle)
     {
-      ROS_DEBUG("requesting steering angle = %.1f (degrees)", goal_msg_.angle);
-      steering_msg_.header.stamp = ros::Time::now();
-      steering_msg_.angle = goal_msg_.angle;
+      // Set the steering angle in degrees.
+      float steer_degrees =
+        angles::to_degrees(pstate_msg_.target.steering_angle);
+      ROS_DEBUG("requesting steering angle = %.1f (degrees)", steer_degrees);
+      steering_msg_.header.stamp = current_time_;
+      steering_msg_.angle = steer_degrees;
       steering_cmd_.publish(steering_msg_);
-      cur_degrees = goal_msg_.angle;
+    }
+}
+
+/** check hardware device activity
+ *
+ *  @pre current_time_ updated for this pilot cycle
+ *
+ *  @param last_msg last message time stamp from this device
+ *  @param state[in,out] pointer to this device's state
+ *
+ *  @post pstate_msg_ updated to reflect current status for this device
+ */
+void checkActivity(const ros::Time &last_msg,
+                   DriverState::_state_type *state)
+{
+  if (current_time_.toSec() - last_msg.toSec() > config_.timeout)
+    {
+      // device not publishing often enough: consider it CLOSED
+      *state = DriverState::CLOSED;
+    }
+}
+
+/** monitor hardware status based on current inputs
+ *
+ *  @post current_time_ updated for this pilot cycle
+ *  @post pstate_msg_ updated to reflect current control hardware status
+ */
+void monitorHardware(void)
+{
+  current_time_ = ros::Time::now();
+  pstate_msg_.header.stamp = current_time_;
+
+  // accumulate new pilot state based on device states
+  checkActivity(brake_time_, &pstate_msg_.brake.state);
+  checkActivity(imu_time_, &pstate_msg_.imu.state);
+  checkActivity(odom_time_, &pstate_msg_.odom.state);
+  checkActivity(shifter_time_, &pstate_msg_.shifter.state);
+  checkActivity(steering_time_, &pstate_msg_.steering.state);
+  checkActivity(throttle_time_, &pstate_msg_.throttle.state);
+
+  pstate_msg_.pilot.state = DriverState::RUNNING;
+  if (pstate_msg_.brake.state != DriverState::RUNNING
+      || pstate_msg_.odom.state != DriverState::RUNNING
+      || pstate_msg_.steering.state != DriverState::RUNNING
+      || pstate_msg_.throttle.state != DriverState::RUNNING)
+    {
+      ROS_WARN_THROTTLE(40, "critical component failure, pilot not running");
+      pstate_msg_.pilot.state = DriverState::OPENED;
     }
 }
 
@@ -463,24 +499,25 @@ namespace Transmission
     } state_t;
 }
 
-// Speed control
-//
-//  Manage the shifter as a finite state machine.  Inputs are the
-//  current and goal velocity ranges (+,0,-).  If these velocities
-//  differ in sign, the vehicle must first be brought to a stop, then
-//  one of the transmission shift relays set for one second, before
-//  the vehicle can begin moving in the opposite direction.
-//
-void speedControl(float speed)
+/** Speed control
+ *  
+ *  Manage the shifter as a finite state machine.  Inputs are the
+ *  current and goal velocity ranges (+,0,-).  If these velocities
+ *  differ in sign, the vehicle must first be brought to a stop, then
+ *  one of the transmission shift relays set for one second, before
+ *  the vehicle can begin moving in the opposite direction.
+*/
+void speedControl(void)
 {
-  // If the learning needs to bypass pilot then return here
-  if (!current_learning_cmd_.pilotActive)
+  // return immediately if pilot preempted for learning speed control
+  if (pstate_msg_.preempted)
     return;
-  
+
   static const double shift_duration = 1.0; // hold relay one second
   static Transmission::state_t shifting_state = Transmission::Drive;
 
-  float goal = goal_msg_.velocity;       // goal velocity
+  float speed = pstate_msg_.current.goal_velocity;
+  float goal = pstate_msg_.target.goal_velocity;
   float error = goal - speed;
 
   speed_range_t cur_range = speed_range(speed);
@@ -500,34 +537,34 @@ void speedControl(float speed)
       else if (Stopped == cur_range && Backward == goal_range)
 	{
 	  shifting_state = Transmission::ShiftReverse;
-          shifter_msg_.header.stamp = ros::Time::now();
+          shifter_msg_.header.stamp = current_time_;
           shifter_msg_.gear = art_msgs::Shifter::Reverse;
           shifter_cmd_.publish(shifter_msg_);
-          shift_time_ = ros::Time::now();
+          shift_time_ = current_time_;
 	}
       else
 	{
-	  Halt(speed);
+	  halt(speed);
           speed_->reset();
 	}
       break;
 
     case Transmission::ShiftReverse:
       // make sure the transmission actually shifted
-      if (shifter_gear_ != art_msgs::Shifter::Reverse)
+      if (pstate_msg_.current.gear != art_msgs::CarControl2::Reverse)
 	{
 	  // repeat shift command until it works
-          shifter_msg_.header.stamp = ros::Time::now();
+          shifter_msg_.header.stamp = current_time_;
           shifter_msg_.gear = art_msgs::Shifter::Reverse;
           shifter_cmd_.publish(shifter_msg_);
-	  shift_time_ = ros::Time::now();
+	  shift_time_ = current_time_;
           ROS_DEBUG("repeated shift command at %.6f", shift_time_.toSec());
 	}
       // make sure the relay was set long enough
-      else if ((ros::Time::now().toSec() - shift_time_.toSec())
+      else if ((current_time_.toSec() - shift_time_.toSec())
                >= shift_duration)
 	{
-          shifter_msg_.header.stamp = ros::Time::now();
+          shifter_msg_.header.stamp = current_time_;
           shifter_msg_.gear = art_msgs::Shifter::Reset;
           shifter_cmd_.publish(shifter_msg_);
 	  if (Backward == goal_range)
@@ -538,16 +575,16 @@ void speedControl(float speed)
 	  else if (Stopped == goal_range)
 	    {
 	      shifting_state = Transmission::Reverse;
-	      Halt(-speed);
+	      halt(-speed);
 	      speed_->reset();
 	    }
 	  else // Dang!  we want to go forward now
 	    {
 	      shifting_state = Transmission::ShiftDrive;
-              shifter_msg_.header.stamp = ros::Time::now();
+              shifter_msg_.header.stamp = current_time_;
               shifter_msg_.gear = art_msgs::Shifter::Drive;
               shifter_cmd_.publish(shifter_msg_);
-	      shift_time_ = ros::Time::now();
+	      shift_time_ = current_time_;
 	    }
 	}
       break;
@@ -561,34 +598,34 @@ void speedControl(float speed)
       else if (Stopped == cur_range && Forward == goal_range)
 	{
 	  shifting_state = Transmission::ShiftDrive;
-          shifter_msg_.header.stamp = ros::Time::now();
+          shifter_msg_.header.stamp = current_time_;
           shifter_msg_.gear = art_msgs::Shifter::Drive;
           shifter_cmd_.publish(shifter_msg_);
-	  shift_time_ = ros::Time::now();
+	  shift_time_ = current_time_;
 	}
       else
 	{
-	  Halt(-speed);
+	  halt(-speed);
 	  speed_->reset();
 	}
       break;
 
     case Transmission::ShiftDrive:
       // make sure the transmission actually shifted
-      if (shifter_gear_ != art_msgs::Shifter::Drive)
+      if (pstate_msg_.current.gear != art_msgs::CarControl2::Drive)
 	{
 	  // repeat shift command until it works
-          shifter_msg_.header.stamp = ros::Time::now();
+          shifter_msg_.header.stamp = current_time_;
           shifter_msg_.gear = art_msgs::Shifter::Drive;
           shifter_cmd_.publish(shifter_msg_);
-	  shift_time_ = ros::Time::now();
+	  shift_time_ = current_time_;
           ROS_DEBUG("repeated shift command at %.6f", shift_time_.toSec());
 	}
       // make sure the relay was set long enough
-      else if ((ros::Time::now().toSec() - shift_time_.toSec())
+      else if ((current_time_.toSec() - shift_time_.toSec())
                >= shift_duration)
 	{
-          shifter_msg_.header.stamp = ros::Time::now();
+          shifter_msg_.header.stamp = current_time_;
           shifter_msg_.gear = art_msgs::Shifter::Reset;
           shifter_cmd_.publish(shifter_msg_);
 	  if (Forward == goal_range)
@@ -599,44 +636,55 @@ void speedControl(float speed)
 	  else if (Stopped == goal_range)
 	    {
 	      shifting_state = Transmission::Drive;
-	      Halt(speed);
+	      halt(speed);
 	      speed_->reset();
 	    }
 	  else // Dang!  we want to go backward now
 	    {
 	      shifting_state = Transmission::ShiftReverse;
-              shifter_msg_.header.stamp = ros::Time::now();
+              shifter_msg_.header.stamp = current_time_;
               shifter_msg_.gear = art_msgs::Shifter::Reverse;
               shifter_cmd_.publish(shifter_msg_);
-	      shift_time_ = ros::Time::now();
+	      shift_time_ = current_time_;
 	    }
 	}
       break;
     }
 }
 
-int setup(ros::NodeHandle node)
+// make this a constructor?
+void setup(ros::NodeHandle node)
 {
-  static int qDepth = 1;
+  // Declare dynamic reconfigure callback before subscribing to topics.
+  dynamic_reconfigure::Server<Config> srv;
+  dynamic_reconfigure::Server<Config>::CallbackType cb =
+    boost::bind(&reconfig, _1, _2);
+  srv.setCallback(cb);
 
   // no delay: we always want the most recent data
   ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
+  int qDepth = 1;
+
+  // command topics (car_cmd will be deprecated)
+  accel_cmd_ = node.subscribe("pilot/accel", qDepth, processCarAccel, noDelay);
+  car_cmd_ = node.subscribe("pilot/cmd", qDepth, processCarCommand, noDelay);
+  learning_cmd_ = node.subscribe("pilot/learningCmd", qDepth,
+                                 processLearning, noDelay);
 
   // topics to read
-  car_cmd_ = node.subscribe("pilot/cmd", qDepth, processCommand, noDelay);
-  twist_cmd_ = node.subscribe("cmd_vel", qDepth, processTwist, noDelay);
-  odom_state_ = node.subscribe("odom", qDepth, processOdom, noDelay);
-
   brake_state_ = node.subscribe("brake/state", qDepth, processBrake, noDelay);
+  imu_state_ = node.subscribe("imu", qDepth, processImu, noDelay);
+  odom_state_ = node.subscribe("odom", qDepth, processOdom, noDelay);
   shifter_state_ = node.subscribe("shifter/state", qDepth,
                                   processShifter, noDelay);
   steering_state_ = node.subscribe("steering/state", qDepth,
                                    processSteering, noDelay);
   throttle_state_ = node.subscribe("throttle/state", qDepth,
                                    processThrottle, noDelay);
-  learning_state_ = node.subscribe("pilot/learningCmd", qDepth,
-                                   processLearning, noDelay);
 
+  // topic for publishing pilot state
+  pilot_state_ = node.advertise<art_msgs::PilotState>("pilot/state", qDepth);
+  pstate_msg_.header.frame_id = art_msgs::ArtVehicle::frame_id;
   
   // initialize servo command interfaces and messages
   brake_cmd_ = node.advertise<art_msgs::BrakeCommand>("brake/cmd", qDepth);
@@ -657,57 +705,34 @@ int setup(ros::NodeHandle node)
   throttle_msg_.header.frame_id = art_msgs::ArtVehicle::frame_id;
   throttle_msg_.request = art_msgs::ThrottleCommand::Absolute;
   throttle_msg_.position = 0.0;
-
-  //
-  current_learning_cmd_.pilotActive = true;
-  
-  return 0;
-}
-
-void shutdown(void)
-{
-  deallocateSpeedControl();
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, NODE);
+  ros::init(argc, argv, "pilot");
   ros::NodeHandle node;
 
-  if (getParameters(argc, argv) != 0)
-    {
-      shutdown();
-      return 1;
-    }
-
-  // declare dynamic reconfigure callback
-  dynamic_reconfigure::Server<art_pilot::PilotConfig> srv;
-  dynamic_reconfigure::Server<art_pilot::PilotConfig>::CallbackType cb =
-    boost::bind(&reconfig, _1, _2);
-  srv.setCallback(cb);
-
-  if (setup(node) != 0)
-    {
-      shutdown();
-      return 2;
-    }
+  setup(node);
  
   // Main loop
   ros::Rate cycle(art_msgs::ArtHertz::PILOT); // set driver cycle rate
   while(ros::ok())
     {
-      ros::spinOnce();                  // handle incoming commands
+      ros::spinOnce();                  // handle incoming messages
 
+      monitorHardware();                // monitor device status
+
+      // TODO only when reconfig() is called
       speed_->configure();              // check for parameter updates
 
       // issue control commands
-      speedControl(odom_msg_.twist.twist.linear.x);
+      speedControl();
       adjustSteering();
+
+      pilot_state_.publish(pstate_msg_); // publish updated state message
 
       cycle.sleep();                    // sleep until next cycle
     }
-
-  shutdown();
 
   return 0;
 }

@@ -63,7 +63,7 @@ Training mode collects data while a human driver operates the vehicle.
 //#define TICKS_PER_DEGREE ((float)(-310000.0 / 31.0))
 //
 // more exact value determined by curve fit of measurements:
-#define TICKS_PER_DEGREE ((float) -9841.65332031)
+#define TICKS_PER_DEGREE ((double) -9841.65332031)
 
 #define DBG(format,args...) ROS_DEBUG(format, ## args)
 
@@ -72,7 +72,7 @@ class devsteer: Servo
 {
 public:
 
-  devsteer();
+  devsteer(int32_t center=0);
   ~devsteer() {};
 
   int	Open();
@@ -80,13 +80,24 @@ public:
   int	Configure();
 
   // Quicksilver command methods
+  int	check_status(void);
   int	get_angle(float &degrees);
-  int	get_encoder(float &ticks);
-  int	get_encoder(int32_t &iticks);
   void  publish_diag(const ros::Publisher &diag_pub);
   int	set_initial_angle(float position);
   int	steering_absolute(float position);
   int	steering_relative(float position);
+
+  // convert steering angle to encoder ticks
+  inline int32_t degrees2ticks(float degrees)
+  {
+    return (int32_t) lrint(degrees * TICKS_PER_DEGREE) + center_ticks_;
+  }
+
+  // convert encoder ticks to steering angle
+  inline float ticks2degrees(int32_t ticks)
+  {
+    return (ticks - center_ticks_) / TICKS_PER_DEGREE;
+  }
 
  private:
 
@@ -96,6 +107,7 @@ public:
   bool	center_on_exit_;          // center steering during shutdown()
   std::string port_;              // tty port name
   bool	training_;                // use training mode
+  bool	simulate_moving_errors_;  // simulate intermittent moving errors
   double steering_rate_;          // steering velocity (deg/sec)
 
   float	req_angle_;                    // requested angle (absolute)
@@ -107,22 +119,12 @@ public:
 
   int	configure_steering(void);
   int	encoder_goto(float degrees);
+  int	get_encoder(int32_t &iticks);
   int	get_status_word(uint16_t &status);
   int	send_cmd(const char *string);
   int	servo_cmd(const char *string);
+  void	servo_write_only(const char *string);
   int	write_register(int reg, int32_t val);
-
-  // convert steering angle to encoder ticks
-  inline int32_t degrees2ticks(float degrees)
-  {
-    return (int32_t) lrint(degrees * TICKS_PER_DEGREE) + center_ticks_;
-  }
-
-  // convert encoder ticks to steering angle
-  inline float ticks2degrees(uint32_t ticks)
-  {
-    return (ticks - center_ticks_) / TICKS_PER_DEGREE;
-  }
 
 };
 

@@ -1,0 +1,22 @@
+<package>
+  <description brief="ART vehicle tele-operation">
+
+     Tele-operation for driving the ART autonomous vehicle under
+     human control.
+
+  </description>
+  <author>Austin Robot Technology, Jack O'Quin</author>
+  <license>BSD</license>
+  <review status="experimental" notes=""/>
+  <url>http://www.ros.org/wiki/art_teleop</url>
+
+  <depend package="art_common"/>
+  <depend package="art_msgs"/>
+  <depend package="joy"/>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+
+  <!-- declare run-time dependency on Qt4 python package -->
+  <rosdep name="PyQt4"/>
+
+</package>

@@ -6,7 +6,8 @@
 #  noted.  This is not a published message, it defines multi-language
 #  constants.
 
-string frame_id = "vehicle" # ROS frame ID
+# ROS frame ID
+string frame_id = "vehicle"
 
 float32 length = 4.8                    # overall length
 float32 width = 2.12                    # overall width

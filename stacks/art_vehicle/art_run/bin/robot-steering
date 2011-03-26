@@ -54,6 +54,11 @@ case $CMD in
 	;;
   setup)
 	echo initializing steering on ${TTY}
+	echo "RST: restart"
+	servo_cmd "@16 4"
+	sleep 1
+	echo "PMX: exit profile move mode"
+	servo_cmd "@16 242"
 	echo "WRI Reg 20 (Position) = 0"
 	servo_cmd "@16 11 20 0"
 	# Max Acceleration: 3865 = 1 RPS/s
@@ -67,6 +72,8 @@ case $CMD in
 	servo_cmd "@16 11 23 193274"
 	echo "WRI Reg 24 (Offset) = 0"
 	servo_cmd "@16 11 24 0"
+	echo "KMC"
+	servo_cmd "@16 167 256 256"
 	echo "PMC"
 	servo_cmd "@16 240 0 0"
 	rc=$?
@@ -91,6 +98,8 @@ case $CMD in
 	rc=$?
 	;;
   status) 
+	#echo "reading polling status word"
+	#servo_cmd "@16 0"
 	echo "reading internal status word"
 	servo_cmd "@16 20"
 	rc=$?

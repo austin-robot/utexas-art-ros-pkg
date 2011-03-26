@@ -1,0 +1,27 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+
+Tele-operation for the ART automonous vehicle (under human control).
+
+
+\section teleop Tele-Operation client
+
+Graphical tele-operation client for ART pilot. Controls the vehicle
+using the mouse or keyboard.
+
+\subsection teleop_examples Examples
+
+Run Qt script for sending speeds and steering angles to the pilot.
+
+\verbatim
+$ rosrun art_pilot teleop.py
+\endverbatim
+
+\subsection teleop_rosapi ROS API
+
+- Node name: \b teleop
+- Publishes: \b pilot/cmd: pilot commands.
+
+*/

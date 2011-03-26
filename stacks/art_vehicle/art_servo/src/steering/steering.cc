@@ -52,7 +52,8 @@ Parameters:
 
 - @b ~/port (string)
   - serial port name for steering controller (usually "/dev/steering")
-  - default: "/dev/null" (simulate steering mechanism)
+  - use "/dev/null" when simulating the device
+  - default: "/dev/steering" (actual hardware port)
 
 - @b ~/diagnostic (bool)
   - if true, publish extra diagnostic information not needed for normal
@@ -78,18 +79,19 @@ public:
 
   ArtSteer();
   ~ArtSteer();
-  void	Main();
-  int	Setup(ros::NodeHandle node);
-  int	Shutdown();
+  void	run();
 
 private:
 
   // internal methods
+  int	calibrate_wheel_position(void);
+  void	close();
   void	GetCmd(const art_msgs::SteeringCommand::ConstPtr &cmdIn);
   void	GetPos(const art_msgs::IOadrState::ConstPtr &ioIn);
+  int	open();
   void	PublishStatus(void);
-  void	calibrate_wheel_position(void);
   void	read_wheel_angle(void);
+
 
   // .cfg variables:
   bool	diagnostic_;			// enable diagnostic mode
@@ -103,7 +105,6 @@ private:
   ros::Publisher  steering_state_;      // steering/state
   ros::Publisher  steering_diag_;	// steering/diag
 
-  devsteer *dev_;			// servo device interface
   float	steering_angle_;                // current steering angle (degrees)
   float	steering_sensor_;		// current steering sensor reading
   double cur_sensor_time_;	        // current sensor data time (sec)
@@ -115,8 +116,9 @@ private:
   int	calibration_cycle_;
   float	mean_voltage_;
 
-  // wheel self-test class
-  testwheel *tw_;
+  // driver state (from art_msgs)
+  typedef art_msgs::DriverState DriverState;
+  DriverState::_state_type driver_state_;
 
   // driver state variables -- the four valid states occur in this order:
   //
@@ -130,10 +132,13 @@ private:
   bool	wheel_calibrated_;		// wheel position calibrated
   bool	wheel_tested_;			// wheel motion tested
 
+  boost::shared_ptr<devsteer> dev_;     // servo device interface
+  boost::shared_ptr<testwheel> tw_;     // wheel self-test class
+
   // polynomials for converting between sensor voltage and angle
-  Polynomial *apoly_;		        // angle to voltage conversion
+  boost::shared_ptr<Polynomial> apoly_; // angle to voltage conversion
 #if defined(USE_VOLTAGE_POLYNOMIAL)
-  Polynomial *vpoly_;		        // voltage to angle conversion
+  boost::shared_ptr<Polynomial> vpoly_; // voltage to angle conversion
 #else
   std::vector<double> c_;               // volts2degrees() coefficients
 #endif
@@ -156,11 +161,17 @@ private:
   }
 };
 
-ArtSteer::ArtSteer()
+ArtSteer::ArtSteer():
+  driver_state_(DriverState::CLOSED),
+  angle_known_(false),
+  wheel_calibrated_(false),
+  wheel_tested_(false),
+  dev_(new devsteer()),
+  tw_(new testwheel(dev_))
 {
   // polynomial to convert steering angles to sensor voltages
   // (inverse of vpoly_, only used when simulating steering angles)
-  apoly_ = new Polynomial("apoly");
+  apoly_.reset(new Polynomial("apoly"));
   apoly_->add_coef(2.544);		// default constant coefficient
   apoly_->add_coef(-0.05456918);        // default coefficient of a
   apoly_->add_coef(0.00036568);		// default coefficient of a**2
@@ -168,7 +179,7 @@ ArtSteer::ArtSteer()
 
 #if defined(USE_VOLTAGE_POLYNOMIAL)
   // polynomial to convert sensor voltages to steering angles
-  vpoly_ = new Polynomial("vpoly");
+  vpoly_.reset(new Polynomial("vpoly"));
   vpoly_->add_coef(62.5943141);		// default constant coefficient
   vpoly_->add_coef(-30.0634102);        // default coefficient of v
   vpoly_->add_coef(2.14785486);		// default coefficient of v**2
@@ -188,7 +199,7 @@ ArtSteer::ArtSteer()
   diagnostic_ = false;
   mynh.getParam("diagnostic", diagnostic_);
   if (diagnostic_)
-    ROS_INFO("using diagnostic mode");
+    ROS_WARN("diagnostic mode ignored");
 
   // simulate sensor input parameter
   mynh.param("simulate", simulate_, false);
@@ -205,43 +216,14 @@ ArtSteer::ArtSteer()
   ROS_INFO("steering sensor timeout: %.3f seconds.", sensor_timeout_);
 
   // allocate and initialize the steering device interface
-  dev_ = new devsteer();
   dev_->Configure();
 
   // allocate and configure the steering wheel self-test
-  tw_ = new testwheel(dev_);
   tw_->Configure();
-}
-
-ArtSteer::~ArtSteer()
-{
-  delete tw_;
-  delete dev_;
-  delete apoly_;
-#if defined(USE_VOLTAGE_POLYNOMIAL)
-  delete vpoly_;
-#endif
-}
-
-// Set up the device.  Return 0 if things go well, and -1 otherwise.
-int ArtSteer::Setup(ros::NodeHandle node)
-{
-  // initialize state variables
-  angle_known_ = false;
-  wheel_calibrated_ = false;
-  wheel_tested_ = false;
-
-  last_sensor_time_ = cur_sensor_time_ = 0.0;
-  last_set_point_ = set_point_ = 180.0;	// preposterous starting value
-  steering_angle_ = 0.0;                // needed for simulation
-  calibration_cycle_ = 0;
-
-  int rc = dev_->Open();
-  if (rc != 0)
-    return -1;
 
   // subscribe to relevant ROS topics
   static int qDepth = 1;
+  ros::NodeHandle node;
   ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
   steering_cmd_ =
     node.subscribe("steering/cmd", qDepth, &ArtSteer::GetCmd, this, noDelay);
@@ -251,15 +233,45 @@ int ArtSteer::Setup(ros::NodeHandle node)
     node.advertise<art_msgs::SteeringDiagnostics>("steering/diag", qDepth);
   ioadr_state_ =
     node.subscribe("ioadr/state", qDepth, &ArtSteer::GetPos, this, noDelay);
-
-  return 0;
 }
 
-// Shutdown the device
-int ArtSteer::Shutdown()
+ArtSteer::~ArtSteer()
+{
+  if (driver_state_ != DriverState::CLOSED)
+    {
+      close();
+    }
+}
+
+/** open the device.
+ *
+ *  @return 0 if successful.
+ *  @post state is OPENED (if successful)
+ */
+int ArtSteer::open()
+{
+  last_sensor_time_ = cur_sensor_time_ = 0.0;
+  last_set_point_ = set_point_ = 180.0;	// preposterous starting value
+  steering_angle_ = 0.0;                // needed for simulation
+  calibration_cycle_ = 0;
+
+  // open the device
+  int rc = dev_->Open();
+  if (rc == 0)
+    {
+      driver_state_ = DriverState::OPENED;
+    }
+  return rc;
+}
+
+/** close the device.
+ *
+ *  @post driver_state_ is CLOSED
+ */
+void ArtSteer::close()
 {
   dev_->Close();
-  return 0;
+  driver_state_ = DriverState::CLOSED;
 }
 
 
@@ -296,18 +308,22 @@ void ArtSteer::GetPos(const art_msgs::IOadrState::ConstPtr &ioIn)
   angle_known_ = true;
 }
 
-// Calibrate current steering wheel position.
-//
-// Assumes the wheel will not move while in this state.  Unless
-// someone forgot to turn on the steering breaker, that will be
-// true. Otherwise, the wheel self-test should detect the error.
-//
-// This implementation minimizes the effects of sensor noise by
-// accumulating a moving average of the first "calibration_periods_"
-// readings.
-//
-void ArtSteer::calibrate_wheel_position(void)
+/* Calibrate current steering wheel position.
+ *
+ * Assumes the wheel will not move while in this state.  Unless
+ * someone forgot to turn on the steering breaker, that will be
+ * true. Otherwise, the wheel self-test should detect the error.
+ *
+ * @return 0 if success, < 0 if still calibrating, > 0 errno if failure
+ *
+ * @note This implementation minimizes the effects of sensor noise by
+ * accumulating a moving average of the first "calibration_periods_"
+ * readings.
+ */
+int ArtSteer::calibrate_wheel_position(void)
 {
+  int retval = -1;			// still working
+
   if (cur_sensor_time_ > last_sensor_time_) // new sensor data this cycle?
     {
       if (calibration_cycle_++ == 0)	// first time?
@@ -316,55 +332,66 @@ void ArtSteer::calibrate_wheel_position(void)
       // accumulate moving average
       mean_voltage_ += ((steering_sensor_ - mean_voltage_)
 		       / calibration_cycle_);
-      ROS_DEBUG("cumulative steering sensor average: %.3f volts", mean_voltage_);
+      ROS_DEBUG("cumulative steering sensor average: %.3f volts",
+                mean_voltage_);
 
       if (calibration_cycle_ >= calibration_periods_)
 	{
 	  // finished with calibration
-	  wheel_calibrated_ = true;
 	  steering_angle_ = limit_travel(volts2degrees(mean_voltage_));
 	  ROS_INFO("initial steering angle: %.2f degrees", steering_angle_);
-	  dev_->set_initial_angle(steering_angle_);
+	  retval = dev_->set_initial_angle(steering_angle_);
 	}
     }
+  return retval;
 }
 
-// Get simulated wheel angle from driver (if real sensor not available).
+/** Get simulated wheel angle from driver
+ *
+ *  Only required when simulating the position sensor (even when using
+ *  the real steering device).
+ *
+ *  @bug this should NOT be called until after calibrate_wheel_position
+ *
+ *  @post when simulate_ is true, tries to set steering_angle_,
+ *        steering_sensor_, cur_sensor_time_, angle_known_
+ */
 void ArtSteer::read_wheel_angle(void)
 {
-  int rc = dev_->get_angle(steering_angle_);
-  if (rc != 0)
+  if (simulate_)                        // not using real sensor?
     {
-      return;
+      int rc = dev_->get_angle(steering_angle_);
+      if (rc == 0)                      // got the angle?
+        {
+          steering_sensor_ = degrees2volts(steering_angle_);
+          cur_sensor_time_ = ros::Time::now().toSec();
+          angle_known_ = true;
+        }
     }
-  steering_sensor_ = degrees2volts(steering_angle_);
-  cur_sensor_time_ = ros::Time::now().toSec();
-  angle_known_ = true;
 }
 
-// publish current device status
+/** publish current device status */
 void ArtSteer::PublishStatus(void)
 {
   art_msgs::SteeringState msg;         // steering state message
 
-  // report the angle and voltage from the steering position sensor
+  msg.driver.state = driver_state_;
   msg.angle = steering_angle_;
   msg.sensor = steering_sensor_;
-
-  // TODO: use ROS diagnostics package
-  if (diagnostic_)			// return extra diagnostic values?
-    {
-      // attempt to read current encoder position
-      dev_->get_encoder(msg.encoder);
-      dev_->publish_diag(steering_diag_);
-    }
-
   msg.header.stamp = ros::Time::now();
   steering_state_.publish(msg);
+
+  if (driver_state_ != DriverState::CLOSED)
+    {
+      // publish driver diagnostic info
+      // (TODO: use ROS diagnostics package)
+      dev_->publish_diag(steering_diag_);
+    }
 }
 
 // Main function for device thread
-void ArtSteer::Main() 
+// TODO rationalize these states and bits
+void ArtSteer::run() 
 {
   ros::Rate cycle(art_msgs::ArtHertz::STEERING); // set driver cycle rate
 
@@ -372,42 +399,75 @@ void ArtSteer::Main()
     {
       ros::spinOnce();                  // handle incoming commands
 
-      if (simulate_)			// not using real position sensor
-        read_wheel_angle();
+      switch (driver_state_)
+        {
+        case DriverState::CLOSED:
+          {
+            // TODO: spin slower while closed
+            open();                     // try to open the device
+            // state: CLOSED ==> OPENED (if successful)
+            break;
+          }
 
-      // Processing depends on driver state.  These tests reverse the
-      // actual sequence of states, focusing on normal operation.
-      if (wheel_tested_)			// wheel is working OK?
-	{
-	  if (fabs(set_point_ - last_set_point_) > epsilon)
-	    {
-	      // command steering position to match desired set point.
-	      int rc = dev_->steering_absolute(set_point_);
-	      if (rc == 0)
-		last_set_point_ = set_point_;
-	    }
-	}
-      else if (wheel_calibrated_)	// initial position known?
-	{
-	  int rc = tw_->Run(steering_angle_);
-	  if (rc < 0)
-	    {
-	      ROS_FATAL("steering self-test failure: shutting down driver");
-              ros::shutdown();
-	    }
-	  if (rc != 0)
-	    wheel_tested_ = true;
-	}
-      else if (angle_known_)	// sensor data received?
-	{
-	  calibrate_wheel_position();
-	}
+        case DriverState::OPENED:
+          {
+            read_wheel_angle();         // (may be simulated)
+            if (wheel_tested_)          // wheel previously tested?
+              {
+                // state: OPENED ==> RUNNING
+                driver_state_ = DriverState::RUNNING;
+              }
+            else if (wheel_calibrated_)	// initial position known?
+              {
+                int rc = tw_->Run(steering_angle_);
+                if (rc < 0)             // test failed?
+                  {
+                    ROS_ERROR("steering self-test failure: closing driver");
+                    close();            // (sets state to CLOSED)
+                  }
+                else if (rc > 0)       // test completed successfully?
+                  {
+                    wheel_tested_ = true;
+                  }
+              }
+            else if (angle_known_)	// sensor data received?
+              {
+                int rc = calibrate_wheel_position();
+		if (rc == 0)		// calibration succeeded?
+		  {
+		    wheel_calibrated_ = true;
+		  }
+		else if (rc > 0)	// calibration failed?
+		  {
+                    ROS_ERROR("steering calibration failure: closing driver");
+                    close();            // (sets state to CLOSED)
+		  }
+              }
+            break;
+          }
 
-      if (angle_known_)
-	PublishStatus();		// publish current status
+        case DriverState::RUNNING:
+          {
+            read_wheel_angle();         // (may be simulated)
+            int rc = dev_->check_status();
+            if (rc != 0)                // status bad?
+              {
+		ROS_ERROR("bad steering status: closing driver");
+		close();		// (sets state to CLOSED)
+              }
+            else if (fabs(set_point_ - last_set_point_) > epsilon)
+              {
+                // command steering position to match desired set point.
+                rc = dev_->steering_absolute(set_point_);
+                if (rc == 0)
+                  last_set_point_ = set_point_;
+              }
+            break;
+          }
+        } // end switch on driver state
 
+      PublishStatus();                  // publish current status
       last_sensor_time_ = cur_sensor_time_;
-
       cycle.sleep();                    // sleep until next cycle
     }
 }
@@ -416,13 +476,8 @@ void ArtSteer::Main()
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "steering");
-  ros::NodeHandle node;
   ArtSteer dvr;
-
-  if (dvr.Setup(node) != 0)
-    return 2;
-  dvr.Main();
-  dvr.Shutdown();
+  dvr.run();
 
   return 0;
 }

@@ -8,5 +8,6 @@
   -->
 
 <launch>
-  <node pkg="$(optenv PILOT_PKG art_pilot)" type="$(optenv PILOT_NODE pilot)" name="pilot" />
+  <node pkg="$(optenv PILOT_PKG art_pilot)"
+        type="$(optenv PILOT_NODE pilot)" name="pilot" />
 </launch>

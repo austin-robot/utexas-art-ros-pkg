@@ -192,7 +192,7 @@ SpeedControlPID::SpeedControlPID():
   // Throttle gains came from Jesse Tannahill's pilot prototype.
   // Brake gains selected by experiment
   //
-  brake_pid_ = new Pid("brake", -0.2, -0.02, -1.6, 1.0, 0.0, 5000.0);
+  brake_pid_ = new Pid("brake", -0.2, -0.0002, -1.6, 1.0, 0.0, 5000.0);
   throttle_pid_ = new Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0);
 
   configure();

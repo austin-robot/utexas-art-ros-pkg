@@ -52,7 +52,8 @@ Parameters
 
 - port (string)
   - tty port name for the brake servo
-  - default: "/dev/null"
+  - use "/dev/null" when simulating the device
+  - default: "/dev/brake" (actual hardware port)
 
 - apply_on_exit (bool)
   - unless false, apply full brake during shutdown.
@@ -81,7 +82,7 @@ Training mode collects data while a human driver operates the vehicle.
 namespace
 {
   // .cfg variables:
-  std::string port = "/dev/null";       // tty port name
+  std::string port = "/dev/brake";      // tty port name
   bool	training = false;               // use training mode
   bool	diagnostic = false;             // enable diagnostic mode
   int   qDepth = 1;                     // ROS topic queue depths

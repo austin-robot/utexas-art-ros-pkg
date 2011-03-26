@@ -2,30 +2,31 @@
 #
 # Qt python script to send tele-operation commands to pilot
 #
-#   Copyright (C) 2009 Austin Robot Technology
-#
+#   Copyright (C) 2009, 2011 Austin Robot Technology
 #   License: Modified BSD Software License Agreement
-#
-#   Author: Jack O'Quin
 #
 # $Id$
 
-PKG_NAME = 'art_pilot'
+PKG_NAME = 'art_teleop'
 
 import sys
 import os
-#import signal
+import math
 import threading
+
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
 import roslib;
 roslib.load_manifest(PKG_NAME)
 import rospy
-from art_msgs.msg import CarControl
-from art_msgs.msg import CarCommand
 
-g_topic = rospy.Publisher('pilot/cmd', CarCommand)
+from art_msgs.msg import ArtVehicle
+from art_msgs.msg import CarControl2
+from art_msgs.msg import CarAccel
+from art_msgs.msg import Epsilon
+
+g_topic = rospy.Publisher('pilot/accel', CarAccel)
 rospy.init_node('teleop')
 
 # set path name for resolving icons
@@ -148,11 +149,9 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addAction(speed_up)
         toolbar.addAction(go_right)
 
-        self.car_msg = CarCommand()
+        self.car_msg = CarAccel()
         self.car_msg.header.stamp = rospy.Time.now()
-        self.car_ctl = CarControl()
-        self.car_ctl.velocity = 0.0
-        self.car_ctl.angle = 0.0
+        self.car_ctl = CarControl2()
         self.car_msg.control = self.car_ctl
         self.topic.publish(self.car_msg)
 
@@ -160,19 +159,30 @@ class MainWindow(QtGui.QMainWindow):
 
     def updateStatusBar(self):
         self.statusBar().showMessage('speed: '
-                                     + str(self.car_ctl.velocity)
+                                     + str(self.car_ctl.goal_velocity)
                                      + ' m/s,    angle: '
-                                     + str(self.car_ctl.angle)
+                                     + str(math.degrees(self.car_ctl.steering_angle))
                                      + ' deg')
 
     def adjustCarCmd(self, v, a):
+        """adjust pilot CarAccel command
 
-        self.car_ctl.velocity += v
-        self.car_ctl.angle += a
-        if self.car_ctl.angle > 29.0:
-            self.car_ctl.angle = 29.0
-        if self.car_ctl.angle < -29.0:
-            self.car_ctl.angle = -29.0
+              @param v change in velocity (m/s)
+              @param a change in steering angle (radians)
+        """
+
+        self.car_ctl.goal_velocity += v
+        if abs(self.car_ctl.goal_velocity) > Epsilon.speed:
+            if self.car_ctl.goal_velocity < 0.0:
+                self.car_ctl.gear = CarControl2.Reverse
+            else:
+                self.car_ctl.gear = CarControl2.Drive
+
+        self.car_ctl.steering_angle += a
+        if self.car_ctl.steering_angle > ArtVehicle.max_steer_radians:
+            self.car_ctl.steering_angle = ArtVehicle.max_steer_radians
+        if self.car_ctl.steering_angle < -ArtVehicle.max_steer_radians:
+            self.car_ctl.steering_angle = -ArtVehicle.max_steer_radians
 
         self.car_msg.header.stamp = rospy.Time.now()
         self.car_msg.control = self.car_ctl
@@ -182,31 +192,31 @@ class MainWindow(QtGui.QMainWindow):
 
     def center_wheel(self):
         "center steering wheel"
-        self.adjustCarCmd(0.0, -self.car_ctl.angle)
+        self.adjustCarCmd(0.0, -self.car_ctl.steering_angle)
 
     def go_left(self):
         "steer left"
-        self.adjustCarCmd(0.0, 1.0)
+        self.adjustCarCmd(0.0, math.radians(1.0))
 
     def go_left_more(self):
         "steer more to left"
-        self.adjustCarCmd(0.0, 4.0)
+        self.adjustCarCmd(0.0, math.radians(4.0))
 
     def go_left_less(self):
         "steer a little to left"
-        self.adjustCarCmd(0.0, 0.25)
+        self.adjustCarCmd(0.0, math.radians(0.25))
 
     def go_right(self):
         "steer right"
-        self.adjustCarCmd(0.0, -1.0)
+        self.adjustCarCmd(0.0, math.radians(-1.0))
 
     def go_right_more(self):
         "steer more to right"
-        self.adjustCarCmd(0.0, -4.0)
+        self.adjustCarCmd(0.0, math.radians(-4.0))
 
     def go_right_less(self):
         "steer far to right"
-        self.adjustCarCmd(0.0, -0.25)
+        self.adjustCarCmd(0.0, math.radians(-0.25))
 
     def slow_down(self):
         "go one m/s slower"
@@ -218,7 +228,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def stop_car(self):
         "stop car immediately"
-        self.adjustCarCmd(-self.car_ctl.velocity, 0.0)
+        self.adjustCarCmd(-self.car_ctl.goal_velocity, 0.0)
 
 
 class QtThread(threading.Thread):

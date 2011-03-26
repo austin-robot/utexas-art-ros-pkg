@@ -49,21 +49,4 @@ pilot parameters at any time, run:
 $ rosrun dynamic_reconfigure reconfigure_gui pilot
 \endverbatim
 
-\section teleop Tele-Operation client
-
-Graphical tele-operation client for ART pilot.
-
-\subsection teleop_examples Examples
-
-Run Qt script for sending speeds and steering angles to the pilot.
-
-\verbatim
-$ rosrun art_pilot teleop.py
-\endverbatim
-
-\subsection teleop_rosapi ROS API
-
-- Node name: \b teleop
-- Publishes: \b pilot/cmd: pilot commands.
-
 */

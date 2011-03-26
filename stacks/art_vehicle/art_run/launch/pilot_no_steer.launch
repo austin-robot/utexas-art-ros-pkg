@@ -16,6 +16,7 @@
   </node>
   <node pkg="art_servo" type="ioadr" name="shifter">
     <param name="~port" value="/dev/shifter"/>
+    <param name="~shifter" value="true"/>
   </node>
   <node pkg="art_servo" type="steering" name="steering">
     <param name="~port" value="/dev/null"/>

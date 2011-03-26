@@ -12,8 +12,9 @@
 
 #include <ros/ros.h>
 
-#include "devsteer.h"
 #include "testwheel.h"
+#include "devsteer.h"
+#include "dtimer.h"
 
 /////////////////////////////////////////////////////////////////
 // public methods
@@ -22,17 +23,14 @@
 
 #define CLASS "testwheel"
 
-testwheel::testwheel(devsteer *_dev)
-{
-  dev = _dev;
-  state = Begin;
-  timer = new DriverTimer();
-}
+testwheel::testwheel(const boost::shared_ptr<devsteer> &_dev):
+  state(Begin),
+  dev(_dev),
+  timer(new DriverTimer())
+{}
 
 testwheel::~testwheel()
-{
-  delete timer;
-}
+{}
 
 int testwheel::Configure()
 {

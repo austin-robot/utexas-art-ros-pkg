@@ -16,6 +16,7 @@
   <depend package="art_nav"/>
   <depend package="art_pilot"/>
   <depend package="art_servo"/>
+  <depend package="art_teleop" />
   <depend package="camera1394"/>
   <depend package="joy" />
   <depend package="nodelet" />

@@ -32,8 +32,6 @@
 # though I made a few changes (for example, using generators where
 # a function would ordinarily use static variables).
 
-# TODO: Test this program using a simulator
-
 import roslib
 roslib.load_manifest('art_pilot')
 import math
@@ -54,12 +52,14 @@ from art_msgs.msg import ThrottleState
 
 from art_msgs.msg import ArtHertz
 from art_msgs.msg import ArtVehicle
+from art_msgs.msg import CarAccel
 from art_msgs.msg import CarCommand
 from art_msgs.msg import CarControl
+from art_msgs.msg import CarControl2
 from art_msgs.msg import Conversions
 from art_msgs.msg import Epsilon
 
-from art_pilot.cfg import PilotConfig
+#from art_pilot.cfg import PilotConfig
 
 from art_common import steering
 import speed
@@ -79,7 +79,8 @@ tools, it also responds to Twist messages on the cmd_vel topic.
 
 Subscribes:
 
-- \b pilot/cmd [art_pilot.CarCommand] velocity and steering angle command
+- \b pilot/accel [art_msgs.CarAccel] acceleration and steering angle command
+- \b pilot/cmd [art_msgs.CarCommand] velocity and steering angle command
 - \b vel_cmd [geometry_msgs.Twist] standard ROS velocity and angle command
 - \b odom [nav_msgs.Odometry] estimate of robot position and velocity.
 
@@ -99,6 +100,7 @@ Publishes:
  # global variables
 
 # ROS topics used by this driver
+accel_cmd_ = None             # Subscriber: pilot command
 car_cmd_ = None             # Subscriber: pilot command
 twist_cmd_ = None           # Subscriber: Twist command
 odom_state_ = None          # Subscriber: odometry
@@ -113,10 +115,10 @@ shifter_cmd_ = None         # Publisher: shifter command
 steering_cmd_ = None        # Publisher: steering command
 throttle_cmd_ = None        # Publisher: throttle command
 
-  # configuration
-config_ = PilotConfig       # Pilot config: dynamic configuration
+# configuration
+#config_ = PilotConfig       # Pilot config: dynamic configuration
 
-  # servo control
+# servo control
 brake_position_ = 1.0
 shifter_gear_ = Shifter.Drive
 steering_angle_ = 0.0
@@ -129,12 +131,12 @@ throttle_msg_ = ThrottleCommand()
 
 shift_time_ = rospy.Time(0.0)           # time last shift requested
 
-  # Odometry data
+# Odometry data
 odom_msg_ = Odometry()
 
-  # pilot command messages
-goal_msg_ = CarControl()
-goal_time_ = rospy.Time()   # time of last CarCommand
+# pilot command messages
+goal_msg_ = CarControl2()
+goal_time_ = rospy.Time()               # time of last command
 twist_msg_ = Twist()
 speed_ = None
 
@@ -164,13 +166,10 @@ def getParameters(argv) :
 def setGoal(command) :
     global goal_msg_
     
-    # rospy.logdebug("setting (velocity ,angle) to (%.3f, %.3f)",
-    #                command.velocity, command.angle)
-
-    if (goal_msg_.velocity != command.velocity) :
+    if (goal_msg_.goal_velocity != command.goal_velocity) :
 
       rospy.logdebug("changing speed goal from %.2f m/s to %.2f",
-                     goal_msg_.velocity, command.velocity)
+                     goal_msg_.goal_velocity, command.goal_velocity)
 
       #if (config_.maxspeed > 0 and command.velocity > config_.maxspeed) :
       #  rospy.logwarn("excessive speed of %.3f m/s requested", command.velocity)
@@ -184,37 +183,31 @@ def setGoal(command) :
       #else :
       #  goal_msg_.velocity = command.velocity
         
-      goal_msg_.velocity = command.velocity
-    
+      goal_msg_.goal_velocity = command.goal_velocity
 
-    if (goal_msg_.angle != command.angle):
+    if (goal_msg_.steering_angle != command.steering_angle):
       rospy.logdebug("changing steering angle from %.3f to %.3f (degrees)",
-                     goal_msg_.angle, command.angle)
-      goal_msg_.angle = command.angle
+                     math.degrees(goal_msg_.steering_angle),
+                     math.degrees(command.steering_angle))
+      goal_msg_.steering_angle = command.steering_angle
 
-
- # processCommand
-def processCommand(msg) :
+def processAccel(msg) :
+    "process CarAccel command input"
     global goal_time_
     goal_time_ = msg.header.stamp
-    rospy.logdebug("pilot command (v,a) = (%.3f, %.3f)",
-                   msg.control.velocity, msg.control.angle)
     car_ctl = msg.control
     setGoal(car_ctl)
-    
 
- # This allows pilot to accept ROS cmd_vel messages
-def processTwist(twistIn) :
-    global twist_msg_
-    twist_msg_ = twistIn
-
-    # convert to a CarControl message for setGoal()
-    car_ctl = CarControl()
-    car_ctl.velocity = twistIn.linear.x
-    car_ctl.angle = steering.steering_angle(car_ctl.velocity, twistIn.angular.z)
-
+def processCommand(msg) :
+    "process CarCommand input"
+    global goal_time_
+    goal_time_ = msg.header.stamp
+    car_ctl = CarControl2()
+    car_ctl.goal_velocity = msg.control.velocity
+    if car_ctl.goal_velocity < 0.0:
+        car_ctl.gear = CarControl2.Reverse
+    car_ctl.steering_angle = math.radians(msg.control.angle)
     setGoal(car_ctl)
-    
 
  # processOdom
 def processOdom(odomIn) :
@@ -358,19 +351,19 @@ def Halt(cur_speed) :
  # request any steering changes needed to reach its goal.
  #
 
-cur_degrees = 360.0     # (an impossible value)
+cur_angle = 2.0 * math.pi               # (an impossible value)
 def adjustSteering() :
-    # Since cur_degrees was originally intended to be a static
+    # Since cur_angle was originally intended to be a static
     # variable and Python has no concept of static variables,
     # I've using global variables instead.
-    global cur_degrees
-    if (cur_degrees != goal_msg_.angle) :
+    global cur_angle
+    if (cur_angle != goal_msg_.steering_angle) :
       rospy.logdebug("requesting steering angle = %.1f (degrees)",
-                     goal_msg_.angle)
+                     math.degrees(goal_msg_.steering_angle))
       steering_msg_.header.stamp = rospy.Time.now()
-      steering_msg_.angle = goal_msg_.angle
+      steering_msg_.angle = math.degrees(goal_msg_.steering_angle)
       steering_cmd_.publish(steering_msg_)
-      cur_degrees = goal_msg_.angle
+      cur_angle = goal_msg_.steering_angle
  
 # These assignments are meant to replace the enumeration used in the
 # C++ version of Pilot.
@@ -416,7 +409,7 @@ def speedControl(speed) :
     global shift_duration
     global shift_time_
 
-    goal = goal_msg_.velocity       # goal velocity
+    goal = goal_msg_.goal_velocity
     error = goal - speed
 
     cur_range = speed_range(speed)
@@ -515,6 +508,7 @@ def speedControl(speed) :
  # setup
 def setup() :
   # topics to read
+  global accel_cmd_
   global car_cmd_
   global twist_cmd_
   global odom_state_
@@ -527,8 +521,10 @@ def setup() :
   global steering_cmd_
   global throttle_cmd_
 
-  car_cmd_ = rospy.Subscriber("pilot/cmd", CarCommand,
-                              processCommand, tcp_nodelay=True)
+  accel_cmd_ = rospy.Subscriber("pilot/accel", CarAccel, processAccel,
+                                tcp_nodelay=True)
+  car_cmd_ = rospy.Subscriber("pilot/cmd", CarCommand, processCommand,
+                              tcp_nodelay=True)
   twist_cmd_ = rospy.Subscriber("cmd_vel", Twist,
                                 processTwist, tcp_nodelay=True)
   odom_state_ = rospy.Subscriber("odom", Odometry,
@@ -587,9 +583,6 @@ def main(argv) :
 
     # Main loop
     while not rospy.is_shutdown():
-      # Rospy doesn't seem to have a spinOnce() function. What
-      # should I do instead? Does it not need anything here?
-      #ros::spinOnce();               # handle incoming commands
 
       speed_.configure()              # check for parameter updates
 

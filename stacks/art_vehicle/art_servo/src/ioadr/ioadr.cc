@@ -93,7 +93,6 @@ private:
 
   // .cfg variables:
   std::string node_name_;               // actual node name assigned
-  std::string node_basename_;           // base node name after last '/'
   int reset_relays_;			// initial/final relays setting
   std::string port_;			// IOADR8x tty port name
   bool do_shifter_;                     // handle Shifter messages
@@ -150,29 +149,29 @@ static const uint8_t relay_value_[5] = {0x00, 0x02, 0x04, 0x08, 0x10};
 IOadr::IOadr()
 {
   node_name_ = ros::this_node::getName();
-  node_basename_ = node_name_.substr(node_name_.rfind('/')+1);
   ROS_INFO_STREAM("initialize node: " << node_name_);
-  ROS_DEBUG_STREAM("base name: " << node_basename_);
 
   // use private node handle to get parameters
   ros::NodeHandle mynh("~");
 
-  port_ = "/dev/null";
-  mynh.getParam("port", port_);
-  ROS_INFO_STREAM("IOADR8x port = " << port_);
-
-  reset_relays_ = 0;
-  mynh.getParam("reset_relays", reset_relays_);
+  mynh.param("reset_relays", reset_relays_, 0);
   if (reset_relays_ >= 0)
     ROS_INFO("reset relays to 0x%02x", reset_relays_);
 
-  do_shifter_ = (node_basename_ == "shifter");
-  mynh.getParam("shifter", do_shifter_);
+  mynh.param("shifter", do_shifter_, false);
   if (do_shifter_)
     {
       ROS_INFO("providing shifter interface");
       shifter_gear_ = art_msgs::Shifter::Drive;
+      port_ = "/dev/shifter";
     }
+  else
+    {
+      // default port name for main IOADR8x board
+      port_ = "/dev/ioadr8x";
+    }
+  mynh.getParam("port", port_);
+  ROS_INFO_STREAM("IOADR8x port = " << port_);
 
   if (mynh.hasParam("poll_list"))
     {

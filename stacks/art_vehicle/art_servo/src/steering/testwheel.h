@@ -35,16 +35,17 @@ Configuration options for steering servo device:
 /** @} */
 
 
-#ifndef _TESTWHEEL_HH_
-#define _TESTWHEEL_HH_
+#ifndef _TESTWHEEL_H_
+#define _TESTWHEEL_H_
 
-#include "dtimer.h"
+class devsteer;
+class DriverTimer;
 
 class testwheel
 {
 public:
 
-  testwheel(devsteer *_dev);
+  testwheel(const boost::shared_ptr<devsteer> &_dev);
   ~testwheel();
 
   int	Configure();
@@ -63,8 +64,8 @@ public:
     } state_t;
 
   state_t state;			// current state of test
-  DriverTimer *timer;
-  devsteer *dev;
+  boost::shared_ptr<devsteer> dev;
+  boost::shared_ptr<DriverTimer> timer;
 
   // configuration options
   bool	test_wheel;
@@ -76,4 +77,4 @@ public:
   float target_angle;
 };
 
-#endif // _TESTWHEEL_HH_
+#endif // _TESTWHEEL_H_

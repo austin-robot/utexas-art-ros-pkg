@@ -8,21 +8,26 @@
 #
 # $Id$
 
-import roslib;
-roslib.load_manifest('art_pilot')
+PKG_NAME = 'art_pilot'
 
+# standard Python packages
+import sys
+import getopt
+import os
+import threading
+
+# ROS node setup
+import roslib;
+roslib.load_manifest(PKG_NAME)
 import rospy
+
+# ROS messages
 from nav_msgs.msg import Odometry
 from art_msgs.msg import BrakeCommand
 from art_msgs.msg import BrakeState
 from art_msgs.msg import CarCommand
 from art_msgs.msg import ThrottleCommand
 from art_msgs.msg import ThrottleState
-
-import sys
-import getopt
-import os
-import threading
 
 import plot_speed                       # speed data tools
 
@@ -53,6 +58,11 @@ class speedTopics:
             self.name = 'speed'
         
         self.plt = plot_speed.speedData()
+
+    def get_pilot_accel(self, cmd):
+        "ROS callback for /pilot/accel topic."
+        self.plt.set_pilot_cmd(cmd.header.stamp.to_sec(),
+                               cmd.control.goal_velocity)
 
     def get_pilot_cmd(self, cmd):
         "ROS callback for /pilot/cmd topic."
@@ -90,6 +100,7 @@ class speedTopics:
 
     def get_data(self, verbose=True):
         "Acquire speed topic data until ROS shutdown."
+        rospy.Subscriber('pilot/accel', CarAccel, self.get_pilot_accel)
         rospy.Subscriber('pilot/cmd', CarCommand, self.get_pilot_cmd)
         rospy.Subscriber('odom', Odometry, self.get_odometry)
         rospy.Subscriber('brake/cmd', BrakeCommand, self.get_brake_cmd)

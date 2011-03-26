@@ -1,7 +1,7 @@
 pilot:
   brake_hold: 0.69999999999999996
   brake_kd: -1.6000000000000001
-  brake_ki: -0.02,
+  brake_ki: -0.0002,
   brake_kp: -0.20000000000000001
   throttle_kd: 0.54000000000000004
   throttle_ki: 0.001

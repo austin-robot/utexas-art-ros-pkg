@@ -9,7 +9,9 @@
   <!-- start pilot and servo actuators -->
   <include file="$(find art_run)/launch/pilot_stage.launch" />
 
-  <!-- start joystick controller -->
-  <include file="$(find art_run)/launch/joystick.launch" />
+  <!-- start joystick controller (navigator not running) -->
+  <include file="$(find art_run)/launch/joystick.launch">
+    <arg name="use_navigator" value="False" />
+  </include>
 
 </launch>

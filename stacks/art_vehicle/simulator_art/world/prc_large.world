@@ -20,7 +20,9 @@ resolution 0.1
 
 # run simulation and screen updates every 50ms to reduce overhead
 #gui_interval 50
-interval_sim 50
+#interval_sim 50
+# BUG workaround for stage: only update every 100ms
+interval_sim 100
 
 
 # configure the GUI window

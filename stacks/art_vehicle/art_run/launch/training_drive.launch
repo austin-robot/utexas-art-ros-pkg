@@ -18,6 +18,7 @@
   </node>
   <node pkg="art_servo" type="ioadr" name="shifter">
     <param name="~port" value="/dev/shifter"/>
+    <param name="~shifter" value="true"/>
   </node>
   <!-- steering driver not working (or useful in training mode
   <node pkg="art_servo" type="steering" name="steering">

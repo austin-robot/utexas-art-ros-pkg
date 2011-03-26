@@ -1,4 +1,5 @@
-/*
+/* -*- mode: C++ -*- 
+ *
  *  Description:  Driver timer class
  *
  *  Copyright (C) 2009 Austin Robot Technology                    

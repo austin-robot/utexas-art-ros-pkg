@@ -2,7 +2,6 @@
  *  ART steering servo controller device interface
  *
  *  Copyright (C) 2008 Austin Robot Technology
- *
  *  License: Modified BSD Software License Agreement
  *
  *  $Id$
@@ -16,6 +15,7 @@
 #include <art_msgs/ArtHertz.h>
 #include <art_msgs/ArtVehicle.h>
 #include "devsteer.h"
+#include "silverlode.h"
 
 /////////////////////////////////////////////////////////////////
 // public methods
@@ -31,10 +31,10 @@ int64_t devsteer::GetTime()
   return (int64_t) t.sec * 1000 + (int64_t) t.nsec / 1000000;
 }
 
-devsteer::devsteer()
-{
-  req_angle_ = 0.0;
-}
+devsteer::devsteer(int32_t center):
+  req_angle_(0.0),
+  center_ticks_(center)                 // for unit testing
+{}
 
 int devsteer::Open()
 {
@@ -72,48 +72,81 @@ int devsteer::Close()
 int devsteer::Configure()
 {
   // use private node handle to get parameters
-  ros::NodeHandle mynh("~");
+  ros::NodeHandle private_nh("~");
 
-  port_ = "/dev/null";
-  mynh.getParam("port", port_);
+  private_nh.param("port", port_, std::string("/dev/steering"));
   ROS_INFO_STREAM("steering port = " << port_);
 
-  mynh.param("center_on_exit", center_on_exit_, false);
+  private_nh.param("center_on_exit", center_on_exit_, false);
   if (center_on_exit_)
     ROS_INFO("center steering on exit");
   else
     ROS_INFO("do not center steering on exit");
 
-  mynh.param("training", training_, false);
+  private_nh.param("training", training_, false);
+  if (training_)
+    ROS_INFO("using training mode");
+
+  private_nh.param("simulate_moving_errors",
+                   simulate_moving_errors_, false);
+  if (simulate_moving_errors_)
+    ROS_INFO("simulating intermittent moving errors");
+
   if (training_)
     ROS_INFO("using training mode");
 
   steering_rate_ = art_msgs::ArtVehicle::max_steer_degrees / 2.0;
-  mynh.getParam("steering_rate", steering_rate_);
+  private_nh.getParam("steering_rate", steering_rate_);
   ROS_INFO("steering rate is %.2f degrees/sec.", steering_rate_);
 
   return 0;
 }
 
-// get steering angle
-//
-// When running without actual device, simulate wheel motion.
-//
-// returns: 0 if successful, errno value otherwise
-//
-// degrees = current steering angle, if I/O successful
-//
+/** check device status
+ *
+ *  @return 0 if device seems to be working correctly
+ *  @todo make a header to define the status bits
+ */
+int devsteer::check_status(void)
+{
+  int rc = get_status_word(diag_msg_.status_word);
+
+  if (rc == 0)
+    {
+      // internal status register bits to check
+      uint16_t bad_status = (silverlode::isw::moving_error);
+      uint16_t required_status = (silverlode::isw::temp_driver_en);
+      if ((diag_msg_.status_word & bad_status) != 0
+	  || (diag_msg_.status_word & required_status) != required_status)
+	{
+	  ROS_ERROR("SilverLode internal status error: 0x%04x",
+		   diag_msg_.status_word);
+	  rc = EIO;
+	}
+    }
+
+  return rc;
+}
+
+/** get steering angle
+ *
+ *  When running without actual steering controller, simulate the
+ *  wheel motion.
+ *
+ *  @pre not using the real wheel position sensor
+ *  @pre center_ticks_ set correctly
+ *
+ *  @param degrees current steering angle, if I/O successful
+ *  @return 0 if successful, errno value otherwise
+ *
+ *  @post sets diag_msg_.encoder value (if successful)
+ */
 int devsteer::get_angle(float &degrees)
 {
   int rc = 0;
 
   if (have_tty)				// using actual device?
     {
-#if 0
-      // This is OK, we use the position sensor instead...
-      ROS_WARN("steering angle not available from device (not implemented)");
-      return ENOSYS;
-#else
       int32_t iticks;
       rc = get_encoder(iticks);
       if (rc == 0)
@@ -124,7 +157,6 @@ int devsteer::get_angle(float &degrees)
 	{
 	  ROS_WARN("encoder read failure, cannot estimate position");
 	}
-#endif
     }
   else
     {
@@ -146,27 +178,22 @@ int devsteer::get_angle(float &degrees)
 		      degrees_per_cycle: -degrees_per_cycle);
 	}
       ROS_DEBUG("simulated angle = %.2f degrees", degrees);
+
+      // set corresponding (simulated) encoder value
+      diag_msg_.encoder = degrees2ticks(degrees);
     }
 
   return rc;
 }
 
-// get steering encoder value -- converted to float
-int devsteer::get_encoder(float &ticks)
-{
-  int32_t iticks;
-  int rc = get_encoder(iticks);
-  if (rc == 0)
-    ticks = (float) iticks;
-  return rc;
-}
-
-// get steering encoder value
-//
-// returns: 0 if successful, errno value otherwise
-//
-// iticks = current encoder position, if I/O successful
-//
+/** get steering encoder value
+ * 
+ *  @param iticks set to encoder position, if I/O successful
+ *  @return 0 if successful, errno value otherwise
+ *
+ *  @post diag_msg_.encoder updated, if successful and using real
+ *                          device
+ */
 int devsteer::get_encoder(int32_t &iticks)
 {
   int rc = send_cmd("@16 12 1\r");
@@ -199,53 +226,75 @@ int devsteer::get_encoder(int32_t &iticks)
 int devsteer::get_status_word(uint16_t &status)
 {
   int rc = send_cmd("@16 20\r");
-  if (rc == 0 && have_tty)
+  if (rc == 0)
     {
-      unsigned int isw;
-      if (1 == sscanf(buffer, "# 10 0014 %4x", &isw))
-	{
-	  status = isw;
-          ROS_DEBUG(" " DEVICE " status: `%s'", buffer);
-	}
+      if (have_tty)
+        {
+          unsigned int isw;
+          if (1 == sscanf(buffer, "# 10 0014 %4x", &isw))
+            {
+              status = isw;
+              ROS_DEBUG(" " DEVICE " status: `%s'", buffer);
+            }
+          else
+            {
+              ROS_WARN(" " DEVICE " unexpected response: `%s'", buffer);
+              rc = EINVAL;
+            }
+        }
       else
 	{
-	  ROS_WARN(" " DEVICE " unexpected response: `%s'", buffer);
-	  rc = EINVAL;
+          status = silverlode::isw::temp_driver_en;
+	}
+
+      if (simulate_moving_errors_)
+	{
+	  // Hack: set moving error for four of every 64 seconds
+          ros::Time now = ros::Time::now();
+	  if ((now.sec & 0x003C) == 0)
+	    status |= silverlode::isw::moving_error;
 	}
     }
   return rc;
 }
 
-// publish current diagnostic information
+/** publish current diagnostic information
+ *
+ *  @param diag_pub ROS publish object for SteeringDiagnostics message.
+ *  @pre diag_msg_ already updated for this cycle
+ */
 void devsteer::publish_diag(const ros::Publisher &diag_pub)
 {
-  get_status_word(diag_msg_.status_word);
+  get_encoder(diag_msg_.encoder);
+  diag_msg_.header.stamp = ros::Time::now();
   diag_pub.publish(diag_msg_);
 }
 
-// set the initial steering wheel angle
-//
-// On entry: the controller is *not* in Profile Move mode, but data
-// registers are set to the basic movement parameters.
-//
-// On exit (if successful): The controller is in Profile Move
-// Continuous mode.  The position is set to reflect the initial wheel
-// angle, and the soft limits are set in registers 39 and 40.
-//
-// returns: 0 if successful;
-//	    errno value otherwise.
-//
+/** set the initial steering wheel angle
+ * 
+ *  @pre the controller is *not* in Profile Move mode, but data
+ *  registers are set to the basic movement parameters.
+ * 
+ *  @post (if successful): The controller is in Profile Move
+ *  Continuous mode.  The position is set to reflect the initial wheel
+ *  angle, and the soft limits are set in registers 39 and 40.
+ * 
+ *  @return 0 if successful; errno value otherwise.
+*/
 int devsteer::set_initial_angle(float position)
 {
   int rc = 0;
 
-#if 1
+#if 0
 
   // Set starting_ticks to current encoder position.  This will be
   // (approximately) zero after initial power-on of the controller,
   // but may vary in subsequent runs if the controller has not been
   // reset.  That variable is used by degrees2ticks() as a conversion
   // offset.
+
+  // BUG: should not rely on get_encoder() before setting
+  // center_ticks_ when using real device with simulated sensor.
   rc = get_encoder(starting_ticks_);
   if (rc == 0)
     {
@@ -289,10 +338,10 @@ int devsteer::set_initial_angle(float position)
   // Subsequently, encoder position zero will correspond to wheel
   // angle zero.
   starting_angle_ = position;
-  center_ticks_ = 0;			// TODO: remove obsolete variable
+  center_ticks_ = 0;			// TODO: remove obsolete variable?
   diag_msg_.center_ticks = center_ticks_;
   starting_ticks_ = degrees2ticks(starting_angle_);
-  ROS_INFO("starting ticks = %ld, center ticks = %ld",
+  ROS_INFO("starting ticks = %d, center ticks = %d",
            starting_ticks_, center_ticks_);
   rc = write_register(20, starting_ticks_); // initial wheel position
   if (rc != 0)
@@ -345,14 +394,19 @@ int devsteer::steering_relative(float delta)
 int devsteer::configure_steering(void)
 {
   int rc;
-
-  // If the controller has not been reset since the last run, it will
-  // probably still be in Profile Move Continuous (PMC) mode.  If so,
+#if 1
+  // The restart command branches to microcode address zero.
+  // It never responds, and nothing works for a while afterward.
+  servo_write_only("@16 4\r");          // RST: restart
+  usleep(1000000);			// wait for that to finish
+#endif
+  // If the controller is in Profile Move Continuous (PMC) mode,
   // setting data registers 20 through 24 will have immediate and
   // undesired effects.  To avoid that, issue a PMX command first.
   //
   // If the controller was not in PMC mode, the PMX will fail, so
-  // ignore any NAK response from that command.
+  // ignore any NAK response from that command.  (Should no longer be
+  // a problem because of the RST.)
   servo_cmd("@16 242\r");		// PMX: exit profile move mode
 
   rc = write_register(20, 0);		// Reg 20 (Position) = 0
@@ -363,8 +417,6 @@ int devsteer::configure_steering(void)
   if (rc != 0) return rc;
 
   // Max Velocity (2^31/16,000) * (60RPM/RPS) = 8,053,064 = 1 RPS
-
-  // Max Velocity: 2**31-1 == 4000RPM, /16,000) * (60RPM/RPS) = 8,053,064 = 1 RPS
   rc = write_register(22, 322122547);	// Reg 22 (Velocity) = 1 RPS
   if (rc != 0) return rc;
 
@@ -372,6 +424,12 @@ int devsteer::configure_steering(void)
   if (rc != 0) return rc;
 
   rc = write_register(24, 0);		// Reg 24 (Offset) = 0
+  if (rc != 0) return rc;
+#if 0
+  // set KMC (Kill Motor Conditions) to stop motor for moving error
+  rc = servo_cmd("@16 167 256 256\r"); 
+  #rc = servo_cmd("@16 167 0 0\r"); 
+#endif
   return rc;
 }
 
@@ -421,7 +479,7 @@ int devsteer::send_cmd(const char *string)
       // write().  If something went wrong, we'll find out by reading
       // the device status.
       int res;
-      res=write(fd, string, len);
+      res = write(fd, string, len);
 
       // Set timeout in msecs.  The device normally responds in two.
       int timeout = 20;
@@ -520,4 +578,23 @@ int devsteer::servo_cmd(const char *string)
       rc = EIO;
     }
   return rc;
+}
+
+/** Write a command to the Quicksilver, no response expected.
+ *
+ *  @return no indication of whether it worked.
+ */
+void devsteer::servo_write_only(const char *string)
+{
+  ROS_DEBUG("servo_write_only %s", string);
+
+  // Flush the I/O buffers to ensure nothing is left over from any
+  // previous command.
+  tcflush(fd, TCIOFLUSH);
+
+  // There is not much point in checking for errors on the write().
+  // If something went wrong, we'll find out later on some command
+  // that reads status.
+  int res;
+  res = write(fd, string, strlen(string));
 }

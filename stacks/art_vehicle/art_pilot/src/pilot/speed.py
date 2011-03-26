@@ -57,7 +57,7 @@ class SpeedControlPID (SpeedControl) :
   def __init__(self) :
     SpeedControl.__init__(self)
     self.braking_ = True
-    self.brake_pid_ = pid.Pid("brake", -0.2, -0.02, -1.6, 1.0, 0.0, 5000.0)
+    self.brake_pid_ = pid.Pid("brake", -0.2, -0.0002, -1.6, 1.0, 0.0, 5000.0)
     self.throttle_pid_ = pid.Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0)
 
     self.configure()

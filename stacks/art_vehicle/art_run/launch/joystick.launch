@@ -6,12 +6,15 @@
 
 <launch>
 
+  <arg name="use_navigator" default="True" />
   <node pkg="joy" type="joy_node" name="joy_node" >
     <param name="autorepeat_rate" value="20.0" />
     <param name="deadzone" value="0.0" />
   </node>
 
-  <node pkg="$(optenv JOY_PKG art_pilot)"
-        type="$(optenv JOY_NODE joy_teleop.py)" name="joy_teleop" />
+  <node pkg="$(optenv TELEOP_PKG art_teleop)"
+        type="$(optenv JOY_NODE joy_teleop.py)" name="joy_teleop" >
+    <param name="use_navigator" value="$(arg use_navigator)" />
+  </node>
 
 </launch>

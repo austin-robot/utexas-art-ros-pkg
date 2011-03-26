@@ -41,7 +41,8 @@ Parameters
 
 - port (string)
   - tty port name for the throttle servo
-  - default: "/dev/null"
+  - use "/dev/null" when simulating the device
+  - default: "/dev/throttle" (actual hardware port)
 
 - training (bool)
   - if true, log throttle data, but do not send it any commands
@@ -95,7 +96,7 @@ Throttle::Throttle()
   // use private node handle to get parameters
   ros::NodeHandle mynh("~");
 
-  port_ = "/dev/null";
+  port_ = "/dev/throttle";
   mynh.getParam("port", port_);
   ROS_INFO_STREAM("steering port = " << port_);
   

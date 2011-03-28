@@ -124,7 +124,7 @@ class JoyNode():
         if self.est.is_suspended(): # OK to issue command?
             self.pilot.publish()
         else:
-            rospy.logwarn('car running autonomously (command ignored)')
+            rospy.logdebug('car running autonomously (command ignored)')
             
     def setAngle(self, turn):
         "set wheel angle"

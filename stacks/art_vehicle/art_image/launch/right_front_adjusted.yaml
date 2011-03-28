@@ -1,0 +1,9 @@
+{auto_brightness: 3, auto_exposure: 3, auto_focus: 5, auto_gain: 2, auto_gamma: 3,
+  auto_hue: 3, auto_iris: 5, auto_saturation: 3, auto_sharpness: 5, auto_shutter: 2,
+  auto_white_balance: 2, auto_zoom: 5, bayer_method: Bilinear, bayer_pattern: gbrg,
+  binning_x: 0, binning_y: 0, brightness: 1024.0, camera_info_url: 'file:///cameras/calibration/right_front_calibration.yaml',
+  exposure: 256.0, focus: 0.0, format7_color_coding: mono8, format7_packet_size: 0,
+  fps: 15, frame_id: /right_front_camera_optical, frame_rate: 15.0, gain: 0.0, gamma: 2.0,
+  guid: 0800461000821a6a, hue: 2048.0, iris: 8.0, iso_speed: 800, reset_on_open: false,
+  roi_height: 0, roi_width: 0, saturation: 256.0, sharpness: 1.0, shutter: 81.0, video_mode: 1280x960_mono8,
+  white_balance_BU: 1928.0, white_balance_RV: 2082.0, x_offset: 0, y_offset: 0, zoom: 0.0}

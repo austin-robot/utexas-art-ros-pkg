@@ -11,9 +11,9 @@ iso_speed: 800
 bayer_pattern: gbrg
 bayer_method: Bilinear
 
-# these all default to automatic settings:
-#brightness: 511
-#exposure: 256
-#gain: 150
-#shutter: 1000
-#whitebalance: "2000 2000"
+# set some feature values:
+auto_gamma: 3           # Manual
+gamma: 2
+auto_gain: 2            # Auto
+auto_shutter: 2         # Auto
+auto_white_balance: 2   # Auto

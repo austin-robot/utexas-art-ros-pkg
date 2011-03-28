@@ -5,6 +5,10 @@
   -->
 
 <launch>
+  <!-- global parameters (in this namespace) -->
+  <!-- define use_sim_time first to avoid races as nodes start up -->
+  <param name="use_sim_time" value="true" />
+
   <!-- stage simulator for ART vehicle -->
   <node pkg="simulator_art" type="artstage" name="artstage"
         args="$(find simulator_art)/world/$(optenv WORLD learn.world)"/>

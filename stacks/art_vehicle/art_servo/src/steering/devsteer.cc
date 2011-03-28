@@ -425,10 +425,13 @@ int devsteer::configure_steering(void)
 
   rc = write_register(24, 0);		// Reg 24 (Offset) = 0
   if (rc != 0) return rc;
-#if 0
+#if 1
   // set KMC (Kill Motor Conditions) to stop motor for moving error
   rc = servo_cmd("@16 167 256 256\r"); 
-  #rc = servo_cmd("@16 167 0 0\r"); 
+  //rc = servo_cmd("@16 167 0 0\r"); 
+
+  // set KMR (Kill Motor Recovery) to "do nothing"
+  rc = servo_cmd("@16 181 0\r"); 
 #endif
   return rc;
 }

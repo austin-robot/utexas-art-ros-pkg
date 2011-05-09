@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <ros/ros.h>
+#include <ros/package.h>
 
 /** Acceleration matrix speed control constructor. */
 LearnedSpeedControl::LearnedSpeedControl():
@@ -13,12 +14,12 @@ LearnedSpeedControl::LearnedSpeedControl():
   ROS_WARN("Learned Speed Controller, load policy");
 
   // create agent and load file
-  loadPolicy("/home/robot/svn/utexas-art-ros-pkg/stacks/art_vehicle/art_pilot/src/pilot/control1400.pol");
-  //loadPolicy("control1400.pol");
+  std::string policyPath = (ros::package::getPath("art_pilot")
+			    + "/pilot/src/pilot/control1400.pol");
+  loadPolicy(policyPath.c_str());
 
   // init state vector
   s.resize(4,0);
-
 }
 
 /** LearnedSpeedControl destructor */
@@ -119,7 +120,7 @@ void LearnedSpeedControl::adjust(float speed, float error,
 }
 
 /** Configure controller parameters. */
-void LearnedSpeedControl::configure(void)
+void LearnedSpeedControl::configure(art_pilot::PilotConfig &newconfig)
 {
 }
 

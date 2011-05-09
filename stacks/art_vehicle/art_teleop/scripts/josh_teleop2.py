@@ -5,13 +5,14 @@
 #   Copyright (C) 2011 Austin Robot Technology
 #   License: Modified BSD Software License Agreement
 #
-# $Id$
+# $Id: joy_teleop.py 1321 2011-04-19 20:23:37Z jack.oquin $
 
 PKG_NAME = 'art_teleop'
 
 # standard Python packages
 import sys
 import math
+import Queue
 
 import pilot_cmd                # ART pilot interface
 import nav_estop                # ART navigator E-stop package
@@ -55,12 +56,17 @@ class JoyNode():
         self.throttle_start = True
         self.brake = 19                 # brake axis (square)
         self.brake_start = True
-
+	self.counter = 0
+	self.throttleQueue = Queue.Queue()
+	self.cruiseSwitch = 1		# Press down Joystick
+	self.cruise = False
+	
         # initialize ROS topics
-        rospy.init_node('joy_teleop')
+        rospy.init_node('josh_teleop2')
         self.pilot = pilot_cmd.PilotCommand()
         self.reconf_server = ReconfigureServer(JoyConfig, self.reconfigure)
         self.joy = rospy.Subscriber('joy', Joy, self.joyCallback)
+
 
     def joyCallback(self, joy):
         "invoked every time a joystick message arrives"
@@ -91,37 +97,74 @@ class JoyNode():
             self.pilot.shift(CarControl2.Park)
             rospy.loginfo('shifting to park')
 
+	if joy.buttons[self.cruiseSwitch]:
+		if self.cruise:
+			self.cruise = False
+		else:
+			self.cruise = True
+			self.pilot.pstate.target.goal_velocity = self.pilot.pstate.current.goal_velocity
+
         # set steering angle
-        self.setAngle(joy.axes[self.steer])
+	self.setAngle(joy.axes[self.steer])
 
-        # adjust speed -- the brake and throttle controls both
-        # return 1.0 when released, -1.0 when completely on
-        br = joy.axes[self.brake]
-        th = joy.axes[self.throttle]
-        rospy.logdebug('joystick brake, throttle: '
-                       + str(br) + ', ' + str(th))
+	if self.cruise:
+		self.pilot.accelerate(0)
 
-        # initially the ROS /joy topic sends zeroes for each axis
-        # until a button press occurs
-        if self.brake_start:
-            if br == 0.0:
-                br = 1.0
-            else:
-                self.brake_start = False
+	else:
+		# adjust speed -- the brake and throttle controls both
+		# return 1.0 when released, -1.0 when completely on
+		# Convert the -1 to 1 to 0 to 1 in increments of .01
+		br = (-joy.axes[self.brake] + 1) / 2
+		th = (-joy.axes[self.throttle] + 1) / 2
+		rospy.logdebug('joystick brake, throttle: '
+		               + str(br) + ', ' + str(th))
 
-        if self.throttle_start:
-            if th == 0.0:
-                th = 1.0
-            else:
-                self.throttle_start = False
+		if self.counter < 1:
+			self.counter = 1
+			self.throttleQueue.put(th)
+		else:
+			initial_th = self.throttleQueue.get()
+			self.throttleQueue.put(th)
 
-        # set acceleration from brake and throttle controls
-        dv = 0.0
-        if br < 1.0:
-            dv = br - 1.0
-        elif th < 1.0:
-            dv = 1.0 - th
-        self.pilot.accelerate(dv * self.config['max_accel'])
+		# initially the ROS /joy topic sends zeroes for each axis
+		# until a button press occurs
+	
+	
+		if self.brake_start:
+		    if br == 0.5:
+		        br = 0
+		    else:
+		        self.brake_start = False
+
+		if self.throttle_start:
+		    if th == 0.5:
+		        th = 0
+		    else:
+		        self.throttle_start = False
+
+		# set dv according to throttle or brake's current state.
+		if br > 0:
+			dv = -br * 3
+
+		elif th == 0 and self.pilot.pstate.current.goal_velocity > 0:
+			dv = -.1
+
+		elif th > 0:
+			if initial_th < th:
+		   		dv = th
+		    	elif initial_th > th:
+				dv = -.1 
+			elif initial_th == th and self.pilot.pstate.current.acceleration >= 0:
+				dv = th
+			elif initial_th == th and self.pilot.pstate.current.acceleration < 0:
+				dv = -.1
+			else:
+				dv = 0
+		else:
+			dv = 0
+
+		# set acceleration and speed from brake and throttle controls
+		self.pilot.accelerate(dv*10)
 
         if self.nav.is_suspended(): # OK to issue command?
             self.pilot.publish()
@@ -153,13 +196,29 @@ class JoyNode():
         # sensitivity while retaining sign. At higher speeds, it may
         # make sense to limit the range, avoiding too-sharp turns and
         # providing better control sensitivity.
-        turn = math.pow(turn, 3) * ArtVehicle.max_steer_radians
+        #turn = math.pow(turn, 3) * ArtVehicle.max_steer_radians
         #turn = math.tan(turn) * ArtVehicle.max_steer_radians
+	if self.pilot.pstate.current.goal_velocity == 0:
+		percentage = 1
+	# Expirimental steering over speed preference
+	#if self.pilot.pstate.current.goal_velocity <= 5:
+	#	percentage = 1
+	
+	else:
+		#percentage = -0.2738*(math.log(math.fabs(self.pilot.pstate.current.goal_velocity))) + 0.6937
+		percentage = (-math.atan2(math.fabs(self.pilot.pstate.current.goal_velocity)-3, 1) / 1.5) + 1
+	turn = turn * percentage * ArtVehicle.max_steer_radians
 
         # ensure maximum wheel angle never exceeded
         self.pilot.steer(turn)
 
+	def maxFinder(self):
+		if self.pilot.pstate.current.goal_velocity > self.config['limit_forward']:
+			return self.pilot.state.current
+		return self.config['limit_forward']
+
 joynode = None
+
 
 def main():
     global joynode

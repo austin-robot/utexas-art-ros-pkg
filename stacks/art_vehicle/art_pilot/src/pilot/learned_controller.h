@@ -14,7 +14,7 @@ class LearnedSpeedControl: public SpeedControl
   virtual ~LearnedSpeedControl();
   virtual void adjust(float speed, float error,
                       float *brake_req, float *throttle_req);
-  virtual void configure(void);
+  virtual void configure(art_pilot::PilotConfig &newconfig);
   virtual void reset(void);
   int getAction(const std::vector<float> &s);
 

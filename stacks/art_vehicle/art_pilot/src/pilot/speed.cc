@@ -1,17 +1,15 @@
-/* -*- mode: C++ -*-
- *
- *  Copyright (C) 2005, 2007, 2009 Austin Robot Technology
- *
+/*
+ *  Copyright (C) 2005, 2007, 2009, 2011 Austin Robot Technology
  *  License: Modified BSD Software License Agreement
  * 
  *  $Id$
  */
 
-/**  \file
+/**  @file
  
      ART autonomous vehicle speed controller.
 
-     \author Jack O'Quin
+     @author Jack O'Quin
  */
 
 #include <art/conversions.h>
@@ -33,8 +31,8 @@ namespace ControlMatrix
   // Velocity control
   typedef struct
   {
-    float	brake_delta;
-    float	throttle_delta;
+    float       brake_delta;
+    float       throttle_delta;
   } accel_parms_t;
 
   // Acceleration matrix: rows are indexed according to the requested
@@ -106,7 +104,8 @@ namespace ControlMatrix
 
 /** Acceleration matrix speed control constructor. */
 SpeedControlMatrix::SpeedControlMatrix():
-  SpeedControl()
+  SpeedControl(),
+  velpid_(new Pid("speed", 2.0, 0.0, 32.0))
 {
   // Allocate speed PID class with default parameters, then
   // configure control constants.
@@ -114,16 +113,12 @@ SpeedControlMatrix::SpeedControlMatrix():
   // Default PD parameters: make Kd proportional to cycle rate, higher
   // frequencies will yield lower deltaV per cycle.
   //
-  velpid_ = new Pid("speed", 2.0, 0.0, 32.0);
-  configure();
   reset();
 }
 
 /** SpeedControlMatrix destructor */
 SpeedControlMatrix::~SpeedControlMatrix()
-{
-  delete velpid_;
-}
+{}
 
 /** Adjust speed to match goal.
 
@@ -169,7 +164,7 @@ void SpeedControlMatrix::adjust(float speed, float error,
 }
 
 /** Configure controller parameters. */
-void SpeedControlMatrix::configure(void)
+void SpeedControlMatrix::configure(art_pilot::PilotConfig &newconfig)
 {
   velpid_->Configure(node_);
 }
@@ -180,31 +175,26 @@ void SpeedControlMatrix::reset(void)
   velpid_->Clear();
 }
 
-/** PID speed control constructor. */
+/** PID speed control constructor.
+ *
+ *  Allocate brake and throttle PID classes with default parameters,
+ *  then configure control constants.
+ *
+ *  Throttle gains came from Jesse Tannahill's pilot prototype.
+ *  Brake gains selected by experiment.
+ */
 SpeedControlPID::SpeedControlPID():
-  SpeedControl()
+  SpeedControl(),
+  braking_(true),                       // begin with brake on
+  brake_pid_(new Pid("brake", -0.2, -0.0002, -1.6, 1.0, 0.0, 5000.0)),
+  throttle_pid_(new Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0))
 {
-  braking_ = true;                      // begin with brake on
-
-  // Allocate brake and throttle PID classes with default parameters,
-  // then configure control constants.
-  //
-  // Throttle gains came from Jesse Tannahill's pilot prototype.
-  // Brake gains selected by experiment
-  //
-  brake_pid_ = new Pid("brake", -0.2, -0.0002, -1.6, 1.0, 0.0, 5000.0);
-  throttle_pid_ = new Pid("throttle", 0.12, 0.001, 0.54, 0.4, 0.0, 5000.0);
-
-  configure();
   reset();
 }
 
 /** PID speed control destructor. */
 SpeedControlPID::~SpeedControlPID()
-{
-  delete brake_pid_;
-  delete throttle_pid_;
-};
+{};
 
 /** Adjust speed to match goal.
 
@@ -273,10 +263,14 @@ void SpeedControlPID::adjust(float speed, float error,
 }
 
 /** Configure controller parameters. */
-void SpeedControlPID::configure(void)
+void SpeedControlPID::configure(art_pilot::PilotConfig &newconfig)
 {
-  brake_pid_->Configure(node_);
-  throttle_pid_->Configure(node_);
+  brake_pid_->Configure(newconfig.brake_kp,
+                        newconfig.brake_ki,
+                        newconfig.brake_kd);
+  throttle_pid_->Configure(newconfig.throttle_kp,
+                           newconfig.throttle_ki,
+                           newconfig.throttle_kd);
 }
 
 /** Reset speed controller. */

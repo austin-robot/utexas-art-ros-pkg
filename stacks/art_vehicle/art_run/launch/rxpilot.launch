@@ -1,0 +1,13 @@
+<!-- -*- mode: XML -*- -->
+<!-- launch file for rxplot to display requested and actual speeds
+
+     $Id$
+  -->
+
+<launch>
+  <node pkg="rxtools" type="rxplot" name="plot_speed"
+        args="/pilot/state/current/goal_velocity,/pilot/state/target/goal_velocity" />
+  <node pkg="rxtools" type="rxplot" name="plot_servo"
+        args="/brake/state/position,/throttle/state/position" />
+
+</launch>

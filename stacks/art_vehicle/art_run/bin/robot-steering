@@ -98,8 +98,8 @@ case $CMD in
 	rc=$?
 	;;
   status) 
-	#echo "reading polling status word"
-	#servo_cmd "@16 0"
+	echo "reading polling status word"
+	servo_cmd "@16 0"
 	echo "reading internal status word"
 	servo_cmd "@16 20"
 	rc=$?

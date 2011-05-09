@@ -394,12 +394,37 @@ int devsteer::steering_relative(float delta)
 int devsteer::configure_steering(void)
 {
   int rc;
+
+#if 0 // does not seem good (before or after RST)...
+  rc = servo_cmd("@16 2\r");		// HLT: shut down all motion
+  if (rc != 0) return rc;
+#endif
+
+#if 0 // should clear persistent KMC status, but does not work
+  rc = servo_cmd("@16 163\r");		// CIS: clear internal status
+  if (rc != 0) return rc;
+  rc = servo_cmd("@16\r");		// POL: read polling status
+  if (rc != 0) return rc;
+  rc = servo_cmd("@16 1 65535\r");	// CPL: clear polling status
+  if (rc != 0) return rc;
+  rc = servo_cmd("@16 146\r");		// TTP: target to position
+  if (rc != 0) return rc;
+
+  // set KMC (Kill Motor Conditions) to stop motor for moving error
+  rc = servo_cmd("@16 167 256 256\r"); 
+  if (rc != 0) return rc;
+
+  rc = servo_cmd("@16 227\r");		// enable motor drivers (EMD)
+  if (rc != 0) return rc;
+#endif
+
 #if 1
   // The restart command branches to microcode address zero.
   // It never responds, and nothing works for a while afterward.
   servo_write_only("@16 4\r");          // RST: restart
   usleep(1000000);			// wait for that to finish
 #endif
+
   // If the controller is in Profile Move Continuous (PMC) mode,
   // setting data registers 20 through 24 will have immediate and
   // undesired effects.  To avoid that, issue a PMX command first.
@@ -425,6 +450,7 @@ int devsteer::configure_steering(void)
 
   rc = write_register(24, 0);		// Reg 24 (Offset) = 0
   if (rc != 0) return rc;
+
 #if 1
   // set KMC (Kill Motor Conditions) to stop motor for moving error
   rc = servo_cmd("@16 167 256 256\r"); 
@@ -433,6 +459,7 @@ int devsteer::configure_steering(void)
   // set KMR (Kill Motor Recovery) to "do nothing"
   rc = servo_cmd("@16 181 0\r"); 
 #endif
+
   return rc;
 }
 

@@ -20,4 +20,5 @@ bool preempted
 
 # latest commanded goal and current status
 CarControl2 target              # current command
+CarControl2 plan                # intermediate goal
 CarControl2 current             # current status

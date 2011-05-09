@@ -1,13 +1,12 @@
 /* -*- mode: C++ -*-
  *
- *  Copyright (C) 2005, 2007, 2009 Austin Robot Technology
- *
+ *  Copyright (C) 2005, 2007, 2009, 2011 Austin Robot Technology
  *  License: Modified BSD Software License Agreement
  * 
  *  $Id$
  */
 
-/**  \file
+/**  @file
  
      ART autonomous vehicle speed controller interface.
  
@@ -18,7 +17,7 @@
         SpeedControlPID -- speed control using direct PID of throttle
                            and brake
 
-     \author Jack O'Quin
+     @author Jack O'Quin
 
  */
 
@@ -27,14 +26,11 @@
 
 #include <ros/ros.h>
 #include <art/pid2.h>
+#include <art_pilot/PilotConfig.h>
 
 // epsilon values for brake and throttle requests
 #define EPSILON_BRAKE 0.01
-#if 0
-#define EPSILON_THROTTLE 0.02
-#else
 #define EPSILON_THROTTLE 0.01
-#endif
 
 /** Virtual base speed controller class */
 class SpeedControl
@@ -60,7 +56,7 @@ class SpeedControl
                       float *brake_req, float *throttle_req) = 0;
 
   /** Configure controller parameters. */
-  virtual void configure(void) = 0;
+  virtual void configure(art_pilot::PilotConfig &newconfig) = 0;
 
   /** Reset speed controller. */
   virtual void reset(void) = 0;
@@ -90,12 +86,12 @@ class SpeedControlMatrix: public SpeedControl
   virtual ~SpeedControlMatrix();
   virtual void adjust(float speed, float error,
                       float *brake_req, float *throttle_req);
-  virtual void configure(void);
+  virtual void configure(art_pilot::PilotConfig &newconfig);
   virtual void reset(void);
 
  private:
 
-  Pid *velpid_;				// velocity PID control
+  boost::shared_ptr<Pid> velpid_;       // velocity PID control
 };
 
 /** PID speed controller class */
@@ -107,7 +103,7 @@ class SpeedControlPID: public SpeedControl
   virtual ~SpeedControlPID();
   virtual void adjust(float speed, float error,
                       float *brake_req, float *throttle_req);
-  virtual void configure(void);
+  virtual void configure(art_pilot::PilotConfig &newconfig);
   virtual void reset(void);
 
  private:
@@ -115,8 +111,8 @@ class SpeedControlPID: public SpeedControl
   // When true, brake is the controlling device, otherwise throttle.
   bool braking_;
 
-  Pid *throttle_pid_;			// Throttle control PID
-  Pid *brake_pid_;			// Brake_Pilot control PID
+  boost::shared_ptr<Pid> brake_pid_;    // Brake_Pilot control PID
+  boost::shared_ptr<Pid> throttle_pid_; // Throttle control PID
 };
 
 #endif // __SPEED_H_

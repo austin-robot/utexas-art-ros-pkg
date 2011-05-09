@@ -14,7 +14,7 @@
   </node>
   <node pkg="art_servo" type="ioadr" name="shifter">
     <param name="~port" value="/dev/shifter"/>
-    <param name="~shifter" value="true"/>
+    <param name="~shifter" value="True"/>
   </node>
   <node pkg="art_servo" type="throttle" name="throttle">
     <param name="~port" value="/dev/throttle"/>
@@ -22,6 +22,10 @@
 
   <!-- navigation components -->
   <node pkg="applanix" type="odometry" name="odometry" />
-  <include file="$(find art_run)/launch/pilot_node.launch" />
+
+  <node pkg="$(optenv PILOT_PKG art_pilot)"
+        type="$(optenv PILOT_NODE pilot)" name="pilot" >
+    <param name="~human_steering" value="True" />
+  </node>
 
 </launch>

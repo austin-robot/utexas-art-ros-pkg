@@ -5,7 +5,7 @@
 #   Copyright (C) 2011 Austin Robot Technology
 #   License: Modified BSD Software License Agreement
 #
-# $Id$
+# $Id: joy_teleop.py 1321 2011-04-19 20:23:37Z jack.oquin $
 
 PKG_NAME = 'art_teleop'
 
@@ -55,12 +55,18 @@ class JoyNode():
         self.throttle_start = True
         self.brake = 19                 # brake axis (square)
         self.brake_start = True
+	self.lowincrease_max = 11       # Increase max .5 (R1)
+	self.highincrease_max = 9       # Increase max 2 (R2)
+	self.lowdecrease_max = 10	# Decrease max .5 (L1)
+	self.highdecrease_max =	8	# Decrease max 2 (L2)
+	
 
         # initialize ROS topics
-        rospy.init_node('joy_teleop')
+        rospy.init_node('josh_teleop')
         self.pilot = pilot_cmd.PilotCommand()
         self.reconf_server = ReconfigureServer(JoyConfig, self.reconfigure)
         self.joy = rospy.Subscriber('joy', Joy, self.joyCallback)
+
 
     def joyCallback(self, joy):
         "invoked every time a joystick message arrives"
@@ -91,37 +97,74 @@ class JoyNode():
             self.pilot.shift(CarControl2.Park)
             rospy.loginfo('shifting to park')
 
+	# handle max increases/decreases
+	if joy.buttons[self.lowincrease_max]:
+		self.config['limit_forward'] += .5
+	if joy.buttons[self.highincrease_max]:
+		self.config['limit_forward'] += 2
+	if joy.buttons[self.lowdecrease_max]:
+		self.config['limit_forward'] -= .5
+	if joy.buttons[self.highdecrease_max]:
+		self.config['limit_forward'] -= 2
+
         # set steering angle
-        self.setAngle(joy.axes[self.steer])
+	self.setAngle(joy.axes[self.steer])
 
         # adjust speed -- the brake and throttle controls both
         # return 1.0 when released, -1.0 when completely on
-        br = joy.axes[self.brake]
-        th = joy.axes[self.throttle]
+	# Convert the -1 to 1 to 0 to 1 in increments of .01
+        br = (-joy.axes[self.brake] + 1) / 2
+        th = (-joy.axes[self.throttle] + 1) / 2
         rospy.logdebug('joystick brake, throttle: '
                        + str(br) + ', ' + str(th))
 
         # initially the ROS /joy topic sends zeroes for each axis
         # until a button press occurs
-        if self.brake_start:
-            if br == 0.0:
-                br = 1.0
+        dv = 0
+	if self.brake_start:
+            if br == 0.5:
+                br = 0
             else:
                 self.brake_start = False
 
         if self.throttle_start:
-            if th == 0.0:
-                th = 1.0
+            if th == 0.5:
+                th = 0
             else:
                 self.throttle_start = False
 
-        # set acceleration from brake and throttle controls
-        dv = 0.0
-        if br < 1.0:
-            dv = br - 1.0
-        elif th < 1.0:
-            dv = 1.0 - th
-        self.pilot.accelerate(dv * self.config['max_accel'])
+	if br > 0:
+		dv = -br * 3
+
+	elif th == 0 and self.pilot.pstate.current.goal_velocity > 0:
+		dv = -.1
+		# This error makes the script work, although I'm not sure why.
+		#self.pilot.pstate.plan.goal_acceleration = -.2
+
+        elif th > 0:
+		if self.pilot.pstate.current.goal_velocity < self.config['limit_forward']*th:
+           		dv = self.config['limit_forward']*th - self.pilot.pstate.current.goal_velocity
+			if dv > 1:
+				dv = 1 + math.pow(dv/self.config['limit_forward'], 2) # varies from 1 to 2
+			else:
+				dv = math.pow(dv, 2) # varies from 0 to 1
+            	elif self.pilot.pstate.current.goal_velocity > self.config['limit_forward']*th:
+			dv = -.1
+                else:
+                    dv = 0
+	else:
+		dv = 0
+
+        # set acceleration and speed from brake and throttle controls
+	self.pilot.car_ctl.acceleration = dv * 10
+	if self.pilot.car_ctl.gear == CarControl2.Drive:
+            	self.pilot.car_ctl.goal_velocity = self.config['limit_forward']*th
+        elif self.pilot.car_ctl.gear == CarControl2.Reverse:
+            	self.pilot.car_ctl.goal_velocity = -self.config['limit_forward']*th
+       	else:                   # do nothing in Park
+            	self.pilot.car_ctl.goal_velocity = 0.0
+            	self.pilot.car_ctl.acceleration = 0.0
+
 
         if self.nav.is_suspended(): # OK to issue command?
             self.pilot.publish()
@@ -153,13 +196,26 @@ class JoyNode():
         # sensitivity while retaining sign. At higher speeds, it may
         # make sense to limit the range, avoiding too-sharp turns and
         # providing better control sensitivity.
-        turn = math.pow(turn, 3) * ArtVehicle.max_steer_radians
+        #turn = math.pow(turn, 3) * ArtVehicle.max_steer_radians
         #turn = math.tan(turn) * ArtVehicle.max_steer_radians
+
+	# currently doesn't work in reverse
+	if self.pilot.pstate.current.goal_velocity == 0:
+		percentage = 1
+	else:
+		percentage = -0.2738*(math.log(math.fabs(self.pilot.pstate.current.goal_velocity))) + 0.6937
+	turn = turn * percentage * ArtVehicle.max_steer_radians
 
         # ensure maximum wheel angle never exceeded
         self.pilot.steer(turn)
 
+	def maxFinder(self):
+		if self.pilot.pstate.current.goal_velocity > self.config['limit_forward']:
+			return self.pilot.state.current
+		return self.config['limit_forward']
+
 joynode = None
+
 
 def main():
     global joynode

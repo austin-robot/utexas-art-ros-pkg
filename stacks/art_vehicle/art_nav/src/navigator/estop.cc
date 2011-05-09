@@ -65,25 +65,28 @@ Estop::Estop(Navigator *navptr, int _verbose):
   Add(NavEstopEvent::Quit,	&Estop::ActionInDone,
       NavEstopState::Done,	NavEstopState::Done);
 
-  // note that the Run behavior is (currently) ignored in the Suspend
-  // state, so we must Pause first before Run
   Add(NavEstopEvent::Run,	&Estop::ActionToRun,
       NavEstopState::Pause,	NavEstopState::Run);
   Add(NavEstopEvent::Run,	&Estop::ActionInRun,
       NavEstopState::Run,	NavEstopState::Run);
-  Add(NavEstopEvent::Run,	&Estop::ActionInSuspend,
-      NavEstopState::Suspend,	NavEstopState::Suspend);
+  Add(NavEstopEvent::Run,	&Estop::ActionToRun,
+      NavEstopState::Suspend,	NavEstopState::Run);
   Add(NavEstopEvent::Run,	&Estop::ActionInDone,
       NavEstopState::Done,	NavEstopState::Done);
 
+  // Note that the Suspend event is allowed even in the Done state.
+  // This allows driving the car with the joystick after the mission
+  // is complete.  Although it is possible to go from Done to Suspend
+  // to Run, the commander has already shut down, so the car will not
+  // begin a new mission.
   Add(NavEstopEvent::Suspend,	&Estop::ActionToSuspend,
       NavEstopState::Pause,	NavEstopState::Suspend);
   Add(NavEstopEvent::Suspend,	&Estop::ActionToSuspend,
       NavEstopState::Run,	NavEstopState::Suspend);
   Add(NavEstopEvent::Suspend,	&Estop::ActionInSuspend,
       NavEstopState::Suspend,	NavEstopState::Suspend);
-  Add(NavEstopEvent::Suspend,	&Estop::ActionInDone,
-      NavEstopState::Done,	NavEstopState::Done);
+  Add(NavEstopEvent::Suspend,	&Estop::ActionToSuspend,
+      NavEstopState::Done,	NavEstopState::Suspend);
 
   // allocate subordinate controllers
   run = new Run(navptr, _verbose);
@@ -270,5 +273,7 @@ Controller::result_t Estop::ActionToRun(pilot_command_t &pcmd)
 Controller::result_t Estop::ActionToSuspend(pilot_command_t &pcmd)
 {
   ART_MSG(1, "Autonomous operation suspended!");
+  // reset last_waypt, so commander will Initialize again for next Run 
+  navdata->last_waypt = ElementID().toMapID();
   return ActionInSuspend(pcmd);
 }

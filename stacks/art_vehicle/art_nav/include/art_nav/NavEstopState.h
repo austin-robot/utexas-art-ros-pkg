@@ -62,6 +62,7 @@ public:
 	"Pause",
 	"Run",
 	"Done",
+	"Suspend",
       };
     return state_name[this->state];
   }

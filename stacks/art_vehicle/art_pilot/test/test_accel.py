@@ -5,9 +5,9 @@
 #   Copyright (C) 2011 Austin Robot Technology
 #   License: Modified BSD Software License Agreement
 #
-# $Id$
+# $Id: pilot_cmd.py 1321 2011-04-19 20:23:37Z jack.oquin $
 
-PKG_NAME = 'art_teleop'
+PKG_NAME = 'art_pilot'
 
 import math
 
@@ -70,6 +70,11 @@ class PilotCommand():
                                            self.car_ctl.goal_velocity,
                                            self.maxspeed)
 
+    def command(self, speed, accel):
+        "set pilot command parameters"
+        self.car_ctl.goal_velocity = speed
+        self.car_ctl.acceleration = accel
+
     def halt(self):
         "halt car immediately"
         self.car_ctl.goal_velocity = 0.0
@@ -87,6 +92,7 @@ class PilotCommand():
     def pilotCallback(self, pstate):
         "handle pilot state message"
         self.pstate = pstate
+        #rospy.loginfo(str(pstate))
         # Base future commands on current state, not target.
         self.car_ctl = pstate.current
 
@@ -114,15 +120,62 @@ class PilotCommand():
                                              ArtVehicle.max_steer_radians)
 
 
-# standalone test of package
+def test(pilot):
+
+    # list of tuples: (speed, acceleration, duration)
+    requests = [(3.0, 20.0, 8.0),
+                (6.0, 20.0, 8.0),
+                (9.0, 20.0, 8.0),
+                (6.0, 20.0, 8.0),
+                (3.0, 20.0, 8.0),
+                (0.0, 20.0, 4.0),
+                (3.0, 0.5, 16.0),
+                (6.0, 0.5, 16.0),
+                (9.0, 0.5, 16.0),
+                (6.0, 0.5, 16.0),
+                (3.0, 0.5, 16.0),
+                (0.0, 0.5, 16.0)]
+
+    while not rospy.is_shutdown():
+
+        if pilot.is_running():
+            # start running the test
+
+            if len(requests) == 0:
+                # stop car after test completed
+                vel = 0.0
+                accel = 0.0
+                duration = 0.0
+            else:
+                # get first tuple in the requests list
+                (vel, accel, duration) = requests.pop(0)
+
+            rospy.loginfo('requesting v: ' + str(vel)
+                          + ' a: ' + str(accel)
+                          + ' t: ' + str(duration))
+
+            if pilot.is_stopped():
+                pilot.shift(CarControl2.Drive)
+
+            pilot.command(vel, accel)
+            pilot.publish()
+
+            if duration == 0.0:
+                break           # test finished
+
+            rospy.sleep(duration)
+
+        else:
+            # wait until pilot is running
+            rospy.loginfo('waiting for pilot to run')
+            rospy.sleep(1.0)
+
 if __name__ == '__main__':
-
     rospy.init_node('pilot_cmd')
-
-    # make an instance
-    pilot = PilotCommand()
-
-    # run the program
+    rospy.loginfo('starting acceleration test')
+    pilot = PilotCommand(10.0)
     try:
-        rospy.spin()
+        test(pilot)
     except rospy.ROSInterruptException: pass
+
+    rospy.loginfo('acceleration test completed')

@@ -162,7 +162,7 @@ IOadr::IOadr()
   if (do_shifter_)
     {
       ROS_INFO("providing shifter interface");
-      shifter_gear_ = art_msgs::Shifter::Drive;
+      shifter_gear_ = art_msgs::Shifter::Park;
       port_ = "/dev/shifter";
     }
   else

@@ -12,6 +12,7 @@ PKG_NAME = 'art_teleop'
 # standard Python packages
 import sys
 import math
+import Queue
 
 import pilot_cmd                # ART pilot interface
 import nav_estop                # ART navigator E-stop package
@@ -24,6 +25,7 @@ import rospy
 # ROS messages
 from art_msgs.msg import ArtVehicle
 from art_msgs.msg import CarControl2
+from art_msgs.msg import SteeringState
 from joy.msg import Joy
 
 # dynamic parameter reconfiguration
@@ -55,10 +57,13 @@ class JoyNode():
         self.throttle_start = True
         self.brake = 19                 # brake axis (square)
         self.brake_start = True
+	self.steeringQueue = Queue.Queue()
+	self.counter = 0
 
         # initialize ROS topics
-        rospy.init_node('joy_teleop')
+        rospy.init_node('jaime_teleop')
         self.pilot = pilot_cmd.PilotCommand()
+	self.steering = SteeringState()
         self.reconf_server = ReconfigureServer(JoyConfig, self.reconfigure)
         self.joy = rospy.Subscriber('joy', Joy, self.joyCallback)
 
@@ -153,8 +158,29 @@ class JoyNode():
         # sensitivity while retaining sign. At higher speeds, it may
         # make sense to limit the range, avoiding too-sharp turns and
         # providing better control sensitivity.
-        turn = math.pow(turn, 3) * ArtVehicle.max_steer_radians
-        #turn = math.tan(turn) * ArtVehicle.max_steer_radians
+	#turn = math.pow(turn, 3) * ArtVehicle.max_steer_radians
+	
+	#enqueues first 5 data points based on the first movements on the wheel
+	if(self.counter < 5):
+		self.counter +=1
+		self.steeringQueue.put(self.steering.angle/180)
+	else:
+		#dequeue oldest value
+		oldVal = self.steeringQueue.get()
+		#get rate of change of angle by subtracting final(turn) - initial(oldVal) and dividing by .25s which is time it takes to get 5 values
+		currentRate = (self.steering.angle/180 - oldVal)/.25
+		limit = 2.0361 * math.pow(.72898, self.pilot.pstate.current.goal_velocity)
+		rospy.logwarn(str(currentRate) + ' ' + str(limit))
+		#if currentRate is above limit, restrict currentRate to the limit at the target velocity, else if it's at or below limit don't do anything
+		#get new value of turn by using equation below:
+		#(final angle - initial angle)/change time = limit; angle final = limit * change in time + angle inital
+		if(math.fabs(currentRate > limit)):
+			rospy.logwarn('Success')
+			turn = limit*.25 + oldVal
+		#put new steering angle into queue
+
+		self.steeringQueue.put(turn)
+
 
         # ensure maximum wheel angle never exceeded
         self.pilot.steer(turn)

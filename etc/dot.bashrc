@@ -12,7 +12,7 @@ alias dr='env | fgrep ROS'
 #OVR=unstable_art
 #OVR=unstable_camera
 OVR=Workspace
-if [ -r ~/ros/$OVR/setup.sh ]
+if [ -r ~/ros/$OVR/setup.bash ]
 then
         export ROS_MASTER_URI=http://$HOSTNAME.local:11311
 

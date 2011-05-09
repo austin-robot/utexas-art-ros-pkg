@@ -38,16 +38,31 @@ class Pid
       float omax=FLT_MAX, float omin=-FLT_MAX, float C=0.0): starting(1)
     {
       this->name = ctlname;
+      this->Configure(kp, ki, kd, omax, omin, C);
+      Clear();
+    };
+  
+  virtual ~Pid() {};
+  
+  /** @brief Configure PID gains */
+  virtual void Configure(float kp, float ki, float kd)
+  {
+      this->kp = kp;
+      this->ki = ki;
+      this->kd = kd;
+  };
+  
+  /** @brief Configure all PID parameters */
+  virtual void Configure(float kp, float ki, float kd,
+                         float omax, float omin, float C)
+  {
       this->kp = kp;
       this->ki = ki;
       this->kd = kd;
       this->omax = omax;
       this->omin = omin;
       this->C = C;
-      Clear();
-    };
-  
-  virtual ~Pid() {};
+  };
   
   /** @brief Configure PID parameters */
   virtual void Configure(const ros::NodeHandle &node)

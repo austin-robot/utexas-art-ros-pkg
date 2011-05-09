@@ -24,6 +24,7 @@ import rospy
 # ROS messages
 from art_msgs.msg import ArtVehicle
 from art_msgs.msg import CarControl2
+from art_msgs.msg import Gear
 from joy.msg import Joy
 
 # dynamic parameter reconfiguration
@@ -88,13 +89,13 @@ class JoyNode():
 
         # handle shifter buttons
         if joy.buttons[self.drive]:
-            self.pilot.shift(CarControl2.Drive)
+            self.pilot.shift(Gear.Drive)
             rospy.loginfo('shifting to drive')
         elif joy.buttons[self.reverse]:
-            self.pilot.shift(CarControl2.Reverse)
+            self.pilot.shift(Gear.Reverse)
             rospy.loginfo('shifting to reverse')
         elif joy.buttons[self.park]:
-            self.pilot.shift(CarControl2.Park)
+            self.pilot.shift(Gear.Park)
             rospy.loginfo('shifting to park')
 
 	# handle max increases/decreases
@@ -157,10 +158,10 @@ class JoyNode():
 
         # set acceleration and speed from brake and throttle controls
 	self.pilot.car_ctl.acceleration = dv * 10
-	if self.pilot.car_ctl.gear == CarControl2.Drive:
+	if self.pilot.car_ctl.gear == Gear.Drive:
             	self.pilot.car_ctl.goal_velocity = self.config['limit_forward']*th
-        elif self.pilot.car_ctl.gear == CarControl2.Reverse:
-            	self.pilot.car_ctl.goal_velocity = -self.config['limit_forward']*th
+        elif self.pilot.car_ctl.gear == Gear.Reverse:
+            	self.pilot.car_ctl.goal_velocity = -self.config['limit_reverse']*th
        	else:                   # do nothing in Park
             	self.pilot.car_ctl.goal_velocity = 0.0
             	self.pilot.car_ctl.acceleration = 0.0

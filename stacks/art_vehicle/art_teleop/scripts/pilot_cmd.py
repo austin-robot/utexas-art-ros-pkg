@@ -22,6 +22,7 @@ from art_msgs.msg import CarAccel
 from art_msgs.msg import CarControl2
 from art_msgs.msg import DriverState
 from art_msgs.msg import Epsilon
+from art_msgs.msg import Gear
 from art_msgs.msg import PilotState
 
 def clamp(minimum, value, maximum):
@@ -57,9 +58,9 @@ class PilotCommand():
         else:
             vabs += dv
 
-        if self.car_ctl.gear == CarControl2.Drive:
+        if self.car_ctl.gear == Gear.Drive:
             self.car_ctl.goal_velocity = vabs
-        elif self.car_ctl.gear == CarControl2.Reverse:
+        elif self.car_ctl.gear == Gear.Reverse:
             self.car_ctl.goal_velocity = -vabs
         else:                   # do nothing in Park
             self.car_ctl.goal_velocity = 0.0

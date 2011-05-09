@@ -24,6 +24,7 @@ import rospy
 # ROS messages
 from art_msgs.msg import ArtVehicle
 from art_msgs.msg import CarControl2
+from art_msgs.msg import Gear
 from joy.msg import Joy
 
 # dynamic parameter reconfiguration
@@ -82,13 +83,13 @@ class JoyNode():
 
         # handle shifter buttons
         if joy.buttons[self.drive]:
-            self.pilot.shift(CarControl2.Drive)
+            self.pilot.shift(Gear.Drive)
             rospy.loginfo('shifting to drive')
         elif joy.buttons[self.reverse]:
-            self.pilot.shift(CarControl2.Reverse)
+            self.pilot.shift(Gear.Reverse)
             rospy.loginfo('shifting to reverse')
         elif joy.buttons[self.park]:
-            self.pilot.shift(CarControl2.Park)
+            self.pilot.shift(Gear.Park)
             rospy.loginfo('shifting to park')
 
         # set steering angle

@@ -25,6 +25,7 @@ from art_msgs.msg import ArtVehicle
 from art_msgs.msg import CarControl2
 from art_msgs.msg import CarAccel
 from art_msgs.msg import Epsilon
+from art_msgs.msg import Gear
 
 g_topic = rospy.Publisher('pilot/accel', CarAccel)
 rospy.init_node('teleop')
@@ -174,9 +175,9 @@ class MainWindow(QtGui.QMainWindow):
         self.car_ctl.goal_velocity += v
         if abs(self.car_ctl.goal_velocity) > Epsilon.speed:
             if self.car_ctl.goal_velocity < 0.0:
-                self.car_ctl.gear = CarControl2.Reverse
+                self.car_ctl.gear = Gear.Reverse
             else:
-                self.car_ctl.gear = CarControl2.Drive
+                self.car_ctl.gear = Gear.Drive
 
         self.car_ctl.steering_angle += a
         if self.car_ctl.steering_angle > ArtVehicle.max_steer_radians:

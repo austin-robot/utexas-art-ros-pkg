@@ -32,6 +32,7 @@
 #include <art_msgs/CarAccel.h>
 #include <art_msgs/CarCommand.h>
 #include <art_msgs/Epsilon.h>
+#include <art_msgs/Gear.h>
 #include <art_msgs/LearningCommand.h>
 #include <art_msgs/PilotState.h>
 
@@ -95,7 +96,6 @@ private:
   void processLearning(const art_msgs::LearningCommand::ConstPtr &learningIn);
   void reconfig(Config &newconfig, uint32_t level);
   void speedControl(void);
-  device_interface::DeviceShifter::Gear targetGear(void);
   void validateTarget(void);
 
   bool is_shifting_;                    // is transmission active?
@@ -281,24 +281,7 @@ void PilotNode::monitorHardware(void)
   pstate_msg_.current.goal_velocity = odom_->value();
   pstate_msg_.current.steering_angle =
     angles::from_degrees(steering_->value());
-
-  /// @todo reconcile CarControl2 and Shifter gear numbers
-  device_interface::DeviceShifter::Gear gear = shifter_->value();
-  switch (gear)
-    {
-    case art_msgs::Shifter::Drive:
-      pstate_msg_.current.gear = art_msgs::CarControl2::Drive;
-      break;
-    case art_msgs::Shifter::Park:
-      pstate_msg_.current.gear = art_msgs::CarControl2::Park;
-      break;
-    case art_msgs::Shifter::Reverse:
-      pstate_msg_.current.gear = art_msgs::CarControl2::Reverse;
-      break;
-    default:
-      ROS_WARN_STREAM("Unexpected gear number: " << gear
-                      << " (ignored)");
-    }
+  pstate_msg_.current.gear = shifter_->value();
 
   // Stage time should not ever start at zero, but there seems to be a
   // bug.  In any case it could be < timeout_ (unlike wall time).
@@ -351,9 +334,9 @@ void PilotNode::processCarCommand(const art_msgs::CarCommand::ConstPtr &msg)
   pstate_msg_.target.goal_velocity = msg->control.velocity;
   pstate_msg_.target.steering_angle = angles::from_degrees(msg->control.angle);
   if (pstate_msg_.target.goal_velocity > 0.0)
-    pstate_msg_.target.gear = art_msgs::CarControl2::Drive;
+    pstate_msg_.target.gear = art_msgs::Gear::Drive;
   else if (pstate_msg_.target.goal_velocity < 0.0)
-    pstate_msg_.target.gear = art_msgs::CarControl2::Reverse;
+    pstate_msg_.target.gear = art_msgs::Gear::Reverse;
   validateTarget();
 }
 
@@ -431,11 +414,13 @@ void PilotNode::speedControl(void)
         }
     }
 
-  if (pstate_msg_.current.gear == pstate_msg_.target.gear)
+  if (pstate_msg_.current.gear == pstate_msg_.target.gear
+      || pstate_msg_.target.gear == art_msgs::Gear::Naught)
     {
       // no shift required
       if ((pstate_msg_.pilot.state != DriverState::RUNNING)
-          || (pstate_msg_.target.gear == art_msgs::CarControl2::Park)
+          || (pstate_msg_.target.gear == art_msgs::Gear::Park)
+          || (pstate_msg_.target.gear == art_msgs::Gear::Neutral)
           || shifter_->busy())
         {
           // unable to proceed
@@ -467,36 +452,10 @@ void PilotNode::speedControl(void)
       if (!shifter_->busy())
         {
           // request shift until driver reports success
-          shifter_->publish(targetGear(), current_time_);
+          shifter_->publish(pstate_msg_.target.gear, current_time_);
         }
 
       halt();                           // never move while shifting
-    }
-}
-
-/** return shifter gear number for target gear
- *
- *  @todo eliminate this method after reconciling CarControl2 and
- *        Shifter gear numbers
- */
-device_interface::DeviceShifter::Gear
-  PilotNode::targetGear(void)
-{
-  switch (pstate_msg_.target.gear)
-    {
-    case art_msgs::CarControl2::Drive:
-      return art_msgs::Shifter::Drive;
-
-    case art_msgs::CarControl2::Park:
-      return art_msgs::Shifter::Park;
-
-    case art_msgs::CarControl2::Reverse:
-      return art_msgs::Shifter::Reverse;
-
-    default:
-      ROS_WARN_STREAM("Unexpected gear number: "
-                      << pstate_msg_.target.gear << " (using Park)");
-      return art_msgs::Shifter::Park;
     }
 }
 

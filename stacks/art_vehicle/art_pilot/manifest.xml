@@ -6,7 +6,7 @@
   </description>
   <author>Austin Robot Technology, Jack O'Quin</author>
   <license>BSD</license>
-  <review status="experimental" notes=""/>
+  <review status="API reviewed" notes="2011-04-13"/>
   <url>http://www.ros.org/wiki/art_pilot</url>
 
   <depend package="angles"/>

@@ -47,7 +47,7 @@ void AccelPlan::adjust(art_msgs::PilotState &pstate,
                        ServoPtr brake, ServoPtr throttle)
 {
   // check whether target has changed since previous cycle
-  float goal_speed = fabs(pstate.target.goal_velocity); 
+  float goal_speed = fabs(pstate.target.speed); 
   float goal_accel = fabs(pstate.target.acceleration);
   if (goal_speed != speed_ || goal_accel !=accel_) // target changed?
     {
@@ -60,12 +60,12 @@ void AccelPlan::adjust(art_msgs::PilotState &pstate,
       if (accel_ == 0.0)                // no acceleration limit?
         {
           // plan directly to target speed
-          pstate.plan.goal_velocity = speed_;
+          pstate.plan.speed = speed_;
         }
       else
         {
           // make plan starting with current speed
-          pstate.plan.goal_velocity = fabs(pstate.current.goal_velocity);
+          pstate.plan.speed = fabs(pstate.current.speed);
         }
     }
 
@@ -86,17 +86,17 @@ void AccelPlan::adjust(art_msgs::PilotState &pstate,
   if (accel_ != 0.0)                    // have acceleration limit?
     {
       // gradually change planned speed
-      float error = speed_ - pstate.plan.goal_velocity;
+      float error = speed_ - pstate.plan.speed;
       float dv = accel_ * dt;           // desired delta V for this cycle
 
       // limit error term to absolute value of requested acceleration
       if (fabs(error) <= dv)
         {
-          pstate.plan.goal_velocity = speed_;
+          pstate.plan.speed = speed_;
         }
       else
         {
-          pstate.plan.goal_velocity += dv * signum(error);
+          pstate.plan.speed += dv * signum(error);
         }
     }
 
@@ -112,8 +112,8 @@ void AccelPlan::adjustVelocity(art_msgs::PilotState &pstate,
 {
   float brake_request;
   float throttle_request;
-  float abs_speed = fabs(pstate.current.goal_velocity);
-  float error = fabs(pstate.plan.goal_velocity) - abs_speed;
+  float abs_speed = fabs(pstate.current.speed);
+  float error = fabs(pstate.plan.speed) - abs_speed;
 
   if (braking_)
     {

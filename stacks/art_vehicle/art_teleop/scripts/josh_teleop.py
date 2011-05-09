@@ -23,7 +23,6 @@ import rospy
 
 # ROS messages
 from art_msgs.msg import ArtVehicle
-from art_msgs.msg import CarControl2
 from art_msgs.msg import Gear
 from joy.msg import Joy
 
@@ -137,19 +136,19 @@ class JoyNode():
 	if br > 0:
 		dv = -br * 3
 
-	elif th == 0 and self.pilot.pstate.current.goal_velocity > 0:
+	elif th == 0 and self.pilot.pstate.current.speed > 0:
 		dv = -.1
 		# This error makes the script work, although I'm not sure why.
 		#self.pilot.pstate.plan.goal_acceleration = -.2
 
         elif th > 0:
-		if self.pilot.pstate.current.goal_velocity < self.config['limit_forward']*th:
-           		dv = self.config['limit_forward']*th - self.pilot.pstate.current.goal_velocity
+		if self.pilot.pstate.current.speed < self.config['limit_forward']*th:
+           		dv = self.config['limit_forward']*th - self.pilot.pstate.current.speed
 			if dv > 1:
 				dv = 1 + math.pow(dv/self.config['limit_forward'], 2) # varies from 1 to 2
 			else:
 				dv = math.pow(dv, 2) # varies from 0 to 1
-            	elif self.pilot.pstate.current.goal_velocity > self.config['limit_forward']*th:
+            	elif self.pilot.pstate.current.speed > self.config['limit_forward']*th:
 			dv = -.1
                 else:
                     dv = 0
@@ -158,12 +157,12 @@ class JoyNode():
 
         # set acceleration and speed from brake and throttle controls
 	self.pilot.car_ctl.acceleration = dv * 10
-	if self.pilot.car_ctl.gear == Gear.Drive:
-            	self.pilot.car_ctl.goal_velocity = self.config['limit_forward']*th
-        elif self.pilot.car_ctl.gear == Gear.Reverse:
-            	self.pilot.car_ctl.goal_velocity = -self.config['limit_reverse']*th
+	if self.pilot.car_ctl.gear.value == Gear.Drive:
+            	self.pilot.car_ctl.speed = self.config['limit_forward']*th
+        elif self.pilot.car_ctl.gear.value == Gear.Reverse:
+            	self.pilot.car_ctl.speed = -self.config['limit_reverse']*th
        	else:                   # do nothing in Park
-            	self.pilot.car_ctl.goal_velocity = 0.0
+            	self.pilot.car_ctl.speed = 0.0
             	self.pilot.car_ctl.acceleration = 0.0
 
 
@@ -201,17 +200,17 @@ class JoyNode():
         #turn = math.tan(turn) * ArtVehicle.max_steer_radians
 
 	# currently doesn't work in reverse
-	if self.pilot.pstate.current.goal_velocity == 0:
+	if self.pilot.pstate.current.speed == 0:
 		percentage = 1
 	else:
-		percentage = -0.2738*(math.log(math.fabs(self.pilot.pstate.current.goal_velocity))) + 0.6937
+		percentage = -0.2738*(math.log(math.fabs(self.pilot.pstate.current.speed))) + 0.6937
 	turn = turn * percentage * ArtVehicle.max_steer_radians
 
         # ensure maximum wheel angle never exceeded
         self.pilot.steer(turn)
 
 	def maxFinder(self):
-		if self.pilot.pstate.current.goal_velocity > self.config['limit_forward']:
+		if self.pilot.pstate.current.speed > self.config['limit_forward']:
 			return self.pilot.state.current
 		return self.config['limit_forward']
 

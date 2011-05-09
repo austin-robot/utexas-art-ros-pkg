@@ -18,8 +18,8 @@ import rospy
 
 # ROS messages
 from art_msgs.msg import ArtVehicle
-from art_msgs.msg import CarAccel
-from art_msgs.msg import CarControl2
+from art_msgs.msg import CarDriveStamped
+from art_msgs.msg import CarDrive
 from art_msgs.msg import DriverState
 from art_msgs.msg import Epsilon
 from art_msgs.msg import Gear
@@ -36,9 +36,9 @@ class PilotCommand():
         "PilotCommand constructor"
         self.reconfigure(maxspeed, minspeed)
         self.pstate = PilotState()
-        self.car_ctl = CarControl2()
-        self.car_msg = CarAccel()
-        self.pub = rospy.Publisher('pilot/accel', CarAccel)
+        self.car_ctl = CarDrive()
+        self.car_msg = CarDriveStamped()
+        self.pub = rospy.Publisher('pilot/drive', CarDriveStamped)
         self.sub = rospy.Subscriber('pilot/state', PilotState,
                                     self.pilotCallback)
 
@@ -48,9 +48,9 @@ class PilotCommand():
 
         self.car_ctl.acceleration = dv
 
-        # update goal_velocity
+        # update speed
         dv *= 0.05                      # scale by cycle duration (dt)
-        vabs = math.fabs(self.car_ctl.goal_velocity)
+        vabs = math.fabs(self.car_ctl.speed)
 
         # never shift gears via acceleration, stop at zero
         if -dv > vabs:
@@ -58,27 +58,27 @@ class PilotCommand():
         else:
             vabs += dv
 
-        if self.car_ctl.gear == Gear.Drive:
-            self.car_ctl.goal_velocity = vabs
-        elif self.car_ctl.gear == Gear.Reverse:
-            self.car_ctl.goal_velocity = -vabs
+        if self.car_ctl.gear.value == Gear.Drive:
+            self.car_ctl.speed = vabs
+        elif self.car_ctl.gear.value == Gear.Reverse:
+            self.car_ctl.speed = -vabs
         else:                   # do nothing in Park
-            self.car_ctl.goal_velocity = 0.0
+            self.car_ctl.speed = 0.0
             self.car_ctl.acceleration = 0.0
 
         # never exceeded forward or reverse speed limits
-        self.car_ctl.goal_velocity = clamp(self.minspeed,
-                                           self.car_ctl.goal_velocity,
-                                           self.maxspeed)
+        self.car_ctl.speed = clamp(self.minspeed,
+                                   self.car_ctl.speed,
+                                   self.maxspeed)
 
     def command(self, speed, accel):
         "set pilot command parameters"
-        self.car_ctl.goal_velocity = speed
+        self.car_ctl.speed = speed
         self.car_ctl.acceleration = accel
 
     def halt(self):
         "halt car immediately"
-        self.car_ctl.goal_velocity = 0.0
+        self.car_ctl.speed = 0.0
         self.car_ctl.acceleration = 0.0
 
     def is_running(self):
@@ -88,7 +88,7 @@ class PilotCommand():
 
     def is_stopped(self):
         "return True if vehicle is stopped"
-        return (math.fabs(self.car_ctl.goal_velocity) < Epsilon.speed)
+        return (math.fabs(self.car_ctl.speed) < Epsilon.speed)
 
     def pilotCallback(self, pstate):
         "handle pilot state message"
@@ -111,7 +111,7 @@ class PilotCommand():
     def shift(self, gear):
         "set gear request (only if stopped)"
         if self.is_stopped():
-            self.car_ctl.gear = gear
+            self.car_ctl.gear.value = gear
 
     def steer(self, angle):
         "set wheel angle (radians)"

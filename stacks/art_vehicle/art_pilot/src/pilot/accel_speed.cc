@@ -61,8 +61,8 @@ void AccelSpeed::adjust(art_msgs::PilotState &pstate,
   // abs_speed: absolute value of current velocity in m/s
   // error: difference between that and our immediate goal
   //
-  float abs_speed = fabs(pstate.current.goal_velocity);
-  float error = fabs(pstate.target.goal_velocity) - abs_speed;
+  float abs_speed = fabs(pstate.current.speed);
+  float error = fabs(pstate.target.speed) - abs_speed;
   float brake_request = brake->last_request();
   float throttle_request = throttle->last_request();
   speed_->set_brake_position(brake->value());

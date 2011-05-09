@@ -23,7 +23,6 @@ import rospy
 
 # ROS messages
 from art_msgs.msg import ArtVehicle
-from art_msgs.msg import CarControl2
 from art_msgs.msg import Gear
 from joy.msg import Joy
 

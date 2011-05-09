@@ -24,7 +24,6 @@ import rospy
 
 # ROS messages
 from art_msgs.msg import ArtVehicle
-from art_msgs.msg import CarControl2
 from art_msgs.msg import Gear
 from joy.msg import Joy
 
@@ -103,7 +102,7 @@ class JoyNode():
 			self.cruise = False
 		else:
 			self.cruise = True
-			self.pilot.pstate.target.goal_velocity = self.pilot.pstate.current.goal_velocity
+			self.pilot.pstate.target.speed = self.pilot.pstate.current.speed
 
         # set steering angle
 	self.setAngle(joy.axes[self.steer])
@@ -147,7 +146,7 @@ class JoyNode():
 		if br > 0:
 			dv = -br * 3
 
-		elif th == 0 and self.pilot.pstate.current.goal_velocity > 0:
+		elif th == 0 and self.pilot.pstate.current.speed > 0:
 			dv = -.1
 
 		elif th > 0:
@@ -199,22 +198,22 @@ class JoyNode():
         # providing better control sensitivity.
         #turn = math.pow(turn, 3) * ArtVehicle.max_steer_radians
         #turn = math.tan(turn) * ArtVehicle.max_steer_radians
-	if self.pilot.pstate.current.goal_velocity == 0:
+	if self.pilot.pstate.current.speed == 0:
 		percentage = 1
 	# Expirimental steering over speed preference
-	#if self.pilot.pstate.current.goal_velocity <= 5:
+	#if self.pilot.pstate.current.speed <= 5:
 	#	percentage = 1
 	
 	else:
-		#percentage = -0.2738*(math.log(math.fabs(self.pilot.pstate.current.goal_velocity))) + 0.6937
-		percentage = (-math.atan2(math.fabs(self.pilot.pstate.current.goal_velocity)-3, 1) / 1.5) + 1
+		#percentage = -0.2738*(math.log(math.fabs(self.pilot.pstate.current.speed))) + 0.6937
+		percentage = (-math.atan2(math.fabs(self.pilot.pstate.current.speed)-3, 1) / 1.5) + 1
 	turn = turn * percentage * ArtVehicle.max_steer_radians
 
         # ensure maximum wheel angle never exceeded
         self.pilot.steer(turn)
 
 	def maxFinder(self):
-		if self.pilot.pstate.current.goal_velocity > self.config['limit_forward']:
+		if self.pilot.pstate.current.speed > self.config['limit_forward']:
 			return self.pilot.state.current
 		return self.config['limit_forward']
 

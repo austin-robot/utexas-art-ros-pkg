@@ -46,8 +46,8 @@ void AccelExample::adjust(art_msgs::PilotState &pstate,
 {
   float brake_request;
   float throttle_request;
-  float abs_speed = fabs(pstate.current.goal_velocity);
-  float error = fabs(pstate.target.goal_velocity) - abs_speed;
+  float abs_speed = fabs(pstate.current.speed);
+  float error = fabs(pstate.target.speed) - abs_speed;
 
   if (braking_)
     {

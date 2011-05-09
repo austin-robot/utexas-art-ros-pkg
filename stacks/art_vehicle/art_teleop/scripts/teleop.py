@@ -22,12 +22,12 @@ roslib.load_manifest(PKG_NAME)
 import rospy
 
 from art_msgs.msg import ArtVehicle
-from art_msgs.msg import CarControl2
-from art_msgs.msg import CarAccel
+from art_msgs.msg import CarDrive
+from art_msgs.msg import CarDriveStamped
 from art_msgs.msg import Epsilon
 from art_msgs.msg import Gear
 
-g_topic = rospy.Publisher('pilot/accel', CarAccel)
+g_topic = rospy.Publisher('pilot/drive', CarDriveStamped)
 rospy.init_node('teleop')
 
 # set path name for resolving icons
@@ -150,9 +150,9 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addAction(speed_up)
         toolbar.addAction(go_right)
 
-        self.car_msg = CarAccel()
+        self.car_msg = CarDriveStamped()
         self.car_msg.header.stamp = rospy.Time.now()
-        self.car_ctl = CarControl2()
+        self.car_ctl = CarDrive()
         self.car_msg.control = self.car_ctl
         self.topic.publish(self.car_msg)
 
@@ -160,24 +160,24 @@ class MainWindow(QtGui.QMainWindow):
 
     def updateStatusBar(self):
         self.statusBar().showMessage('speed: '
-                                     + str(self.car_ctl.goal_velocity)
+                                     + str(self.car_ctl.speed)
                                      + ' m/s,    angle: '
                                      + str(math.degrees(self.car_ctl.steering_angle))
                                      + ' deg')
 
     def adjustCarCmd(self, v, a):
-        """adjust pilot CarAccel command
+        """adjust pilot CarDrive command
 
               @param v change in velocity (m/s)
               @param a change in steering angle (radians)
         """
 
-        self.car_ctl.goal_velocity += v
-        if abs(self.car_ctl.goal_velocity) > Epsilon.speed:
-            if self.car_ctl.goal_velocity < 0.0:
-                self.car_ctl.gear = Gear.Reverse
+        self.car_ctl.speed += v
+        if abs(self.car_ctl.speed) > Epsilon.speed:
+            if self.car_ctl.speed < 0.0:
+                self.car_ctl.gear.value = Gear.Reverse
             else:
-                self.car_ctl.gear = Gear.Drive
+                self.car_ctl.gear.value = Gear.Drive
 
         self.car_ctl.steering_angle += a
         if self.car_ctl.steering_angle > ArtVehicle.max_steer_radians:
@@ -229,7 +229,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def stop_car(self):
         "stop car immediately"
-        self.adjustCarCmd(-self.car_ctl.goal_velocity, 0.0)
+        self.adjustCarCmd(-self.car_ctl.speed, 0.0)
 
 
 class QtThread(threading.Thread):

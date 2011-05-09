@@ -29,7 +29,7 @@
 
 #include <art_msgs/ArtVehicle.h>
 #include <art_msgs/ArtHertz.h>
-#include <art_msgs/CarAccel.h>
+#include <art_msgs/CarDriveStamped.h>
 #include <art_msgs/CarCommand.h>
 #include <art_msgs/Epsilon.h>
 #include <art_msgs/Gear.h>
@@ -51,14 +51,14 @@ using art_msgs::Epsilon;
 /**
  @brief controls the ART vehicle brake, throttle, steering and transmission
 
-The pilot receives CarAccel messages from the navigator, then
+The pilot receives CarDriveStamped messages from the navigator, then
 translates them into commands to the servo motor actuators for
 controlling the speed and direction of the vehicle.  It gets odometry
 information from a separate node.
 
 Subscribes:
 
-- @b pilot/accel [art_msgs::CarAccel] acceleration and steering command
+- @b pilot/drive [art_msgs::CarDriveStamped] driving command
 - @b pilot/cmd [art_msgs::CarCommand] velocity and steering angle command
 - @b imu [sensor_msgs::Imu] estimate of robot accelerations
 - @b odom [nav_msgs::Odometry] estimate of robot position and velocity.
@@ -91,7 +91,7 @@ private:
   void adjustSteering(void);
   void halt(void);
   void monitorHardware(void);
-  void processCarAccel(const art_msgs::CarAccel::ConstPtr &msg);
+  void processCarDrive(const art_msgs::CarDriveStamped::ConstPtr &msg);
   void processCarCommand(const art_msgs::CarCommand::ConstPtr &msg);
   void processLearning(const art_msgs::LearningCommand::ConstPtr &learningIn);
   void reconfig(Config &newconfig, uint32_t level);
@@ -104,7 +104,7 @@ private:
   boost::shared_ptr<ReconfigServer> reconfig_server_;
 
   // ROS topics used by this node
-  ros::Subscriber accel_cmd_;           // CarAccel command
+  ros::Subscriber accel_cmd_;           // CarDriveStamped command
   ros::Subscriber car_cmd_;             // CarCommand
 
   // Device interfaces used by pilot
@@ -161,8 +161,8 @@ PilotNode::PilotNode(ros::NodeHandle node):
   int qDepth = 1;
 
   // command topics (car_cmd will be deprecated)
-  accel_cmd_ = node.subscribe("pilot/accel", qDepth,
-                              &PilotNode::processCarAccel, this, noDelay);
+  accel_cmd_ = node.subscribe("pilot/drive", qDepth,
+                              &PilotNode::processCarDrive, this, noDelay);
   car_cmd_ = node.subscribe("pilot/cmd", qDepth,
                             &PilotNode::processCarCommand, this , noDelay);
   learning_cmd_ = node.subscribe("pilot/learningCmd", qDepth,
@@ -245,7 +245,7 @@ void PilotNode::adjustSteering(void)
 void PilotNode::halt(void)
 {
   // absolute value of current velocity in m/sec
-  float abs_speed = fabs(pstate_msg_.current.goal_velocity);
+  float abs_speed = fabs(pstate_msg_.current.speed);
   if (abs_speed < Epsilon::speed)
     {
       // Already stopped.  Ease up on the brake to reduce strain on
@@ -278,10 +278,10 @@ void PilotNode::monitorHardware(void)
   current_time_ = ros::Time::now();
   pstate_msg_.header.stamp = current_time_;
   pstate_msg_.current.acceleration = imu_->value();
-  pstate_msg_.current.goal_velocity = odom_->value();
+  pstate_msg_.current.speed = odom_->value();
   pstate_msg_.current.steering_angle =
     angles::from_degrees(steering_->value());
-  pstate_msg_.current.gear = shifter_->value();
+  pstate_msg_.current.gear.value = shifter_->value();
 
   // Stage time should not ever start at zero, but there seems to be a
   // bug.  In any case it could be < timeout_ (unlike wall time).
@@ -313,13 +313,12 @@ void PilotNode::monitorHardware(void)
       pstate_msg_.pilot.state = DriverState::OPENED;
       ROS_WARN_THROTTLE(40, "critical component failure, pilot not running");
       // reset latest target request
-      pstate_msg_.target = art_msgs::CarControl2();
-      pstate_msg_.target.gear = pstate_msg_.current.gear;
+      pstate_msg_.target = art_msgs::CarDrive();
     }
 }
 
-/** CarAccel message callback */
-void PilotNode::processCarAccel(const art_msgs::CarAccel::ConstPtr &msg)
+/** CarDriveStamped message callback */
+void PilotNode::processCarDrive(const art_msgs::CarDriveStamped::ConstPtr &msg)
 {
   goal_time_ = msg->header.stamp;
   pstate_msg_.target = msg->control;
@@ -331,12 +330,12 @@ void PilotNode::processCarCommand(const art_msgs::CarCommand::ConstPtr &msg)
 {
   goal_time_ = msg->header.stamp;
   pstate_msg_.target.acceleration = 0.0; // use some default?
-  pstate_msg_.target.goal_velocity = msg->control.velocity;
+  pstate_msg_.target.speed = msg->control.velocity;
   pstate_msg_.target.steering_angle = angles::from_degrees(msg->control.angle);
-  if (pstate_msg_.target.goal_velocity > 0.0)
-    pstate_msg_.target.gear = art_msgs::Gear::Drive;
-  else if (pstate_msg_.target.goal_velocity < 0.0)
-    pstate_msg_.target.gear = art_msgs::Gear::Reverse;
+  if (pstate_msg_.target.speed > 0.0)
+    pstate_msg_.target.gear.value = art_msgs::Gear::Drive;
+  else if (pstate_msg_.target.speed < 0.0)
+    pstate_msg_.target.gear.value = art_msgs::Gear::Reverse;
   validateTarget();
 }
 
@@ -397,8 +396,8 @@ void PilotNode::speedControl(void)
     return;
 
   float dt = 1.0 / art_msgs::ArtHertz::PILOT;
-  float abs_current_speed = fabs(pstate_msg_.current.goal_velocity);
-  float abs_target_speed = fabs(pstate_msg_.target.goal_velocity);
+  float abs_current_speed = fabs(pstate_msg_.current.speed);
+  float abs_target_speed = fabs(pstate_msg_.target.speed);
 
   if (is_shifting_)
     {
@@ -414,13 +413,13 @@ void PilotNode::speedControl(void)
         }
     }
 
-  if (pstate_msg_.current.gear == pstate_msg_.target.gear
-      || pstate_msg_.target.gear == art_msgs::Gear::Naught)
+  if (pstate_msg_.current.gear.value == pstate_msg_.target.gear.value
+      || pstate_msg_.target.gear.value == art_msgs::Gear::Naught)
     {
       // no shift required
       if ((pstate_msg_.pilot.state != DriverState::RUNNING)
-          || (pstate_msg_.target.gear == art_msgs::Gear::Park)
-          || (pstate_msg_.target.gear == art_msgs::Gear::Neutral)
+          || (pstate_msg_.target.gear.value == art_msgs::Gear::Park)
+          || (pstate_msg_.target.gear.value == art_msgs::Gear::Neutral)
           || shifter_->busy())
         {
           // unable to proceed
@@ -452,7 +451,7 @@ void PilotNode::speedControl(void)
       if (!shifter_->busy())
         {
           // request shift until driver reports success
-          shifter_->publish(pstate_msg_.target.gear, current_time_);
+          shifter_->publish(pstate_msg_.target.gear.value, current_time_);
         }
 
       halt();                           // never move while shifting
@@ -464,11 +463,11 @@ void PilotNode::speedControl(void)
 void PilotNode::validateTarget(void)
 {
   using namespace pilot;
-  pstate_msg_.target.goal_velocity = clamp(config_.minspeed,
-                                           pstate_msg_.target.goal_velocity,
-                                           config_.maxspeed);
+  pstate_msg_.target.speed = clamp(config_.minspeed,
+                                   pstate_msg_.target.speed,
+                                   config_.maxspeed);
   ROS_DEBUG("target velocity goal is %.2f m/s",
-            pstate_msg_.target.goal_velocity);
+            pstate_msg_.target.speed);
 
   // TODO clamp angle to permitted range
   ROS_DEBUG("target steering angle is %.3f (degrees)",

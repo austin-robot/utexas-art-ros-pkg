@@ -24,7 +24,7 @@ import rospy
 
 # ROS messages
 from art_msgs.msg import ArtVehicle
-from art_msgs.msg import CarControl2
+from art_msgs.msg import Gear
 from art_msgs.msg import SteeringState
 from joy.msg import Joy
 
@@ -87,13 +87,13 @@ class JoyNode():
 
         # handle shifter buttons
         if joy.buttons[self.drive]:
-            self.pilot.shift(CarControl2.Drive)
+            self.pilot.shift(Gear.Drive)
             rospy.loginfo('shifting to drive')
         elif joy.buttons[self.reverse]:
-            self.pilot.shift(CarControl2.Reverse)
+            self.pilot.shift(Gear.Reverse)
             rospy.loginfo('shifting to reverse')
         elif joy.buttons[self.park]:
-            self.pilot.shift(CarControl2.Park)
+            self.pilot.shift(Gear.Park)
             rospy.loginfo('shifting to park')
 
         # set steering angle
@@ -169,7 +169,7 @@ class JoyNode():
 		oldVal = self.steeringQueue.get()
 		#get rate of change of angle by subtracting final(turn) - initial(oldVal) and dividing by .25s which is time it takes to get 5 values
 		currentRate = (self.steering.angle/180 - oldVal)/.25
-		limit = 2.0361 * math.pow(.72898, self.pilot.pstate.current.goal_velocity)
+		limit = 2.0361 * math.pow(.72898, self.pilot.pstate.current.speed)
 		rospy.logwarn(str(currentRate) + ' ' + str(limit))
 		#if currentRate is above limit, restrict currentRate to the limit at the target velocity, else if it's at or below limit don't do anything
 		#get new value of turn by using equation below:

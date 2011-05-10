@@ -325,27 +325,41 @@ void PilotNode::processCarDrive(const art_msgs::CarDriveStamped::ConstPtr &msg)
   validateTarget();
 }
 
-/** CarCommand message callback (will be deprecated) */
+/** CarCommand message callback (now DEPRECATED) */
 void PilotNode::processCarCommand(const art_msgs::CarCommand::ConstPtr &msg)
 {
+  ROS_WARN_THROTTLE(100, "CarCommand deprecated: use CarDriveStamped.");
+
   goal_time_ = msg->header.stamp;
-  pstate_msg_.target.acceleration = 0.0; // use some default?
-  pstate_msg_.target.speed = msg->control.velocity;
   pstate_msg_.target.steering_angle = angles::from_degrees(msg->control.angle);
+  pstate_msg_.target.behavior.value = art_msgs::PilotBehavior::Run;
+
+  pstate_msg_.target.jerk = 0.0;
+  pstate_msg_.target.acceleration = 0.0;
+  pstate_msg_.target.speed = msg->control.velocity;
   if (pstate_msg_.target.speed > 0.0)
-    pstate_msg_.target.gear.value = art_msgs::Gear::Drive;
+    {
+      pstate_msg_.target.gear.value = art_msgs::Gear::Drive;
+    }
   else if (pstate_msg_.target.speed < 0.0)
-    pstate_msg_.target.gear.value = art_msgs::Gear::Reverse;
+    {
+      // in reverse: make speed positive
+      pstate_msg_.target.speed = -msg->control.velocity;
+      pstate_msg_.target.gear.value = art_msgs::Gear::Reverse;
+    }
+  else
+    {
+      pstate_msg_.target.gear.value = art_msgs::Gear::Naught;
+    }
+
   validateTarget();
 }
 
-/** LearningCommand message callback
- *
- * @todo create a better learning interface (perhaps a service?)
- */
+/** LearningCommand message callback (DEPRECATED) */
 void PilotNode::processLearning(const art_msgs::LearningCommand::ConstPtr
                                 &learningIn)
 {
+  ROS_WARN_THROTTLE(100, "LearningCommand deprecated: use CarDriveStamped.");
   pstate_msg_.preempted = (learningIn->pilotActive == 0);
   ROS_INFO_STREAM("Pilot is "
                   << (pstate_msg_.preempted? "preempted": "active"));
@@ -459,19 +473,52 @@ void PilotNode::speedControl(void)
 }
 
 
-/** validate target CarCommand2 values */
+/** validate target CarDrive values */
 void PilotNode::validateTarget(void)
 {
-  using namespace pilot;
-  pstate_msg_.target.speed = clamp(config_.minspeed,
-                                   pstate_msg_.target.speed,
-                                   config_.maxspeed);
-  ROS_DEBUG("target velocity goal is %.2f m/s",
-            pstate_msg_.target.speed);
+  // Warn if negative speed, acceleration and jerk.
+  if (pstate_msg_.target.speed < 0.0
+      || pstate_msg_.target.acceleration < 0.0
+      || pstate_msg_.target.jerk < 0.0)
+    {
+      ROS_WARN_THROTTLE(100, "Negative speed, acceleration and jerk "
+                        "are DEPRECATED (using absolute value).");
+      pstate_msg_.target.speed = fabs(pstate_msg_.target.speed);
+      pstate_msg_.target.acceleration = fabs(pstate_msg_.target.acceleration);
+      pstate_msg_.target.jerk = fabs(pstate_msg_.target.jerk);
+    }
 
-  // TODO clamp angle to permitted range
-  ROS_DEBUG("target steering angle is %.3f (degrees)",
-            angles::to_degrees(pstate_msg_.target.steering_angle));
+  if (pstate_msg_.target.gear.value == art_msgs::Gear::Reverse)
+    {
+      if (pstate_msg_.target.speed > config_.limit_reverse)
+        {
+          ROS_WARN_STREAM_THROTTLE(100, "Requested speed ("
+                                   << pstate_msg_.target.speed
+                                   << ") exceeds reverse limit of "
+                                   << config_.limit_reverse
+                                   << " m/s");
+          pstate_msg_.target.speed = config_.limit_reverse;
+        }
+    }
+  else
+    {
+      if (pstate_msg_.target.speed > config_.limit_forward)
+        {
+          ROS_WARN_STREAM_THROTTLE(100, "Requested speed ("
+                                   << pstate_msg_.target.speed
+                                   << ") exceeds limit of "
+                                   << config_.limit_forward
+                                   << " m/s");
+          pstate_msg_.target.speed = config_.limit_forward;
+        }
+    }
+
+  // limit steering angle to permitted range
+  using namespace pilot;
+  using namespace art_msgs;
+  pstate_msg_.target.steering_angle = clamp(-ArtVehicle::max_steer_radians,
+                                            pstate_msg_.target.steering_angle,
+                                            ArtVehicle::max_steer_radians);
 }
 
 /** main entry point */

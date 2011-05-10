@@ -9,8 +9,6 @@
 
 PKG_NAME = 'art_pilot'
 
-import math
-
 # ROS node setup
 import roslib;
 roslib.load_manifest(PKG_NAME)
@@ -50,7 +48,7 @@ class PilotCommand():
 
         # update speed
         dv *= 0.05                      # scale by cycle duration (dt)
-        vabs = math.fabs(self.car_ctl.speed)
+        vabs = abs(self.car_ctl.speed)
 
         # never shift gears via acceleration, stop at zero
         if -dv > vabs:
@@ -88,7 +86,7 @@ class PilotCommand():
 
     def is_stopped(self):
         "return True if vehicle is stopped"
-        return (math.fabs(self.car_ctl.speed) < Epsilon.speed)
+        return (abs(self.car_ctl.speed) < Epsilon.speed)
 
     def pilotCallback(self, pstate):
         "handle pilot state message"

@@ -245,7 +245,7 @@ void PilotNode::adjustSteering(void)
 void PilotNode::halt(void)
 {
   // absolute value of current velocity in m/sec
-  float abs_speed = fabs(pstate_msg_.current.speed);
+  float abs_speed = pstate_msg_.current.speed;
   if (abs_speed < Epsilon::speed)
     {
       // Already stopped.  Ease up on the brake to reduce strain on
@@ -277,8 +277,8 @@ void PilotNode::monitorHardware(void)
   // update current pilot state
   current_time_ = ros::Time::now();
   pstate_msg_.header.stamp = current_time_;
-  pstate_msg_.current.acceleration = imu_->value();
-  pstate_msg_.current.speed = odom_->value();
+  pstate_msg_.current.acceleration = fabs(imu_->value());
+  pstate_msg_.current.speed = fabs(odom_->value());
   pstate_msg_.current.steering_angle =
     angles::from_degrees(steering_->value());
   pstate_msg_.current.gear.value = shifter_->value();
@@ -410,8 +410,8 @@ void PilotNode::speedControl(void)
     return;
 
   float dt = 1.0 / art_msgs::ArtHertz::PILOT;
-  float abs_current_speed = fabs(pstate_msg_.current.speed);
-  float abs_target_speed = fabs(pstate_msg_.target.speed);
+  float abs_current_speed = pstate_msg_.current.speed;
+  float abs_target_speed = pstate_msg_.target.speed;
 
   if (is_shifting_)
     {
@@ -444,7 +444,7 @@ void PilotNode::speedControl(void)
           // driving in the correct gear
           if ((abs_target_speed < Epsilon::speed)
               && ((pstate_msg_.target.acceleration == 0.0)
-                  || (fabs(pstate_msg_.target.acceleration * dt)
+                  || (pstate_msg_.target.acceleration * dt
                       > abs_current_speed)))
             {
               // stop requested and acceleration not specified, or

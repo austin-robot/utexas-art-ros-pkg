@@ -13,7 +13,7 @@
   </node>
 
   <node pkg="$(optenv TELEOP_PKG art_teleop)"
-        type="$(optenv JOY_NODE joy_teleop.py)" name="joy_teleop" >
+        type="$(optenv JOY_NODE josh_teleop2.py)" name="joy_teleop" >
     <param name="use_navigator" value="$(arg use_navigator)" />
   </node>
 

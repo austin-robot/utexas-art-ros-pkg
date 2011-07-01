@@ -20,7 +20,8 @@
   <depend stack="laser_drivers" /> <!-- sicktoolbox_wrapper -->
   <depend stack="ros" /> <!-- roslib -->
   <depend stack="ros_comm" /> <!-- std_msgs, rosbag, rospy, roscpp, rosbagmigration -->
-  <depend stack="simulator_stage" /> <!-- stage -->
+  <depend stack="rx" /> <!-- rxtools -->
+  <depend stack="stage" /> <!-- stage -->
   <depend stack="velodyne" /> <!-- velodyne_common -->
 
 </stack>

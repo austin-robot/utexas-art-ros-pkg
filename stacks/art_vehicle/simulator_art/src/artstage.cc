@@ -391,7 +391,7 @@ main(int argc, char** argv)
     exit(-1);
 
   // spawn a thread to read incoming ROS messages
-  boost::thread t(boost::thread::thread(boost::bind(&ros::spin)));
+  boost::thread t(boost::thread(boost::bind(&ros::spin)));
 
   // TODO: get rid of this fixed-duration sleep, using some Stage builtin
   // PauseUntilNextUpdate() functionality.

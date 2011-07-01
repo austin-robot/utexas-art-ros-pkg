@@ -21,11 +21,10 @@
   <depend package="joy" />
   <depend package="nodelet" />
   <depend package="rosbag" />
+  <depend package="rxtools" />
   <depend package="sicktoolbox_wrapper"/>
   <depend package="simulator_art"/>
   <depend package="tf"/>
   <depend package="velodyne_common"/>
 
 </package>
-
-

@@ -35,9 +35,9 @@ Obstacle::Obstacle(Navigator *_nav, int _verbose)
 
   // initialize observers state to all clear in case that driver is
   // not subscribed or not publishing data
-  obstate.obs.resize(Observers::N_Observers);
-  prev_obstate.obs.resize(Observers::N_Observers);
-  for (unsigned i = 0; i < Observers::N_Observers; ++i)
+  obstate.obs.resize(Observation::N_Observers);
+  prev_obstate.obs.resize(Observation::N_Observers);
+  for (unsigned i = 0; i < Observation::N_Observers; ++i)
     {
       obstate.obs[i].clear = true;
       obstate.obs[i].applicable = true;
@@ -59,7 +59,7 @@ bool Obstacle::car_approaching()
   if (config_->offensive_driving)
     return false;
 
-  Observation::_oid_type oid = Observers::Nearest_forward;
+  Observation::_oid_type oid = Observation::Nearest_forward;
   if (obstate.obs[oid].clear || !obstate.obs[oid].applicable)
     {
       if (verbose >= 4)
@@ -219,7 +219,7 @@ bool Obstacle::in_lane(MapXY location, const poly_list_t &lane,
 //
 void Obstacle::observers_message(Observers *obs_msg)
 {
-  if (obs_msg->obs.size() != Observers::N_Observers)
+  if (obs_msg->obs.size() != Observation::N_Observers)
     {
       // error in message size
       ROS_ERROR_STREAM("ERROR: Observer message size (" << obs_msg->obs.size()
@@ -235,14 +235,14 @@ void Obstacle::observers_message(Observers *obs_msg)
 
   if (verbose >= 2)
     {
-      char clear_string[Observers::N_Observers+1];
-      for (unsigned i = 0; i < Observers::N_Observers; ++i)
+      char clear_string[Observation::N_Observers+1];
+      for (unsigned i = 0; i < Observation::N_Observers; ++i)
 	{
 	  clear_string[i] = (obstate.obs[i].clear? '1': '0');
 	  if (obstate.obs[i].applicable)
 	    clear_string[i] += 2;
 	}
-      clear_string[Observers::N_Observers] = '\0';
+      clear_string[Observation::N_Observers] = '\0';
       ROS_DEBUG("observers report {%s}, pose (%.3f,%.3f,%.3f), "
                 "(%.3f, %.3f), time %.6f",
                 clear_string,
@@ -259,9 +259,9 @@ void Obstacle::observers_message(Observers *obs_msg)
 bool Obstacle::passing_lane_clear(void)
 {
   if (course->passing_left)
-    return observer_clear(Observers::Adjacent_left);
+    return observer_clear(Observation::Adjacent_left);
   else
-    return observer_clear(Observers::Adjacent_right);
+    return observer_clear(Observation::Adjacent_right);
 }
 
 // reset obstacle class

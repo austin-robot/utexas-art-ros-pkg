@@ -325,7 +325,7 @@ Controller::result_t Uturn::control(pilot_command_t &pcmd)
     {
     case Wait:
       // wait until left lane is clear.
-      if (obstacle->observer_clear(Observers::Adjacent_left))
+      if (obstacle->observer_clear(Observation::Adjacent_left))
 	{
 	  if (verbose)
 	    ART_MSG(1, "U-turn entry lane clear");

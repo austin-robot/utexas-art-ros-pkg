@@ -473,12 +473,12 @@ Controller::result_t Road::ActionInWaitLane(pilot_command_t &pcmd)
       if (lane_direction == Course::Left)
 	{
 	  ART_MSG(1, "Waiting for nearest left lane to clear.");
-	  lane_observer = Observers::Adjacent_left;
+	  lane_observer = Observation::Adjacent_left;
 	}
       else
 	{
 	  ART_MSG(1, "Waiting for nearest right lane to clear.");
-	  lane_observer = Observers::Adjacent_right;
+	  lane_observer = Observation::Adjacent_right;
 	}
       // TODO: add a timeout for when the observer is not applicable?
       if (obstacle->observer_clear(lane_observer))
@@ -522,7 +522,7 @@ Controller::result_t Road::ActionInWaitStop(pilot_command_t &pcmd)
 
   // wait until stopped for a while, then query observer
   if (stop_line_timer->Check()		// initial timer expired?
-      && obstacle->observer_clear(Observers::Intersection))
+      && obstacle->observer_clear(Observation::Intersection))
     {
       ART_MSG(1, "Our turn to cross intersection.");
       stop_line_timer->Cancel();
@@ -531,7 +531,7 @@ Controller::result_t Road::ActionInWaitStop(pilot_command_t &pcmd)
     }
 
   // restart precedence timer if number of cars remaining changed
-  Observation obs = obstacle->observation(Observers::Intersection);
+  Observation obs = obstacle->observation(Observation::Intersection);
   if (obs.applicable && obs.nobjects != prev_nobjects)
     {
       prev_nobjects = obs.nobjects;
@@ -686,14 +686,14 @@ Controller::result_t Road::ActionToWaitCross(pilot_command_t &pcmd)
       // assume always headed for nearest right lane
       // TODO: how do I verify that?
       ART_MSG(1, "Waiting for nearest intersection lane to clear.");
-      crossing_observer = Observers::Merge_into_nearest;
+      crossing_observer = Observation::Merge_into_nearest;
     }
   else
 #endif
     {
       // going Straight or Left, wait for all lanes to clear
       ART_MSG(1, "Waiting for all intersection lanes to clear.");
-      crossing_observer = Observers::Merge_across_all;
+      crossing_observer = Observation::Merge_across_all;
     }
   course->signal_for_direction(crossing_direction);
   return ActionInWaitCross(pcmd);

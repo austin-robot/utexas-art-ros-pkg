@@ -15,6 +15,7 @@
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
   <depend package="tf"/>
+  <depend package="visualization_msgs" />
 
   <!-- obsolete dependencies:
 
@@ -23,7 +24,6 @@
   <depend package="costmap_2d"/>
   <depend package="velodyne_common" />
   <depend package="velodyne_ringcomp" />
-  <depend package="visualization_msgs" />
   
   <export>
     <cpp cflags="-I${prefix}/include"

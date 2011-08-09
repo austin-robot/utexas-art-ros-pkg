@@ -36,13 +36,10 @@ MapGrid::MapGrid(ros::NodeHandle &node):
 
   // advertise published topics
   const std::string viz_topic("visualization_marker_array");
-  visualization_publisher_ =
+  viz_pub_ =
     node_.advertise<visualization_msgs::MarkerArray>(viz_topic, 1, true);
-  nearest_front_publisher_ =
-    node_.advertise <art_msgs::Observation>("nearest_front",1, true);
-  nearest_rear_publisher_ =
-    node_.advertise <art_msgs::Observation>("nearest_rear",1, true);
-  
+  observations_pub_ =
+    node_.advertise <art_msgs::ObservationArray>("observations", 1, true);
 }
 
 MapGrid::~MapGrid() {}
@@ -64,26 +61,28 @@ void MapGrid::processLocalMap(const art_msgs::ArtLanes &msg)
 
 void MapGrid::filterPointsInLocalMap() 
 {
- // set the exact point cloud size -- the vectors should already have
+  // set the exact point cloud size -- the vectors should already have
   // enough space
-  size_t npoints = transformed_obstacles_.points.size();
+  size_t npoints = obstacles_.points.size();
   added_quads_.clear();
-  for (unsigned i = 0; i < npoints; ++i)   {
-      isPointInAPolygon(transformed_obstacles_.points[i].x,
-                        transformed_obstacles_.points[i].y);
-  }
+  for (unsigned i = 0; i < npoints; ++i)
+    {
+      isPointInAPolygon(obstacles_.points[i].x,
+                        obstacles_.points[i].y);
+    }
 }
 
 void MapGrid::transformPointCloud(const sensor_msgs::PointCloud &msg) 
 {
-  try {
-    tf_listener_->transformPointCloud("/map", msg,
-                                      transformed_obstacles_);
-
-    calcRobotPolygon(); // Hopefully not needed in future
- } catch (tf::TransformException ex){
-    ROS_ERROR("%s",ex.what());
-  }
+  try
+    {
+      tf_listener_->transformPointCloud("/map", msg, obstacles_);
+      calcRobotPolygon();            // hopefully not needed in future
+    }
+  catch (tf::TransformException ex)
+    {
+      ROS_ERROR("%s",ex.what());
+    }
 }
 
 bool MapGrid::isPointInAPolygon(float x, float y) 
@@ -118,7 +117,10 @@ bool MapGrid::isPointInAPolygon(float x, float y)
 
 void MapGrid::runObservers() 
 {
-  // Extract polygons for nearest front observer
+  art_msgs::ObservationArrayPtr observations(new art_msgs::ObservationArray);
+  observations->obs.resize(2);          // number of observers
+
+  // update nearest front observer
   art_msgs::ArtLanes nearest_front_quads =
     quad_ops::filterLanes(robot_polygon_,local_map_,
                           *quad_ops::compare_forward_seg_lane);
@@ -126,13 +128,13 @@ void MapGrid::runObservers()
     quad_ops::filterLanes(robot_polygon_,obs_quads_,
                           *quad_ops::compare_forward_seg_lane);
 
-  // Run the observer
-  art_msgs::Observation n_f =
+  observations->obs[0].oid = art_msgs::Observation::Nearest_forward;
+  observations->obs[0] =
     nearest_front_observer_.update(robot_polygon_.poly_id,
                                    nearest_front_quads,
                                    nearest_front_obstacles);
 
-  // Extract polygons for nearest rear observer
+  // update nearest front observer
   art_msgs::ArtLanes nearest_rear_quads =
     quad_ops::filterLanes(robot_polygon_,local_map_,
                           *quad_ops::compare_backward_seg_lane);
@@ -140,22 +142,21 @@ void MapGrid::runObservers()
     quad_ops::filterLanes(robot_polygon_,obs_quads_,
                           *quad_ops::compare_backward_seg_lane);
 
-  // Reverse the vectors because the observer experts polygons in
+  // reverse the vectors because the observer experts polygons in
   // order of distance from base polygon
   std::reverse(nearest_rear_quads.polygons.begin(),
                nearest_rear_quads.polygons.end());
   std::reverse(nearest_rear_obstacles.polygons.begin(),
                nearest_rear_obstacles.polygons.end());
 
-  // Run the observer
-  art_msgs::Observation n_r =
+  observations->obs[1].oid = art_msgs::Observation::Nearest_backward;
+  observations->obs[1] =
     nearest_rear_observer_.update(robot_polygon_.poly_id,
                                   nearest_rear_quads,
                                   nearest_rear_obstacles);
 
   // Publish observations
-  nearest_front_publisher_.publish(n_f);
-  nearest_rear_publisher_.publish(n_r);
+  observations_pub_.publish(observations);
 }                                                                     
 
 
@@ -196,7 +197,7 @@ void MapGrid::calcRobotPolygon()
 
 void MapGrid::publishObstacleVisualization()
 {
-  if (visualization_publisher_.getNumSubscribers()==0)
+  if (viz_pub_.getNumSubscribers()==0)
     return;
 
   ros::Time now = ros::Time::now();
@@ -263,7 +264,7 @@ void MapGrid::publishObstacleVisualization()
   marks_msg_.markers.push_back(mark);
 
   // Publish the markers
-  visualization_publisher_.publish(marks_msg_);
+  viz_pub_.publish(marks_msg_);
 }
 
 /** Handle incoming data. */

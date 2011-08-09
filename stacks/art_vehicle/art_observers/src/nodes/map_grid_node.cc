@@ -11,7 +11,7 @@
 */
 
 #include <ros/ros.h>
-#include <art_obstacles/map_grid.h>
+#include <art_observers/map_grid.h>
 #include <art_msgs/Observation.h>
 #include <visualization_msgs/MarkerArray.h>
 

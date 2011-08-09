@@ -4,7 +4,7 @@
     Road obstacle observers for the ART autonomous vehicle.
 
   </description>
-  <author>Jack O'Quin, Michael Quinlan</author>
+  <author>Michael Quinlan, Jack O'Quin</author>
   <license>BSD</license>
   <review status="experimental" notes=""/>
   <url>http://ros.org/wiki/art_observers</url>

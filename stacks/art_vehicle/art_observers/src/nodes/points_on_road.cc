@@ -7,9 +7,13 @@
 /** \file
 
   This node takes in a point cloud an republishes only the points that
-  inside road polygons
+  lie inside road polygons
 
-  This probably not hte neatest or fastest way of doing this, but its an aexample  
+  This probably not the neatest or fastest way of doing this, but it's
+  an example.
+
+  @author Michael Quinlan
+
 */
 
 #include <ros/ros.h>

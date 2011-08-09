@@ -1,3 +1,19 @@
+/* -*- mode: C++ -*-
+ *
+ *  Copyright (C) 2011 Austin Robot Technology
+ *  License: Modified BSD Software License Agreement
+ * 
+ *  $Id: accel.h 1539 2011-05-09 04:09:20Z jack.oquin $
+ */
+
+/**  @file
+ 
+     ART observer map grid interface.
+
+     @author Michael Quinlan
+
+ */
+
 #ifndef _MAP_GRID_H_
 #define _MAP_GRID_H_
 
@@ -13,10 +29,11 @@
 #include <art_msgs/ArtLanes.h>
 #include <art_msgs/Observation.h>
 
-#include <art_obstacles/QuadrilateralOps.h>
-#include <art_obstacles/lane_observer.h>
+#include <art_observers/QuadrilateralOps.h>
+#include <art_observers/lane_observer.h>
 
-class MapGrid {
+class MapGrid 
+{
 public:
 
   MapGrid(ros::NodeHandle* node);
@@ -59,4 +76,4 @@ private:
   ros::NodeHandle* node_;
 };
 
-#endif
+#endif // _MAP_GRID_H_

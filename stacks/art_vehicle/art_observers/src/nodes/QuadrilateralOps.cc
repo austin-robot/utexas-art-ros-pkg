@@ -1,5 +1,5 @@
 #include <art_map/types.h>
-#include <art_obstacles/QuadrilateralOps.h>
+#include <art_observers/QuadrilateralOps.h>
 
 namespace quad_ops {
 // determines if point lies in interior of given polygon points on

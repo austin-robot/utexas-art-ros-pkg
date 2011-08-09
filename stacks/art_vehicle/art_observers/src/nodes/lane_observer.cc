@@ -4,14 +4,18 @@
  *  License: Modified BSD Software License 
  */
 
-/** \file
+/**  @file
+ 
+     ART lane observers class implementation.
 
+     @author Michael Quinlan
 
-*/
+ */
 
-#include <art_obstacles/lane_observer.h>
+#include <art_observers/lane_observer.h>
 
-LaneObserver::LaneObserver() {
+LaneObserver::LaneObserver() 
+{
   observation_.name = "Nearest_Front";
   observation_.oid = 0;  // nearest_front in observers
 
@@ -22,10 +26,15 @@ LaneObserver::LaneObserver() {
   current_update_ = ros::Time::now();
 }
 
-LaneObserver::~LaneObserver() {
+LaneObserver::~LaneObserver() 
+{
 }
 
-art_msgs::Observation LaneObserver::update(int origin_poly_id, art_msgs::ArtLanes &lane_quads, art_msgs::ArtLanes &obstacle_quads) {
+art_msgs::Observation
+  LaneObserver::update(int origin_poly_id,
+                       art_msgs::ArtLanes &lane_quads,
+                       art_msgs::ArtLanes &obstacle_quads) 
+{
   current_update_ = ros::Time::now();
   if (current_update_ == prev_update_) return observation_;
 

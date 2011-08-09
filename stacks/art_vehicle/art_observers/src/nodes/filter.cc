@@ -1,14 +1,32 @@
-#include <filters/realtime_circular_buffer.h>
-#include <art_obstacles/filter.h>
+/*
+ *  Copyright (C) 2011 Austin Robot Technology
+ *  License: Modified BSD Software License Agreement
+ * 
+ *  $Id: accel.h 1539 2011-05-09 04:09:20Z jack.oquin $
+ */
 
-MedianFilter::MedianFilter() {
+/**  @file
+ 
+     ART observers data filtering class implementation.
+
+     @author Michael Quinlan
+
+ */
+
+#include <filters/realtime_circular_buffer.h>
+#include <art_observers/filter.h>
+
+MedianFilter::MedianFilter() 
+{
   number_of_observations_ = 5;
 }
 
-MedianFilter::~MedianFilter() {
+MedianFilter::~MedianFilter() 
+{
 }
 
-bool MedianFilter::configure() {
+bool MedianFilter::configure() 
+{
   // Hack to overwrite configure for the median filter
   configured_=true; 
   data_storage_.reset( new filters::RealtimeCircularBuffer<float >(number_of_observations_, temp));
@@ -16,7 +34,8 @@ bool MedianFilter::configure() {
   return true;
 };
 
-bool MedianFilter::isFull() {
+bool MedianFilter::isFull() 
+{
   if (data_storage_->size() == number_of_observations_)
     return true;
   else
@@ -25,21 +44,25 @@ bool MedianFilter::isFull() {
 
 // -------------------------
 
-MeanFilter::MeanFilter() {
+MeanFilter::MeanFilter() 
+{
   number_of_observations_ = 5;
 }
 
-MeanFilter::~MeanFilter() {
+MeanFilter::~MeanFilter() 
+{
 }
 
-bool MeanFilter::configure() {
+bool MeanFilter::configure() 
+{
   // Hack to overwrite configure for the mean filter
   configured_=true; 
   data_storage_.reset(new filters::RealtimeCircularBuffer<float>(number_of_observations_, temp_));
   return true;
 };
 
-bool MeanFilter::isFull() {
+bool MeanFilter::isFull() 
+{
   if (data_storage_->size() == number_of_observations_)
     return true;
   else

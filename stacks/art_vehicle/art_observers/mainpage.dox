@@ -1,0 +1,8 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+This package provides observer nodes to publish observations of
+obstacles in the road.
+
+*/

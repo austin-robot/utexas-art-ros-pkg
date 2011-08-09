@@ -1,0 +1,37 @@
+<package>
+  <description brief="ART vehicle observers">
+
+    Road obstacle observers for the ART autonomous vehicle.
+
+  </description>
+  <author>Jack O'Quin, Michael Quinlan</author>
+  <license>BSD</license>
+  <review status="experimental" notes=""/>
+  <url>http://ros.org/wiki/art_observers</url>
+
+  <depend package="art_map"/>
+  <depend package="art_msgs"/>
+  <depend package="filters"/>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+
+  <!-- obsolete dependencies:
+
+  <depend package="art_common"/>
+  <depend package="art_run"/>
+  <depend package="costmap_2d"/>
+  <depend package="velodyne_common" />
+  <depend package="velodyne_ringcomp" />
+  <depend package="visualization_msgs" />
+  
+  <export>
+    <cpp cflags="-I${prefix}/include"
+         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib"/>
+  </export>
+
+  -->
+
+</package>
+
+

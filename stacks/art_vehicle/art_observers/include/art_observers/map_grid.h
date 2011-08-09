@@ -11,6 +11,7 @@
      ART observer map grid interface.
 
      @author Michael Quinlan
+     @author Jack O'Quin
 
  */
 
@@ -21,36 +22,36 @@
 #include <tr1/unordered_set>
 
 #include <ros/ros.h>
-
+#include <art_msgs/ArtLanes.h>
+#include <art_msgs/Observation.h>
 #include <sensor_msgs/PointCloud.h>
 #include <tf/transform_listener.h>
 #include <visualization_msgs/MarkerArray.h>
 
-#include <art_msgs/ArtLanes.h>
-#include <art_msgs/Observation.h>
-
-#include <art_observers/QuadrilateralOps.h>
 #include <art_observers/lane_observer.h>
+#include <art_observers/QuadrilateralOps.h>
 
 class MapGrid 
 {
 public:
 
-  MapGrid(ros::NodeHandle* node);
+  MapGrid(ros::NodeHandle &node);
   ~MapGrid();
-
-  void processObstacles(const sensor_msgs::PointCloud &msg);
-  void processLocalMap(const art_msgs::ArtLanes &msg);
+  void spin();
 
 private:
-  void transformPointCloud(const sensor_msgs::PointCloud &msg);
+
+  void calcRobotPolygon();
   void filterPointsInLocalMap();
   bool isPointInAPolygon(float x, float y);
-
-  void runObservers();
-  void calcRobotPolygon();
-
+  void processLocalMap(const art_msgs::ArtLanes &msg);
+  void processObstacles(const sensor_msgs::PointCloud &msg);
   void publishObstacleVisualization();
+  void runObservers();
+  void transformPointCloud(const sensor_msgs::PointCloud &msg);
+
+  ros::NodeHandle node_;
+  boost::shared_ptr<tf::TransformListener> tf_listener_;
 
   LaneObserver nearest_front_observer_;
   LaneObserver nearest_rear_observer_;
@@ -65,15 +66,14 @@ private:
 
   art_msgs::ArtQuadrilateral robot_polygon_;
 
-  tf::TransformListener* tf_listener_;
   visualization_msgs::MarkerArray marks_msg_;
+
+  ros::Subscriber obstacle_sub_;
+  ros::Subscriber road_map_sub_;
 
   ros::Publisher nearest_front_publisher_;
   ros::Publisher nearest_rear_publisher_;
-
   ros::Publisher visualization_publisher_;
-
-  ros::NodeHandle* node_;
 };
 
 #endif // _MAP_GRID_H_

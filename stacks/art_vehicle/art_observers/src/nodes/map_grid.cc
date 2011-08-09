@@ -1,6 +1,6 @@
 /*
- *  Copyright (C) 2010 UT-Austin &  Austin Robot Technology, Michael Quinlan
- * 
+ *  Copyright (C) 2010 UT-Austin & Austin Robot Technology, Michael Quinlan
+ *  Copyright (C) 2011 UT-Austin & Austin Robot Technology
  *  License: Modified BSD Software License 
  */
 
@@ -10,35 +10,42 @@
     data structure.
 
     @author Michael Quinlan
+    @author Jack O'Quin
+
 */
 
 #include <algorithm>
-
 #include <ros/ros.h>
-
 #include <art_observers/map_grid.h>
 
-MapGrid::MapGrid(ros::NodeHandle* node) 
+MapGrid::MapGrid(ros::NodeHandle &node):
+  node_(node),
+  tf_listener_(new tf::TransformListener())
 {
-  node_ = node;
+  // subscribe to obstacle cloud
+  obstacle_sub_ =
+    node_.subscribe("fused_obstacles", 1,
+                    &MapGrid::processObstacles, this,
+                    ros::TransportHints().tcpNoDelay(true));
 
-  tf_listener_= new tf::TransformListener();
+  // subscribe to local road map
+  road_map_sub_ =
+    node_.subscribe("roadmap_local", 1,
+                    &MapGrid::processLocalMap, this,
+                    ros::TransportHints().tcpNoDelay(true));
 
-  // Set the publishers
+  // advertise published topics
+  const std::string viz_topic("visualization_marker_array");
   visualization_publisher_ =
-    node_->advertise <visualization_msgs::MarkerArray>("visualization_marker_array",
-                                                       1, true);
+    node_.advertise<visualization_msgs::MarkerArray>(viz_topic, 1, true);
   nearest_front_publisher_ =
-    node_->advertise <art_msgs::Observation>("nearest_front",1, true);
+    node_.advertise <art_msgs::Observation>("nearest_front",1, true);
   nearest_rear_publisher_ =
-    node_->advertise <art_msgs::Observation>("nearest_rear",1, true);
+    node_.advertise <art_msgs::Observation>("nearest_rear",1, true);
   
 }
 
-MapGrid::~MapGrid() 
-{
-  delete tf_listener_;
-}
+MapGrid::~MapGrid() {}
 
 void MapGrid::processObstacles(const sensor_msgs::PointCloud &msg) 
 {
@@ -257,4 +264,10 @@ void MapGrid::publishObstacleVisualization()
 
   // Publish the markers
   visualization_publisher_.publish(marks_msg_);
+}
+
+/** Handle incoming data. */
+void MapGrid::spin()
+{
+  ros::spin();
 }

@@ -14,5 +14,4 @@
 
 #include <art_observers/observer.h>
 
-Observer::Observer() {}
 Observer::~Observer() {}

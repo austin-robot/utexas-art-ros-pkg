@@ -27,7 +27,15 @@
 class Observer 
 {
 public:
-  Observer();
+
+  /// Shorter typedef for observer ID
+  typedef art_msgs::Observation::_oid_type Oid_t;
+
+  Observer(Oid_t id, const std::string &name)
+  {
+    observation_.oid = id;
+    observation_.name = name;
+  }
   ~Observer();
 
   virtual art_msgs::Observation

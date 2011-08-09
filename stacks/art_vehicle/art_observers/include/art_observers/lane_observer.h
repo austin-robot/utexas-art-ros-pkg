@@ -25,7 +25,7 @@
 class LaneObserver: public Observer 
 {
 public:
-  LaneObserver();
+  LaneObserver(Oid_t id, const std::string &name);
   ~LaneObserver();
 
   virtual art_msgs::Observation

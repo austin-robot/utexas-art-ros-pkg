@@ -52,16 +52,18 @@ private:
 
   ros::NodeHandle node_;
   boost::shared_ptr<tf::TransformListener> tf_listener_;
+
+  LaneObserver nearest_front_observer_;
+  LaneObserver nearest_rear_observer_;
+
   ros::Subscriber obstacle_sub_;
   ros::Subscriber road_map_sub_;
   ros::Publisher observations_pub_;
   ros::Publisher viz_pub_;
 
-  LaneObserver nearest_front_observer_;
-  LaneObserver nearest_rear_observer_;
-
   sensor_msgs::PointCloud obstacles_;
   art_msgs::ArtLanes local_map_;
+  art_msgs::ObservationArray observations_;
 
   std::tr1::unordered_set<int> added_quads_;
   art_msgs::ArtLanes obs_quads_;

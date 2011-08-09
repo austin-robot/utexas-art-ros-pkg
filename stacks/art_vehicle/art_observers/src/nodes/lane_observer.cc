@@ -14,11 +14,9 @@
 
 #include <art_observers/lane_observer.h>
 
-LaneObserver::LaneObserver() 
+LaneObserver::LaneObserver(Oid_t id, const std::string &name):
+  Observer(id, name)
 {
-  observation_.name = "Nearest_Front";
-  observation_.oid = 0;  // nearest_front in observers
-
   distance_filter_.configure();
   velocity_filter_.configure();
   

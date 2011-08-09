@@ -20,7 +20,11 @@
 
 MapGrid::MapGrid(ros::NodeHandle &node):
   node_(node),
-  tf_listener_(new tf::TransformListener())
+  tf_listener_(new tf::TransformListener()),
+  nearest_front_observer_(art_msgs::Observation::Nearest_forward,
+                          std::string("Nearest_forward")),
+  nearest_rear_observer_(art_msgs::Observation::Nearest_backward,
+                         std::string("Nearest_backward"))
 {
   // subscribe to obstacle cloud
   obstacle_sub_ =
@@ -40,12 +44,16 @@ MapGrid::MapGrid(ros::NodeHandle &node):
     node_.advertise<visualization_msgs::MarkerArray>(viz_topic, 1, true);
   observations_pub_ =
     node_.advertise <art_msgs::ObservationArray>("observations", 1, true);
+
+  // initialize observations message
+  observations_.obs.resize(2);          // number of observers
 }
 
 MapGrid::~MapGrid() {}
 
 void MapGrid::processObstacles(const sensor_msgs::PointCloud &msg) 
 {
+  observations_.header.stamp = msg.header.stamp;
   obs_quads_.polygons.clear();
   added_quads_.clear();
   transformPointCloud(msg);
@@ -77,6 +85,7 @@ void MapGrid::transformPointCloud(const sensor_msgs::PointCloud &msg)
   try
     {
       tf_listener_->transformPointCloud("/map", msg, obstacles_);
+      observations_.header.frame_id = obstacles_.header.frame_id;
       calcRobotPolygon();            // hopefully not needed in future
     }
   catch (tf::TransformException ex)
@@ -117,9 +126,6 @@ bool MapGrid::isPointInAPolygon(float x, float y)
 
 void MapGrid::runObservers() 
 {
-  art_msgs::ObservationArrayPtr observations(new art_msgs::ObservationArray);
-  observations->obs.resize(2);          // number of observers
-
   // update nearest front observer
   art_msgs::ArtLanes nearest_front_quads =
     quad_ops::filterLanes(robot_polygon_,local_map_,
@@ -128,8 +134,7 @@ void MapGrid::runObservers()
     quad_ops::filterLanes(robot_polygon_,obs_quads_,
                           *quad_ops::compare_forward_seg_lane);
 
-  observations->obs[0].oid = art_msgs::Observation::Nearest_forward;
-  observations->obs[0] =
+  observations_.obs[0] =
     nearest_front_observer_.update(robot_polygon_.poly_id,
                                    nearest_front_quads,
                                    nearest_front_obstacles);
@@ -149,14 +154,13 @@ void MapGrid::runObservers()
   std::reverse(nearest_rear_obstacles.polygons.begin(),
                nearest_rear_obstacles.polygons.end());
 
-  observations->obs[1].oid = art_msgs::Observation::Nearest_backward;
-  observations->obs[1] =
+  observations_.obs[1] =
     nearest_rear_observer_.update(robot_polygon_.poly_id,
                                   nearest_rear_quads,
                                   nearest_rear_obstacles);
 
   // Publish observations
-  observations_pub_.publish(observations);
+  observations_pub_.publish(observations_);
 }                                                                     
 
 

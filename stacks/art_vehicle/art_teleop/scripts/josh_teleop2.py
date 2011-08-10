@@ -25,7 +25,13 @@ import rospy
 # ROS messages
 from art_msgs.msg import ArtVehicle
 from art_msgs.msg import Gear
-from joy.msg import Joy
+
+# In ROS Electric, the Joy message gained a header and moved to
+# sensor_msgs.  Use that if it's available.
+try:
+    from sensor_msgs.msg import Joy
+except ImportError:
+    from joy.msg import Joy
 
 # dynamic parameter reconfiguration
 from driver_base.msg import SensorLevels

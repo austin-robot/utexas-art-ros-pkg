@@ -28,7 +28,7 @@ MapGrid::MapGrid(ros::NodeHandle &node):
 {
   // subscribe to obstacle cloud
   obstacle_sub_ =
-    node_.subscribe("fused_obstacles", 1,
+    node_.subscribe("velodyne/obstacles", 1,
                     &MapGrid::processObstacles, this,
                     ros::TransportHints().tcpNoDelay(true));
 

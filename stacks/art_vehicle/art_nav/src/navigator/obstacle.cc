@@ -68,9 +68,15 @@ bool Obstacle::car_approaching()
     }
 
   // estimate absolute speed of obstacle from closing velocity and
-  // vehicle speed at time of observation
+  // vehicle speed
   float rel_speed = obstate.obs[oid].velocity;
+#if 0
+  // use vehicle speed at time of observation
   float abs_speed = rel_speed - obstate.odom.twist.twist.linear.x;
+#else
+  // use current vehicle speed
+  float abs_speed = rel_speed - odom->twist.twist.linear.x;
+#endif
 
   if (verbose >= 3)
     ART_MSG(6, "obstacle observed closing at %.3fm/s, absolute speed %.3f",
@@ -217,7 +223,7 @@ bool Obstacle::in_lane(MapXY location, const poly_list_t &lane,
 //  Called from the driver ProcessMessage() handler when new
 //  observers data arrive.
 //
-void Obstacle::observers_message(Observers *obs_msg)
+void Obstacle::observers_message(ObservationArray *obs_msg)
 {
   if (obs_msg->obs.size() != Observation::N_Observers)
     {
@@ -243,15 +249,6 @@ void Obstacle::observers_message(Observers *obs_msg)
 	    clear_string[i] += 2;
 	}
       clear_string[Observation::N_Observers] = '\0';
-      ROS_DEBUG("observers report {%s}, pose (%.3f,%.3f,%.3f), "
-                "(%.3f, %.3f), time %.6f",
-                clear_string,
-                obstate.odom.pose.pose.position.x,
-                obstate.odom.pose.pose.position.y,
-                tf::getYaw(obstate.odom.pose.pose.orientation),
-                obstate.odom.twist.twist.linear.x,
-                obstate.odom.twist.twist.angular.z,
-                obstate.header.stamp.toSec());
     }
 }
 

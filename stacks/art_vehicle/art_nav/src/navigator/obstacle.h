@@ -14,11 +14,11 @@
 #include <vector>
 #include "ntimer.h"
 
-#include <art_msgs/Observers.h>
+#include <art_msgs/ObservationArray.h>
 
 // Provide short names for these messages so they can easily be moved
 // to a different package.
-using art_msgs::Observers;
+using art_msgs::ObservationArray;
 using art_msgs::Observation;
 
 /** @brief Navigator obstacle class.
@@ -101,7 +101,7 @@ class Obstacle
    * @param obs_msg pointer to the observer state message struct in
    * the player message queue.  Must copy the data before returning.
    */
-  void observers_message(Observers *obs_msg);
+  void observers_message(ObservationArray *obs_msg);
 
   /** @brief return true when observer reports passing lane clear */
   bool passing_lane_clear(void);
@@ -141,8 +141,8 @@ class Obstacle
   float max_range;			//< maximum scan range
 
   // observers data
-  Observers obstate;                    //< current observers state
-  Observers prev_obstate;               //< previous observers state
+  ObservationArray obstate;             //< current observers state
+  ObservationArray prev_obstate;        //< previous observers state
 
   // blockage timer
   NavTimer *blockage_timer;

@@ -32,7 +32,7 @@
 #include <art_msgs/Behavior.h>
 #include <art_msgs/NavigatorCommand.h>
 #include <art_msgs/NavigatorState.h>
-#include <art_msgs/Observers.h>
+#include <art_msgs/ObservationArray.h>
 #include <nav_msgs/Odometry.h>
 
 #include <art_nav/NavBehavior.h>
@@ -45,8 +45,8 @@ typedef art_nav::NavigatorConfig Config;
 using art_msgs::Behavior;
 using art_msgs::NavigatorCommand;
 using art_msgs::NavigatorState;
-using art_msgs::Observers;
 using art_msgs::Observation;
+using art_msgs::ObservationArray;
 using nav_msgs::Odometry;
 using art_msgs::Order;
 

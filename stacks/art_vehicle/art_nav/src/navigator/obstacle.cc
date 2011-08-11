@@ -15,6 +15,9 @@
 #include "course.h"
 #include "obstacle.h"
 
+// Provide shorter name for observation message.
+using art_msgs::Observation;
+
 // Constructor
 Obstacle::Obstacle(Navigator *_nav, int _verbose)
 {
@@ -36,9 +39,9 @@ Obstacle::Obstacle(Navigator *_nav, int _verbose)
   // initialize observers state to all clear in case that driver is
   // not subscribed or not publishing data
   obstate.obs.resize(Observation::N_Observers);
-  prev_obstate.obs.resize(Observation::N_Observers);
   for (unsigned i = 0; i < Observation::N_Observers; ++i)
     {
+      obstate.obs[i].oid = i;
       obstate.obs[i].clear = true;
       obstate.obs[i].applicable = true;
     }
@@ -48,6 +51,11 @@ Obstacle::Obstacle(Navigator *_nav, int _verbose)
   was_stopped = false;
 
   reset();
+
+  ros::NodeHandle node;
+  obs_sub_ = node.subscribe("observations", 10,
+                            &Obstacle::observers_message, this,
+                            ros::TransportHints().tcpNoDelay(true));
 }
 
 // is there a car approaching from ahead in our lane?
@@ -218,37 +226,24 @@ bool Obstacle::in_lane(MapXY location, const poly_list_t &lane,
   return false;
 }
 
-// handle observers driver message
-//
-//  Called from the driver ProcessMessage() handler when new
-//  observers data arrive.
-//
-void Obstacle::observers_message(ObservationArray *obs_msg)
+/** @brief ObservationArray message callback
+ *
+ *  @param obs_msg pointer to the observations message.
+ */
+void
+  Obstacle::observers_message(const art_msgs::ObservationArrayConstPtr obs_msg)
 {
-  if (obs_msg->obs.size() != Observation::N_Observers)
+  // Messages could arrive out of order, only track the most recent
+  // time stamp.
+  obstate.header.stamp = std::max(obstate.header.stamp,
+                                  obs_msg->header.stamp);
+
+  // obstate contains all the latest observations received, update
+  // only the ones present in this message.
+  for (uint32_t i = 0; i < obs_msg->obs.size(); ++i)
     {
-      // error in message size
-      ROS_ERROR_STREAM("ERROR: Observer message size (" << obs_msg->obs.size()
-                       << ") is wrong (ignored)");
-      return;
-    }
-
-  if (obstate.header.stamp == obs_msg->header.stamp)
-    return;				// repeated message, no new data
-
-  prev_obstate = obstate;
-  obstate = *obs_msg;
-
-  if (verbose >= 2)
-    {
-      char clear_string[Observation::N_Observers+1];
-      for (unsigned i = 0; i < Observation::N_Observers; ++i)
-	{
-	  clear_string[i] = (obstate.obs[i].clear? '1': '0');
-	  if (obstate.obs[i].applicable)
-	    clear_string[i] += 2;
-	}
-      clear_string[Observation::N_Observers] = '\0';
+      obstate.obs[obs_msg->obs[i].oid] = obs_msg->obs[i];
+      // TODO (maybe) track time stamps separately for each OID?
     }
 }
 

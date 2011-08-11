@@ -16,11 +16,6 @@
 
 #include <art_msgs/ObservationArray.h>
 
-// Provide short names for these messages so they can easily be moved
-// to a different package.
-using art_msgs::ObservationArray;
-using art_msgs::Observation;
-
 /** @brief Navigator obstacle class.
  *
  *  @todo Add ROS-style ObstacleGrid input.
@@ -76,13 +71,13 @@ class Obstacle
   float maximum_range(void) {return max_range;}
 
   /** @brief return current observation state */
-  Observation observation(Observation::_oid_type oid)
+  art_msgs::Observation observation(art_msgs::Observation::_oid_type oid)
   {
     return obstate.obs[oid];
   }
 
   /** @brief return true when observer reports clear to go */
-  bool observer_clear(Observation::_oid_type oid)
+  bool observer_clear(art_msgs::Observation::_oid_type oid)
   {
     bool clear = obstate.obs[oid].clear && obstate.obs[oid].applicable;
 
@@ -92,16 +87,7 @@ class Obstacle
     return clear;
   }
 
-  /** @brief handle observers driver message
-   *
-   *  Called from the driver ProcessMessage() handler when new
-   *  observers data arrive.
-   *
-   * @param hdr the player message header pointer
-   * @param obs_msg pointer to the observer state message struct in
-   * the player message queue.  Must copy the data before returning.
-   */
-  void observers_message(ObservationArray *obs_msg);
+  void observers_message(const art_msgs::ObservationArrayConstPtr obs_msg);
 
   /** @brief return true when observer reports passing lane clear */
   bool passing_lane_clear(void);
@@ -140,9 +126,10 @@ class Obstacle
   // parameters
   float max_range;			//< maximum scan range
 
+  ros::Subscriber obs_sub_;             //< observations subscription
+
   // observers data
-  ObservationArray obstate;             //< current observers state
-  ObservationArray prev_obstate;        //< previous observers state
+  art_msgs::ObservationArray obstate;   //< current observers state
 
   // blockage timer
   NavTimer *blockage_timer;

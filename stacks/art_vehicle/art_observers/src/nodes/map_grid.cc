@@ -90,7 +90,8 @@ void MapGrid::transformPointCloud(const sensor_msgs::PointCloud &msg)
     }
   catch (tf::TransformException ex)
     {
-      ROS_ERROR("%s",ex.what());
+      // only log tf error once every 20 times
+      ROS_WARN_STREAM_THROTTLE(20, ex.what());
     }
 }
 

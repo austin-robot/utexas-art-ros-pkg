@@ -46,6 +46,9 @@ Obstacle::Obstacle(Navigator *_nav, int _verbose)
       obstate.obs[i].applicable = true;
     }
 
+  // exception: initialize Nearest_forward not applicable
+  obstate.obs[Observation::Nearest_forward].applicable = false;
+
   // allocate timers
   blockage_timer = new NavTimer();
   was_stopped = false;
@@ -91,61 +94,6 @@ bool Obstacle::car_approaching()
 	    rel_speed, abs_speed);
 
   return (abs_speed > config_->min_approach_speed);
-}
-
-// Return distance to closest obstacle ahead in course plan.
-//
-// entry:
-//	course->plan contains current lane polygons
-//
-float Obstacle::closest_ahead_in_plan(void)
-{
-  // value to return if no obstacle found
-  float retval = Infinite::distance;
-
-#if 0 // ignoring obstacles at the moment
-  // find index of closest polygon to current vehicle pose
-  int closest_poly_index = pops->getClosestPoly(course->plan, estimate->pos);
-  if (closest_poly_index < 0)
-    {
-      if (verbose)
-	ART_MSG(2, "no closest polygon in lane (size %u)",
-		course->plan.size());
-      return retval;
-    }
-
-  // When rejoining a lane, there should be an aim_poly defined.  Only
-  // look for obstacles starting there.
-  if (course->aim_poly.poly_id != -1)
-    {
-      int aim_index = pops->getPolyIndex(course->plan, course->aim_poly);
-      if (aim_index >=0 && aim_index < (int) course->plan.size())
-	closest_poly_index = aim_index;
-    }
-
-  for (uint i=0; i< lasers->all_obstacle_list.size(); i++)
-    if (in_lane(lasers->all_obstacle_list.at(i), 
-		course->plan, closest_poly_index))
-      {
-	if (verbose >4)
-	  ART_MSG(3,"Saw obstacle in lane: obstacle list size %d (velodyne %d, fusion %d) at index %d",lasers->all_obstacle_list.size(), lasers->velodyne_obstacle_list.size(),lasers->fusion_obstacle_list.size(),  i);
-	
-	float distance = course->distance_in_plan(estimate->pos,
-						  lasers->all_obstacle_list.at(i));						
-
-	if (distance > 0 && distance < retval)
-	  {
-	    retval = distance;
-	  }
-      }
-
-  if (verbose >= 3)
-    ART_MSG(8, "Closest obstacle in lane %s is %.3f m down the lane",
-	    course->plan.at(closest_poly_index).start_way.lane_name().str,
-	    retval);
-#endif // ignoring obstacles
-
-  return retval;
 }
 
 // Return distances of closest obstacles ahead and behind in a lane.

@@ -54,9 +54,6 @@ class Obstacle
   /** @brief is there a car approaching from ahead in our lane? */
   bool car_approaching();
 
-  /** @brief return distance to closest obstacle ahead in course plan */
-  float closest_ahead_in_plan(void);
-
   /** Return distances of closest obstacles ahead and behind in a lane. */
   void closest_in_lane(const poly_list_t &lane, float &ahead, float &behind);
 

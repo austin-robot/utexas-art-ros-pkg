@@ -43,32 +43,34 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
   bool was_blocked = navdata->lane_blocked;
   navdata->lane_blocked = false;
 
-  float location = obstacle->closest_ahead_in_plan();
   result_t result = OK;
+  art_msgs::Observation fobs =
+    obstacle->observation(art_msgs::Observation::Nearest_forward);
 
-  if (location >= obstacle->maximum_range())
+  ROS_DEBUG("Nearest_forward: C%d A%d, dist %.3f, time %.3f, vel %.3f",
+            fobs.clear, fobs.applicable,
+            fobs.distance, fobs.time, fobs.velocity);
+
+  if (!fobs.applicable
+      || fobs.distance >= obstacle->maximum_range())
     {
       // no obstacle that matters, leave pcmd unmodified
+      ROS_DEBUG("no obstacle ahead");
       return result;
     }
 
-  float following_time =
-    Euclidean::DistanceToTime(location, estimate->twist.twist.linear.x);
-
-  ROS_DEBUG("obstacle is %.3f sec ahead at %.3f m/s",
-	    following_time, estimate->twist.twist.linear.x);
+  ROS_DEBUG("obstacle is %.3f sec ahead, closing at %.3f m/s",
+	    fobs.time, fobs.velocity);
 
   // A 2 sec minimum following time at 10mph will cause us to brake
   // hard when still about two car lengths away (~9m).  One length is
   // the minimum distance allowed by the DARPA rules.
-  if ((following_time <= config_->min_following_time)
-      || (location <= config_->close_stopping_distance))
+  if ((fobs.time <= config_->min_following_time)
+      || (fobs.distance <= config_->close_stopping_distance))
     {
       // be safe, request immediate stop
       pcmd.velocity = 0.0;
-
-      if (verbose >= 2)
-	ART_MSG(8, "Obstacle avoidance requesting immediate halt");
+      ROS_INFO("Obstacle avoidance requesting immediate halt");
 
       // when fully stopped, initiate blocked lane behavior
       // (may already be doing it)
@@ -78,19 +80,19 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
 	  if (!was_blocked)
 	    {
 	      // flag not already set, new obstacle
-	      ART_MSG(1, "New obstacle detected!");
+	      ROS_INFO("New obstacle detected!");
 	    }
 	  result = Blocked;
 	}
     }
-  else if (following_time < config_->desired_following_time)
+  else if (fobs.time < config_->desired_following_time)
     {
-      adjust_speed(pcmd, location); // speed up a bit
+      adjust_speed(pcmd, fobs.distance); // speed up a bit
     }
   else if (nav->navdata.stopped
-	   || (following_time > config_->desired_following_time))
+	   || (fobs.time > config_->desired_following_time))
     {
-      adjust_speed(pcmd, location); // slow down a bit
+      adjust_speed(pcmd, fobs.distance); // slow down a bit
     }
 
   // The multiple calls to adjust_speed() above could be tightened
@@ -99,7 +101,7 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
   // See if there is anyone coming towards us ahead in this lane.
   if (obstacle->car_approaching())
     {
-      ART_MSG(1, "Possible collision ahead!");
+      ROS_ERROR("Possible collision ahead!");
       result = Collision;
     }
 

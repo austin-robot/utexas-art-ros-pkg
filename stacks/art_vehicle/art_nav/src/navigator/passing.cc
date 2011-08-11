@@ -14,9 +14,7 @@
 #include "obstacle.h"
 #include "passing.h"
 
-#include "avoid.h"
 #include "halt.h"
-#include "lane_heading.h"
 #include "follow_safely.h"
 #include "slow_for_curves.h"
 
@@ -25,52 +23,20 @@
 Passing::Passing(Navigator *navptr, int _verbose):
   Controller(navptr, _verbose)
 {
-  avoid = new Avoid(navptr, _verbose);
+  //avoid = new Avoid(navptr, _verbose);
   halt = new Halt(navptr, _verbose);
   follow_safely = new FollowSafely(navptr, _verbose);
-  lane_heading = new LaneHeading(navptr, _verbose);
   slow_for_curves = new SlowForCurves(navptr, _verbose);
   reset_me();
 };
 
 Passing::~Passing()
 {
-  delete avoid;
+  //delete avoid;
   delete halt;
   delete follow_safely;
-  delete lane_heading;
   delete slow_for_curves;
 };
-
-void Passing::configure()
-{
-
-  // minimum passing distance
-  passing_distance = cf->ReadFloat(section, "passing_distance", 10.0);
-  ART_MSG(2, "\tminimum passing distance is %.3f m", passing_distance);
-
-  // required clearance ahead and behind to return from passing
-  passing_distance_ahead = cf->ReadFloat(section, "passing_distance_ahead",
-					 DARPA_rules::front_limit_after_pass
-					 + ArtVehicle::front_bumper_px
-					 + ArtVehicle::length);
-  ART_MSG(2, "\tpassing distance ahead is %.3f m", passing_distance_ahead);
-
-  passing_distance_behind = cf->ReadFloat(section, "passing_distance_behind",
-					  DARPA_rules::min_rear_sep_after_pass
-					  - ArtVehicle::rear_bumper_px
-					  - ArtVehicle::halflength);
-  ART_MSG(2, "\tpassing distance behind is %.3f m", passing_distance_behind);
-
-  passing_speed = cf->ReadFloat(section, "passing_speed", 3.0);
-  ART_MSG(2, "\tpassing speed is %.1f m/s", passing_speed);
-
-  avoid->configure(cf, section);
-  halt->configure(cf, section);
-  follow_safely->configure(cf, section);
-  slow_for_curves->configure(cf, section);
-  lane_heading->configure(cf, section);
-}
 
 // follow passing lane
 //
@@ -83,8 +49,11 @@ Controller::result_t Passing::control(pilot_command_t &pcmd)
   pilot_command_t incmd = pcmd;		// copy of original input
 
   if (!in_passing_lane
-      && course->in_lane(estimate->pos)) // reached passing lane yet?
-    in_passing_lane = true;
+      && course->in_lane(MapPose(estimate->pose.pose)))
+    {
+      // reached passing lane
+      in_passing_lane = true;
+    }
 
   if (!in_passing_lane			// not in passing lane yet?
       && !obstacle->passing_lane_clear()) // clear to go?
@@ -93,11 +62,8 @@ Controller::result_t Passing::control(pilot_command_t &pcmd)
       return halt->control(pcmd);
     }
 
-  if (verbose >= 2)
-    {
-      ART_MSG(5, "Go to waypoint %s in passing lane",
-	      order->waypt[1].id.name().str);
-    }
+  ROS_DEBUG("Go to waypoint %s in passing lane",
+            ElementID(order->waypt[1].id).name().str);
 
   // reduce speed while passing
   nav->reduce_speed_with_min(pcmd, passing_speed);
@@ -109,20 +75,23 @@ Controller::result_t Passing::control(pilot_command_t &pcmd)
 
   if (done_passing())
     {
-      ART_MSG(1, "passing completed");
+      ROS_WARN("passing completed");
       result = Finished;
     }
 
-  // set desired heading for passing lane
-  lane_heading->control(pcmd);		// should work OK
+  // set heading to desired course
+  course->desired_heading(pcmd);
 
+  // check if way-point reached
   course->lane_waypoint_reached();
 
+#if 0 // not doing avoid right now
   result_t avoid_result = avoid->control(pcmd, incmd);
   if (result == OK)
     {
       result = avoid_result;
     }
+#endif // not doing avoid right now
 
   trace("passing controller", pcmd, result);
 
@@ -133,9 +102,10 @@ Controller::result_t Passing::control(pilot_command_t &pcmd)
 bool Passing::done_passing(void)
 {
   bool done = false;
-  if (course->distance_in_plan(course->start_pass_location, estimate->pos)
+  if (course->distance_in_plan(course->start_pass_location,
+                               MapPose(estimate->pose.pose))
       > passing_distance+DARPA_rules::min_forw_sep_travel
-      + ArtVehicle::front_bumper_px);
+      + art_msgs::ArtVehicle::front_bumper_px)
     {
       // TODO: compute aim point for reentering lane?
 
@@ -156,10 +126,9 @@ void Passing::reset(void)
 {
   trace_reset("Passing");
   reset_me();
-  avoid->reset();
+  //avoid->reset();
   halt->reset();
   follow_safely->reset();
-  lane_heading->reset();
   slow_for_curves->reset();
 }
 

@@ -18,7 +18,7 @@
 #include "follow_safely.h"
 #include "halt.h"
 //#include "real_zone.h"
-//#include "passing.h"
+#include "passing.h"
 #include "ntimer.h"
 #include "uturn.h"
 //#include "voronoi_zone.h"
@@ -152,7 +152,7 @@ Road::Road(Navigator *navptr, int _verbose):
   follow_lane = new FollowLane(navptr, _verbose);
   follow_safely = new FollowSafely(navptr, _verbose);
   halt = new Halt(navptr, _verbose);
-  //passing = new Passing(navptr, _verbose);
+  passing = new Passing(navptr, _verbose);
   uturn = new Uturn(navptr, _verbose);
   //zone = new RealZone(navptr, _verbose);
 
@@ -172,7 +172,7 @@ Road::~Road()
   delete follow_lane;
   delete follow_safely;
   delete halt;
-  //delete passing;
+  delete passing;
   delete uturn;
   //delete zone;
 
@@ -240,7 +240,7 @@ void Road::reset(void)
   follow_lane->reset();
   follow_safely->reset();
   halt->reset();
-  //passing->reset();
+  passing->reset();
   uturn->reset();
   //zone->reset();
 }
@@ -398,8 +398,7 @@ Controller::result_t Road::ActionInInit(pilot_command_t &pcmd)
 
 Controller::result_t Road::ActionInPass(pilot_command_t &pcmd)
 {
-  //result_t result = passing->control(pcmd);
-  result_t result = Finished;           // scaffolding
+  result_t result = passing->control(pcmd);
   if (result == Finished)
     {
       pending_event = NavRoadEvent::FollowLane;
@@ -621,7 +620,7 @@ Controller::result_t Road::ActionToBlock(pilot_command_t &pcmd)
 
 Controller::result_t Road::ActionToEvade(pilot_command_t &pcmd)
 {
-#if 0  // don't try to pass for now, easier to unit test Evade logic
+#if 1  // don't try to pass for now, easier to unit test Evade logic
   // collision detected: first try to pass immediately
   if (course->find_passing_lane())
     {
@@ -634,7 +633,7 @@ Controller::result_t Road::ActionToEvade(pilot_command_t &pcmd)
 	}
     }
   // no passing lane: evade collision by leaving lane to the right
-  evade->reset();
+  //evade->reset();
 #endif
   return ActionInEvade(pcmd);
 }
@@ -657,7 +656,7 @@ Controller::result_t Road::ActionToPass(pilot_command_t &pcmd)
   if (course->switch_to_passing_lane())
     {
       passing_timer->Cancel();
-      //passing->reset();
+      passing->reset();
       return ActionInPass(pcmd);
     }
   else

@@ -12,9 +12,8 @@
 #ifndef __PASSING_HH__
 #define __PASSING_HH__
 
-class Avoid;
+//class Avoid;
 class Halt;
-class LaneHeading;
 class FollowSafely;
 class SlowForCurves;
 
@@ -24,17 +23,15 @@ public:
 
   Passing(Navigator *navptr, int _verbose);
   ~Passing();
-  void configure();
   result_t control(pilot_command_t &pcmd);
   void reset(void);
 
 private:
   bool in_passing_lane;
 
-  Avoid		*avoid;
+  //Avoid       *avoid;
   Halt		*halt;
   FollowSafely	*follow_safely;
-  LaneHeading	*lane_heading;
   SlowForCurves *slow_for_curves;
 
   // .cfg variables

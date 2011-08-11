@@ -5,7 +5,6 @@
 #  evade.cc
 #  lane_edge.cc
 #  parking.cc
-#  passing.cc
 #  real_zone.cc
 #  safety.cc
 #  voronoi_zone.cc
@@ -19,6 +18,7 @@ rosbuild_add_executable(navigator
   follow_safely.cc
   navigator.cc
   obstacle.cc
+  passing.cc
   queue_mgr.cc
   road.cc
   run.cc

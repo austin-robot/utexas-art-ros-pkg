@@ -18,7 +18,7 @@
 class FollowLane;
 class FollowSafely;
 class Halt;
-//class Passing;
+class Passing;
 class NavTimer;
 //class RealZone;
 class Uturn;
@@ -67,7 +67,7 @@ private:
   FollowLane	*follow_lane;
   FollowSafely	*follow_safely;
   Halt		*halt;
-  //Passing	*passing;
+  Passing	*passing;
   Uturn	*uturn;
   //RealZone	*zone;
 

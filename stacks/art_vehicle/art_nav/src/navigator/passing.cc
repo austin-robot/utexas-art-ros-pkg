@@ -102,18 +102,18 @@ Controller::result_t Passing::control(pilot_command_t &pcmd)
 bool Passing::done_passing(void)
 {
   bool done = false;
-  if (course->distance_in_plan(course->start_pass_location,
-                               MapPose(estimate->pose.pose))
-      > config_->passing_distance+DARPA_rules::min_forw_sep_travel
-      + art_msgs::ArtVehicle::front_bumper_px)
+  double dist_since_passing =
+    course->distance_in_plan(course->start_pass_location,
+                             MapPose(estimate->pose.pose));
+  if (dist_since_passing > config_->passing_distance)
     {
       // TODO: compute aim point for reentering lane?
 
       // see if clear to return to passed lane
       float ahead, behind;
       obstacle->closest_in_lane(course->passed_lane, ahead, behind);
-      if (ahead >= config_->passing_distance_ahead
-	  && behind >= config_->passing_distance_behind)
+      if (ahead >= config_->passing_clearance_ahead
+	  && behind >= config_->passing_clearance_behind)
 	{
 	  done = true;
 	}

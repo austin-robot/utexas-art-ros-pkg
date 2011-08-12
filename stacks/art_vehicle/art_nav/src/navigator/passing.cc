@@ -66,7 +66,7 @@ Controller::result_t Passing::control(pilot_command_t &pcmd)
             ElementID(order->waypt[1].id).name().str);
 
   // reduce speed while passing
-  nav->reduce_speed_with_min(pcmd, passing_speed);
+  nav->reduce_speed_with_min(pcmd, config_->passing_speed);
 
   // adjust speed to maintain a safe following distance in our lane
   result_t result = follow_safely->control(pcmd);
@@ -104,7 +104,7 @@ bool Passing::done_passing(void)
   bool done = false;
   if (course->distance_in_plan(course->start_pass_location,
                                MapPose(estimate->pose.pose))
-      > passing_distance+DARPA_rules::min_forw_sep_travel
+      > config_->passing_distance+DARPA_rules::min_forw_sep_travel
       + art_msgs::ArtVehicle::front_bumper_px)
     {
       // TODO: compute aim point for reentering lane?
@@ -112,8 +112,8 @@ bool Passing::done_passing(void)
       // see if clear to return to passed lane
       float ahead, behind;
       obstacle->closest_in_lane(course->passed_lane, ahead, behind);
-      if (ahead >= passing_distance_ahead
-	  && behind >= passing_distance_behind)
+      if (ahead >= config_->passing_distance_ahead
+	  && behind >= config_->passing_distance_behind)
 	{
 	  done = true;
 	}

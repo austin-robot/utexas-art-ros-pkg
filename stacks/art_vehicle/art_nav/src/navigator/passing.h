@@ -34,13 +34,6 @@ private:
   FollowSafely	*follow_safely;
   SlowForCurves *slow_for_curves;
 
-  // .cfg variables
-  float passing_distance;
-  float close_stopping_distance;
-  float passing_distance_ahead;
-  float passing_distance_behind;
-  float passing_speed;
-
   bool done_passing(void);
 
   // reset this controller only

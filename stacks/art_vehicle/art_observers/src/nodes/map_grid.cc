@@ -57,9 +57,14 @@ void MapGrid::processObstacles(const sensor_msgs::PointCloud &msg)
   obs_quads_.polygons.clear();
   added_quads_.clear();
   transformPointCloud(msg);
-  filterPointsInLocalMap();
-  runObservers();
-  publishObstacleVisualization();
+
+  // skip the rest until the local road map has been received at least once
+  if (local_map_.header.stamp > ros::Time())
+    {
+      filterPointsInLocalMap();
+      runObservers();
+      publishObstacleVisualization();
+    }
 }
 
 void MapGrid::processLocalMap(const art_msgs::ArtLanes &msg) 
@@ -69,8 +74,7 @@ void MapGrid::processLocalMap(const art_msgs::ArtLanes &msg)
 
 void MapGrid::filterPointsInLocalMap() 
 {
-  // set the exact point cloud size -- the vectors should already have
-  // enough space
+  // set the exact point cloud size
   size_t npoints = obstacles_.points.size();
   added_quads_.clear();
   for (unsigned i = 0; i < npoints; ++i)

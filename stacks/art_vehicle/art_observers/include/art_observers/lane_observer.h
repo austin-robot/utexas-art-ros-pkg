@@ -3,7 +3,7 @@
  *  Copyright (C) 2011 Austin Robot Technology
  *  License: Modified BSD Software License Agreement
  * 
- *  $Id: accel.h 1539 2011-05-09 04:09:20Z jack.oquin $
+ *  $Id$
  */
 
 /**  @file

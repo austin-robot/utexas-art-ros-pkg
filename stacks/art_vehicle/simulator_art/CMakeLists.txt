@@ -34,3 +34,6 @@ link_directories(/u/mquinlan/ros_extras)
 
 # new, improved simulation
 rosbuild_add_executable(artstage src/artstage.cc src/vehicle_model.cc)
+
+# simulator node that finds obstacles points from the SICK laser
+rosbuild_add_executable(obstacles src/obstacles.cc)

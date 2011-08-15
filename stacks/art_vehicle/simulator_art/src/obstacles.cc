@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
   // Subscribers
   ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
   subLaserScan_ =
-      node.subscribe("laser/front", qDepth, &processLaserScan, noDelay);
+      node.subscribe("front_sick", qDepth, &processLaserScan, noDelay);
   
   // Publishers
   pubPointCloud_ = node.advertise<sensor_msgs::PointCloud>("velodyne/obstacles", qDepth);

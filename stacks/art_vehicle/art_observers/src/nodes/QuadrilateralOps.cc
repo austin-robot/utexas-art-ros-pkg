@@ -133,7 +133,6 @@ namespace quad_ops {
                                  const art_msgs::ArtLanes& quads,
                                  const int lane)
   {
-    
     PolyOps polyOps;
     poly_list_t allPolygons, to_polys;
     polyOps.GetPolys(quads, allPolygons);

@@ -1,5 +1,6 @@
 #include <art_map/types.h>
 #include <art_observers/QuadrilateralOps.h>
+#include <art_map/PolyOps.h> 
 
 namespace quad_ops {
 // determines if point lies in interior of given polygon points on
@@ -109,7 +110,7 @@ namespace quad_ops {
   }
   
   // This function returns an ArtLanes containing all the
-  // ArtQuadrilaterals in 'quads' that are statisfied by the 'filter'
+  // ArtQuadrilaterals in 'quads' that are satisfied by the 'filter'
   // being passed in
   art_msgs::ArtLanes filterLanes(const art_msgs::ArtQuadrilateral& base_quad,
                                  const art_msgs::ArtLanes& quads,
@@ -125,5 +126,23 @@ namespace quad_ops {
     }
     return filtered;
   }
-  
+
+  art_msgs::ArtLanes filterAdjacentLanes(const art_msgs::ArtQuadrilateral& base_quad,
+                                 const art_msgs::ArtLanes& quads,
+                                 const int lane, MapPose &pose_)
+  {
+    std::vector<poly> to_polys;
+    PolyOps::getLaneDir(&to_polys, &to_polys, 0, lane, &pose_);
+    //art_msgs::ArtQuadrilaterals adj_quad = 
+    //art_msgs::ArtLanes filtered;
+    //size_t num_quads = quads.polygons.size();
+    //for (size_t i=0; i<num_quads; i++) {
+      //const art_msgs::ArtQuadrilateral* p= &(quads.polygons[i]);
+      //if (filter(base_quad,quads.polygons[i]))  {
+        //filtered.polygons.push_back(*p);
+      //}
+    //}
+    //return filtered;
+    return NULL;
+  }
 }

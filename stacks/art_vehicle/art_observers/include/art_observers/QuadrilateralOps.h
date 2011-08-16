@@ -21,6 +21,8 @@
 
 #include <art_msgs/ArtQuadrilateral.h>
 #include <art_msgs/ArtLanes.h>
+#include <art_map/PolyOps.h>
+#include <nav_msgs/Odometry.h>
 
 namespace quad_ops 
 {
@@ -40,7 +42,9 @@ namespace quad_ops
   art_msgs::ArtLanes filterLanes(const Quad& base_quad,
                                  const art_msgs::ArtLanes& quads,
                                  bool(*filter)(const Quad&, const Quad&));
-
+  art_msgs::ArtLanes filterAdjacentLanes(const Quad& base_quad,
+                                 const art_msgs::ArtLanes& quads,
+                                 int lane, MapPose &pose_);
   // Create a comparison operator so we can use ArtQuadrilateral's in
   // std::set or std::sort
   struct quad_less
@@ -51,7 +55,7 @@ namespace quad_ops
     };
   };
 
-  // Create some comparison operators for filtering ArtQuadirilaterals
+  // Create some comparison operators for filtering ArtQuadrilaterals
   inline bool compare_seg_lane(const Quad& base, const Quad& comp)
   {
     return ( (base.start_way.seg == comp.start_way.seg) && 
@@ -78,6 +82,24 @@ namespace quad_ops
              (base.start_way.lane == comp.start_way.lane) &&
              (base.end_way.seg == comp.end_way.seg) && 
              (base.end_way.lane == comp.end_way.lane) &&
+             (!comp.is_transition) );
+  };
+  inline bool compare_left_seg_lane(const Quad& base, const Quad& comp) 
+  {
+    return ( (base.poly_id < comp.poly_id) &&
+             (base.start_way.seg < comp.start_way.seg) &&
+             (base.start_way.lane < comp.start_way.lane) &&
+             (base.end_way.seg < comp.end_way.seg) && 
+             (base.end_way.lane < comp.end_way.lane) &&
+             (!comp.is_transition) );
+  };
+  inline bool compare_right_seg_lane(const Quad& base, const Quad& comp) 
+  {
+    return ( (base.poly_id < comp.poly_id) &&
+             (base.start_way.seg > comp.start_way.seg) &&
+             (base.start_way.lane > comp.start_way.lane) &&
+             (base.end_way.seg > comp.end_way.seg) && 
+             (base.end_way.lane > comp.end_way.lane) &&
              (!comp.is_transition) );
   };
 }

@@ -27,9 +27,12 @@
 #include <sensor_msgs/PointCloud.h>
 #include <tf/transform_listener.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <nav_msgs/Odometry.h>
 
 #include <art_observers/lane_observer.h>
 #include <art_observers/QuadrilateralOps.h>
+
+#include <art_map/PolyOps.h>
 
 class MapGrid 
 {
@@ -46,6 +49,7 @@ private:
   bool isPointInAPolygon(float x, float y);
   void processLocalMap(const art_msgs::ArtLanes &msg);
   void processObstacles(const sensor_msgs::PointCloud &msg);
+  void processPose(const nav_msgs::Odometry &odom);
   void publishObstacleVisualization();
   void runObservers();
   void transformPointCloud(const sensor_msgs::PointCloud &msg);
@@ -55,15 +59,19 @@ private:
 
   LaneObserver nearest_front_observer_;
   LaneObserver nearest_rear_observer_;
+  LaneObserver adjacent_left_observer_;
+  LaneObserver adjacent_right_observer_;
 
   ros::Subscriber obstacle_sub_;
   ros::Subscriber road_map_sub_;
+  ros::Subscriber odom_sub_;
   ros::Publisher observations_pub_;
   ros::Publisher viz_pub_;
 
   sensor_msgs::PointCloud obstacles_;
   art_msgs::ArtLanes local_map_;
   art_msgs::ObservationArray observations_;
+  MapPose pose_;
 
   std::tr1::unordered_set<int> added_quads_;
   art_msgs::ArtLanes obs_quads_;

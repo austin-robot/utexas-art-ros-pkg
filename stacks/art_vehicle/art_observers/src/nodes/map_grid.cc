@@ -24,9 +24,13 @@ MapGrid::MapGrid(ros::NodeHandle &node):
   nearest_front_observer_(art_msgs::Observation::Nearest_forward,
                           std::string("Nearest_forward")),
   nearest_rear_observer_(art_msgs::Observation::Nearest_backward,
-                         std::string("Nearest_backward"))
-{
-  // subscribe to obstacle cloud
+                         std::string("Nearest_backward")),
+  adjacent_left_observer_(art_msgs::Observation::Adjacent_left,
+                         std::string("Adjacent_left")),
+  adjacent_right_observer_(art_msgs::Observation::Adjacent_right,
+                         std::string("Adjacent_right"))
+{ 
+ // subscribe to obstacle cloud
   obstacle_sub_ =
     node_.subscribe("velodyne/obstacles", 1,
                     &MapGrid::processObstacles, this,
@@ -37,6 +41,12 @@ MapGrid::MapGrid(ros::NodeHandle &node):
     node_.subscribe("roadmap_local", 1,
                     &MapGrid::processLocalMap, this,
                     ros::TransportHints().tcpNoDelay(true));
+  
+  // subscribe to odometry
+  odom_sub_ = 
+    node_.subscribe("odom", 1,
+                    &MapGrid::processPose, this,
+                    ros::TransportHints().tcpNoDelay(true));
 
   // advertise published topics
   const std::string viz_topic("visualization_marker_array");
@@ -46,7 +56,7 @@ MapGrid::MapGrid(ros::NodeHandle &node):
     node_.advertise <art_msgs::ObservationArray>("observations", 1, true);
 
   // initialize observations message
-  observations_.obs.resize(2);          // number of observers
+  observations_.obs.resize(4);          // number of observers
 }
 
 MapGrid::~MapGrid() {}
@@ -70,6 +80,11 @@ void MapGrid::processObstacles(const sensor_msgs::PointCloud &msg)
 void MapGrid::processLocalMap(const art_msgs::ArtLanes &msg) 
 {
   local_map_ = msg;
+}
+
+void MapGrid::processPose(const nav_msgs::Odometry &odom)
+{
+  pose_ = MapPose(odom.pose.pose); 
 }
 
 void MapGrid::filterPointsInLocalMap() 
@@ -163,7 +178,32 @@ void MapGrid::runObservers()
     nearest_rear_observer_.update(robot_polygon_.poly_id,
                                   nearest_rear_quads,
                                   nearest_rear_obstacles);
+  //update adjacent left observer 
+  
+  art_msgs::ArtLanes adjacent_left_quads =
+    quad_ops::filterAdjacentLanes(robot_polygon_,local_map_, 
+                          1, pose_);                            // 1 indicates get adjacenet left, -1 means adjacent right
+  art_msgs::ArtLanes adjacent_left_obstacles =
+    quad_ops::filterAdjacentLanes(robot_polygon_,obs_quads_,
+                          1, pose_);
 
+  observations_.obs[2] =
+    adjacent_left_observer_.update(robot_polygon_.poly_id,
+                                   adjacent_left_quads,
+                                   adjacent_left_obstacles);
+  //update adjacent right observer 
+  
+  art_msgs::ArtLanes adjacent_right_quads =
+    quad_ops::filterAdjacentLanes(robot_polygon_,local_map_,
+                          -1, pose_);
+  art_msgs::ArtLanes adjacent_right_obstacles =
+    quad_ops::filterAdjacentLanes(robot_polygon_,obs_quads_,
+                          -1, pose_);
+
+  observations_.obs[3] =
+    adjacent_right_observer_.update(robot_polygon_.poly_id,
+                                   adjacent_right_quads,
+                                   adjacent_right_obstacles);
   // Publish observations
   observations_pub_.publish(observations_);
 }                                                                     

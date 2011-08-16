@@ -23,8 +23,7 @@ int main(int argc, char *argv[])
 {
   ros::init(argc, argv, NODE);
   ros::NodeHandle node;
-
-  MapGrid* mGrid = new MapGrid(node);
+  MapGrid* mGrid = new MapGrid(node); 
   mGrid->spin();                        // handle incoming data
 
   return 0;

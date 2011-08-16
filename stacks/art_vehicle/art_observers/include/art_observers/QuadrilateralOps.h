@@ -42,9 +42,9 @@ namespace quad_ops
   art_msgs::ArtLanes filterLanes(const Quad& base_quad,
                                  const art_msgs::ArtLanes& quads,
                                  bool(*filter)(const Quad&, const Quad&));
-  art_msgs::ArtLanes filterAdjacentLanes(const Quad& base_quad,
+  art_msgs::ArtLanes filterAdjacentLanes(MapPose &pose,
                                  const art_msgs::ArtLanes& quads,
-                                 int lane, MapPose &pose_);
+                                 const int lane);
   // Create a comparison operator so we can use ArtQuadrilateral's in
   // std::set or std::sort
   struct quad_less

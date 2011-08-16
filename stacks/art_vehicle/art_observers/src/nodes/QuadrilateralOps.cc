@@ -126,23 +126,20 @@ namespace quad_ops {
     }
     return filtered;
   }
-
-  art_msgs::ArtLanes filterAdjacentLanes(const art_msgs::ArtQuadrilateral& base_quad,
+  
+  // This function returns an ArtLanes containing all the 
+  // ArtQuadrilaterals in 'quads' that are in the adjacent lane
+  art_msgs::ArtLanes filterAdjacentLanes(MapPose &pose,
                                  const art_msgs::ArtLanes& quads,
-                                 const int lane, MapPose &pose_)
+                                 const int lane)
   {
-    std::vector<poly> to_polys;
-    PolyOps::getLaneDir(&to_polys, &to_polys, 0, lane, &pose_);
-    //art_msgs::ArtQuadrilaterals adj_quad = 
-    //art_msgs::ArtLanes filtered;
-    //size_t num_quads = quads.polygons.size();
-    //for (size_t i=0; i<num_quads; i++) {
-      //const art_msgs::ArtQuadrilateral* p= &(quads.polygons[i]);
-      //if (filter(base_quad,quads.polygons[i]))  {
-        //filtered.polygons.push_back(*p);
-      //}
-    //}
-    //return filtered;
-    return NULL;
+    
+    PolyOps polyOps;
+    poly_list_t allPolygons, to_polys;
+    polyOps.GetPolys(quads, allPolygons);
+    polyOps.getLaneDir(allPolygons, to_polys, 0, lane, pose);
+    art_msgs::ArtLanes adjacentPolys;
+    polyOps.GetLanes(to_polys, adjacentPolys);
+    return adjacentPolys;
   }
 }

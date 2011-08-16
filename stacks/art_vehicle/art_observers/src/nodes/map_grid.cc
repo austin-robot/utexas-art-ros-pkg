@@ -181,11 +181,11 @@ void MapGrid::runObservers()
   //update adjacent left observer 
   
   art_msgs::ArtLanes adjacent_left_quads =
-    quad_ops::filterAdjacentLanes(robot_polygon_,local_map_, 
-                          1, pose_);                            // 1 indicates get adjacenet left, -1 means adjacent right
+    quad_ops::filterAdjacentLanes(pose_,local_map_, 
+                          1);                            // 1 indicates get adjacenet left, -1 means adjacent right
   art_msgs::ArtLanes adjacent_left_obstacles =
-    quad_ops::filterAdjacentLanes(robot_polygon_,obs_quads_,
-                          1, pose_);
+    quad_ops::filterAdjacentLanes(pose_,obs_quads_,
+                          1);
 
   observations_.obs[2] =
     adjacent_left_observer_.update(robot_polygon_.poly_id,
@@ -194,11 +194,11 @@ void MapGrid::runObservers()
   //update adjacent right observer 
   
   art_msgs::ArtLanes adjacent_right_quads =
-    quad_ops::filterAdjacentLanes(robot_polygon_,local_map_,
-                          -1, pose_);
+    quad_ops::filterAdjacentLanes(pose_,local_map_,
+                          -1);
   art_msgs::ArtLanes adjacent_right_obstacles =
-    quad_ops::filterAdjacentLanes(robot_polygon_,obs_quads_,
-                          -1, pose_);
+    quad_ops::filterAdjacentLanes(pose_,obs_quads_,
+                          -1);
 
   observations_.obs[3] =
     adjacent_right_observer_.update(robot_polygon_.poly_id,

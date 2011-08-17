@@ -146,6 +146,7 @@ bool MapGrid::isPointInAPolygon(float x, float y)
 
 void MapGrid::runObservers() 
 {
+  ROS_INFO("Starting front observer");
   // update nearest front observer
   art_msgs::ArtLanes nearest_front_quads =
     quad_ops::filterLanes(robot_polygon_,local_map_,
@@ -159,7 +160,8 @@ void MapGrid::runObservers()
                                    nearest_front_quads,
                                    nearest_front_obstacles);
 
-  // update nearest front observer
+  ROS_INFO("Starting rear observer");
+  // update nearest rear observer
   art_msgs::ArtLanes nearest_rear_quads =
     quad_ops::filterLanes(robot_polygon_,local_map_,
                           *quad_ops::compare_backward_seg_lane);
@@ -177,7 +179,10 @@ void MapGrid::runObservers()
   observations_.obs[1] =
     nearest_rear_observer_.update(robot_polygon_.poly_id,
                                   nearest_rear_quads,
-                                  nearest_rear_obstacles);
+                               nearest_rear_obstacles);
+
+
+   ROS_INFO("Starting left observer");
   //update adjacent left observer 
   
   art_msgs::ArtLanes adjacent_left_quads =
@@ -191,6 +196,9 @@ void MapGrid::runObservers()
     adjacent_left_observer_.update(robot_polygon_.poly_id,
                                    adjacent_left_quads,
                                    adjacent_left_obstacles);
+
+
+  ROS_INFO("Starting right observer");
   //update adjacent right observer 
   
   art_msgs::ArtLanes adjacent_right_quads =
@@ -204,6 +212,7 @@ void MapGrid::runObservers()
     adjacent_right_observer_.update(robot_polygon_.poly_id,
                                    adjacent_right_quads,
                                    adjacent_right_obstacles);
+  ROS_INFO("Publish observers");
   // Publish observations
   observations_pub_.publish(observations_);
 }                                                                     

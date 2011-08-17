@@ -387,7 +387,7 @@ main(int argc, char** argv)
 
   StageNode sn(argc-1, argv, gui, world_file.c_str());
 
-  if(sn.SubscribeModels() != 0)
+  if(sn.SubscribeModels() != 0)	
     exit(-1);
 
   // spawn a thread to read incoming ROS messages

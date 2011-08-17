@@ -97,7 +97,10 @@ public:
   };
 
   void toMsg(art_msgs::ArtQuadrilateral &msg) {
+    msg.poly.points.resize(art_msgs::ArtQuadrilateral::quad_size);
+    ROS_INFO("Converting poly to message");
     p1.toMsg(msg.poly.points[art_msgs::ArtQuadrilateral::bottom_left]);
+    ROS_INFO("made p1");
     p2.toMsg(msg.poly.points[art_msgs::ArtQuadrilateral::top_left]);
     p3.toMsg(msg.poly.points[art_msgs::ArtQuadrilateral::top_right]);
     p4.toMsg(msg.poly.points[art_msgs::ArtQuadrilateral::bottom_right]);
@@ -116,6 +119,7 @@ public:
 
     msg.left_boundary.lane_marking = left_boundary;
     msg.right_boundary.lane_marking = right_boundary;
+    ROS_INFO("Finished");
   }
 };
 

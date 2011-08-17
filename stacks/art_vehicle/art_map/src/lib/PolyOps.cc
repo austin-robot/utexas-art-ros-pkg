@@ -590,6 +590,23 @@ void PolyOps::CollectPolys(const std::vector<poly> &from_polys,
   CollectPolys(from_polys, to_polys, start, from_polys.size());
 }
 
+// Convert ArtLanes message into polygon list
+void PolyOps::GetPolys(const art_msgs::ArtLanes &lanes, poly_list_t &polyList)
+{
+  polyList.resize(lanes.polygons.size());
+  for (unsigned i = 0; i < lanes.polygons.size(); i++) {
+    polyList[i] = poly(lanes.polygons[i]);
+  }
+}
+
+void PolyOps::GetLanes(poly_list_t &polyList, art_msgs::ArtLanes &lanes)
+{
+  lanes.polygons.resize(polyList.size());
+  for (unsigned i = 0; i < polyList.size(); i++) {
+    polyList[i].toMsg(lanes.polygons[i]);
+  }
+}
+
 // true if curPoly is in the specified segment and lane
 bool PolyOps::LanePoly(const poly &curPoly, WayPointNode waypt)
 {

@@ -95,6 +95,28 @@ public:
     left_boundary = Lane_marking(msg.left_boundary.lane_marking);
     right_boundary = Lane_marking(msg.right_boundary.lane_marking);
   };
+
+  void toMsg(art_msgs::ArtQuadrilateral &msg) {
+    p1.toMsg(msg.poly.points[art_msgs::ArtQuadrilateral::bottom_left]);
+    p2.toMsg(msg.poly.points[art_msgs::ArtQuadrilateral::top_left]);
+    p3.toMsg(msg.poly.points[art_msgs::ArtQuadrilateral::top_right]);
+    p4.toMsg(msg.poly.points[art_msgs::ArtQuadrilateral::bottom_right]);
+    midpoint.toMsg(msg.midpoint);
+
+    msg.heading = heading;
+    msg.length = length;
+    msg.poly_id = poly_id;
+    
+    msg.is_stop = is_stop;
+    msg.is_transition = is_transition;
+    msg.contains_way = contains_way;
+    
+    msg.start_way = start_way.toMapID();
+    msg.end_way = end_way.toMapID();
+
+    msg.left_boundary.lane_marking = left_boundary;
+    msg.right_boundary.lane_marking = right_boundary;
+  }
 };
 
 typedef std::vector<poly> poly_list_t;  // polygon vector type
@@ -167,6 +189,10 @@ class PolyOps
   void CollectPolys(const std::vector<poly> &from_polys,
 		    std::vector<poly> &to_polys,
 		    unsigned start);
+
+  void GetPolys(const art_msgs::ArtLanes &lanes, poly_list_t &polyList);
+
+  void GetLanes(poly_list_t &polyList, art_msgs::ArtLanes &lanes);
 
   // true if curPoly is in the specified segment and lane
   // Note: this ignores stop line polygons, we don't want to use them

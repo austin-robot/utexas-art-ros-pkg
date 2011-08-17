@@ -104,6 +104,19 @@ public:
   {
     return MapXY(this->x - that.x, this->y - that.y);
   }
+
+  void toMsg(geometry_msgs::Point &pt) {
+    pt.x = x;
+    pt.y = y;
+    pt.z = 0;
+  }
+
+  void toMsg(geometry_msgs::Point32 &pt) {
+    pt.x = x;
+    pt.y = y;
+    pt.z = 0;
+  }
+ 
 };
 
 typedef std::vector<MapXY> mapxy_list_t;

@@ -194,8 +194,7 @@ void MapGrid::runObservers()
   std::vector<poly> adj_polys_left;
   int adjacent_left_poly_ID;
   polyOps_left.GetPolys(adjacent_left_quads, adj_polys_left);
-  adjacent_left_poly_ID = polyOps_left.getClosestPoly(adj_polys_left, 
-                                         pose_);
+  adjacent_left_poly_ID = polyOps_left.getClosestPoly(adj_polys_left, robot_polygon_.midpoint.x, robot_polygon_.midpoint.y);
   observations_.obs[2] =
     adjacent_left_observer_.update(adjacent_left_poly_ID,
                                    adjacent_left_quads,
@@ -214,8 +213,7 @@ void MapGrid::runObservers()
   std::vector<poly> adj_polys_right;
   int adjacent_right_poly_ID;
   polyOps_right.GetPolys(adjacent_right_quads, adj_polys_right);
-  adjacent_right_poly_ID = polyOps_right.getClosestPoly(adj_polys_right, 
-                                         pose_);
+  adjacent_right_poly_ID = polyOps_right.getClosestPoly(adj_polys_right, robot_polygon_.midpoint.x, robot_polygon_.midpoint.y);
   observations_.obs[3] =
     adjacent_right_observer_.update(adjacent_right_poly_ID,
                                    adjacent_right_quads,

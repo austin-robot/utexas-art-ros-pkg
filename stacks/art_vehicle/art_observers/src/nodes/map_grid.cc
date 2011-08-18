@@ -196,11 +196,10 @@ void MapGrid::runObservers()
   polyOps_left.GetPolys(adjacent_left_quads, adj_polys_left);
   adjacent_left_poly_ID = polyOps_left.getClosestPoly(adj_polys_left, robot_polygon_.midpoint.x, robot_polygon_.midpoint.y);
   observations_.obs[2] =
-    adjacent_left_observer_.update(adjacent_left_poly_ID,
+    adjacent_left_observer_.updateAdj(adj_polys_left[adjacent_left_poly_ID].poly_id,
                                    adjacent_left_quads,
                                    adjacent_left_obstacles);
-
-
+  
   // update adjacent right observer 
   
   art_msgs::ArtLanes adjacent_right_quads =
@@ -215,7 +214,7 @@ void MapGrid::runObservers()
   polyOps_right.GetPolys(adjacent_right_quads, adj_polys_right);
   adjacent_right_poly_ID = polyOps_right.getClosestPoly(adj_polys_right, robot_polygon_.midpoint.x, robot_polygon_.midpoint.y);
   observations_.obs[3] =
-    adjacent_right_observer_.update(adjacent_right_poly_ID,
+    adjacent_right_observer_.updateAdj(adj_polys_right[adjacent_right_poly_ID].poly_id,
                                    adjacent_right_quads,
                                    adjacent_right_obstacles);
   // Publish observations

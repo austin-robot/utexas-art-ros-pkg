@@ -32,6 +32,10 @@ public:
     update(int root_poly_id,
            art_msgs::ArtLanes &lane_quads,
            art_msgs::ArtLanes &obstacle_quads);
+  virtual art_msgs::Observation    
+    updateAdj(int adj_poly_id, 
+           art_msgs::ArtLanes &adj_lane_quads,
+           art_msgs::ArtLanes &adj_obstacle_quads);
 
 private:
   std::vector<float> distance_;
@@ -41,6 +45,10 @@ private:
 
   ros::Time prev_update_;
   ros::Time current_update_;
+  art_msgs::Observation  
+  updateAdjHelper(int adj_poly_id, 
+                             art_msgs::ArtLanes &adj_lane_quads,
+                             art_msgs::ArtLanes &adj_obstacle_quads);
 };
 
 

@@ -84,24 +84,6 @@ namespace quad_ops
              (base.end_way.lane == comp.end_way.lane) &&
              (!comp.is_transition) );
   };
-  /*inline bool compare_left_seg_lane(const Quad& base, const Quad& comp) 
-  {
-    return ( (base.poly_id < comp.poly_id) &&
-             (base.start_way.seg < comp.start_way.seg) &&
-             (base.start_way.lane < comp.start_way.lane) &&
-             (base.end_way.seg < comp.end_way.seg) && 
-             (base.end_way.lane < comp.end_way.lane) &&
-             (!comp.is_transition) );
-  };
-  inline bool compare_right_seg_lane(const Quad& base, const Quad& comp) 
-  {
-    return ( (base.poly_id < comp.poly_id) &&
-             (base.start_way.seg > comp.start_way.seg) &&
-             (base.start_way.lane > comp.start_way.lane) &&
-             (base.end_way.seg > comp.end_way.seg) && 
-             (base.end_way.lane > comp.end_way.lane) &&
-             (!comp.is_transition) );
-  };*/
 }
 
 #endif // __QUADRILATERAL_OPS_H__

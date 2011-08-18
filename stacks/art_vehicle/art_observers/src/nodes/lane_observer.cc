@@ -85,7 +85,7 @@ art_msgs::Observation
   observation_.time = time;
   observation_.clear = clear;
   observation_.applicable = applicable;
-                  
+                   
   return observation_;
 }
- 
+

@@ -53,6 +53,16 @@ private:
   void publishObstacleVisualization();
   void runObservers();
   void transformPointCloud(const sensor_msgs::PointCloud &msg);
+  int getClosestPoly(const std::vector<poly>& polys, float x, float y);
+  int getClosestPoly(const std::vector<poly>& polys, MapXY pt)
+  {
+    return getClosestPoly(polys, pt.x, pt.y);
+  }
+  int getClosestPoly(const std::vector<poly>& polys,
+                     const MapPose &pose)
+  {
+    return getClosestPoly(polys, pose.map.x, pose.map.y);
+  }
 
   ros::NodeHandle node_;
   boost::shared_ptr<tf::TransformListener> tf_listener_;

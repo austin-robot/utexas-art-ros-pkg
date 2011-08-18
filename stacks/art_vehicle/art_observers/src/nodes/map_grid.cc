@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <ros/ros.h>
 #include <art_observers/map_grid.h>
+#include <art_observers/QuadrilateralOps.h>
+#include <art_map/PolyOps.h> 
 
 MapGrid::MapGrid(ros::NodeHandle &node):
   node_(node),
@@ -67,7 +69,7 @@ void MapGrid::processObstacles(const sensor_msgs::PointCloud &msg)
   obs_quads_.polygons.clear();
   added_quads_.clear();
   transformPointCloud(msg);
-
+  
   // skip the rest until the local road map has been received at least once
   if (local_map_.header.stamp > ros::Time())
     {
@@ -84,7 +86,7 @@ void MapGrid::processLocalMap(const art_msgs::ArtLanes &msg)
 
 void MapGrid::processPose(const nav_msgs::Odometry &odom)
 {
-  pose_ = MapPose(odom.pose.pose); 
+  pose_ = MapPose(odom.pose.pose);
 }
 
 void MapGrid::filterPointsInLocalMap() 
@@ -180,22 +182,27 @@ void MapGrid::runObservers()
                                nearest_rear_obstacles);
 
 
-  //update adjacent left observer 
+  // update adjacent left observer 
   
   art_msgs::ArtLanes adjacent_left_quads =
     quad_ops::filterAdjacentLanes(pose_,local_map_, 
-                          1);                            // 1 indicates get adjacenet left, -1 means adjacent right
+                          1);                            // 1 indicates get adjacent left, -1 means adjacent right
   art_msgs::ArtLanes adjacent_left_obstacles =
     quad_ops::filterAdjacentLanes(pose_,obs_quads_,
                           1);
-
+  PolyOps polyOps_left;
+  std::vector<poly> adj_polys_left;
+  int adjacent_left_poly_ID;
+  polyOps_left.GetPolys(adjacent_left_quads, adj_polys_left);
+  adjacent_left_poly_ID = polyOps_left.getClosestPoly(adj_polys_left, 
+                                         pose_);
   observations_.obs[2] =
-    adjacent_left_observer_.update(robot_polygon_.poly_id,
+    adjacent_left_observer_.update(adjacent_left_poly_ID,
                                    adjacent_left_quads,
                                    adjacent_left_obstacles);
 
 
-  //update adjacent right observer 
+  // update adjacent right observer 
   
   art_msgs::ArtLanes adjacent_right_quads =
     quad_ops::filterAdjacentLanes(pose_,local_map_,
@@ -203,9 +210,14 @@ void MapGrid::runObservers()
   art_msgs::ArtLanes adjacent_right_obstacles =
     quad_ops::filterAdjacentLanes(pose_,obs_quads_,
                           -1);
-
+  PolyOps polyOps_right;
+  std::vector<poly> adj_polys_right;
+  int adjacent_right_poly_ID;
+  polyOps_right.GetPolys(adjacent_right_quads, adj_polys_right);
+  adjacent_right_poly_ID = polyOps_right.getClosestPoly(adj_polys_right, 
+                                         pose_);
   observations_.obs[3] =
-    adjacent_right_observer_.update(robot_polygon_.poly_id,
+    adjacent_right_observer_.update(adjacent_right_poly_ID,
                                    adjacent_right_quads,
                                    adjacent_right_obstacles);
   // Publish observations

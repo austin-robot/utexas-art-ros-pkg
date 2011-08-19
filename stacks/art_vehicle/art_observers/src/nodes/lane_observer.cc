@@ -38,7 +38,6 @@ art_msgs::Observation
 
   float distance=80.0;
   if (obstacle_quads.polygons.size()!=0) {
-    ROS_INFO("Saw Obstacle in front");
     // Get length of road from robot to nearest obstacle
     int target_id = obstacle_quads.polygons[0].poly_id;
     distance=0;

@@ -182,18 +182,22 @@ void MapGrid::runObservers()
 
 
   // update adjacent left observer 
-  
+  std::cout << "Number of obstacles: " << obs_quads_.polygons.size() << "\n";
   art_msgs::ArtLanes adjacent_left_quads =
     quad_ops::filterAdjacentLanes(pose_,local_map_, 
                           1);                            // 1 indicates get adjacent left, -1 means adjacent right
   art_msgs::ArtLanes adjacent_left_obstacles =
     quad_ops::filterAdjacentLanes(pose_,obs_quads_,
                           1);
+  
+  // Finding closest poly in left lane
   PolyOps polyOps_left;
   std::vector<poly> adj_polys_left;
   int adjacent_left_poly_ID;
   polyOps_left.GetPolys(adjacent_left_quads, adj_polys_left);
   adjacent_left_poly_ID = polyOps_left.getClosestPoly(adj_polys_left, robot_polygon_.midpoint.x, robot_polygon_.midpoint.y);
+
+  // Check to see if there is a left lane to check
   if(adj_polys_left.size() == 0) {
   observations_.obs[2] =
     adjacent_left_observer_.updateAdj(-1,
@@ -214,11 +218,15 @@ void MapGrid::runObservers()
   art_msgs::ArtLanes adjacent_right_obstacles =
     quad_ops::filterAdjacentLanes(pose_,obs_quads_,
                           -1);
+
+  // Finding closest poly in right lane
   PolyOps polyOps_right;
   std::vector<poly> adj_polys_right;
   int adjacent_right_poly_ID;
   polyOps_right.GetPolys(adjacent_right_quads, adj_polys_right);
   adjacent_right_poly_ID = polyOps_right.getClosestPoly(adj_polys_right, robot_polygon_.midpoint.x, robot_polygon_.midpoint.y);
+
+  // Check to see if there is a right lane to check
   if(adj_polys_right.size() == 0) {
   observations_.obs[3] =
     adjacent_right_observer_.updateAdj(-1,

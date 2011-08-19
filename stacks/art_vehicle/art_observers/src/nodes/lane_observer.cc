@@ -34,10 +34,11 @@ art_msgs::Observation
                        art_msgs::ArtLanes &obstacle_quads) 
 {
   current_update_ = ros::Time::now();
-  if (current_update_ == prev_update_) return observation_;
+  //if (current_update_ == prev_update_) return observation_;
 
   float distance=80.0;
   if (obstacle_quads.polygons.size()!=0) {
+    ROS_INFO("Saw Obstacle in front");
     // Get length of road from robot to nearest obstacle
     int target_id = obstacle_quads.polygons[0].poly_id;
     distance=0;
@@ -95,7 +96,15 @@ art_msgs::Observation
 LaneObserver::updateAdj(int adj_poly_id,
                        art_msgs::ArtLanes &adj_lane_quads,
                        art_msgs::ArtLanes &adj_obstacle_quads) 
-{
+{ 
+  if(adj_poly_id == -1) {
+    observation_.distance = 80.0;
+    observation_.velocity = 0.0;
+    observation_.time = 0.0;
+    observation_.clear = false;
+    observation_.applicable = false;
+    return observation_;
+  }
   if (adj_obstacle_quads.polygons.size()!=0) {
     int index_adj;
     for (unsigned i = 0; i < adj_lane_quads.polygons.size() ; i++)
@@ -113,7 +122,7 @@ LaneObserver::updateAdj(int adj_poly_id,
        front_adj_lane.polygons.resize(adj_lane_quads.polygons.size() - index_adj + 1); 
        for (unsigned i = index_adj; i < adj_lane_quads.polygons.size(); i++) 
        {
-          front_adj_lane.polygons[i] = adj_lane_quads.polygons[i];
+          front_adj_lane.polygons[i-index_adj] = adj_lane_quads.polygons[i];
        }
        rear_adj_lane.polygons.resize(index_adj + 1);
        for (int i = 0; i < index_adj; i++)
@@ -145,30 +154,26 @@ LaneObserver::updateAdj(int adj_poly_id,
       if(adj_obstacle_quads.polygons[i].poly_id > adj_lane_quads.polygons[index_adj].poly_id)
         {
           front_counter_++;
+	  front_adj_obstacles.polygons[i] = adj_obstacle_quads.polygons[i];
         }
       else 
         {
           rear_counter_++;
+	  rear_adj_obstacles.polygons[i] = adj_obstacle_quads.polygons[i];
         }
     }
     front_adj_obstacles.polygons.resize (front_counter_);
     rear_adj_obstacles.polygons.resize (rear_counter_);
-    for (unsigned i = index_adj; i < adj_lane_quads.polygons.size(); i++) 
-    {
-      front_adj_obstacles.polygons[i] = adj_obstacle_quads.polygons[i];
-    }
-    for (int i = 0; i < index_adj; i++) 
-    {
-      rear_adj_obstacles.polygons[i] = adj_obstacle_quads.polygons[i];
-    }
     art_msgs::Observation front_obs = updateAdjHelper(index_adj, front_adj_lane, front_adj_obstacles);
     art_msgs::Observation rear_obs = updateAdjHelper(index_adj, rear_adj_lane, rear_adj_obstacles);  
     if (rear_obs.time > front_obs.time)     // determines which adjacent observation (front or rear) is more relevant to publish
     {                                        // if front_obs.time = rear_obs.time, then the front_obs will be published
-      return rear_obs;
+      observation_ =  rear_obs;
+    } else {
+      observation_ =  front_obs; 
     }
-    return front_obs; 
   }
+  return observation_;
 }
 
 art_msgs::Observation

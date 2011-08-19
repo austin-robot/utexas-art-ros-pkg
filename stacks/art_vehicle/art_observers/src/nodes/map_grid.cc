@@ -160,7 +160,6 @@ void MapGrid::runObservers()
     nearest_front_observer_.update(robot_polygon_.poly_id,
                                    nearest_front_quads,
                                    nearest_front_obstacles);
-
   // update nearest rear observer
   art_msgs::ArtLanes nearest_rear_quads =
     quad_ops::filterLanes(robot_polygon_,local_map_,
@@ -195,10 +194,17 @@ void MapGrid::runObservers()
   int adjacent_left_poly_ID;
   polyOps_left.GetPolys(adjacent_left_quads, adj_polys_left);
   adjacent_left_poly_ID = polyOps_left.getClosestPoly(adj_polys_left, robot_polygon_.midpoint.x, robot_polygon_.midpoint.y);
+  if(adj_polys_left.size() == 0) {
+  observations_.obs[2] =
+    adjacent_left_observer_.updateAdj(-1,
+                                   adjacent_left_quads,
+                                   adjacent_left_obstacles);
+  } else {
   observations_.obs[2] =
     adjacent_left_observer_.updateAdj(adj_polys_left[adjacent_left_poly_ID].poly_id,
                                    adjacent_left_quads,
                                    adjacent_left_obstacles);
+  }
   
   // update adjacent right observer 
   
@@ -213,10 +219,17 @@ void MapGrid::runObservers()
   int adjacent_right_poly_ID;
   polyOps_right.GetPolys(adjacent_right_quads, adj_polys_right);
   adjacent_right_poly_ID = polyOps_right.getClosestPoly(adj_polys_right, robot_polygon_.midpoint.x, robot_polygon_.midpoint.y);
+  if(adj_polys_right.size() == 0) {
+  observations_.obs[3] =
+    adjacent_right_observer_.updateAdj(-1,
+                                   adjacent_right_quads,
+                                   adjacent_right_obstacles);
+  } else {
   observations_.obs[3] =
     adjacent_right_observer_.updateAdj(adj_polys_right[adjacent_right_poly_ID].poly_id,
                                    adjacent_right_quads,
                                    adjacent_right_obstacles);
+  }
   // Publish observations
   observations_pub_.publish(observations_);
 }                                                                     

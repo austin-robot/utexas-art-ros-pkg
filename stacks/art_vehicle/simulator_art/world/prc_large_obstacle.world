@@ -80,7 +80,7 @@ car
  name "robot4"
   color "yellow"
   size [4.8 2.12 3.0]     # make tall enough for lasers to see
-  pose [ -224.99 -4.57 0 -30.63 ]
+  pose [ -216.66 -3.81 0 -30.63 ]
   localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
   localization "gps"
   laser_return 1          # visible to lasers

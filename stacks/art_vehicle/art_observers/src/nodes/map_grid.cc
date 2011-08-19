@@ -182,14 +182,14 @@ void MapGrid::runObservers()
 
 
   // update adjacent left observer 
-  std::cout << "Number of obstacles: " << obs_quads_.polygons.size() << "\n";
+  
   art_msgs::ArtLanes adjacent_left_quads =
     quad_ops::filterAdjacentLanes(pose_,local_map_, 
                           1);                            // 1 indicates get adjacent left, -1 means adjacent right
   art_msgs::ArtLanes adjacent_left_obstacles =
     quad_ops::filterAdjacentLanes(pose_,obs_quads_,
                           1);
-  
+  std::cout << "Number of obstacles: " << adjacent_left_obstacles.polygons.size() << "\n"; // this line is never reached, however, filterAdjacentLanes is cycled through fully
   // Finding closest poly in left lane
   PolyOps polyOps_left;
   std::vector<poly> adj_polys_left;
@@ -237,10 +237,10 @@ void MapGrid::runObservers()
     adjacent_right_observer_.updateAdj(adj_polys_right[adjacent_right_poly_ID].poly_id,
                                    adjacent_right_quads,
                                    adjacent_right_obstacles);
-  }
+  } 
   // Publish observations
   observations_pub_.publish(observations_);
-}                                                                     
+}                                                            
 
 
 void MapGrid::calcRobotPolygon() 

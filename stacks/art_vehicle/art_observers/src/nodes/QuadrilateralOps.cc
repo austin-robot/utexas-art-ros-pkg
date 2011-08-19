@@ -133,12 +133,15 @@ namespace quad_ops {
                                  const art_msgs::ArtLanes& quads,
                                  const int lane)
   {
+    ROS_INFO ("Filtering adjacent lanes");
     PolyOps polyOps;
     poly_list_t allPolygons, to_polys;
     polyOps.GetPolys(quads, allPolygons);
     polyOps.getLaneDir(allPolygons, to_polys, 0, lane, pose);
     art_msgs::ArtLanes adjacentPolys;
     polyOps.GetLanes(to_polys, adjacentPolys);
+    ROS_INFO ("Done filtering adjacent lanes"); // does return correctly - meaning that filterAdjacentLanes does function
     return adjacentPolys;
+    
   }
 }

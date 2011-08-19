@@ -35,7 +35,6 @@ art_msgs::Observation
 {
   current_update_ = ros::Time::now();
   if (current_update_ == prev_update_) return observation_;
-
   float distance=80.0;
   if (obstacle_quads.polygons.size()!=0) {
     // Get length of road from robot to nearest obstacle

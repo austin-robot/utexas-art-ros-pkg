@@ -1,3 +1,4 @@
+/* -*- mode: C++ -*- */
 /*
  *  Copyright (C) 2007, 2010 David Li, Patrick Beeson, Jack O'Quin
  *
@@ -37,8 +38,13 @@ typedef std::vector<PerimeterPoint> PerimeterPointList;
 
 // This class is not called Zone to avoid confusion with the RNDF Zone
 // class, which has more information
-class ZonePerimeter {
+class ZonePerimeter 
+{
 public:
+  ZonePerimeter():
+    speed_limit(0.0),
+    zone_id(-1)
+  {}
   float speed_limit;
   segment_id_t zone_id;
   PerimeterPointList perimeter_points;

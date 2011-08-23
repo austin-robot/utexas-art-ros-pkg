@@ -17,11 +17,11 @@
 #ifndef _LANE_OBSERVER_H_
 #define _LANE_OBSERVER_H_
 
-#include <vector>
 #include <art_observers/filter.h>
 #include <art_observers/observer.h>
 
 
+/** @brief Generic lane observer class (to be replaced). */
 class LaneObserver: public Observer 
 {
 public:

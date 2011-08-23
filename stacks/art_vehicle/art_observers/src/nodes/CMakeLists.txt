@@ -16,6 +16,7 @@ rosbuild_add_executable(observers_node
         observers_node.cc
         lane_observations.cc
         QuadrilateralOps.cc
+        nearest_forward.cc
         lane_observer.cc
         observer.cc
         filter.cc)

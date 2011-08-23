@@ -17,10 +17,7 @@
 #ifndef _ART_OBSERVER_H_
 #define _ART_OBSERVER_H_
 
-#include <vector>
-
 #include <art_msgs/ArtLanes.h>
-#include <art_msgs/ArtQuadrilateral.h>
 #include <art_msgs/Observation.h>
 
 /** @brief Observers base class. */

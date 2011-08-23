@@ -22,17 +22,17 @@
 #include <tr1/unordered_set>
 
 #include <ros/ros.h>
+
 #include <art_msgs/ArtLanes.h>
 #include <art_msgs/ObservationArray.h>
+#include <nav_msgs/Odometry.h>
 #include <sensor_msgs/PointCloud.h>
 #include <tf/transform_listener.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <nav_msgs/Odometry.h>
 
-#include <art_observers/lane_observer.h>
 #include <art_observers/QuadrilateralOps.h>
 
-#include <art_map/PolyOps.h>
+#include <art_observers/nearest_forward.h>
 
 class LaneObservations 
 {
@@ -43,6 +43,12 @@ public:
   void spin();
 
 private:
+
+  void addObserver(Observer *obs)
+  {
+    observers_.push_back(obs);
+    observations_.obs.push_back(art_msgs::Observation());
+  }
 
   void calcRobotPolygon();
   void filterPointsInLocalMap();
@@ -67,10 +73,12 @@ private:
   ros::NodeHandle node_;
   boost::shared_ptr<tf::TransformListener> tf_listener_;
 
-  LaneObserver nearest_front_observer_;
+  observers::NearestForward nearest_forward_observer_;
+#if 0
   LaneObserver nearest_rear_observer_;
   LaneObserver adjacent_left_observer_;
   LaneObserver adjacent_right_observer_;
+#endif
 
   ros::Subscriber obstacle_sub_;
   ros::Subscriber road_map_sub_;
@@ -80,8 +88,11 @@ private:
 
   sensor_msgs::PointCloud obstacles_;
   art_msgs::ArtLanes local_map_;
-  art_msgs::ObservationArray observations_;
   MapPose pose_;
+
+  // vector of observers, in order of the observations they publish
+  std::vector<Observer *> observers_;
+  art_msgs::ObservationArray observations_;
 
   std::tr1::unordered_set<int> added_quads_;
   art_msgs::ArtLanes obs_quads_;

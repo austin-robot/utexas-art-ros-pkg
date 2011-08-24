@@ -17,8 +17,9 @@
 namespace observers
 {
 
-NearestForward::NearestForward(Oid_t id, const std::string &name):
-  Observer(id, name)
+NearestForward::NearestForward():
+  Observer(art_msgs::Observation::Nearest_forward,
+	   std::string("Nearest_forward"))
 {
   distance_filter_.configure();
   velocity_filter_.configure();

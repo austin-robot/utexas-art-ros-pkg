@@ -17,6 +17,7 @@
 #ifndef _ART_OBSERVER_H_
 #define _ART_OBSERVER_H_
 
+#include <limits>
 #include <art_msgs/ArtLanes.h>
 #include <art_msgs/Observation.h>
 
@@ -25,13 +26,24 @@ class Observer
 {
 public:
 
-  /// Shorter typedef for observer ID
+  /** Shorter typedef for observer ID */
   typedef art_msgs::Observation::_oid_type Oid_t;
 
+  /** Constructor
+   *
+   *  @param id observer ID
+   *  @param name observer name
+   */
   Observer(Oid_t id, const std::string &name)
   {
     observation_.oid = id;
     observation_.name = name;
+    observation_.applicable = false;
+    observation_.clear = false;
+    observation_.time = std::numeric_limits<float>::signaling_NaN();
+    observation_.distance = std::numeric_limits<float>::signaling_NaN();
+    observation_.velocity = std::numeric_limits<float>::signaling_NaN();
+    observation_.nobjects = 0;
   }
   ~Observer();
 

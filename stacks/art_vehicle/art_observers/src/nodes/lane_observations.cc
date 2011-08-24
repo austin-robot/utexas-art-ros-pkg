@@ -25,9 +25,7 @@
 /** @brief run lane observers, publish their observations */
 LaneObservations::LaneObservations(ros::NodeHandle &node):
   node_(node),
-  tf_listener_(new tf::TransformListener()),
-  nearest_forward_observer_(art_msgs::Observation::Nearest_forward,
-			    std::string("Nearest_forward"))
+  tf_listener_(new tf::TransformListener())
 #if 0
   nearest_rear_observer_(art_msgs::Observation::Nearest_backward,
                          std::string("Nearest_backward")),
@@ -63,7 +61,7 @@ LaneObservations::LaneObservations(ros::NodeHandle &node):
     node_.advertise <art_msgs::ObservationArray>("observations", 1, true);
 
   // initialize observers
-  addObserver(&nearest_forward_observer_);
+  addObserver(nearest_forward_observer_);
 }
 
 LaneObservations::~LaneObservations() {}

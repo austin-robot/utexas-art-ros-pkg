@@ -44,9 +44,9 @@ public:
 
 private:
 
-  void addObserver(Observer *obs)
+  void addObserver(Observer &obs)
   {
-    observers_.push_back(obs);
+    observers_.push_back(&obs);
     observations_.obs.push_back(art_msgs::Observation());
   }
 

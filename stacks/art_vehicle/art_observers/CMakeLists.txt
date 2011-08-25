@@ -21,4 +21,5 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
+add_subdirectory(src/observers)
 add_subdirectory(src/nodes)

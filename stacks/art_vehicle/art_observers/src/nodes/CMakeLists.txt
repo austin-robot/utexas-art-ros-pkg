@@ -5,19 +5,11 @@ target_link_libraries(points_on_road artmap)
 rosbuild_add_executable(map_grid
         map_grid_node.cc
         map_grid.cc
-        QuadrilateralOps.cc
-        lane_observer.cc
-        observer.cc
-        filter.cc)
-target_link_libraries(map_grid artmap)
+        lane_observer.cc)
+target_link_libraries(map_grid observers artmap)
 
-# TODO: separate commmon classes into a library
+# redesigned version
 rosbuild_add_executable(observers_node
         observers_node.cc
-        lane_observations.cc
-        QuadrilateralOps.cc
-        nearest_forward.cc
-        lane_observer.cc
-        observer.cc
-        filter.cc)
-target_link_libraries(observers_node artmap)
+        lane_observations.cc)
+target_link_libraries(observers_node observers artmap)

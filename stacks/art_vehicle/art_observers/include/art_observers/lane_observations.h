@@ -33,6 +33,7 @@
 #include <art_observers/QuadrilateralOps.h>
 
 #include <art_observers/nearest_forward.h>
+#include <art_observers/nearest_backward.h>
 
 class LaneObservations 
 {
@@ -73,12 +74,9 @@ private:
   ros::NodeHandle node_;
   boost::shared_ptr<tf::TransformListener> tf_listener_;
 
+  // observer instances
   observers::NearestForward nearest_forward_observer_;
-#if 0
-  LaneObserver nearest_rear_observer_;
-  LaneObserver adjacent_left_observer_;
-  LaneObserver adjacent_right_observer_;
-#endif
+  observers::NearestBackward nearest_backward_observer_;
 
   ros::Subscriber obstacle_sub_;
   ros::Subscriber road_map_sub_;

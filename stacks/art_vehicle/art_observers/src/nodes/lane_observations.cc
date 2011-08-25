@@ -52,6 +52,7 @@ LaneObservations::LaneObservations(ros::NodeHandle &node):
 
   // Initialize observers.  They will be updated in this order.
   addObserver(nearest_forward_observer_);
+  addObserver(nearest_backward_observer_);
 }
 
 LaneObservations::~LaneObservations() {}
@@ -141,35 +142,14 @@ bool LaneObservations::isPointInAPolygon(float x, float y)
 
 void LaneObservations::runObservers() 
 {
-  // run all registered observers
+  // update all the registered observers
   for (unsigned i = 0; i < observers_.size(); ++i)
     {
       observations_.obs[i] =
 	observers_[i]->update(robot_polygon_, local_map_, obs_quads_);
     }
 
-#if 0
-  // update nearest rear observer
-  art_msgs::ArtLanes nearest_rear_quads =
-    quad_ops::filterLanes(robot_polygon_,local_map_,
-                          *quad_ops::compare_backward_seg_lane);
-  art_msgs::ArtLanes nearest_rear_obstacles =
-    quad_ops::filterLanes(robot_polygon_,obs_quads_,
-                          *quad_ops::compare_backward_seg_lane);
-
-  // reverse the vectors because the observer experts polygons in
-  // order of distance from base polygon
-  std::reverse(nearest_rear_quads.polygons.begin(),
-               nearest_rear_quads.polygons.end());
-  std::reverse(nearest_rear_obstacles.polygons.begin(),
-               nearest_rear_obstacles.polygons.end());
-
-  observations_.obs[1] =
-    nearest_rear_observer_.update(robot_polygon_.poly_id,
-                                  nearest_rear_quads,
-                               nearest_rear_obstacles);
-#endif
-  // Publish observations
+  // Publish their observations
   observations_pub_.publish(observations_);
 }                                                            
 

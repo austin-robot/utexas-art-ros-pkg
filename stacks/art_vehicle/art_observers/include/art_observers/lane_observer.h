@@ -22,7 +22,7 @@
 
 
 /** @brief Generic lane observer class (to be replaced). */
-class LaneObserver: public Observer 
+class LaneObserver: public observers::Observer 
 {
 public:
   LaneObserver(Oid_t id, const std::string &name);

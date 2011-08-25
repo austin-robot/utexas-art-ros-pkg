@@ -21,6 +21,9 @@
 #include <art_msgs/ArtLanes.h>
 #include <art_msgs/Observation.h>
 
+namespace observers
+{
+
 /** @brief Observers base class. */
 class Observer 
 {
@@ -72,5 +75,7 @@ public:
 protected:
   art_msgs::Observation observation_;
 };
+
+}; // namespace observers
 
 #endif // _ART_OBSERVER_H_

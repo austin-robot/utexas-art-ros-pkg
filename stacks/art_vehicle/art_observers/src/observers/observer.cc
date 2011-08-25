@@ -13,6 +13,9 @@
 
 #include <art_observers/observer.h>
 
+namespace observers
+{
+
 Observer::~Observer() {}
 
 // Define stub for non-pure virtual function method to avoid linker
@@ -34,3 +37,5 @@ art_msgs::Observation
 {
   return art_msgs::Observation();
 }
+
+}; // namespace observers

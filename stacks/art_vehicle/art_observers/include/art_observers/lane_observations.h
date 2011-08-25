@@ -44,7 +44,7 @@ public:
 
 private:
 
-  void addObserver(Observer &obs)
+  void addObserver(observers::Observer &obs)
   {
     observers_.push_back(&obs);
     observations_.obs.push_back(art_msgs::Observation());
@@ -91,7 +91,7 @@ private:
   MapPose pose_;
 
   // vector of observers, in order of the observations they publish
-  std::vector<Observer *> observers_;
+  std::vector<observers::Observer *> observers_;
   art_msgs::ObservationArray observations_;
 
   std::tr1::unordered_set<int> added_quads_;

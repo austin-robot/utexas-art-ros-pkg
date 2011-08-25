@@ -12,6 +12,7 @@
 
  */
 
+#include <art_observers/QuadrilateralOps.h>
 #include <art_observers/nearest_forward.h>
 
 namespace observers
@@ -30,26 +31,35 @@ NearestForward::~NearestForward()
 }
 
 art_msgs::Observation
-  NearestForward::update(int origin_poly_id,
-                       art_msgs::ArtLanes &lane_quads,
-                       art_msgs::ArtLanes &obstacle_quads) 
+  NearestForward::update(const art_msgs::ArtQuadrilateral &robot_quad,
+			 const art_msgs::ArtLanes &local_map,
+			 const art_msgs::ArtLanes &obstacles)
 {
-  float distance = 80.0;
-  if (obstacle_quads.polygons.size()!=0)
+  // get quadrilaterals ahead in the current lane
+  art_msgs::ArtLanes lane_quads =
+    quad_ops::filterLanes(robot_quad, local_map,
+                          *quad_ops::compare_forward_seg_lane);
+
+  // get obstacles ahead in the current lane
+  art_msgs::ArtLanes lane_obstacles =
+    quad_ops::filterLanes(robot_quad, obstacles,
+                          *quad_ops::compare_forward_seg_lane);
+
+  float distance = 80.0;		// max range
+  if (lane_obstacles.polygons.size()!=0)
     {
       // Get distance along road from robot to nearest obstacle
-      int target_id = obstacle_quads.polygons[0].poly_id;
+      int target_id = lane_obstacles.polygons[0].poly_id;
       distance = 0;
-      for (size_t i=0; i<lane_quads.polygons.size(); i++)
+      for (size_t i = 0; i < lane_quads.polygons.size(); i++)
 	{
-	  distance+=lane_quads.polygons[i].length;
+	  distance += lane_quads.polygons[i].length;
 	  if (lane_quads.polygons[i].poly_id == target_id)
-	    {
-	      break;
-	    }
+	    break;
 	}
     }
-  // Filter the distance
+
+  // Filter the distance by averaging over time
   float filt_distance;
   distance_filter_.update(distance, filt_distance);
   

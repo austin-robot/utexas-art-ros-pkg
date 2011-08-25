@@ -31,9 +31,9 @@ public:
   ~NearestForward();
 
   virtual art_msgs::Observation
-    update(int root_poly_id,
-           art_msgs::ArtLanes &lane_quads,
-           art_msgs::ArtLanes &obstacle_quads);
+    update(const art_msgs::ArtQuadrilateral &robot_quad,
+	   const art_msgs::ArtLanes &local_map,
+           const art_msgs::ArtLanes &obstacles);
 
 private:
   std::vector<float> distance_;

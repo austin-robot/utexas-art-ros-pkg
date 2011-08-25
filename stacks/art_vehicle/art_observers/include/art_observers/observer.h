@@ -47,10 +47,27 @@ public:
   }
   ~Observer();
 
+  /** Generic observer update function.
+   *
+   *  Called whenever there are new obstacle data, assuming the
+   *  local_map is also available.
+   *
+   *  @param robot_quad    quadrilateral containing the robot
+   *  @param local_map     road map lanes within range of the robot
+   *  @param obstacles     local map quads currently containing obstacles
+   *
+   *  @todo Make pure virtual once deprecated version is deleted. 
+   */
   virtual art_msgs::Observation
-    update(int root_poly_id,
-           art_msgs::ArtLanes &lane_quads,
-           art_msgs::ArtLanes &obstacle_quads) = 0;
+    update(const art_msgs::ArtQuadrilateral &robot_quad,
+	   const art_msgs::ArtLanes &local_map,
+           const art_msgs::ArtLanes &obstacles);
+
+  /** Deprecated update interface. */
+  virtual art_msgs::Observation
+    update(int robot_poly_id,
+	   const art_msgs::ArtLanes &local_map,
+           const art_msgs::ArtLanes &obstacles);
 
 protected:
   art_msgs::Observation observation_;

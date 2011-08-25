@@ -30,8 +30,8 @@ LaneObserver::~LaneObserver()
 
 art_msgs::Observation
   LaneObserver::update(int origin_poly_id,
-                       art_msgs::ArtLanes &lane_quads,
-                       art_msgs::ArtLanes &obstacle_quads) 
+                       const art_msgs::ArtLanes &lane_quads,
+                       const art_msgs::ArtLanes &obstacle_quads) 
 {
   current_update_ = ros::Time::now();
   if (current_update_ == prev_update_) return observation_;

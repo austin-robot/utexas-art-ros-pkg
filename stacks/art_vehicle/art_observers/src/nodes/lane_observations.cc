@@ -20,20 +20,10 @@
 #include <ros/ros.h>
 #include <art_observers/lane_observations.h>
 
-#include <art_observers/QuadrilateralOps.h>
-
 /** @brief run lane observers, publish their observations */
 LaneObservations::LaneObservations(ros::NodeHandle &node):
   node_(node),
   tf_listener_(new tf::TransformListener())
-#if 0
-  nearest_rear_observer_(art_msgs::Observation::Nearest_backward,
-                         std::string("Nearest_backward")),
-  adjacent_left_observer_(art_msgs::Observation::Adjacent_left,
-                         std::string("Adjacent_left")),
-  adjacent_right_observer_(art_msgs::Observation::Adjacent_right,
-                         std::string("Adjacent_right"))
-#endif
 { 
  // subscribe to obstacle cloud
   obstacle_sub_ =
@@ -60,7 +50,7 @@ LaneObservations::LaneObservations(ros::NodeHandle &node):
   observations_pub_ =
     node_.advertise <art_msgs::ObservationArray>("observations", 1, true);
 
-  // initialize observers
+  // Initialize observers.  They will be updated in this order.
   addObserver(nearest_forward_observer_);
 }
 
@@ -151,21 +141,11 @@ bool LaneObservations::isPointInAPolygon(float x, float y)
 
 void LaneObservations::runObservers() 
 {
-  // update nearest front observer
-  /// @todo move this into the observer
-  art_msgs::ArtLanes nearest_front_quads =
-    quad_ops::filterLanes(robot_polygon_,local_map_,
-                          *quad_ops::compare_forward_seg_lane);
-  art_msgs::ArtLanes nearest_front_obstacles =
-    quad_ops::filterLanes(robot_polygon_,obs_quads_,
-                          *quad_ops::compare_forward_seg_lane);
-
+  // run all registered observers
   for (unsigned i = 0; i < observers_.size(); ++i)
     {
       observations_.obs[i] =
-	observers_[i]->update(robot_polygon_.poly_id,
-			      nearest_front_quads,
-			      nearest_front_obstacles);
+	observers_[i]->update(robot_polygon_, local_map_, obs_quads_);
     }
 
 #if 0

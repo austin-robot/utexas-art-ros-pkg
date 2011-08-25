@@ -30,8 +30,8 @@ public:
 
   virtual art_msgs::Observation
     update(int root_poly_id,
-           art_msgs::ArtLanes &lane_quads,
-           art_msgs::ArtLanes &obstacle_quads);
+           const art_msgs::ArtLanes &lane_quads,
+           const art_msgs::ArtLanes &obstacle_quads);
   virtual art_msgs::Observation    
     updateAdj(int adj_poly_id, 
            art_msgs::ArtLanes &adj_lane_quads,

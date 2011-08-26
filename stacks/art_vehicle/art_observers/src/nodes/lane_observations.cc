@@ -16,9 +16,8 @@
 
 */
 
-#include <algorithm>
-#include <ros/ros.h>
 #include <art_observers/lane_observations.h>
+#include <art_observers/QuadrilateralOps.h>
 
 /** @brief run lane observers, publish their observations */
 LaneObservations::LaneObservations(ros::NodeHandle &node):
@@ -35,12 +34,6 @@ LaneObservations::LaneObservations(ros::NodeHandle &node):
   road_map_sub_ =
     node_.subscribe("roadmap_local", 1,
                     &LaneObservations::processLocalMap, this,
-                    ros::TransportHints().tcpNoDelay(true));
-  
-  // subscribe to odometry
-  odom_sub_ = 
-    node_.subscribe("odom", 1,
-                    &LaneObservations::processPose, this,
                     ros::TransportHints().tcpNoDelay(true));
 
   // advertise published topics
@@ -76,11 +69,6 @@ void LaneObservations::processObstacles(const sensor_msgs::PointCloud &msg)
 void LaneObservations::processLocalMap(const art_msgs::ArtLanes &msg) 
 {
   local_map_ = msg;
-}
-
-void LaneObservations::processPose(const nav_msgs::Odometry &odom)
-{
-  pose_ = MapPose(odom.pose.pose);
 }
 
 void LaneObservations::filterPointsInLocalMap() 

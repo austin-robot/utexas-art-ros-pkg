@@ -51,7 +51,7 @@ art_msgs::Observation
   std::reverse(lane_quads.polygons.begin(), lane_quads.polygons.end());
   std::reverse(lane_obstacles.polygons.begin(), lane_obstacles.polygons.end());
 
-  float distance = 80.0;		// max range
+  float distance = config_.max_range;
   if (lane_obstacles.polygons.size()!=0)
     {
       // get distance along road from robot to nearest obstacle

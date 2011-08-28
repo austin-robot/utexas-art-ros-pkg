@@ -46,7 +46,7 @@ art_msgs::Observation
     quad_ops::filterLanes(robot_quad, obstacles,
                           *quad_ops::compare_forward_seg_lane);
 
-  float distance = 80.0;		// max range
+  float distance = config_.max_range;
   if (lane_obstacles.polygons.size()!=0)
     {
       // Get distance along road from robot to nearest obstacle

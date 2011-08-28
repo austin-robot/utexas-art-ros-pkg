@@ -65,11 +65,12 @@ private:
   ros::NodeHandle priv_nh_;
 
   Config config_;			///< configuration parameters
-  boost::shared_ptr<tf::TransformListener> tf_listener_;
 
   // observer instances
   observers::NearestForward nearest_forward_observer_;
   observers::NearestBackward nearest_backward_observer_;
+
+  boost::shared_ptr<tf::TransformListener> tf_listener_;
 
   ros::Subscriber obstacle_sub_;
   ros::Subscriber road_map_sub_;

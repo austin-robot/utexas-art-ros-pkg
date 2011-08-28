@@ -20,11 +20,27 @@
 #include <art_observers/QuadrilateralOps.h>
 
 /** @brief run lane observers, publish their observations */
-LaneObservations::LaneObservations(ros::NodeHandle &node):
+LaneObservations::LaneObservations(ros::NodeHandle &node,
+				   ros::NodeHandle &priv_nh):
   node_(node),
+  priv_nh_(priv_nh),
   tf_listener_(new tf::TransformListener())
 { 
- // subscribe to obstacle cloud
+  // get configuration parameters
+  priv_nh_.param("map_frame_id", config_.map_frame_id,
+		 std::string("/map"));
+  priv_nh_.param("robot_frame_id", config_.robot_frame_id,
+		 std::string("vehicle"));
+  priv_nh_.param("max_range", config_.max_range, 80.0);
+
+  // apply tf_prefix to robot frame ID, if needed
+  std::string tf_prefix = tf::getPrefixParam(priv_nh_);
+  config_.robot_frame_id = tf::resolve(tf_prefix, config_.robot_frame_id);
+
+  ROS_INFO_STREAM("map frame: " << config_.map_frame_id
+		  << ", robot frame: " << config_.robot_frame_id);
+
+  // subscribe to obstacle cloud
   obstacle_sub_ =
     node_.subscribe("velodyne/obstacles", 1,
                     &LaneObservations::processObstacles, this,
@@ -87,7 +103,7 @@ void LaneObservations::transformPointCloud(const sensor_msgs::PointCloud &msg)
 {
   try
     {
-      tf_listener_->transformPointCloud("/map", msg, obstacles_);
+      tf_listener_->transformPointCloud(config_.map_frame_id, msg, obstacles_);
       observations_.header.frame_id = obstacles_.header.frame_id;
       calcRobotPolygon();            // hopefully not needed in future
     }
@@ -146,7 +162,7 @@ void LaneObservations::calcRobotPolygon()
 {
   // --- Hack to get my own polygon
   geometry_msgs::PointStamped laser_point;
-  laser_point.header.frame_id = "/vehicle";  
+  laser_point.header.frame_id = config_.robot_frame_id;  
   laser_point.header.stamp = ros::Time();
   
   laser_point.point.x = 0.0;
@@ -154,7 +170,7 @@ void LaneObservations::calcRobotPolygon()
   laser_point.point.z = 0.0;
   
   geometry_msgs::PointStamped robot_point;
-  tf_listener_->transformPoint("/map", laser_point, robot_point);
+  tf_listener_->transformPoint(config_.map_frame_id, laser_point, robot_point);
 
   size_t numPolys = local_map_.polygons.size();
   float x = robot_point.point.x; 
@@ -194,7 +210,7 @@ void LaneObservations::publishObstacleVisualization()
     {
       visualization_msgs::Marker mark;
       mark.header.stamp = now;
-      mark.header.frame_id = "/map";
+      mark.header.frame_id = config_.map_frame_id;
     
       mark.ns = "obstacle_polygons";
       mark.id = (int32_t) i;
@@ -222,7 +238,7 @@ void LaneObservations::publishObstacleVisualization()
   // Draw the polygon containing the robot
   visualization_msgs::Marker mark;
   mark.header.stamp = now;
-  mark.header.frame_id = "/map";
+  mark.header.frame_id = config_.map_frame_id;
   
   mark.ns = "obstacle_polygons";
   mark.id = (int32_t) i;

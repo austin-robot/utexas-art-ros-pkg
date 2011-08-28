@@ -32,11 +32,15 @@
 #include <art_observers/nearest_forward.h>
 #include <art_observers/nearest_backward.h>
 
+#include <art_observers/ObserversConfig.h>
+typedef art_observers::ObserversConfig Config;
+
 class LaneObservations 
 {
 public:
 
-  LaneObservations(ros::NodeHandle &node);
+  LaneObservations(ros::NodeHandle &node,
+		   ros::NodeHandle &priv_nh);
   ~LaneObservations();
   void spin();
 
@@ -58,6 +62,9 @@ private:
   void transformPointCloud(const sensor_msgs::PointCloud &msg);
 
   ros::NodeHandle node_;
+  ros::NodeHandle priv_nh_;
+
+  Config config_;			///< configuration parameters
   boost::shared_ptr<tf::TransformListener> tf_listener_;
 
   // observer instances

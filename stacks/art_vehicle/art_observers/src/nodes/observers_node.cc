@@ -20,8 +20,11 @@ int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "observers_node");
   ros::NodeHandle node;
-  LaneObservations* obs = new LaneObservations(node); 
-  obs->spin();                        // handle incoming data
+  ros::NodeHandle priv_nh("~");
+  LaneObservations* obs = new LaneObservations(node, priv_nh); 
+
+  // handle incoming data until shutdown
+  obs->spin();
 
   return 0;
 }

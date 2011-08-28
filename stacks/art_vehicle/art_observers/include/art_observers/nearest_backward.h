@@ -27,7 +27,7 @@ namespace observers
 class NearestBackward: public Observer 
 {
 public:
-  NearestBackward();
+  NearestBackward(art_observers::ObserversConfig &config);
   ~NearestBackward();
 
   virtual art_msgs::Observation

@@ -18,8 +18,9 @@
 namespace observers
 {
 
-NearestForward::NearestForward():
-  Observer(art_msgs::Observation::Nearest_forward,
+NearestForward::NearestForward(art_observers::ObserversConfig &config):
+  Observer(config,
+	   art_msgs::Observation::Nearest_forward,
 	   std::string("Nearest_forward"))
 {
   distance_filter_.configure();

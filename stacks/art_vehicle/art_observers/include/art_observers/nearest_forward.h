@@ -27,7 +27,7 @@ namespace observers
 class NearestForward: public Observer 
 {
 public:
-  NearestForward();
+  NearestForward(art_observers::ObserversConfig &config);
   ~NearestForward();
 
   virtual art_msgs::Observation

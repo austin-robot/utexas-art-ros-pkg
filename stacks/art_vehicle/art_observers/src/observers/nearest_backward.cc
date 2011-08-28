@@ -18,8 +18,9 @@
 namespace observers
 {
 
-NearestBackward::NearestBackward():
-  Observer(art_msgs::Observation::Nearest_backward,
+NearestBackward::NearestBackward(art_observers::ObserversConfig &config):
+  Observer(config,
+	   art_msgs::Observation::Nearest_backward,
 	   std::string("Nearest_backward"))
 {
   distance_filter_.configure();

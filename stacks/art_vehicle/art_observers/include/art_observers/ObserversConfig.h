@@ -20,6 +20,9 @@
 #ifndef _OBSERVERS_CONFIG_H_
 #define _OBSERVERS_CONFIG_H_
 
+#include <ros/ros.h>
+#include <tf/transform_listener.h>
+
 namespace art_observers
 {
 
@@ -27,7 +30,30 @@ namespace art_observers
   class ObserversConfig
   {
   public:
-    ObserversConfig() {};
+    /// default constructor
+    ObserversConfig():
+      map_frame_id(std::string("/map")),
+      robot_frame_id(std::string("vehicle")),
+      max_range(80.0)
+    {};
+    ObserversConfig(const ObserversConfig &that)
+    {
+      *this = that;
+    };
+    ObserversConfig(ros::NodeHandle priv_nh)
+    {
+      // get configuration parameters
+      priv_nh.param("map_frame_id", map_frame_id, std::string("/map"));
+      priv_nh.param("robot_frame_id", robot_frame_id, std::string("vehicle"));
+      priv_nh.param("max_range", max_range, 80.0);
+
+      // apply tf_prefix to robot frame ID, if needed
+      std::string tf_prefix = tf::getPrefixParam(priv_nh);
+      robot_frame_id = tf::resolve(tf_prefix, robot_frame_id);
+
+      ROS_INFO_STREAM("map frame: " << map_frame_id
+		      << ", robot frame: " << robot_frame_id);
+    };
 
     std::string map_frame_id;		///< frame ID of map
     std::string robot_frame_id;		///< frame ID of robot

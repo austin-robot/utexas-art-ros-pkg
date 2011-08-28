@@ -24,22 +24,11 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
 				   ros::NodeHandle &priv_nh):
   node_(node),
   priv_nh_(priv_nh),
+  config_(priv_nh),
+  nearest_forward_observer_(config_),
+  nearest_backward_observer_(config_),
   tf_listener_(new tf::TransformListener())
 { 
-  // get configuration parameters
-  priv_nh_.param("map_frame_id", config_.map_frame_id,
-		 std::string("/map"));
-  priv_nh_.param("robot_frame_id", config_.robot_frame_id,
-		 std::string("vehicle"));
-  priv_nh_.param("max_range", config_.max_range, 80.0);
-
-  // apply tf_prefix to robot frame ID, if needed
-  std::string tf_prefix = tf::getPrefixParam(priv_nh_);
-  config_.robot_frame_id = tf::resolve(tf_prefix, config_.robot_frame_id);
-
-  ROS_INFO_STREAM("map frame: " << config_.map_frame_id
-		  << ", robot frame: " << config_.robot_frame_id);
-
   // subscribe to obstacle cloud
   obstacle_sub_ =
     node_.subscribe("velodyne/obstacles", 1,

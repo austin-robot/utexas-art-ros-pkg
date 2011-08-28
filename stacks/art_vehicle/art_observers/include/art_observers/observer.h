@@ -20,6 +20,7 @@
 #include <limits>
 #include <art_msgs/ArtLanes.h>
 #include <art_msgs/Observation.h>
+#include <art_observers/ObserversConfig.h>
 
 namespace observers
 {
@@ -32,12 +33,15 @@ public:
   /** Shorter typedef for observer ID */
   typedef art_msgs::Observation::_oid_type Oid_t;
 
-  /** Constructor
+  /** Constructor.
    *
+   *  @param config configuration structure
    *  @param id observer ID
    *  @param name observer name
    */
-  Observer(Oid_t id, const std::string &name)
+  Observer(art_observers::ObserversConfig &config,
+	   Oid_t id, const std::string &name):
+    config_(config)
   {
     observation_.oid = id;
     observation_.name = name;
@@ -49,6 +53,19 @@ public:
     observation_.nobjects = 0;
   }
   ~Observer();
+
+  /** DEPRECATED constructor. */
+  Observer(Oid_t id, const std::string &name)
+  {
+    observation_.oid = id;
+    observation_.name = name;
+    observation_.applicable = false;
+    observation_.clear = false;
+    observation_.time = std::numeric_limits<float>::signaling_NaN();
+    observation_.distance = std::numeric_limits<float>::signaling_NaN();
+    observation_.velocity = std::numeric_limits<float>::signaling_NaN();
+    observation_.nobjects = 0;
+  }
 
   /** Generic observer update function.
    *
@@ -74,6 +91,7 @@ public:
 
 protected:
   art_msgs::Observation observation_;
+  art_observers::ObserversConfig config_;
 };
 
 }; // namespace observers

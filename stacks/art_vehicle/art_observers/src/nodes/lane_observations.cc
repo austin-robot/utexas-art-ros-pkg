@@ -1,7 +1,9 @@
 /*
  *  Copyright (C) 2010 UT-Austin & Austin Robot Technology, Michael Quinlan
  *  Copyright (C) 2011 UT-Austin & Austin Robot Technology
- *  License: Modified BSD Software License 
+ *  License: Modified BSD Software License
+ *
+ *  $Id$
  */
 
 /** @file
@@ -19,7 +21,7 @@
 #include <art_observers/lane_observations.h>
 #include <art_observers/QuadrilateralOps.h>
 
-/** @brief run lane observers, publish their observations */
+/** @brief Run lane observers, publish their observations. */
 LaneObservations::LaneObservations(ros::NodeHandle &node,
 				   ros::NodeHandle &priv_nh):
   node_(node),
@@ -53,15 +55,14 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
   addObserver(nearest_backward_observer_);
 }
 
-/** Deconstructor. */
+/** @brief Deconstructor. */
 LaneObservations::~LaneObservations() {}
 
-/** Obstacle point cloud callback. */
+/** @brief Obstacle point cloud callback. */
 void LaneObservations::processObstacles(const sensor_msgs::PointCloud &msg) 
 {
   observations_.header.stamp = msg.header.stamp;
   obs_quads_.polygons.clear();
-  added_quads_.clear();
   transformPointCloud(msg);
   
   // skip the rest until the local road map has been received at least once
@@ -73,13 +74,13 @@ void LaneObservations::processObstacles(const sensor_msgs::PointCloud &msg)
     }
 }
 
-/** Local road map callback. */
+/** @brief Local road map callback. */
 void LaneObservations::processLocalMap(const art_msgs::ArtLanes &msg) 
 {
   local_map_ = msg;
 }
 
-/** Filter obstacle points to those in a road map polygon. */
+/** @brief Filter obstacle points to those in a road map polygon. */
 void LaneObservations::filterPointsInLocalMap() 
 {
   // set the exact point cloud size
@@ -92,7 +93,7 @@ void LaneObservations::filterPointsInLocalMap()
     }
 }
 
-/** Transform obstacle points into the map frame of reference. */
+/** @brief Transform obstacle points into the map frame of reference. */
 void LaneObservations::transformPointCloud(const sensor_msgs::PointCloud &msg) 
 {
   try
@@ -108,7 +109,13 @@ void LaneObservations::transformPointCloud(const sensor_msgs::PointCloud &msg)
     }
 }
 
-/** @return true if (X, Y) is within a road map polygon. */
+/** Point in polygon predicate.
+ *
+ *  @return true if (X, Y) is within a road map polygon.
+ *
+ *  @post @a added_quads contains polygon ID, if found.
+ *        @a obstacle_quads contains polygon, if found.
+ */
 bool LaneObservations::isPointInAPolygon(float x, float y) 
 {
   size_t num_polys = local_map_.polygons.size();
@@ -139,7 +146,7 @@ bool LaneObservations::isPointInAPolygon(float x, float y)
   return inside;
 }
 
-/** Run all registered observers and publish their observations. */
+/** @brief Run all registered observers and publish their observations. */
 void LaneObservations::runObservers() 
 {
   // update all the registered observers
@@ -153,7 +160,7 @@ void LaneObservations::runObservers()
   observations_pub_.publish(observations_);
 }                                                            
 
-/** Calculate which polygon currently contains the robot. */
+/** @brief Calculate which polygon currently contains the robot. */
 void LaneObservations::calcRobotPolygon() 
 {
   // --- Hack to get my own polygon
@@ -189,7 +196,7 @@ void LaneObservations::calcRobotPolygon()
     }
 }
 
-/** Publish rviz markers for obstacles in the road. */
+/** @brief Publish rviz markers for obstacles in the road. */
 void LaneObservations::publishObstacleVisualization()
 {
   if (viz_pub_.getNumSubscribers()==0)
@@ -262,7 +269,7 @@ void LaneObservations::publishObstacleVisualization()
   viz_pub_.publish(marks_msg_);
 }
 
-/** Handle incoming data. */
+/** @brief Handle incoming data. */
 void LaneObservations::spin()
 {
   ros::spin();

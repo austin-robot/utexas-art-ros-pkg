@@ -65,8 +65,8 @@ private:
   void runObservers();
   void transformPointCloud(const sensor_msgs::PointCloud &msg);
 
-  ros::NodeHandle node_;
-  ros::NodeHandle priv_nh_;
+  ros::NodeHandle node_;		///< node handle
+  ros::NodeHandle priv_nh_;		///< private node handle
 
   Config config_;			///< configuration parameters
 
@@ -76,22 +76,25 @@ private:
 
   boost::shared_ptr<tf::TransformListener> tf_listener_;
 
+  // ROS topic subscriptions and publishers
   ros::Subscriber obstacle_sub_;
   ros::Subscriber road_map_sub_;
   ros::Publisher observations_pub_;
   ros::Publisher viz_pub_;
 
-  sensor_msgs::PointCloud obstacles_;
-  art_msgs::ArtLanes local_map_;
+  sensor_msgs::PointCloud obstacles_;	///< current obstacle data
+  art_msgs::ArtLanes local_map_;	///< local road map
 
-  // vector of observers, in order of the observations they publish
+  /// vector of observers, in order of the observations they publish
   std::vector<observers::Observer *> observers_;
+
+  /// current observations from the observers
   art_msgs::ObservationArray observations_;
 
-  std::tr1::unordered_set<int> added_quads_;
-  art_msgs::ArtLanes obs_quads_;
+  std::tr1::unordered_set<int> added_quads_; ///< set of obstacle quads
+  art_msgs::ArtLanes obs_quads_;	///< vector of obstacle quads
   std::vector<art_msgs::ArtQuadrilateral>::iterator obs_it_;
-  art_msgs::ArtQuadrilateral robot_polygon_;
+  art_msgs::ArtQuadrilateral robot_polygon_; ///< robot's current polygon
 
   /// Only used within LaneObservations::publishObstacleVisualization(), a
   /// class variable only to avoid memory allocation on every cycle.

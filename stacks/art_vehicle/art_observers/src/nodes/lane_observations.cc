@@ -53,8 +53,10 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
   addObserver(nearest_backward_observer_);
 }
 
+/** Deconstructor. */
 LaneObservations::~LaneObservations() {}
 
+/** Obstacle point cloud callback. */
 void LaneObservations::processObstacles(const sensor_msgs::PointCloud &msg) 
 {
   observations_.header.stamp = msg.header.stamp;
@@ -71,11 +73,13 @@ void LaneObservations::processObstacles(const sensor_msgs::PointCloud &msg)
     }
 }
 
+/** Local road map callback. */
 void LaneObservations::processLocalMap(const art_msgs::ArtLanes &msg) 
 {
   local_map_ = msg;
 }
 
+/** Filter obstacle points to those in a road map polygon. */
 void LaneObservations::filterPointsInLocalMap() 
 {
   // set the exact point cloud size
@@ -88,6 +92,7 @@ void LaneObservations::filterPointsInLocalMap()
     }
 }
 
+/** Transform obstacle points into the map frame of reference. */
 void LaneObservations::transformPointCloud(const sensor_msgs::PointCloud &msg) 
 {
   try
@@ -103,6 +108,7 @@ void LaneObservations::transformPointCloud(const sensor_msgs::PointCloud &msg)
     }
 }
 
+/** @return true if (X, Y) is within a road map polygon. */
 bool LaneObservations::isPointInAPolygon(float x, float y) 
 {
   size_t num_polys = local_map_.polygons.size();
@@ -133,6 +139,7 @@ bool LaneObservations::isPointInAPolygon(float x, float y)
   return inside;
 }
 
+/** Run all registered observers and publish their observations. */
 void LaneObservations::runObservers() 
 {
   // update all the registered observers
@@ -146,7 +153,7 @@ void LaneObservations::runObservers()
   observations_pub_.publish(observations_);
 }                                                            
 
-
+/** Calculate which polygon currently contains the robot. */
 void LaneObservations::calcRobotPolygon() 
 {
   // --- Hack to get my own polygon
@@ -182,6 +189,7 @@ void LaneObservations::calcRobotPolygon()
     }
 }
 
+/** Publish rviz markers for obstacles in the road. */
 void LaneObservations::publishObstacleVisualization()
 {
   if (viz_pub_.getNumSubscribers()==0)

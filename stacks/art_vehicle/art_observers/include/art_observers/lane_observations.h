@@ -46,6 +46,10 @@ public:
 
 private:
 
+  /** @brief Add an entry to the observer vector.
+   *
+   *  @param obs observer to add
+   */
   void addObserver(observers::Observer &obs)
   {
     observers_.push_back(&obs);

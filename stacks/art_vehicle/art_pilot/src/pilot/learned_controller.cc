@@ -15,7 +15,7 @@ LearnedSpeedControl::LearnedSpeedControl():
 
   // create agent and load file
   std::string policyPath = (ros::package::getPath("art_pilot")
-			    + "/pilot/src/pilot/control1400.pol");
+			    + "/src/pilot/control1400.pol");
   loadPolicy(policyPath.c_str());
 
   // init state vector

@@ -45,8 +45,9 @@ public:
 private:
 
   void calcRobotPolygon();
+  //void filterObstacles(art_msgs::ArtLanes lane, art_msgs::ArtLanes obstacles; art_msgs::ArtLanes filtered_obs);
   void filterPointsInLocalMap();
-  bool isPointInAPolygon(float x, float y);
+  bool isPointInAPolygon(float x, float y, art_msgs::ArtLanes map, art_msgs::ArtLanes obs_, 									std::tr1::unordered_set<int> added_);
   void processLocalMap(const art_msgs::ArtLanes &msg);
   void processObstacles(const sensor_msgs::PointCloud &msg);
   void processPose(const nav_msgs::Odometry &odom);

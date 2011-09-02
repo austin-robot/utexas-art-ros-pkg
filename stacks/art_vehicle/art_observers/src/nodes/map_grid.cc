@@ -97,9 +97,17 @@ void MapGrid::filterPointsInLocalMap()
   for (unsigned i = 0; i < npoints; ++i)
     {
       isPointInAPolygon(obstacles_.points[i].x,
-                        obstacles_.points[i].y);
+                        obstacles_.points[i].y,
+			local_map_, obs_quads_, added_quads_);
     }
 }
+
+// Function assigns polygons to filtered_obs from obstacles if the polygon also exist in lane
+//void filterObstacles(art_msgs::ArtLanes lane, art_msgs::ArtLanes obstacles, art_msgs::ArtLanes filtered_obs)
+//{
+//  filtered_obs.clear;
+  
+
 
 void MapGrid::transformPointCloud(const sensor_msgs::PointCloud &msg) 
 {
@@ -116,16 +124,16 @@ void MapGrid::transformPointCloud(const sensor_msgs::PointCloud &msg)
     }
 }
 
-bool MapGrid::isPointInAPolygon(float x, float y) 
+bool MapGrid::isPointInAPolygon(float x, float y, art_msgs::ArtLanes map, art_msgs::ArtLanes obs_, 									std::tr1::unordered_set<int> added_) 
 {
-  size_t num_polys = local_map_.polygons.size();
+  size_t num_polys = map.polygons.size();
   
   bool inside = false;
   std::pair<std::tr1::unordered_set<int>::iterator, bool> pib;
   
   for (size_t i=0; i<num_polys; i++)
     {
-      art_msgs::ArtQuadrilateral *p= &(local_map_.polygons[i]);
+      art_msgs::ArtQuadrilateral *p= &(map.polygons[i]);
       float dist= ((p->midpoint.x-x)*(p->midpoint.x-x)
                    + (p->midpoint.y-y)*(p->midpoint.y-y));
 
@@ -135,10 +143,10 @@ bool MapGrid::isPointInAPolygon(float x, float y)
       inside = quad_ops::quickPointInPolyRatio(x,y,*p,0.6);
       if (inside)
         {
-          pib = added_quads_.insert(p->poly_id);
+          pib = added_.insert(p->poly_id);
           if (pib.second)
             {
-              obs_quads_.polygons.push_back(*p);
+              obs_.polygons.push_back(*p);
             }
         }
     }
@@ -182,14 +190,13 @@ void MapGrid::runObservers()
 
 
   // update adjacent left observer 
-  
   art_msgs::ArtLanes adjacent_left_quads =
     quad_ops::filterAdjacentLanes(pose_,local_map_, 
                           1);                            // 1 indicates get adjacent left, -1 means adjacent right
   art_msgs::ArtLanes adjacent_left_obstacles =
     quad_ops::filterAdjacentLanes(pose_,obs_quads_,
                           1);
-  std::cout << "Number of obstacles: " << adjacent_left_obstacles.polygons.size() << "\n"; // this line is never reached, however, filterAdjacentLanes is cycled through fully
+  
   // Finding closest poly in left lane
   PolyOps polyOps_left;
   std::vector<poly> adj_polys_left;

@@ -234,5 +234,4 @@ art_msgs::Observation
   return observation_;
 }
 
-// Updates: cleaned up updateAdj and revised a bit of updateAdjHelper (see comments); code compiles with only a warning (lane_observer.cc:172: warning: control reaches end of non-void function) not sure what this warning signifies; still need to ensure that rear observer returns a negative distance; segmentation fault when trying to run with StageSim
 

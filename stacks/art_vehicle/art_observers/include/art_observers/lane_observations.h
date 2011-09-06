@@ -25,7 +25,12 @@
 
 #include <art_msgs/ArtLanes.h>
 #include <art_msgs/ObservationArray.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_ros/transforms.h>
 #include <sensor_msgs/PointCloud.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_listener.h>
 #include <visualization_msgs/MarkerArray.h>
 
@@ -46,6 +51,9 @@ public:
 
 private:
 
+  /** @brief short name for PCL PointCloud */
+  typedef pcl::PointCloud<pcl::PointXYZ> PtCloud;
+
   /** @brief Add an entry to the observer vector.
    *
    *  @param obs observer to add
@@ -59,11 +67,13 @@ private:
   void calcRobotPolygon();
   void filterPointsInLocalMap();
   bool isPointInAPolygon(float x, float y);
-  void processLocalMap(const art_msgs::ArtLanes &msg);
-  void processObstacles(const sensor_msgs::PointCloud &msg);
+  void processLocalMap(const art_msgs::ArtLanes::ConstPtr &msg);
+  void processObstacles(void);
+  void processPointCloud(const sensor_msgs::PointCloud::ConstPtr &msg);
+  void processPointCloud2(const sensor_msgs::PointCloud2::ConstPtr &msg);
   void publishObstacleVisualization();
   void runObservers();
-  void transformPointCloud(const sensor_msgs::PointCloud &msg);
+  void transformPointCloud(const PtCloud &msg);
 
   ros::NodeHandle node_;		///< node handle
   ros::NodeHandle priv_nh_;		///< private node handle
@@ -77,12 +87,13 @@ private:
   boost::shared_ptr<tf::TransformListener> tf_listener_;
 
   // ROS topic subscriptions and publishers
-  ros::Subscriber obstacle_sub_;
+  ros::Subscriber pc_sub_;		///< deprecated PointCloud input
+  ros::Subscriber pc2_sub_;		///< PointCloud2 input
   ros::Subscriber road_map_sub_;
   ros::Publisher observations_pub_;
   ros::Publisher viz_pub_;
 
-  sensor_msgs::PointCloud obstacles_;	///< current obstacle data
+  PtCloud obstacles_;			///< current obstacle data
   art_msgs::ArtLanes local_map_;	///< local road map
 
   /// vector of observers, in order of the observations they publish

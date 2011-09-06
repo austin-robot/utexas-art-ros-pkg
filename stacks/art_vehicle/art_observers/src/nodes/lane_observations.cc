@@ -18,6 +18,7 @@
 
 */
 
+#include <sensor_msgs/point_cloud_conversion.h>
 #include <art_observers/lane_observations.h>
 #include <art_observers/QuadrilateralOps.h>
 
@@ -31,10 +32,14 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
   nearest_backward_observer_(config_),
   tf_listener_(new tf::TransformListener())
 { 
-  // subscribe to obstacle cloud
-  obstacle_sub_ =
+  // subscribe to point cloud topics
+  pc_sub_ =
     node_.subscribe("velodyne/obstacles", 1,
-                    &LaneObservations::processObstacles, this,
+                    &LaneObservations::processPointCloud, this,
+                    ros::TransportHints().tcpNoDelay(true));
+  pc2_sub_ =
+    node_.subscribe("obstacles", 1,
+                    &LaneObservations::processPointCloud2, this,
                     ros::TransportHints().tcpNoDelay(true));
 
   // subscribe to local road map
@@ -58,12 +63,15 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
 /** @brief Deconstructor. */
 LaneObservations::~LaneObservations() {}
 
-/** @brief Obstacle point cloud callback. */
-void LaneObservations::processObstacles(const sensor_msgs::PointCloud &msg) 
+/** @brief Obstacles point cloud processing.
+ *
+ *  @pre @c obstacles_ contains the point cloud data received
+ */
+void LaneObservations::processObstacles(void) 
 {
-  observations_.header.stamp = msg.header.stamp;
+  observations_.header.stamp = obstacles_.header.stamp;
   obs_quads_.polygons.clear();
-  transformPointCloud(msg);
+  transformPointCloud(obstacles_);
   
   // skip the rest until the local road map has been received at least once
   if (local_map_.header.stamp > ros::Time())
@@ -74,10 +82,29 @@ void LaneObservations::processObstacles(const sensor_msgs::PointCloud &msg)
     }
 }
 
-/** @brief Local road map callback. */
-void LaneObservations::processLocalMap(const art_msgs::ArtLanes &msg) 
+/** @brief PointCloud callback. */
+void LaneObservations::processPointCloud(const sensor_msgs::PointCloud::ConstPtr &msg)
 {
-  local_map_ = msg;
+  // convert to PointCloud2, then process that
+  boost::shared_ptr<sensor_msgs::PointCloud2> pc2(new sensor_msgs::PointCloud2);
+  sensor_msgs::convertPointCloudToPointCloud2(*msg, *pc2);
+  processPointCloud2(pc2);
+}
+
+/** @brief PointCloud2 callback. */
+void LaneObservations::processPointCloud2(const sensor_msgs::PointCloud2::ConstPtr &msg)
+{
+  // convert ROS message into PCL point cloud
+  pcl::fromROSMsg(*msg, obstacles_);
+
+  // process the PCL point cloud data
+  processObstacles();
+}
+
+/** @brief Local road map callback. */
+void LaneObservations::processLocalMap(const art_msgs::ArtLanes::ConstPtr &msg) 
+{
+  local_map_ = *msg;
 }
 
 /** @brief Filter obstacle points to those in a road map polygon. */
@@ -94,13 +121,19 @@ void LaneObservations::filterPointsInLocalMap()
 }
 
 /** @brief Transform obstacle points into the map frame of reference. */
-void LaneObservations::transformPointCloud(const sensor_msgs::PointCloud &msg) 
+void LaneObservations::transformPointCloud(const PtCloud &msg) 
 {
   try
     {
-      tf_listener_->transformPointCloud(config_.map_frame_id, msg, obstacles_);
+      // wait for transform to be available
+      tf_listener_->waitForTransform(config_.map_frame_id, msg.header.frame_id,
+				     msg.header.stamp, ros::Duration(0.2));
+      pcl_ros::transformPointCloud(config_.map_frame_id, msg, obstacles_,
+				   *tf_listener_);
       observations_.header.frame_id = obstacles_.header.frame_id;
-      calcRobotPolygon();            // hopefully not needed in future
+
+      // hopefully not needed in future
+      calcRobotPolygon();
     }
   catch (tf::TransformException ex)
     {

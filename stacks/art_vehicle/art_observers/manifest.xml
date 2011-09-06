@@ -12,6 +12,8 @@
   <depend package="art_map"/>
   <depend package="art_msgs"/>
   <depend package="filters"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
   <depend package="nav_msgs"/>

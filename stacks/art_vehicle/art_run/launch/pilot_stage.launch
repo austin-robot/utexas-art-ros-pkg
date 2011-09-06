@@ -20,6 +20,7 @@
     <rosparam
        file="$(find simulator_art)/world/$(optenv WORLD prc_large).yaml"/>
   </node>
+  <node pkg="simulator_art" type="obstacles" name="art_simulated_obstacles" />
 
   <!-- static transforms -->
   <include file="$(find art_run)/launch/static_transforms.launch"/>

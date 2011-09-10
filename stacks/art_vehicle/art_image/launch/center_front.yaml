@@ -1,9 +1,9 @@
-# Left front camera on car (Sony XCD-SX90CR)
+# Center front camera on car (Sony XCD-SX90CR)
 
-guid: 0800461000821aa5
+guid: 0800461000821a6a
 video_mode: 1280x960_mono8
-frame_id: left_front_camera_optical
-camera_info_url: package://art_image/calibration/left_front_calibration.yaml
+frame_id: center_front_camera_optical
+camera_info_url: package://art_image/calibration/center_front_calibration.yaml
 fps: 15
 iso_speed: 800
 

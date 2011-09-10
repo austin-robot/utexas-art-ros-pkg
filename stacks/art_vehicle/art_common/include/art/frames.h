@@ -40,6 +40,8 @@ namespace ArtFrames
   const std::string rear_sick = "rear_sick";
 
   /** camera device and optical frames of reference */
+  const std::string center_front_camera = "center_front_camera";
+  const std::string center_front_camera_optical = "center_front_camera_optical";
   const std::string left_front_camera = "left_front_camera";
   const std::string left_front_camera_optical = "left_front_camera_optical";
   const std::string right_front_camera = "right_front_camera";

@@ -1,4 +1,6 @@
 rosrun image_view image_view image:=/left_front/camera/image_raw _image_transport:=compressed &
 
+rosrun image_view image_view image:=/center_front/camera/image_raw _image_transport:=compressed &
+
 rosrun image_view image_view image:=/right_front/camera/image_raw _image_transport:=compressed &
 

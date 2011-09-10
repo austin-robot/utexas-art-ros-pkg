@@ -148,6 +148,15 @@ int main(int argc, char** argv)
                   ArtVehicle::left_front_camera_pitch,
                   ArtVehicle::left_front_camera_yaw);
 
+      // Center front camera
+      opticalTF(&tf_broadcaster, ArtFrames::center_front_camera,
+                  ArtVehicle::center_front_camera_px,
+                  ArtVehicle::center_front_camera_py,
+                  ArtVehicle::center_front_camera_pz,
+                  ArtVehicle::center_front_camera_roll,
+                  ArtVehicle::center_front_camera_pitch,
+                  ArtVehicle::center_front_camera_yaw);
+
       // Right front camera
       opticalTF(&tf_broadcaster, ArtFrames::right_front_camera,
                   ArtVehicle::right_front_camera_px,

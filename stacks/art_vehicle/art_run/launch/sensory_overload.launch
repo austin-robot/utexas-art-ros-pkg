@@ -12,6 +12,7 @@
   <node pkg="velodyne_common" type="read" name="velodyne_read"/>
 
   <include file="$(find art_image)/launch/get_left_front.launch" />
+  <include file="$(find art_image)/launch/get_center_front.launch" />
   <include file="$(find art_image)/launch/get_right_front.launch" />
 
   <!-- global parameters (in this namespace) -->

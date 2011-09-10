@@ -1,9 +1,9 @@
 # Right front camera on car (Sony XCD-SX90CR)
 
-guid: 0800461000821a6a
+guid: 0800461000821a9d
 video_mode: 1280x960_mono8
 frame_id: right_front_camera_optical
-camera_info_url: file:///cameras/calibration/right_front_calibration.yaml
+camera_info_url: package://art_image/calibration/right_front_calibration.yaml
 fps: 15
 iso_speed: 800
 

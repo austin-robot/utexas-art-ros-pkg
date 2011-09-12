@@ -3,7 +3,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud.h> 
 
-#define NODE "art_simulator_obstalce_converter"
+#define NODE "art_simulated_obstacles"
 
 namespace {
 
@@ -85,11 +85,7 @@ int main(int argc, char *argv[]) {
   // Publishers
   pubPointCloud_ = node.advertise<sensor_msgs::PointCloud>("velodyne/obstacles", qDepth);
 
-  ROS_INFO(NODE ": starting up");
-  
   ros::spin();                          // handle incoming data
-
-  ROS_INFO(NODE ": shutting down");
  
   return 0;
 

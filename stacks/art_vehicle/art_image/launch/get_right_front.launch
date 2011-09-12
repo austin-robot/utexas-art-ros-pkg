@@ -8,7 +8,7 @@
   <!-- name node (and topic) after parameter file -->
   <node ns="right_front" pkg="camera1394"
         type="camera1394_node" name="right_front" >
-    <rosparam file="$(find art_image)/launch/right_front.yaml" /> 
+    <rosparam file="$(find art_image)/param/right_front.yaml" /> 
   </node>
 
 </launch>

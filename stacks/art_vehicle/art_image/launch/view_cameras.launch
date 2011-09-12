@@ -1,12 +1,17 @@
 <!-- -*- mode: XML -*- -->
 
-<!-- view two front camera images -->
+<!-- view three front camera images -->
 
 <launch>
 
   <node pkg="image_view" type="image_view" name="left_front_view"
         args="_image_transport:=compressed">
     <remap from="image" to="/left_front/camera/image_raw"/>
+  </node>
+
+  <node pkg="image_view" type="image_view" name="center_front_view"
+        args="_image_transport:=compressed">
+    <remap from="image" to="/center_front/camera/image_raw"/>
   </node>
 
   <node pkg="image_view" type="image_view" name="right_front_view">

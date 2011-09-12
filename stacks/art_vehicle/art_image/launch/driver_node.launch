@@ -1,0 +1,19 @@
+<!-- -*- mode: XML -*- -->
+
+<!-- Start the driver for a specific IEEE1394 digital camera.
+
+     arg: camera = base file name of camera YAML parameters
+                   (default: center_front)
+-->
+
+<launch>
+
+  <arg name="camera" default="center_front" />
+
+  <!-- launch device driver node with parameter file -->
+  <node ns="$(arg camera)" pkg="camera1394"
+        type="camera1394_node" name="camera_$(arg camera)" >
+    <rosparam file="$(find art_image)/param/$(arg camera).yaml" /> 
+  </node>
+
+</launch>

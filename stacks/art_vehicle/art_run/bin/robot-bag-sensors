@@ -13,10 +13,12 @@ mkdir -p $BAGS
 rosbag record -o $BAGS/velodyne /velodyne/rawscan &
 
 CAMERA1=/left_front/camera
-CAMERA2=/right_front/camera
+CAMERA2=/center_front/camera
+CAMERA3=/right_front/camera
 
 rosbag record -o $BAGS/camera \
         $CAMERA1/image_raw/compressed $CAMERA1/camera_info \
         $CAMERA2/image_raw/compressed $CAMERA2/camera_info &
+        $CAMERA3/image_raw/compressed $CAMERA3/camera_info &
 
 exec robot-bag-core

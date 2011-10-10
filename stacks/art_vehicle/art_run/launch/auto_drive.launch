@@ -13,6 +13,10 @@
   <!-- start pilot and servo actuators -->
   <include file="$(find art_run)/launch/pilot_drive.launch" />
 
+  <!-- start navigator and observers 
+  <include file="$(find art_run)/launch/navigator.launch" />
+  -->
+
   <!-- start navigator -->
   <node pkg="art_nav" type="navigator" name="navigator" >
     <rosparam file="$(find art_run)/params/navigator_common.yaml" />

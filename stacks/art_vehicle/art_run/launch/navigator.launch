@@ -1,0 +1,17 @@
+<!-- -*- mode: XML -*- -->
+<!-- Launch file for navigator and observers
+
+     $Id$
+  -->
+
+<launch>
+
+  <!-- start observers -->
+  <node pkg="art_observers" type="observers_node" name="observers_node" />
+
+  <!-- start navigator -->
+  <node pkg="art_nav" type="navigator" name="navigator" >
+    <rosparam file="$(find art_run)/params/navigator_common.yaml" />
+  </node>
+
+</launch>

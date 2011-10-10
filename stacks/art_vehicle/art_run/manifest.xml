@@ -14,6 +14,7 @@
   <depend package="art_image" />
   <depend package="art_map"/>
   <depend package="art_nav"/>
+  <depend package="art_observers"/>
   <depend package="art_pilot"/>
   <depend package="art_servo"/>
   <depend package="art_teleop" />

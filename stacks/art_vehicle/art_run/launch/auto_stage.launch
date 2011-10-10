@@ -13,10 +13,8 @@
   <!-- start pilot and servo actuators -->
   <include file="$(find art_run)/launch/pilot_stage.launch" />
 
-  <!-- start navigator -->
-  <node pkg="art_nav" type="navigator" name="navigator" >
-    <rosparam file="$(find art_run)/params/navigator_common.yaml" />
-  </node>
+  <!-- start navigator and observers -->
+  <include file="$(find art_run)/launch/navigator.launch" />
 
   <!-- start commander, tell it to enter Run mode -->
   <node pkg="art_nav" type="commander" name="commander" >

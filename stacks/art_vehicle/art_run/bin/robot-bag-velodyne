@@ -1,10 +1,15 @@
 #!/bin/sh
 
-# record bag from velodyne, with corresponding
-#   odometry, GPS and coordinate transforms
+# record bag from velodyne, with corresponding maplanes, odometry, GPS
+# and coordinate transforms
 
+# run this with: roslaunch art_run sensory_overload.launch
 
-BAGS=${ROS_HOME:-~/.ros}/bags
+BAGS=${ROS_HOME:-~/.ros}/bags/sensors
+mkdir -p $BAGS
 
-exec rosbag record -a -o $BAGS/velodyne/velodyne
+### start recording the new format...
+#rosbag record -o $BAGS/velodyne /velodyne/rawscan &
+rosbag record -o $BAGS/velodyne /velodyne/packets &
 
+exec robot-bag-core

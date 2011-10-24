@@ -8,9 +8,12 @@
 BAGS=${ROS_HOME:-~/.ros}/bags/sensors
 mkdir -p $BAGS
 
-### NOTE: soon we need to start recording the new format...
-#rosbag record -o $BAGS/velodyne /velodyne/packets &
-rosbag record -o $BAGS/velodyne /velodyne/rawscan &
+### start recording the new format...
+#rosbag record -o $BAGS/velodyne /velodyne/rawscan &
+rosbag record -o $BAGS/velodyne /velodyne/packets &
+
+### collect Sick data (if any)
+rosbag record -o $BAGS/sicks /front_sick /rear_sick &
 
 CAMERA1=/left_front/camera
 CAMERA2=/center_front/camera

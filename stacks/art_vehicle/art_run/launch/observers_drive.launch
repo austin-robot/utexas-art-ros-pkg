@@ -19,9 +19,9 @@
   <!-- start velodyne and obstacle detection -->
   <node pkg="velodyne_common" type="read" name="velodyne_read"/>
   <!--
-  <node pkg="velodyne_height_map" type="height_map" name="velodyne_height_map"/>
-  -->
   <node pkg="velodyne_ringcomp" type="ringcomp" name="velodyne_ringcomp"/>
+  -->
+  <node pkg="velodyne_height_map" type="height_map" name="velodyne_height_map"/>
 
   <!-- start commander -->
   <node pkg="art_nav" type="commander" name="commander" >

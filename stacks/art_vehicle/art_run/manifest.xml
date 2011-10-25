@@ -27,9 +27,7 @@
   <depend package="simulator_art"/>
   <depend package="tf"/>
   <depend package="velodyne_common"/>
-  <depend package="velodyne_ringcomp"/>
-  <!--
   <depend package="velodyne_height_map"/>
-  -->
+  <depend package="velodyne_ringcomp"/>
 
 </package>

@@ -1,0 +1,34 @@
+<!-- -*- mode: XML -*- -->
+
+<!-- start nodes to configure cameras, sicks and velodyne sensor
+     positions
+
+     $Id$
+-->
+
+<launch>
+
+  <node pkg="applanix" type="odometry" name="odometry"/>
+  <node pkg="velodyne_common" type="read" name="velodyne_read"/>
+  <include file="$(find art_run)/launch/sick_lasers.launch" />
+
+  <include file="$(find art_image)/launch/get_left_front.launch" />
+  <include file="$(find art_image)/launch/get_center_front.launch" />
+  <include file="$(find art_image)/launch/get_right_front.launch" />
+
+  <!-- global parameters (in this namespace) -->
+  <param name="rndf"
+         value="$(find art_map)/rndf/$(optenv WORLD prc_large).rndf"/>
+
+  <!-- configurable transforms -->
+  <node pkg="art_common" type="vehicle_configurable_tf"
+	name="vehicle_configurable_tf"/>
+  <node pkg="tf" type="static_transform_publisher" name="odom_is_map"
+        args="0 0 0 0 0 0 /map /odom 1000" />
+
+  <!-- start maplanes node with corresponding RNDF -->
+  <node pkg="art_map" type="maplanes" name="maplanes">
+    <param name="frame_id" value="/map" />
+  </node>
+
+</launch>

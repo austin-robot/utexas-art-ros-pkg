@@ -46,14 +46,14 @@ float32 velodyne_roll=0.0062133721370998124 # (calculated)
 
 float32 front_SICK_px = 3.178
 float32 front_SICK_py= 0.0		# (approximately)
-float32 front_SICK_pz = 0.941
+float32 front_SICK_pz = 0.7
 float32 front_SICK_roll = 0.0		# (approximately)
 float32 front_SICK_pitch = 0.0		# (approximately)
 float32 front_SICK_yaw = 0.027	        # (approximately)
 
 float32 rear_SICK_px = -1.140
 float32 rear_SICK_py = 0.0              # (approximately)
-float32 rear_SICK_pz = 0.943
+float32 rear_SICK_pz = 0.7
 float32 rear_SICK_roll = 0.0		# (approximately)
 float32 rear_SICK_pitch = 0.0		# (approximately)
 float32 rear_SICK_yaw = 3.1415926535897931160  # (approximately PI)
@@ -61,7 +61,7 @@ float32 rear_SICK_yaw = 3.1415926535897931160  # (approximately PI)
 float32 center_front_camera_px = 0.52     # velodyne_px+0.127 (approx)
 float32 center_front_camera_py = 0.367    # velodyne_py+0.089 (approx)
 float32 center_front_camera_pz = 2.184    # velodyne_pz-0.216 (approx)
-float32 center_front_camera_yaw = 0.0     # (approx, need to calibrate)
+float32 center_front_camera_yaw = -0.058  # (measured)
 float32 center_front_camera_pitch = 0.0   # (assumed)
 float32 center_front_camera_roll = 0.0    # (assumed)
 

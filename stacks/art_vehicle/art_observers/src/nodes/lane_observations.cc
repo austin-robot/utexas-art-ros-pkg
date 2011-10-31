@@ -30,6 +30,7 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
   config_(priv_nh),
   nearest_forward_observer_(config_),
   nearest_backward_observer_(config_),
+  adjacent_left_observer_(config_),
   tf_listener_(new tf::TransformListener())
 { 
   // subscribe to point cloud topics
@@ -58,6 +59,7 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
   // Initialize observers.  They will be updated in this order.
   addObserver(nearest_forward_observer_);
   addObserver(nearest_backward_observer_);
+  addObserver(adjacent_left_observer_);
 }
 
 /** @brief Deconstructor. */

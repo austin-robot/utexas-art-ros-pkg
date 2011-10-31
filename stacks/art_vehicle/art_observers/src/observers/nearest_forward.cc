@@ -86,7 +86,7 @@ art_msgs::Observation
 
   // Am I clear, I.e. I won't hit anything
   bool clear=false;
-  if (time == -1)
+  if (time == -1) // Should this be updated?
     {
       clear = true;
     }

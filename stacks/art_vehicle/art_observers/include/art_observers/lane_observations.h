@@ -36,6 +36,7 @@
 
 #include <art_observers/nearest_forward.h>
 #include <art_observers/nearest_backward.h>
+#include <art_observers/adjacent_left.h>
 
 #include <art_observers/ObserversConfig.h>
 typedef art_observers::ObserversConfig Config;
@@ -83,6 +84,7 @@ private:
   // observer instances
   observers::NearestForward nearest_forward_observer_;
   observers::NearestBackward nearest_backward_observer_;
+  observers::AdjacentLeft adjacent_left_observer_;
 
   boost::shared_ptr<tf::TransformListener> tf_listener_;
 

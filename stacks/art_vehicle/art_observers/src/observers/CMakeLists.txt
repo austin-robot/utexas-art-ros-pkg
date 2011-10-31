@@ -1,7 +1,9 @@
 rosbuild_add_library(observers
+	adjacent_left.cc
+	filter.cc
         nearest_backward.cc
         nearest_forward.cc
         observer.cc
         QuadrilateralOps.cc
-        filter.cc)
+        )
 target_link_libraries(observers artmap)

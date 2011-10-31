@@ -14,6 +14,7 @@
   <depend package="art_msgs"/>
   <depend package="roscpp"/>
   <depend package="tf"/>
+  <depend package="dynamic_reconfigure"/>
 
   <export>
     <cpp cflags="-I${prefix}/include"/>

@@ -33,7 +33,8 @@ public:
   virtual art_msgs::Observation
     update(const art_msgs::ArtQuadrilateral &robot_quad,
 	   const art_msgs::ArtLanes &local_map,
-           const art_msgs::ArtLanes &obstacles);
+           const art_msgs::ArtLanes &obstacles,
+	   MapPose pose_);
 
 private:
   std::vector<float> distance_;

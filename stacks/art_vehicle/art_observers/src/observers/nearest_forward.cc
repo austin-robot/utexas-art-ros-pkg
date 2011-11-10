@@ -14,6 +14,7 @@
 
 #include <art_observers/QuadrilateralOps.h>
 #include <art_observers/nearest_forward.h>
+#include <art_map/PolyOps.h>
 
 namespace observers
 {
@@ -34,7 +35,8 @@ NearestForward::~NearestForward()
 art_msgs::Observation
   NearestForward::update(const art_msgs::ArtQuadrilateral &robot_quad,
 			 const art_msgs::ArtLanes &local_map,
-			 const art_msgs::ArtLanes &obstacles)
+			 const art_msgs::ArtLanes &obstacles,
+			 MapPose pose_)
 {
   // get quadrilaterals ahead in the current lane
   art_msgs::ArtLanes lane_quads =

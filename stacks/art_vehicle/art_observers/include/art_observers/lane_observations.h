@@ -33,6 +33,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_listener.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <nav_msgs/Odometry.h>
 
 #include <art_observers/nearest_forward.h>
 #include <art_observers/nearest_backward.h>
@@ -72,6 +73,7 @@ private:
   void processObstacles(void);
   void processPointCloud(const sensor_msgs::PointCloud::ConstPtr &msg);
   void processPointCloud2(const sensor_msgs::PointCloud2::ConstPtr &msg);
+  void processPose(const nav_msgs::Odometry &odom);
   void publishObstacleVisualization();
   void runObservers();
   void transformPointCloud(const PtCloud &msg);
@@ -92,6 +94,7 @@ private:
   ros::Subscriber pc_sub_;		///< deprecated PointCloud input
   ros::Subscriber pc2_sub_;		///< PointCloud2 input
   ros::Subscriber road_map_sub_;
+  ros::Subscriber odom_sub_;
   ros::Publisher observations_pub_;
   ros::Publisher viz_pub_;
 
@@ -108,6 +111,7 @@ private:
   art_msgs::ArtLanes obs_quads_;	///< vector of obstacle quads
   std::vector<art_msgs::ArtQuadrilateral>::iterator obs_it_;
   art_msgs::ArtQuadrilateral robot_polygon_; ///< robot's current polygon
+  MapPose pose_; // pose of Map
 
   /// Only used within LaneObservations::publishObstacleVisualization(), a
   /// class variable only to avoid memory allocation on every cycle.

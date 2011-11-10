@@ -21,6 +21,7 @@
 #include <art_msgs/ArtLanes.h>
 #include <art_msgs/Observation.h>
 #include <art_observers/ObserversConfig.h>
+#include <art_map/PolyOps.h>
 
 namespace observers
 {
@@ -81,13 +82,18 @@ public:
   virtual art_msgs::Observation
     update(const art_msgs::ArtQuadrilateral &robot_quad,
 	   const art_msgs::ArtLanes &local_map,
-           const art_msgs::ArtLanes &obstacles);
+           const art_msgs::ArtLanes &obstacles,
+	   MapPose pose_);
 
   /** Deprecated update interface. */
   virtual art_msgs::Observation
     update(int robot_poly_id,
 	   const art_msgs::ArtLanes &local_map,
-           const art_msgs::ArtLanes &obstacles);
+           const art_msgs::ArtLanes &obstacles); 
+
+  /** Used by all observers to get obstacles in plolygons of interest **/
+  bool pointInLane(float x, float y, art_msgs::ArtLanes lane);
+  art_msgs::ArtLanes getObstaclesInLane(art_msgs::ArtLanes obstacles, art_msgs::ArtLanes lane_quads);
 
 protected:
   art_msgs::Observation observation_;

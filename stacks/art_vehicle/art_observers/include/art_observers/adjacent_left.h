@@ -19,6 +19,8 @@
 
 #include <art_observers/filter.h>
 #include <art_observers/observer.h>
+#include <art_map/PolyOps.h>
+#include <art_observers/QuadrilateralOps.h>
 
 namespace observers
 {
@@ -33,9 +35,12 @@ public:
   virtual art_msgs::Observation
     update(const art_msgs::ArtQuadrilateral &robot_quad,
 	   const art_msgs::ArtLanes &local_map,
-           const art_msgs::ArtLanes &obstacles);
+           const art_msgs::ArtLanes &obstacles,
+	   MapPose pose_);
 
 private:
+
+
   std::vector<float> distance_;
 
   MedianFilter distance_filter_;

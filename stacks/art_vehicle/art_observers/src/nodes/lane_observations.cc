@@ -49,6 +49,12 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
                     &LaneObservations::processLocalMap, this,
                     ros::TransportHints().tcpNoDelay(true));
 
+  // subscribe to odometry
+  odom_sub_ = 
+    node_.subscribe("odom", 1,
+                    &LaneObservations::processPose, this,
+                    ros::TransportHints().tcpNoDelay(true));
+
   // advertise published topics
   const std::string viz_topic("visualization_marker_array");
   viz_pub_ =
@@ -107,6 +113,12 @@ void LaneObservations::processPointCloud2(const sensor_msgs::PointCloud2::ConstP
 void LaneObservations::processLocalMap(const art_msgs::ArtLanes::ConstPtr &msg) 
 {
   local_map_ = *msg;
+}
+
+/** @brief process the pose of the map **/
+void LaneObservations::processPose(const nav_msgs::Odometry &odom)
+{
+  pose_ = MapPose(odom.pose.pose);
 }
 
 /** @brief Filter obstacle points to those in a road map polygon. */
@@ -188,7 +200,7 @@ void LaneObservations::runObservers()
   for (unsigned i = 0; i < observers_.size(); ++i)
     {
       observations_.obs[i] =
-	observers_[i]->update(robot_polygon_, local_map_, obs_quads_);
+	observers_[i]->update(robot_polygon_, local_map_, obs_quads_, pose_);
     }
 
   // Publish their observations

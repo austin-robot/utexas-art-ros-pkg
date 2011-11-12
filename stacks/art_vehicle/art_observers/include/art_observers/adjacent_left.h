@@ -40,6 +40,9 @@ public:
 
 private:
 
+  art_msgs::Observation updateAdjHelper(int adj_poly_id, 
+                             art_msgs::ArtLanes &adj_lane_quads,
+                             art_msgs::ArtLanes &adj_obstacle_quads);
 
   std::vector<float> distance_;
 

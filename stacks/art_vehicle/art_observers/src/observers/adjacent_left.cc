@@ -46,29 +46,26 @@ art_msgs::Observation
 
   art_msgs::ArtLanes adj_lane_quads = quad_ops::filterAdjacentLanes
 					(pose_, local_map, 1);
-
   art_msgs::ArtLanes adj_lane_obstacles = getObstaclesInLane(obstacles, adj_lane_quads);
-  
   // Finding closest poly in left lane
   PolyOps polyOps_left;
   std::vector<poly> adj_polys_left;
-  int adjacent_poly_id;
+  int index_adj = -1;
   polyOps_left.GetPolys(adj_lane_quads, adj_polys_left);
-  adjacent_poly_id = polyOps_left.getClosestPoly(adj_polys_left, robot_quad.midpoint.x, robot_quad.midpoint.y);
-
+  index_adj = polyOps_left.getClosestPoly(adj_polys_left, 		 robot_quad.midpoint.x, robot_quad.midpoint.y);
   // Get index of adjacent polygon in left lane
-  int index_adj;
-  for (unsigned i = 0; i < adj_lane_quads.polygons.size() ; i++){
-    if (adj_lane_quads.polygons[i].poly_id == adjacent_poly_id) { 
-      index_adj = (int) i;
-      break;
-    } 
-  }
-
+//  int index_adj = -1;
+//  for (int i = 0; i < adj_lane_quads.polygons.size() ; i++){
+//    ROS_INFO("%d", adj_lane_quads.polygons[i].poly_id);
+//    if (adj_lane_quads.polygons[i].poly_id == adjacent_poly_id) {
+//      index_adj = i;
+//      break;
+//   } 
+//  }
   art_msgs::ArtLanes front_adj_lane;
   art_msgs::ArtLanes rear_adj_lane;
   // Which way are we going down the lane?
-  if (adj_lane_quads.polygons[index_adj+1].poly_id > adj_lane_quads.polygons[index_adj].poly_id){
+  if (adj_lane_quads.polygons[index_adj].poly_id > adj_lane_quads.polygons[index_adj-1].poly_id){
     front_adj_lane.polygons.resize(adj_lane_quads.polygons.size() - index_adj + 1); 
     for (unsigned i = index_adj; i < adj_lane_quads.polygons.size(); i++) {
       front_adj_lane.polygons[i-index_adj] = adj_lane_quads.polygons[i];

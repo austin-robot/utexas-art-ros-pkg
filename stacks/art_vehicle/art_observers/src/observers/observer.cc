@@ -55,6 +55,7 @@ art_msgs::ArtLanes Observer::getObstaclesInLane(art_msgs::ArtLanes obstacles, ar
   
     for (size_t j=0; j<num_polys; j++) {
       art_msgs::ArtQuadrilateral *p= &(lane_quads.polygons[j]);
+
       float dist= ((p->midpoint.x-x)*(p->midpoint.x-x)
                    + (p->midpoint.y-y)*(p->midpoint.y-y));
 
@@ -68,7 +69,7 @@ art_msgs::ArtLanes Observer::getObstaclesInLane(art_msgs::ArtLanes obstacles, ar
    }
 
     if(inside) {
-      obstaclesInLane.polygons.push_back(obstacles.polygons[counter]);
+      obstaclesInLane.polygons[counter] = obstacles.polygons[i];
       counter++;
     }
   }

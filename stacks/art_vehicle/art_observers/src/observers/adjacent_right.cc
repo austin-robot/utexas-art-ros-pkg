@@ -42,11 +42,11 @@ art_msgs::Observation
   art_msgs::ArtLanes adj_lane_obstacles = getObstaclesInLane(obstacles, adj_lane_quads);
   
   //Finding closest poly in left lane
-  PolyOps polyOps_left;
-  std::vector<poly> adj_polys_left;
+  PolyOps polyOps_right;
+  std::vector<poly> adj_polys_right;
   int index_adj = -1;
-  polyOps_left.GetPolys(adj_lane_quads, adj_polys_left);
-  index_adj = polyOps_left.getClosestPoly(adj_polys_left, robot_quad.midpoint.x, robot_quad.midpoint.y);
+  polyOps_right.GetPolys(adj_lane_quads, adj_polys_right);
+  index_adj = polyOps_right.getClosestPoly(adj_polys_right, robot_quad.midpoint.x, robot_quad.midpoint.y);
  
   float distance = config_.max_range;
   if (adj_lane_obstacles.polygons.size()!=0)

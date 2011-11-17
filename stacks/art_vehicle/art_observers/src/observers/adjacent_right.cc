@@ -6,40 +6,38 @@
 
 /**  @file
 
-     Adjacent left observer implementation.
+     Adjacent right observer implementation.
 
      @author Michael Quinlan, Jack O'Quin, Corbyn Salisbury
 
  */
 
 #include <art_observers/QuadrilateralOps.h>
-#include <art_observers/adjacent_left.h>
+#include <art_observers/adjacent_right.h>
 
 namespace observers
 {
 
-AdjacentLeft::AdjacentLeft(art_observers::ObserversConfig &config):
+AdjacentRight::AdjacentRight(art_observers::ObserversConfig &config):
   Observer(config,
-	   art_msgs::Observation::Adjacent_left,
-	   std::string("Adjacent Left"))
+	   art_msgs::Observation::Adjacent_right,
+	   std::string("Adjacent Right"))
 {
   distance_filter_.configure();
   velocity_filter_.configure();
 }
 
-AdjacentLeft::~AdjacentLeft()
+AdjacentRight::~AdjacentRight()
 {
 }
 
 art_msgs::Observation
-  AdjacentLeft::update(const art_msgs::ArtQuadrilateral &robot_quad,
+  AdjacentRight::update(const art_msgs::ArtQuadrilateral &robot_quad,
 			 const art_msgs::ArtLanes &local_map,
 			 const art_msgs::ArtLanes &obstacles,
-			 MapPose pose_)
-{
-
+			 MapPose pose_) {
   art_msgs::ArtLanes adj_lane_quads = quad_ops::filterAdjacentLanes
-					(pose_, local_map, 1);
+					(pose_, local_map, -1);
 
   art_msgs::ArtLanes adj_lane_obstacles = getObstaclesInLane(obstacles, adj_lane_quads);
   
@@ -117,4 +115,5 @@ art_msgs::Observation
                    
   return observation_;
 }
-}; // namespace observers
+}
+

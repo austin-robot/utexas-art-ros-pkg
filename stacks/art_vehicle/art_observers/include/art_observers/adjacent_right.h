@@ -8,14 +8,14 @@
 
 /**  @file
 
-     adjacent right left interface.
+     Adjacent right observer interface.
 
      @author Michael Quinlan, Jack O'Quin, Corbyn Salisbury
 
  */
 
-#ifndef _ADJACENT_LEFT_OBSERVER_H_
-#define _ADJACENT_LEFT_OBSERVER_H_
+#ifndef _ADJACENT_RIGHT_OBSERVER_H_
+#define _ADJACENT_RIGHT_OBSERVER_H_
 
 #include <art_observers/filter.h>
 #include <art_observers/observer.h>
@@ -25,12 +25,12 @@
 namespace observers
 {
 
-/** @brief Adjacent left observer class. */
-class AdjacentLeft: public Observer 
+/** @brief Adjacent right observer class. */
+class AdjacentRight: public Observer 
 {
 public:
-  AdjacentLeft(art_observers::ObserversConfig &config);
-  ~AdjacentLeft();
+  AdjacentRight(art_observers::ObserversConfig &config);
+  ~AdjacentRight();
 
   virtual art_msgs::Observation
     update(const art_msgs::ArtQuadrilateral &robot_quad,
@@ -51,4 +51,4 @@ private:
 
 }; // namespace observers
 
-#endif // _ADJACENT_LEFT_H_
+#endif // _ADJACENT_RIGHT_H

@@ -47,9 +47,21 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
   art_msgs::Observation fobs =
     obstacle->observation(art_msgs::Observation::Nearest_forward);
 
-  ROS_DEBUG("Nearest_forward: C%d A%d, dist %.3f, time %.3f, vel %.3f",
-            fobs.clear, fobs.applicable,
-            fobs.distance, fobs.time, fobs.velocity);
+  if (fobs.time < 0.0)
+    {
+      // HACK for obstacle going away from us
+      fobs.time = Infinite::time;
+      /// @todo change observation message to use +inf for receding obstacles
+      ROS_DEBUG("Nearest_forward HACK: C%d A%d, dist %.3f, time %.3f, vel %.3f",
+                fobs.clear, fobs.applicable,
+                fobs.distance, fobs.time, fobs.velocity);
+    }
+  else
+    {
+      ROS_DEBUG("Nearest_forward: C%d A%d, dist %.3f, time %.3f, vel %.3f",
+                fobs.clear, fobs.applicable,
+                fobs.distance, fobs.time, fobs.velocity);
+    }
 
   if (!fobs.applicable
       || fobs.distance >= obstacle->maximum_range())
@@ -70,7 +82,7 @@ Controller::result_t FollowSafely::control(pilot_command_t &pcmd)
     {
       // be safe, request immediate stop
       pcmd.velocity = 0.0;
-      ROS_INFO("Obstacle avoidance requesting immediate halt");
+      ROS_DEBUG("Obstacle avoidance requesting immediate halt");
 
       // when fully stopped, initiate blocked lane behavior
       // (may already be doing it)

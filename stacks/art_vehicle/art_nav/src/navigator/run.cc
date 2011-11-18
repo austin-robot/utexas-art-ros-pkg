@@ -292,7 +292,6 @@ Controller::result_t Run::go(pilot_command_t &pcmd)
 
     case Continue:
       // normal processing -- run the road state machine
-      ROS_DEBUG("Running, invoking Road controller");
       return road->control(pcmd);
 
     default:

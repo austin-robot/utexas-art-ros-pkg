@@ -234,8 +234,7 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
   if (plan.empty())
     {
       // no plan available: a big problem, but must do something
-      if (verbose >= 2)
-        ART_MSG(5, "no lane data available, steer using waypoints.");
+      ROS_WARN_THROTTLE(40, "no lane data available, steer using waypoints.");
       aim_polar = head_for_waypt(target_dist);
       aim_distance = aim_polar.range;
       aim_next_heading =
@@ -319,8 +318,8 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	      else
 		{
                   // No polygon in target distance.  Head to next way-point
-		  ROS_WARN("no polygon at least %.3fm away, "
-                           "steer using waypoints", target_dist);
+		  ROS_WARN_THROTTLE(40, "no polygon at least %.3fm away, "
+                                     "steer using waypoints", target_dist);
 		  aim_polar = head_for_waypt(target_dist);
 		  
 		  aim_distance = aim_polar.range;
@@ -334,7 +333,8 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
 	      // no plan available: a big problem, but must do
 	      // something.  Go to next waypoint.
 	      
-              ROS_WARN("no lane data available, steer using waypoints.");
+              ROS_WARN_THROTTLE(40, "no lane data available, "
+                                "steer using waypoints.");
 	      aim_polar = head_for_waypt(target_dist);
 	      aim_distance = aim_polar.range;
 	      aim_next_heading =
@@ -380,8 +380,7 @@ void Course::desired_heading(pilot_command_t &pcmd, float offset_ratio)
   used_velocity = fminf(used_velocity,pcmd.velocity);
 #endif
 
-  if (verbose >= 3)
-    ART_MSG(8,"Thresholding speed to %.3f m/s",used_velocity);
+  ROS_DEBUG("Thresholding speed to %.3f m/s", used_velocity);
 
   float spring_yaw;
   if (aim_in_plan)
@@ -439,7 +438,7 @@ float Course::distance_in_plan(const MapPose &from,
 void Course::end_run_cycle()
 {
   if (!waypoint_checked)
-    ROS_WARN("failed to check for way-point reached!");
+    ROS_ERROR("failed to check for way-point reached!");
 }
 
 // find an aim polygon ahead of the car in lane
@@ -470,8 +469,7 @@ int Course::find_aim_polygon(poly_list_t &lane)
 #if 1  
   float aim_distance = min_lane_steer_dist;
   
-  if (verbose >= 4)
-    ART_MSG(8, "aim point %.3fm ahead", aim_distance);
+  ROS_DEBUG("aim point %.3fm ahead", aim_distance);
   
   return pops->index_of_downstream_poly(lane, nearby_poly, aim_distance);
 
@@ -503,15 +501,15 @@ int Course::find_aim_polygon(poly_list_t &lane)
 
   if (order->waypt[1].is_goal)
     {
-      float way_dist = distance_in_plan(MapPose(estimate->pose.pose), order->waypt[1]);
+      float way_dist = distance_in_plan(MapPose(estimate->pose.pose),
+                                        order->waypt[1]);
       aim_distance = fminf(aim_distance,way_dist);
     }
 
   // At least look as far ahead as bumper
   aim_distance = fmaxf(aim_distance, ArtVehicle::front_bumper_px);
 
-  if (verbose >= 4)
-    ART_MSG(8, "lane is %.3fm away, aim point %.3fm ahead",
+  ROS_DEBUG("lane is %.3fm away, aim point %.3fm ahead",
 	    lane_distance, aim_distance);
   
   return pops->index_of_downstream_poly(lane, nearby_poly, aim_distance);
@@ -552,8 +550,7 @@ bool Course::find_passing_lane(void)
   int cur_index = pops->getClosestPoly(plan, MapPose(estimate->pose.pose));
   if (cur_index == -1)
     {
-      if (verbose)
-	ART_MSG(1, "no polygon nearby in plan");
+      ROS_WARN("no polygon nearby in plan");
       return false;
     }
   poly cur_poly = plan.at(cur_index);
@@ -613,19 +610,18 @@ bool Course::find_passing_lane(void)
   else
     {
       passing_lane = -1;
-      ROS_DEBUG("no passing lane available for waypoint %s",
-		ElementID(order->waypt[1].id).name().str);
+      ROS_WARN("no passing lane available for waypoint %s",
+               ElementID(order->waypt[1].id).name().str);
       return false;
     }
 
   // save direction for turn signals
   passing_left = (passing_lane == left_lane);
 
-  if (verbose)
-    ART_MSG(5, "passing lane %s selected, to %s going %s",
-	    adj_lane[passing_lane].lane_name().str,
-	    (passing_left? "left": "right"),
-	    (adj_forw[passing_lane]? "forward": "backward"));
+  ROS_INFO("passing lane %s selected, to %s going %s",
+           adj_lane[passing_lane].lane_name().str,
+           (passing_left? "left": "right"),
+           (adj_forw[passing_lane]? "forward": "backward"));
 
 #else // old version
 
@@ -655,16 +651,14 @@ bool Course::find_passing_lane(void)
   // segment, return failure
   if (passing_lane < 0)
     {
-      if (verbose)
-	ART_MSG(1, "no passing lane available for waypoint %s",
-		order->waypt[1].id.name().str);
+      ROS_WARN("no passing lane available for waypoint %s",
+               order->waypt[1].id.name().str);
       return false;
     }
 
   passing_left = true;			// always left for now
 
-  if (verbose)
-    ART_MSG(5, "passing lane %s selected",
+  ROS_DEBUG("passing lane %s selected",
 	    adj_lane[passing_lane].lane_name().str);
 
 #endif
@@ -684,8 +678,7 @@ void Course::find_travel_lane(bool rejoin)
 {
   if (plan_valid())
     {
-      if (verbose >= 4)
-	ART_MSG(5, "find_travel_lane() plan still valid");
+      ROS_DEBUG("find_travel_lane() plan still valid");
     }
   else
     {
@@ -696,15 +689,15 @@ void Course::find_travel_lane(bool rejoin)
     
       if (polygons.size() == 0)		// no lane data available?
 	{
-	  if (verbose >= 2)
-	    ART_MSG(5, "find_travel_lane() has no polygons");
+          ROS_WARN("find_travel_lane() has no polygons");
 	  return;
 	}
 
       // push waypt[0] polygon onto the plan
       pops->add_polys_for_waypts(polygons, plan,
 				 order->waypt[0].id, order->waypt[0].id);
-      if (verbose >= 6) log("debug plan", plan);
+      if (verbose >= 6)
+        log("debug plan", plan);
 
       // add polygons leading to the target waypt entries
       for (int i = 1; i < Order::N_WAYPTS; ++i)
@@ -722,16 +715,16 @@ void Course::find_travel_lane(bool rejoin)
 	    break;
 	}
 
-      if (plan.size() > 1 && verbose >= 6)
+      if (plan.size() > 1)
 	{
-	  ART_MSG(7, "plan[0] start, end waypoints are %s, %s, poly_id = %d",
-		  plan.at(0).start_way.name().str,
-		  plan.at(0).end_way.name().str,
-		  plan.at(0).poly_id);
-	  ART_MSG(7, "plan[1] start, end waypoints are %s, %s, poly_id = %d",
-		  plan.at(1).start_way.name().str,
-		  plan.at(1).end_way.name().str,
-		  plan.at(1).poly_id);
+	  ROS_DEBUG("plan[0] start, end waypoints are %s, %s, poly_id = %d",
+                    plan.at(0).start_way.name().str,
+                    plan.at(0).end_way.name().str,
+                    plan.at(0).poly_id);
+	  ROS_DEBUG("plan[1] start, end waypoints are %s, %s, poly_id = %d",
+                    plan.at(1).start_way.name().str,
+                    plan.at(1).end_way.name().str,
+                    plan.at(1).poly_id);
 	}
       log("find_travel_lane() plan", plan);
     }
@@ -759,8 +752,7 @@ void Course::find_travel_lane(bool rejoin)
 	{
 	  // set aim polygon for obstacle avoidance
 	  aim_poly = plan.at(aim_index);
-	  if (verbose >= 2)
-	    ART_MSG(5, "aim polygon is %d", aim_poly.poly_id);
+          ROS_DEBUG("aim polygon is %d", aim_poly.poly_id);
 	}
     }
 }
@@ -934,38 +926,25 @@ void Course::log(const char *str, const poly_list_t &polys)
   unsigned npolys = polys.size();
   if (npolys > 0)
     {
-      if (verbose >= 3)
-	{
-	  for (unsigned i = 0; i < npolys; ++i)
-	    {
-#if 0
-	      if (verbose >= 5)
-		ART_MSG(8, "polygon[%u] = %d", i, polys.at(i).poly_id);
-#endif
-	      unsigned start_seq = i;
-	      while (i+1 < npolys
-		     && abs(polys.at(i+1).poly_id - polys.at(i).poly_id) == 1)
-		{
-#if 0
-		  if (verbose >= 5)
-		    ART_MSG(8, "polygon run from %u (%d) to %u (%d)",
-			    i, polys.at(i).poly_id,
-			    i+1, polys.at(i+1).poly_id);
-#endif
-		  ++i;
-		}
-	      if (start_seq == i)
-		ART_MSG(8, "%s polygon at %d", str, polys.at(i).poly_id);
-	      else
-		ART_MSG(8, "%s polygons from %d to %d",
-			str, polys.at(start_seq).poly_id, polys.at(i).poly_id);
-	    }
-	}
+      for (unsigned i = 0; i < npolys; ++i)
+        {
+          ROS_DEBUG("polygon[%u] = %d", i, polys.at(i).poly_id);
+          unsigned start_seq = i;
+          while (i+1 < npolys
+                 && abs(polys.at(i+1).poly_id - polys.at(i).poly_id) == 1)
+            {
+              ++i;
+            }
+          if (start_seq == i)
+            ROS_DEBUG("%s polygon at %d", str, polys.at(i).poly_id);
+          else
+            ROS_DEBUG("%s polygons from %d to %d",
+                      str, polys.at(start_seq).poly_id, polys.at(i).poly_id);
+        }
     }
   else
     {
-      if (verbose >= 2)
-	ART_MSG(8, "%s no polygons at all", str);
+      ROS_INFO("%s no polygons at all", str);
     }
 }
 
@@ -986,8 +965,7 @@ bool Course::new_waypts(void)
 // reset course class
 void Course::reset(void)
 {
-  if (verbose)
-    ART_MSG(2, "Course class reset()");
+  ROS_INFO("Course class reset()");
 
   // TODO: figure out when this needs to happen and what to do
   start_pass_location = MapPose();
@@ -1006,8 +984,7 @@ ElementID Course::replan_roadblock(void)
   for (unsigned i = 0; i < art_msgs::Order::N_WAYPTS; ++i)
     {
       saved_waypt_id[i] = order->waypt[i].id;
-      if (verbose >= 4)
-	ART_MSG(8, "saved_waypt_id[%u] = %s",
+      ROS_DEBUG("saved_waypt_id[%u] = %s",
 		i, saved_waypt_id[i].name().str);
     }
 
@@ -1024,8 +1001,7 @@ ElementID Course::replan_roadblock(void)
   ElementID reverse_lane =
     pops->getReverseLane(polygons,exit_pose);
 
-  if (verbose >= 4)
-    ART_MSG(5,"Replan from lane %s", reverse_lane.lane_name().str);
+  ROS_INFO("Replan from lane %s", reverse_lane.lane_name().str);
 
   return reverse_lane;
 }
@@ -1085,9 +1061,9 @@ float Course::stop_waypt_distance(bool same_lane)
 
 	  stop_poly = polygons.at(stop_index);
 	  stop_waypt = WayPointNode(order->waypt[i]);
-	  float wayptdist = distance_in_plan(MapPose(estimate->pose.pose), stop_waypt);
-	  if (verbose >= 2)
-	    ART_MSG(5, "Stop at waypoint %s is %.3fm away",
+	  float wayptdist = distance_in_plan(MapPose(estimate->pose.pose),
+                                             stop_waypt);
+          ROS_DEBUG("Stop at waypoint %s is %.3fm away",
 		    stop_waypt.id.name().str, wayptdist);
 	  return wayptdist;
 	}
@@ -1113,8 +1089,7 @@ bool Course::switch_to_passing_lane()
   int aim_index = find_aim_polygon(adj_polys[passing_lane]);
   if (aim_index == -1)
     {
-      if (verbose)
-	ART_MSG(2, "unable to pass, no polygon near the aiming point");
+      ROS_WARN("unable to pass, no polygon near the aiming point");
       return false;
     }
 
@@ -1128,16 +1103,14 @@ bool Course::switch_to_passing_lane()
   log("switch_to_passing_lane() plan", plan);
   if (plan.empty())
     {
-      if (verbose)
-	ART_MSG(2, "no polygons in passing lane past aiming point");
+      ROS_WARN("no polygons in passing lane past aiming point");
       return false;
     }
 
   aim_poly=plan.at(0);
   MapXY aim_poly_midpt = pops->getPolyEdgeMidpoint(aim_poly);
-  if (verbose >= 2)
-    ART_MSG(5, "aiming at polygon %d, midpoint (%.3f, %.3f)",
-	    aim_poly.poly_id, aim_poly_midpt.x, aim_poly_midpt.y);
+  ROS_DEBUG("aiming at polygon %d, midpoint (%.3f, %.3f)",
+           aim_poly.poly_id, aim_poly_midpt.x, aim_poly_midpt.y);
 
   MapXY start_point =
     pops->GetClosestPointToLine (pops->midpoint(aim_poly.p1,aim_poly.p4),
@@ -1148,8 +1121,8 @@ bool Course::switch_to_passing_lane()
   start_pass_location.map=start_point;
   start_pass_location.yaw=aim_poly.heading;
 
-  ART_MSG(1, "passing starts at (%.3f, %.3f)",
-	  start_pass_location.map.x, start_pass_location.map.y);
+  ROS_INFO("passing starts at (%.3f, %.3f)",
+           start_pass_location.map.x, start_pass_location.map.y);
 
   return true;
 }
@@ -1174,8 +1147,7 @@ float Course::uturn_distance(void)
 
   // compute distance remaining
   float wayptdist = distance_in_plan(MapPose(estimate->pose.pose), stop_waypt);
-  if (verbose >= 2)
-    ART_MSG(5, "U-turn at waypoint %s, %.3fm away",
+  ROS_DEBUG("U-turn at waypoint %s, %.3fm away",
 	    stop_waypt.id.name().str, wayptdist);
   return wayptdist;
 }
@@ -1238,9 +1210,8 @@ bool Course::zone_waypoint_reached(void)
     }
   else
     {
-      if (verbose >= 5)
-	ROS_DEBUG("distance to zone waypoint %s is %.3fm",
-                  ElementID(order->waypt[1].id).name().str, distance);
+      ROS_DEBUG("distance to zone waypoint %s is %.3fm",
+                ElementID(order->waypt[1].id).name().str, distance);
     }
   
   return found;
@@ -1311,9 +1282,8 @@ bool Course::spot_waypoint_reached(void)
     }
   else
     {
-      if (verbose >= 5)
-	ROS_DEBUG("distance to spot waypoint %s is %.3fm",
-                  ElementID(order->waypt[1].id).name().str, distance);
+      ROS_DEBUG("distance to spot waypoint %s is %.3fm",
+                ElementID(order->waypt[1].id).name().str, distance);
     }
 
   return found;
@@ -1343,24 +1313,29 @@ float Course::max_speed_for_slow_down(const float& final_speed,
   return fminf(max, sqrtf(vf2 - tax));
 }
 
+// This function answers the question:
+//
+// What is the fastest I could be going right now such that my
+// heading changes <dheading> over the next <distance>, but I never
+// exceed <maximum_yaw_rate>?
 float Course::max_speed_for_change_in_heading(const float& dheading,
 					      const float& distance,
 					      const float& max,
-					      const float& maximum_yaw_rate) {
-  // This function answers the question:
-  //
-  // What is the fastest I could be going right now such that my
-  // heading changes <dheading> over the next <distance>, but I never
-  // exceed <maximum_yaw_rate>?
-  
-  // XXX: Include art/epsilon.h and use equal
-  if(Epsilon::equal(dheading,0))
-    return max;
+					      const float& maximum_yaw_rate) 
+{
+  if (Epsilon::equal(dheading,0))
+    {
+      return max;
+    }
   else
     {
-      float new_speed=fminf(max, fmaxf(max_speed_for_sharp,fabsf(heading_change_ratio * (maximum_yaw_rate / dheading)))); 
-      if (verbose>=5)
-	ART_MSG(3,"slow for heading: distance: %.3f, dheading: %.3f, maximum_yaw_rate: %.3f, max_speed: %.3f, final: %.3f",distance,dheading,maximum_yaw_rate,max,new_speed); 
+      float new_speed=fminf(max,
+                            fmaxf(max_speed_for_sharp,
+                                  fabsf(heading_change_ratio *
+                                        (maximum_yaw_rate / dheading)))); 
+      ROS_DEBUG("slow for heading: distance: %.3f, dheading: %.3f, "
+                "maximum_yaw_rate: %.3f, max_speed: %.3f, final: %.3f",
+                distance, dheading, maximum_yaw_rate, max,new_speed); 
       return new_speed;
     }
 }
@@ -1420,8 +1395,7 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
 	  float error_offset = 0.0;
 	  if (lane_space > 0.0)		// any room in this lane?
 	    error_offset = offset_ratio * lane_space;
-	  if (verbose >= 3)
-	    ART_MSG(8, "error offset %.3f, half lane width %.3f, ratio %.3f",
+          ROS_DEBUG("error offset %.3f, half lane width %.3f, ratio %.3f",
 		    error_offset, half_lane_width, offset_ratio);
 
 	  // Increasing error term pushes right, decreasing left.
@@ -1474,8 +1448,8 @@ float Course::get_yaw_spring_system(const Polar& aim_polar,
   last_error=error;
   float yaw=d1+d2;
 
-  if (verbose >=3)
-    ART_MSG(8,"Heading spring systems values: error %.3f, dtheta %.3f, d1 %.3f, d2 %.3f, d1+d2 %.3f",error,theta,d1,d2,yaw);
+  ROS_DEBUG("Heading spring systems values: error %.3f, dtheta %.3f, "
+            "d1 %.3f, d2 %.3f, d1+d2 %.3f", error, theta, d1, d2, yaw);
   
   if (yaw < 0)
     return fmaxf(-max_yaw, yaw);

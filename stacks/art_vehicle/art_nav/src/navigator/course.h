@@ -217,8 +217,7 @@ class Course
       {
 	navdata->signal_left = true;
 	navdata->signal_right = true;
-	if (verbose >= 3)
-	  ART_MSG(7, "setting both turn signals on");
+        ROS_DEBUG("setting both turn signals on");
       }
   }
 
@@ -229,8 +228,7 @@ class Course
       {
 	navdata->signal_left = false;
 	navdata->signal_right = false;
-	if (verbose >= 3)
-	  ART_MSG(7, "setting turn signals off");
+        ROS_DEBUG("setting turn signals off");
       }
   }
 
@@ -242,8 +240,7 @@ class Course
       {
 	navdata->signal_left = direction;
 	navdata->signal_right = !direction;
-	if (verbose >= 3)
-	  ART_MSG(7, "signalling %s", (direction? "left": "right"));
+        ROS_DEBUG("signalling %s", (direction? "left": "right"));
       }
   }
 

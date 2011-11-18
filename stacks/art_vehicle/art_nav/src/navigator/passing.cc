@@ -68,10 +68,8 @@ Controller::result_t Passing::control(pilot_command_t &pcmd)
   // reduce speed while passing
   nav->reduce_speed_with_min(pcmd, config_->passing_speed);
 
-  // adjust speed to maintain a safe following distance in our lane
-  result_t result = follow_safely->control(pcmd);
-
-  slow_for_curves->control(pcmd);
+  // adjust speed for any upcoming curves
+  result_t result = slow_for_curves->control(pcmd);
 
   if (done_passing())
     {

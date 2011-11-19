@@ -4,7 +4,7 @@
     Road obstacle observers for the ART autonomous vehicle.
 
   </description>
-  <author>Michael Quinlan, Jack O'Quin</author>
+  <author>Michael Quinlan, Jack O'Quin, Corbyn Salisbury</author>
   <license>BSD</license>
   <review status="experimental" notes=""/>
   <url>http://ros.org/wiki/art_observers</url>
@@ -19,13 +19,6 @@
   <depend package="nav_msgs"/>
   <depend package="tf"/>
   <depend package="visualization_msgs" />
-
-  <!--
-  <export>
-    <cpp cflags="-I${prefix}/include"
-         lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib"/>
-  </export>
-  -->
 
 </package>
 

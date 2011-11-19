@@ -55,19 +55,6 @@ public:
   }
   ~Observer();
 
-  /** DEPRECATED constructor. */
-  Observer(Oid_t id, const std::string &name)
-  {
-    observation_.oid = id;
-    observation_.name = name;
-    observation_.applicable = false;
-    observation_.clear = false;
-    observation_.time = std::numeric_limits<float>::signaling_NaN();
-    observation_.distance = std::numeric_limits<float>::signaling_NaN();
-    observation_.velocity = std::numeric_limits<float>::signaling_NaN();
-    observation_.nobjects = 0;
-  }
-
   /** Generic observer update function.
    *
    *  Called whenever there are new obstacle data, assuming the
@@ -76,6 +63,7 @@ public:
    *  @param robot_quad    quadrilateral containing the robot
    *  @param local_map     road map lanes within range of the robot
    *  @param obstacles     local map quads currently containing obstacles
+   *  @param pose          current pose of robot
    *
    *  @todo Make pure virtual once deprecated version is deleted. 
    */
@@ -83,17 +71,15 @@ public:
     update(const art_msgs::ArtQuadrilateral &robot_quad,
 	   const art_msgs::ArtLanes &local_map,
            const art_msgs::ArtLanes &obstacles,
-	   MapPose pose_);
+	   MapPose pose) = 0;
 
-  /** Deprecated update interface. */
-  virtual art_msgs::Observation
-    update(int robot_poly_id,
-	   const art_msgs::ArtLanes &local_map,
-           const art_msgs::ArtLanes &obstacles); 
-
-  /** Used by all observers to get obstacles in plolygons of interest **/
+  /** Used by all observers to get obstacles in polygons of interest
+   *
+   *  @todo move these out of this pure virtual base class.
+   */
   bool pointInLane(float x, float y, art_msgs::ArtLanes lane);
-  art_msgs::ArtLanes getObstaclesInLane(art_msgs::ArtLanes obstacles, art_msgs::ArtLanes lane_quads);
+  art_msgs::ArtLanes getObstaclesInLane(art_msgs::ArtLanes obstacles,
+                                        art_msgs::ArtLanes lane_quads);
 
 protected:
   art_msgs::Observation observation_;

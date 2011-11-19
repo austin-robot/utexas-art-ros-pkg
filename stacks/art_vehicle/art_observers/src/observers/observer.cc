@@ -19,28 +19,10 @@ namespace observers
 
 Observer::~Observer() {}
 
-// Define stub for non-pure virtual function method to avoid linker
-// error.  Can be removed once it is made pure virtual.
-art_msgs::Observation
-  Observer::update(const art_msgs::ArtQuadrilateral &robot_quad,
-		   const art_msgs::ArtLanes &local_map,
-		   const art_msgs::ArtLanes &obstacles,
-		   MapPose pose_)
+art_msgs::ArtLanes 
+  Observer::getObstaclesInLane(art_msgs::ArtLanes obstacles,
+                               art_msgs::ArtLanes lane_quads) 
 {
-  return art_msgs::Observation();
-}
-
-// Define stub for non-pure virtual function method to avoid linker
-// error.  Can be removed once this deprecated function is deleted
-art_msgs::Observation
-  Observer::update(int robot_poly_id,
-		   const art_msgs::ArtLanes &local_map,
-		   const art_msgs::ArtLanes &obstacles)
-{
-  return art_msgs::Observation();
-}
-
-art_msgs::ArtLanes Observer::getObstaclesInLane(art_msgs::ArtLanes obstacles, art_msgs::ArtLanes lane_quads) {
   int counter = 0;
   art_msgs::ArtLanes obstaclesInLane;
   obstaclesInLane.polygons.resize(obstacles.polygons.size());
@@ -77,7 +59,8 @@ art_msgs::ArtLanes Observer::getObstaclesInLane(art_msgs::ArtLanes obstacles, ar
   return obstaclesInLane;
 }
 
-/*bool pointInLane(float x, float y, art_msgs::ArtLanes lane) {
+#if 0
+bool pointInLane(float x, float y, art_msgs::ArtLanes lane) {
   
   size_t num_polys = lane.polygons.size();
   
@@ -99,6 +82,7 @@ art_msgs::ArtLanes Observer::getObstaclesInLane(art_msgs::ArtLanes obstacles, ar
     }
 
   return inside;
-}*/
+}
+#endif
 
 }; // namespace observers

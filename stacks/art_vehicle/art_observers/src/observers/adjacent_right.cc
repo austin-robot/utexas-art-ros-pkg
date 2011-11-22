@@ -32,10 +32,10 @@ AdjacentRight::~AdjacentRight()
 }
 
 art_msgs::Observation
-  AdjacentRight::update(const art_msgs::ArtQuadrilateral &robot_quad,
-			 const art_msgs::ArtLanes &local_map,
+  AdjacentRight::update(const art_msgs::ArtLanes &local_map,
 			 const art_msgs::ArtLanes &obstacles,
 			 MapPose pose_) {
+
   art_msgs::ArtLanes adj_lane_quads = quad_ops::filterAdjacentLanes
 					(pose_, local_map, -1);
 
@@ -46,7 +46,7 @@ art_msgs::Observation
   std::vector<poly> adj_polys_right;
   int index_adj = -1;
   polyOps_right.GetPolys(adj_lane_quads, adj_polys_right);
-  index_adj = polyOps_right.getClosestPoly(adj_polys_right, robot_quad.midpoint.x, robot_quad.midpoint.y);
+  index_adj = polyOps_right.getClosestPoly(adj_polys_right, pose_.map.x, pose_.map.y);
  
   float distance = config_.max_range;
   if (adj_lane_obstacles.polygons.size()!=0)

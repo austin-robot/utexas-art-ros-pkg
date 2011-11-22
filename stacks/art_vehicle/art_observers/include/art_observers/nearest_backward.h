@@ -31,8 +31,7 @@ public:
   ~NearestBackward();
 
   virtual art_msgs::Observation
-    update(const art_msgs::ArtQuadrilateral &robot_quad,
-	   const art_msgs::ArtLanes &local_map,
+    update(const art_msgs::ArtLanes &local_map,
            const art_msgs::ArtLanes &obstacles,
 	   MapPose pose_);
 

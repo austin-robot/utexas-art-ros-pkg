@@ -202,7 +202,7 @@ void LaneObservations::runObservers()
   for (unsigned i = 0; i < observers_.size(); ++i)
     {
       observations_.obs[i] =
-	observers_[i]->update(robot_polygon_, local_map_, obs_quads_, pose_);
+	observers_[i]->update(local_map_, obs_quads_, pose_);
     }
 
   // Publish their observations

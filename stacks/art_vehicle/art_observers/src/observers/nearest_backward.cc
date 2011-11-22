@@ -32,19 +32,27 @@ NearestBackward::~NearestBackward()
 }
 
 art_msgs::Observation
-  NearestBackward::update(const art_msgs::ArtQuadrilateral &robot_quad,
-			  const art_msgs::ArtLanes &local_map,
+  NearestBackward::update(const art_msgs::ArtLanes &local_map,
 			  const art_msgs::ArtLanes &obstacles, 
 			  MapPose pose_)
 {
+
+  PolyOps polyOps;
+  std::vector<poly> map_polys;
+  int poly_index = -1;
+  polyOps.GetPolys(local_map, map_polys);
+  poly_index = polyOps.getClosestPoly(map_polys, pose_.map.x, pose_.map.y);
+
+  art_msgs::ArtQuadrilateral robot_quad1 = local_map.polygons[poly_index];
+
   // get quadrilaterals ahead in the current lane
   art_msgs::ArtLanes lane_quads =
-    quad_ops::filterLanes(robot_quad, local_map,
+    quad_ops::filterLanes(robot_quad1, local_map,
                           *quad_ops::compare_backward_seg_lane);
 
   // get obstacles ahead in the current lane
   art_msgs::ArtLanes lane_obstacles =
-    quad_ops::filterLanes(robot_quad, obstacles,
+    quad_ops::filterLanes(robot_quad1, obstacles,
                           *quad_ops::compare_backward_seg_lane);
 
   // reverse the vectors because the code that follows expects

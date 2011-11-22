@@ -68,8 +68,7 @@ public:
    *  @todo Make pure virtual once deprecated version is deleted. 
    */
   virtual art_msgs::Observation
-    update(const art_msgs::ArtQuadrilateral &robot_quad,
-	   const art_msgs::ArtLanes &local_map,
+    update(const art_msgs::ArtLanes &local_map,
            const art_msgs::ArtLanes &obstacles,
 	   MapPose pose) = 0;
 

@@ -46,18 +46,9 @@ namespace Euclidean
       float r_denomenator = (bx-ax)*(bx-ax) + (by-ay)*(by-ay);
       float r = r_numerator / r_denomenator;
 
-      float px = ax + r*(bx-ax);
-      float py = ay + r*(by-ay);
-
       float s =  ((ay-cy)*(bx-ax)-(ax-cx)*(by-ay) ) / r_denomenator;
 
       distanceLine = fabs(s)*sqrtf(r_denomenator);
-
-      //
-      // (xx,yy) is the point on the lineSegment closest to (cx,cy)
-      //
-      float xx = px;
-      float yy = py;
 
       if ( (r >= 0) && (r <= 1) )
 	{
@@ -70,14 +61,10 @@ namespace Euclidean
 	  float dist2 = (cx-bx)*(cx-bx) + (cy-by)*(cy-by);
 	  if (dist1 < dist2)
 	    {
-	      xx = ax;
-	      yy = ay;
 	      distanceSegment = sqrtf(dist1);
 	    }
 	  else
 	    {
-	      xx = bx;
-	      yy = by;
 	      distanceSegment = sqrtf(dist2);
 	    }
 	}

@@ -628,9 +628,9 @@ int devbrake::query_cmd(const char *string, char *status, int nbytes)
       // There is not much point in checking for errors on the
       // write().  If something went wrong, we'll find out by reading
       // the device status.
-      int res=0;
-      res=write(fd, string, len);
-
+      int res = write(fd, string, len);
+      if (res < 0)
+        ROS_ERROR_THROTTLE(100, "write() error: %d", errno);
 
       int timeout = 16;			// set timeout in msecs
       int linelen = 0;
@@ -815,6 +815,7 @@ void devbrake::servo_write_only(const char *string)
   // There is not much point in checking for errors on the write().
   // If something went wrong, we'll find out later on some command
   // that reads status.
-  int res=0;
-  res=write(fd, string, strlen(string));
+  int res = write(fd, string, strlen(string));
+  if (res < 0)
+    ROS_ERROR_THROTTLE(100, "write() error: %d", errno);
 }

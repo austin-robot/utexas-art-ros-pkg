@@ -127,8 +127,9 @@ int dev8x::query_relays(uint8_t *relays)
   buffer[1] = 14;
   buffer[2] = 24;			// Get Status
   DBG("query_relays: writing command.");
-  int res=0;
-  res=write(fd, buffer, 3);
+  int res = write(fd, buffer, 3);
+  if (res < 0)
+    ROS_ERROR_THROTTLE(100, "write() error: %d", errno);
 
   // read result
   DBG("query_relays: reading result.");
@@ -157,8 +158,9 @@ int dev8x::read_8bit_port(int ch, int *data)
   buffer[0] = 254;
   buffer[1] = 6;
   buffer[2] = ch;
-  int res=0;
-  res=write(fd, buffer, 3);
+  int res = write(fd, buffer, 3);
+  if (res < 0)
+    ROS_ERROR_THROTTLE(100, "write() error: %d", errno);
 
   int rc = read(fd, buffer, 1);
   if (rc == 1)				// success?
@@ -190,8 +192,9 @@ int dev8x::read_10bit_port(int ch, int *data)
   buffer[0] = 254;
   buffer[1] = 6;
   buffer[2] = 8 + ch - 3;
-  int res=0;
-  res=write(fd, buffer, 3);
+  int res = write(fd, buffer, 3);
+  if (res < 0)
+    ROS_ERROR_THROTTLE(100, "write() error: %d", errno);
 
   int rc = read(fd, &buffer[1], 1);
   if (rc != 1 && have_tty)		// failure?

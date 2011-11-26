@@ -46,7 +46,9 @@ Passing::~Passing()
 //	Finished, if original lane reached.
 Controller::result_t Passing::control(pilot_command_t &pcmd)
 {
+#if 0 // not doing avoid right now
   pilot_command_t incmd = pcmd;		// copy of original input
+#endif // not doing avoid right now
 
   if (!in_passing_lane
       && course->in_lane(MapPose(estimate->pose.pose)))

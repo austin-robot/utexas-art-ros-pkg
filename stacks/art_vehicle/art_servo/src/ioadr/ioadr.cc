@@ -357,7 +357,11 @@ void IOadr::PollDevice(void)
     {
       poll_method_t poll_method = poll_list_[i]->function;
       if (poll_method)
-	rc = (this->*poll_method)(i);
+        {
+          rc = (this->*poll_method)(i);
+          if (rc != 0)
+            ROS_ERROR_THROTTLE(100, "poll method returns %d", rc);
+        }
     }
 
   // Get relay values, set new ones if requested.  Note: setting the

@@ -144,7 +144,9 @@ Controller::result_t FollowLane::control(pilot_command_t &pcmd)
     pcmd.velocity=fminf(pcmd.velocity,1.0); //Make this config
 
 
+#if 0 // not doing avoid right now
   pilot_command_t incmd = pcmd;		// copy of original input
+#endif // not doing avoid right now
 
   // set approaching way-point type
   way_type_t wtype = approaching_waypoint_type(course->stop_waypt);

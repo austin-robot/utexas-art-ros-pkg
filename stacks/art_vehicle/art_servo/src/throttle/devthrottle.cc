@@ -545,8 +545,9 @@ int devthrottle::servo_cmd(void)
       // There is not much point in checking for errors on the
       // write().  If something went wrong, we'll find out while
       // reading the response.
-      int res=0;
-      res=write(fd, cmdstr, cmdlen);	// send the command
+      int res = write(fd, cmdstr, cmdlen);	// send the command
+      if (res < 0)
+        ROS_ERROR_THROTTLE(100, "write() error: %d", errno);
 
       ROS_DEBUG(DEVICE " write() %s\n",cmdstr);
 

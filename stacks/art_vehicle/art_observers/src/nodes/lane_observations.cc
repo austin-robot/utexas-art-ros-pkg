@@ -73,7 +73,7 @@ LaneObservations::LaneObservations(ros::NodeHandle &node,
 /** @brief Deconstructor. */
 LaneObservations::~LaneObservations() {}
 
-/** @brief Obstacles point cloud processing.
+/** @brief Obstacles point cloud processing.  Starts all the observers
  *
  *  @pre @c obstacles_ contains the point cloud data received
  */
@@ -182,6 +182,7 @@ bool LaneObservations::isPointInAPolygon(float x, float y)
         continue;
 
       inside = quad_ops::quickPointInPolyRatio(x,y,*p,0.6);
+      // Add polygon to lane if so
       if (inside)
         {
           pib = added_quads_.insert(p->poly_id);

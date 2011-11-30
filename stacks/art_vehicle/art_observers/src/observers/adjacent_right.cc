@@ -6,7 +6,8 @@
 
 /**  @file
 
-     Adjacent right observer implementation.
+     Adjacent right observer implementation. Observer obtains data and updates the observation_ msg
+     with new changes.  Deals witht the lane to the right of the car.
 
      @author Michael Quinlan, Jack O'Quin, Corbyn Salisbury
 
@@ -31,6 +32,7 @@ AdjacentRight::~AdjacentRight()
 {
 }
 
+// \brief main updater for the car. Updates observation_ msg. It is assumed the car is already in the right lane when doing time and distance calculations.
 art_msgs::Observation
   AdjacentRight::update(const art_msgs::ArtLanes &local_map,
 			 const art_msgs::ArtLanes &obstacles,
@@ -54,6 +56,7 @@ art_msgs::Observation
       // Get distance along road from robot to nearest obstacle
       int target_id = adj_lane_obstacles.polygons[0].poly_id;
       distance = 0;
+      // Check to see what direction the right lane is going in
       if(adj_lane_quads.polygons[index_adj].poly_id < adj_lane_obstacles.polygons[0].poly_id) {
         for (size_t i = index_adj; i < adj_lane_quads.polygons.size(); i++)
 	  {
@@ -84,7 +87,7 @@ art_msgs::Observation
   prev_update_ = current_update; // Reset prev_update time
 
   // Time to intersection (-1 if obstacle is moving away)
-  double time = -1;
+  double time = std::numeric_limits<float>::infinity();
   if (filt_velocity < 0)      // Object getting closer, will intersect
     {
       if (filt_velocity > -0.1)	    // avoid dividing by a tiny number
@@ -96,7 +99,7 @@ art_msgs::Observation
 
   // Am I clear, I.e. I won't hit anything
   bool clear=false;
-  if (time == -1) // Should this be updated?
+  if (time < 10) // Should this be updated?
     {
       clear = true;
     }

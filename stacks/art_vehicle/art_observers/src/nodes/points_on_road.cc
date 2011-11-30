@@ -92,6 +92,7 @@ void processObstacles(const sensor_msgs::PointCloud &msg)
   output.publish(pc);
 }
 
+// \brief stores the values of the map
 void processMap(const art_msgs::ArtLanes &msg)
 {
   map = msg;

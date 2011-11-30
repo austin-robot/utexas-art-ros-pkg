@@ -5,9 +5,9 @@
 
 /**  @file
  
-     ART lane observer base class implementation.
+     ART lane observer base class implementation.  Used as a framework to all other observers
 
-     @author Michael Quinlan
+     @author Michael Quinlan, Corbyn Salisbury
 
  */
 
@@ -19,6 +19,7 @@ namespace observers
 
 Observer::~Observer() {}
 
+// \brief returns all obstacles located in wanted lane
 art_msgs::ArtLanes 
   Observer::getObstaclesInLane(art_msgs::ArtLanes obstacles,
                                art_msgs::ArtLanes lane_quads) 
@@ -27,6 +28,7 @@ art_msgs::ArtLanes
   art_msgs::ArtLanes obstaclesInLane;
   obstaclesInLane.polygons.resize(obstacles.polygons.size());
   for(unsigned i = 0; i < obstacles.polygons.size(); i++) {
+    // implementation of pointsInLane from lane_observations here on out.
     float x = obstacles.polygons[i].midpoint.x;
     float y = obstacles.polygons[i].midpoint.y;
     

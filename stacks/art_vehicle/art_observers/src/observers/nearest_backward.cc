@@ -6,7 +6,8 @@
 
 /**  @file
 
-     Nearest backward observer implementation.
+     Nearest backward observer implementation. Observer obtains data and updates the observation_ msg
+     with new changes.  Deals witht the polygons behind the car
 
      @author Michael Quinlan, Jack O'Quin
 
@@ -31,6 +32,7 @@ NearestBackward::~NearestBackward()
 {
 }
 
+// \brief  Update message with new data.
 art_msgs::Observation
   NearestBackward::update(const art_msgs::ArtLanes &local_map,
 			  const art_msgs::ArtLanes &obstacles, 
@@ -88,7 +90,7 @@ art_msgs::Observation
   prev_update_ = current_update; // Reset prev_update time
 
   // time to intersection (-1 if obstacle is moving away)
-  double time = -1;
+  double time = std::numeric_limits<float>::infinity();
   if (filt_velocity < 0)      // Object getting closer, will intersect
     {
       if (filt_velocity > -0.1)	    // avoid dividing by a tiny number
@@ -100,7 +102,7 @@ art_msgs::Observation
 
   // am I clear (i.e. won't hit anything)
   bool clear=false;
-  if (time == -1)
+  if (time < 10)
     {
       clear = true;
     }

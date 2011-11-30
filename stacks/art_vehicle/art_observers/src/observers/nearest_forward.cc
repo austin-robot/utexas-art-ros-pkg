@@ -6,7 +6,8 @@
 
 /**  @file
 
-     Nearest forward observer implementation.
+     Nearest forward observer implementation. Observer obtains data and updates the observation_ msg
+     with new changes.  Deals with the lane in front of the car.
 
      @author Michael Quinlan, Jack O'Quin
 
@@ -32,6 +33,7 @@ NearestForward::~NearestForward()
 {
 }
 
+// \brief Updates the message with new data received.
 art_msgs::Observation
   NearestForward::update(const art_msgs::ArtLanes &local_map,
 			 const art_msgs::ArtLanes &obstacles,
@@ -82,7 +84,7 @@ art_msgs::Observation
   prev_update_ = current_update; // Reset prev_update time
 
   // Time to intersection (-1 if obstacle is moving away)
-  double time = -1;
+  double time = std::numeric_limits<float>::infinity();
   if (filt_velocity < 0)      // Object getting closer, will intersect
     {
       if (filt_velocity > -0.1)	    // avoid dividing by a tiny number
@@ -94,7 +96,7 @@ art_msgs::Observation
 
   // Am I clear, I.e. I won't hit anything
   bool clear=false;
-  if (time == -1) // Should this be updated?
+  if (time < 10) // Should this be updated?
     {
       clear = true;
     }

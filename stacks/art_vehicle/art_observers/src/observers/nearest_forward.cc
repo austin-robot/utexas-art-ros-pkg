@@ -6,8 +6,9 @@
 
 /**  @file
 
-     Nearest forward observer implementation. Observer obtains data and updates the observation_ msg
-     with new changes.  Deals with the lane in front of the car.
+     Nearest forward observer implementation. Observer obtains data
+     and updates the observation_ msg with new changes.  Deals with
+     the lane in front of the car.
 
      @author Michael Quinlan, Jack O'Quin
 
@@ -56,7 +57,7 @@ art_msgs::Observation
     quad_ops::filterLanes(robot_quad1, obstacles,
                           *quad_ops::compare_forward_seg_lane);
 
-  float distance = config_.max_range;
+  float distance = std::numeric_limits<float>::infinity();
   if (lane_obstacles.polygons.size()!=0)
     {
       // Get distance along road from robot to nearest obstacle
@@ -83,35 +84,26 @@ art_msgs::Observation
   velocity_filter_.update(velocity,filt_velocity);
   prev_update_ = current_update; // Reset prev_update time
 
-  // Time to intersection (-1 if obstacle is moving away)
+  // Time to intersection (infinite if obstacle moving away)
   double time = std::numeric_limits<float>::infinity();
-  if (filt_velocity < 0)      // Object getting closer, will intersect
+
+  if (filt_velocity < 0)
     {
-      if (filt_velocity > -0.1)	    // avoid dividing by a tiny number
+      // Object getting closer
+      if (filt_velocity > -0.1)
 	{
+          // avoid dividing by a tiny number
 	  filt_velocity = 0.1;
 	}
       time = fabs(filt_distance / filt_velocity);
     }
 
-  // Am I clear, I.e. I won't hit anything
-  bool clear=false;
-  if (time < 10) // Should this be updated?
-    {
-      clear = true;
-    }
-
-  // Do I really know enough to publish data ?
-  bool applicable=false;
-  if (velocity_filter_.isFull())
-    applicable = true;
-    
   // return the observation
   observation_.distance = filt_distance;
   observation_.velocity = filt_velocity;
   observation_.time = time;
-  observation_.clear = clear;
-  observation_.applicable = applicable;
+  observation_.clear =  (time > 10.0);
+  observation_.applicable = (velocity_filter_.isFull());
                    
   return observation_;
 }

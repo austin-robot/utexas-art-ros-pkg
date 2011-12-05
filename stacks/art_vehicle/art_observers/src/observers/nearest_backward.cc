@@ -6,8 +6,9 @@
 
 /**  @file
 
-     Nearest backward observer implementation. Observer obtains data and updates the observation_ msg
-     with new changes.  Deals witht the polygons behind the car
+     Nearest backward observer implementation. Observer obtains data
+     and updates the observation_ msg with new changes.  Deals with
+     the lane behind the car.
 
      @author Michael Quinlan, Jack O'Quin
 
@@ -62,7 +63,7 @@ art_msgs::Observation
   std::reverse(lane_quads.polygons.begin(), lane_quads.polygons.end());
   std::reverse(lane_obstacles.polygons.begin(), lane_obstacles.polygons.end());
 
-  float distance = config_.max_range;
+  float distance = std::numeric_limits<float>::infinity();
   if (lane_obstacles.polygons.size()!=0)
     {
       // get distance along road from robot to nearest obstacle
@@ -89,7 +90,7 @@ art_msgs::Observation
   velocity_filter_.update(velocity,filt_velocity);
   prev_update_ = current_update; // Reset prev_update time
 
-  // time to intersection (-1 if obstacle is moving away)
+  // Time to intersection (infinite if obstacle moving away)
   double time = std::numeric_limits<float>::infinity();
   if (filt_velocity < 0)      // Object getting closer, will intersect
     {
@@ -100,22 +101,12 @@ art_msgs::Observation
       time = fabs(filt_distance / filt_velocity);
     }
 
-  // am I clear (i.e. won't hit anything)
-  bool clear=false;
-  if (time < 10)
-    {
-      clear = true;
-    }
-
-  // do I really know enough to publish data ?
-  bool applicable = (velocity_filter_.isFull());
-    
   // return the observation
   observation_.distance = filt_distance;
   observation_.velocity = filt_velocity;
   observation_.time = time;
-  observation_.clear = clear;
-  observation_.applicable = applicable;
+  observation_.clear =  (time > 10.0);
+  observation_.applicable = (velocity_filter_.isFull());
                    
   return observation_;
 }

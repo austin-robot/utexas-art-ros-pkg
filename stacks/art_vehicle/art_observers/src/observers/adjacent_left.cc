@@ -6,8 +6,9 @@
 
 /**  @file
 
-     Adjacent left observer implementation. Observer obtains data and updates the observation_ msg
-     with new changes.  Deals witht the lane to the left of the car.
+     Adjacent left observer implementation. Observer obtains data and
+     updates the observations msg with new changes.  Deals with the
+     lane to the left of the car.
 
      @author Michael Quinlan, Jack O'Quin, Corbyn Salisbury
 
@@ -32,7 +33,11 @@ AdjacentLeft::~AdjacentLeft()
 {
 }
 
-// \brief Updates the observation_ msg.  Uses filtering.  Caluclations are made with the assumption the car already occupies the adjacent left lane
+/** @brief Updates the observation_ msg.
+ *
+ *  @note Calculations are made from the nearest point of the adjacent
+ *  left lane.
+ */
 art_msgs::Observation
   AdjacentLeft::update(const art_msgs::ArtLanes &local_map,
 			 const art_msgs::ArtLanes &obstacles,
@@ -51,7 +56,7 @@ art_msgs::Observation
   polyOps_left.GetPolys(adj_lane_quads, adj_polys_left);
   index_adj = polyOps_left.getClosestPoly(adj_polys_left, pose_.map.x, pose_.map.y);
  
-  float distance = config_.max_range;
+  float distance = std::numeric_limits<float>::infinity();
   if (adj_lane_obstacles.polygons.size()!=0)
     {
       // Get distance along road from robot to nearest obstacle
@@ -87,35 +92,37 @@ art_msgs::Observation
   velocity_filter_.update(velocity,filt_velocity);
   prev_update_ = current_update; // Reset prev_update time
 
-  // Time to intersection (-1 if obstacle is moving away)
+  // Time to intersection (infinite if obstacle moving away)
   double time = std::numeric_limits<float>::infinity();
-  if (filt_velocity < 0)      // Object getting closer, will intersect
+
+  if (filt_velocity < 0)
     {
-      if (filt_velocity > -0.1)	    // avoid dividing by a tiny number
+      // Object getting closer
+      if (filt_velocity > -0.1)
 	{
+          // avoid dividing by a tiny number
 	  filt_velocity = 0.1;
 	}
       time = fabs(filt_distance / filt_velocity);
     }
 
-  // Am I clear, I.e. I won't hit anything
-  bool clear=false;
-  if (time < 10) // Should this be updated?
+  if (filt_velocity < 0)
     {
-      clear = true;
+      // Object getting closer
+      if (filt_velocity > -0.1)
+	{
+          // avoid dividing by a tiny number
+	  filt_velocity = 0.1;
+	}
+      time = fabs(filt_distance / filt_velocity);
     }
 
-  // Do I really know enough to publish data ?
-  bool applicable=false;
-  if (velocity_filter_.isFull())
-    applicable = true;
-    
   // return the observation
   observation_.distance = filt_distance;
   observation_.velocity = filt_velocity;
   observation_.time = time;
-  observation_.clear = clear;
-  observation_.applicable = applicable;
+  observation_.clear =  (time > 10.0);
+  observation_.applicable = (velocity_filter_.isFull());
                    
   return observation_;
 }

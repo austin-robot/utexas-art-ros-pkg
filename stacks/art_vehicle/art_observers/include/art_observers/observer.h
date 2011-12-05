@@ -48,9 +48,9 @@ public:
     observation_.name = name;
     observation_.applicable = false;
     observation_.clear = false;
-    observation_.time = std::numeric_limits<float>::signaling_NaN();
-    observation_.distance = std::numeric_limits<float>::signaling_NaN();
-    observation_.velocity = std::numeric_limits<float>::signaling_NaN();
+    observation_.time = std::numeric_limits<float>::infinity();
+    observation_.distance = std::numeric_limits<float>::infinity();
+    observation_.velocity = std::numeric_limits<float>::quiet_NaN();
     observation_.nobjects = 0;
   }
   ~Observer();

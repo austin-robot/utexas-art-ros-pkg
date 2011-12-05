@@ -33,8 +33,7 @@ namespace art_observers
     /// default constructor
     ObserversConfig():
       map_frame_id(std::string("/map")),
-      robot_frame_id(std::string("vehicle")),
-      max_range(80.0)
+      robot_frame_id(std::string("vehicle"))
     {};
     ObserversConfig(const ObserversConfig &that)
     {
@@ -45,7 +44,6 @@ namespace art_observers
       // get configuration parameters
       priv_nh.param("map_frame_id", map_frame_id, std::string("/map"));
       priv_nh.param("robot_frame_id", robot_frame_id, std::string("vehicle"));
-      priv_nh.param("max_range", max_range, 80.0);
 
       // apply tf_prefix to robot frame ID, if needed
       std::string tf_prefix = tf::getPrefixParam(priv_nh);
@@ -57,7 +55,6 @@ namespace art_observers
 
     std::string map_frame_id;		///< frame ID of map
     std::string robot_frame_id;		///< frame ID of robot
-    double	max_range;		///< maximum obstacle range
   };
 
 }; // namespace art_observers

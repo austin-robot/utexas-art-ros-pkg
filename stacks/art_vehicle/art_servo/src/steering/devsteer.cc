@@ -325,6 +325,8 @@ int devsteer::set_initial_angle(float position)
       rc = servo_cmd("@16 240 0 0\r");
       if (rc != 0)
 	ROS_WARN(DEVICE " failed to enter PMC mode.");
+
+      // TODO check if KMC and KMR should be moved here
     }
   else
     ROS_WARN(DEVICE " failed reading steering encoder: "
@@ -432,6 +434,7 @@ int devsteer::configure_steering(void)
   // If the controller was not in PMC mode, the PMX will fail, so
   // ignore any NAK response from that command.  (Should no longer be
   // a problem because of the RST.)
+  // TODO remove this...
   servo_cmd("@16 242\r");		// PMX: exit profile move mode
 
   rc = write_register(20, 0);		// Reg 20 (Position) = 0
@@ -453,11 +456,11 @@ int devsteer::configure_steering(void)
 
 #if 1
   // set KMC (Kill Motor Conditions) to stop motor for moving error
-  rc = servo_cmd("@16 167 256 256\r"); 
+  servo_cmd("@16 167 256 256\r"); 
   //rc = servo_cmd("@16 167 0 0\r"); 
 
   // set KMR (Kill Motor Recovery) to "do nothing"
-  rc = servo_cmd("@16 181 0\r"); 
+  servo_cmd("@16 181 0\r"); 
 #endif
 
   return rc;

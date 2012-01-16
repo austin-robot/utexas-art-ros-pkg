@@ -1,6 +1,6 @@
 # Center front camera on car (Sony XCD-SX90CR)
 
-guid: 0800461000821a6a
+guid: 0800461000822011
 video_mode: 1280x960_mono8
 frame_id: center_front_camera_optical
 camera_info_url: package://art_image/calibration/center_front_calibration.yaml

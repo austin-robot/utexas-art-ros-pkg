@@ -2,5 +2,5 @@
     uri: https://utexas-art-ros-pkg.googlecode.com/svn/trunk
     local-name: utexas-art
 - svn:
-    uri: https://utexas-art-ros-pkg.googlecode.com/svn/branches/sandbox
-    local-name: sandbox
+    uri: https://utexas-art-ros-pkg.googlecode.com/svn/branches/projects
+    local-name: projects

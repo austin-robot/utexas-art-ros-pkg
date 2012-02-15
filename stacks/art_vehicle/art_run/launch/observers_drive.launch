@@ -17,7 +17,7 @@
   <include file="$(find art_run)/launch/navigator.launch" />
 
   <!-- start velodyne and obstacle detection -->
-  <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node"/>
+  <include file="$(find velodyne_driver)/launch/nodelet_manager.launch"/>
   <!--
   <node pkg="velodyne_ringcomp" type="ringcomp" name="velodyne_ringcomp"/>
   -->

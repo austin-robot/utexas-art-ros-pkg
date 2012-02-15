@@ -1,8 +1,0 @@
-/**
-\mainpage
-\htmlinclude manifest.html
-
-Tele-operation scripts for driving a vehicle with Ackermann steering
-under human control.
-
-*/

@@ -1,14 +1,14 @@
 <package>
-  <description brief="Ackermann steering tele-operation">
+  <description brief="Ackermann steering Qt tele-operation">
 
-     Tele-operation scripts for driving a vehicle with Ackermann
+     Qt tele-operation interface for driving a vehicle with Ackermann
      steering under human control.
 
   </description>
   <author>Jack O'Quin, Joshua Bennett</author>
   <license>BSD</license>
   <review status="experimental" notes=""/>
-  <url>http://www.ros.org/wiki/ackermann_teleop</url>
+  <url>http://www.ros.org/wiki/ackermann_qt</url>
 
   <depend package="ackermann_msgs"/>
   <depend package="driver_base" />

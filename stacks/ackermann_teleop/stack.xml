@@ -1,0 +1,12 @@
+<stack>
+  <description brief="ackermann">
+    ROS tele-operation packages for robots using Ackermann steering.
+  </description>
+  <author>Maintained by Jack O'Quin</author>
+  <license>BSD</license>  
+  <review status="experiemental" notes=""/>
+  <url>http://ros.org/wiki/ackermann_teleop</url>
+
+  <depend stack="ros" />
+
+</stack>

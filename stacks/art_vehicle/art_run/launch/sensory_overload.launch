@@ -9,7 +9,7 @@
 <launch>
 
   <node pkg="applanix" type="odometry" name="odometry"/>
-  <node pkg="velodyne_common" type="read" name="velodyne_read"/>
+  <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node"/>
 
   <include file="$(find art_image)/launch/get_left_front.launch" />
   <include file="$(find art_image)/launch/get_center_front.launch" />

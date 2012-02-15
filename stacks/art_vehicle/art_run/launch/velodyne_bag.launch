@@ -8,7 +8,7 @@
 <launch>
   <node pkg="art_common" type="vehicle_static_tf" name="vehicle_static_tf"/>
   <node pkg="applanix" type="odometry" name="odometry"/>
-  <node pkg="velodyne_common" type="read" name="read"/>
+  <node pkg="velodyne_driver" type="velodyne_node" name="velodyne_node"/>
   <node pkg="rosbag" type="rosbag" name="rosbag"
-        args="record -o $(env PWD)/velodyne /velodyne/rawscan /odom /gps /tf" />
+        args="record -o $(env PWD)/velodyne /velodyne/rawscan /odom /gps /imu /tf" />
 </launch>

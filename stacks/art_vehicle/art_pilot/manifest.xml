@@ -15,6 +15,7 @@
   <depend package="driver_base" />
   <depend package="dynamic_reconfigure" />
   <depend package="roscpp"/>
+  <depend package="roslib"/>
   <depend package="rospy"/>
   <depend package="std_msgs"/>
 

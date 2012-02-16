@@ -7,7 +7,7 @@
 #
 # $Id$
 
-PKG_NAME = 'ackermann_teleop'
+PKG_NAME = 'ackermann_qt'
 
 import sys
 import os

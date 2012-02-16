@@ -1,0 +1,8 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+HKS game contoller tele-operation interface for driving a vehicle with
+Ackermann steering under human control.
+
+*/

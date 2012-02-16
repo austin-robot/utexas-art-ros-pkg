@@ -5,7 +5,7 @@
      steering under human control.
 
   </description>
-  <author>Jack O'Quin, Joshua Bennett</author>
+  <author>Jack O'Quin</author>
   <license>BSD</license>
   <review status="experimental" notes=""/>
   <url>http://www.ros.org/wiki/ackermann_qt</url>
@@ -13,7 +13,6 @@
   <depend package="ackermann_msgs"/>
   <depend package="driver_base" />
   <depend package="dynamic_reconfigure" />
-  <depend package="joy"/>
   <depend package="rospy"/>
 
   <!-- declare run-time dependency on Qt4 python package -->

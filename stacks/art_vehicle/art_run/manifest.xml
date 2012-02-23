@@ -20,8 +20,6 @@
   <depend package="art_teleop" />
   <depend package="camera1394"/>
   <depend package="joy"/>
-  <depend package="nodelet"/>
-  <depend package="rosbag"/>
   <depend package="rxtools"/>
   <depend package="sicktoolbox_wrapper"/>
   <depend package="simulator_art"/>

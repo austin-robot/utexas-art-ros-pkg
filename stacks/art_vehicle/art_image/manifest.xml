@@ -8,13 +8,11 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/art_image</url>
-  <depend package="applanix"/>
   <depend package="camera1394" />
   <depend package="compressed_image_transport"/>
   <depend package="image_transport"/>
   <depend package="image_view"/>
   <depend package="theora_image_transport"/>
-  <depend package="velodyne_common"/>
 
 </package>
 

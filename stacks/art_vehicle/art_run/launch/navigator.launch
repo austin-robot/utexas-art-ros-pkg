@@ -1,4 +1,3 @@
-<!-- -*- mode: XML -*- -->
 <!-- Launch file for navigator and observers
 
      $Id$
@@ -7,7 +6,9 @@
 <launch>
 
   <!-- start observers -->
-  <node pkg="art_observers" type="observers_node" name="observers_node" />
+  <node pkg="art_observers" type="observers_node" name="observers_node">
+    <remap from="obstacles" to="velodyne_obstacles" />
+  </node>
 
   <!-- start navigator -->
   <node pkg="art_nav" type="navigator" name="navigator" >

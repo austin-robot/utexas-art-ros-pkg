@@ -1,28 +1,24 @@
 #include <string>
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
-#include <sensor_msgs/PointCloud.h> 
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
 
-#define NODE "art_simulated_obstacles"
-
-namespace {
-
-  int qDepth = 1;
-
+namespace
+{
   ros::Subscriber subLaserScan_;
   ros::Publisher pubPointCloud_;
-
-  sensor_msgs::PointCloud pc;
-
+  pcl::PointCloud<pcl::PointXYZI> pc_;
 }
 
-void processLaserScan(const sensor_msgs::LaserScan &laserScan) {
+void processLaserScan(const sensor_msgs::LaserScan &laserScan) 
+{
+  // Pass the header information along (including frame ID)
+  pc_.header = laserScan.header;
 
-  // Pass the header information along
-  pc.header = laserScan.header;
-
-  int maxPoints = ceil((laserScan.angle_max - laserScan.angle_min) / laserScan.angle_increment) + 1;
-  pc.points.resize(maxPoints);
+  int maxPoints = ceil((laserScan.angle_max - laserScan.angle_min)
+                       / laserScan.angle_increment) + 1;
+  pc_.points.resize(maxPoints);
 
   float currentAngle = laserScan.angle_min;
   int angleIndex = 0;
@@ -36,9 +32,10 @@ void processLaserScan(const sensor_msgs::LaserScan &laserScan) {
       float xPt = cosf(currentAngle) * distance;
       float yPt = sinf(currentAngle) * distance;
 
-      pc.points[numPoints].x = xPt;
-      pc.points[numPoints].y = yPt;
-      pc.points[numPoints].z = 0.25;
+      pc_.points[numPoints].x = xPt;
+      pc_.points[numPoints].y = yPt;
+      pc_.points[numPoints].z = 0.25;
+      pc_.points[numPoints].intensity = laserScan.intensities[angleIndex];
       numPoints++;
     }
 
@@ -46,47 +43,27 @@ void processLaserScan(const sensor_msgs::LaserScan &laserScan) {
     currentAngle += laserScan.angle_increment;
   }
 
-  pc.points.resize(numPoints);
+  pc_.points.resize(numPoints);
 
-  pubPointCloud_.publish(pc);
+  pubPointCloud_.publish(pc_);
 }
 
-int getParameters(int argc, char *argv[]) {
-  char ch;
-  const char* optflags = "q:";
-  while(-1 != (ch = getopt(argc, argv, optflags))) {
-    switch(ch) {
+int main(int argc, char *argv[]) 
+{
 
-      case 'q':
-        qDepth = atoi(optarg);
-        if (qDepth < 1) {
-          qDepth = 1;
-        }
-        break;
-    }
-  }
-
-  return 1;
-}
-
-int main(int argc, char *argv[]) {
-
-  ros::init(argc, argv, NODE);
+  ros::init(argc, argv, "art_simulated_obstacles");
   ros::NodeHandle node;
   
-  if (!getParameters(argc, argv))
-    return -1; 
-
   // Subscribers
   ros::TransportHints noDelay = ros::TransportHints().tcpNoDelay(true);
   subLaserScan_ =
-      node.subscribe("front_sick", qDepth, &processLaserScan, noDelay);
+      node.subscribe("front_sick", 10, &processLaserScan, noDelay);
   
   // Publishers
-  pubPointCloud_ = node.advertise<sensor_msgs::PointCloud>("velodyne/obstacles", qDepth);
+  pubPointCloud_ =
+    node.advertise<pcl::PointCloud<pcl::PointXYZI> >("velodyne_obstacles", 10);
 
   ros::spin();                          // handle incoming data
  
   return 0;
-
 }

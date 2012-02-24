@@ -18,10 +18,14 @@
 
   <!-- start velodyne and obstacle detection -->
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch"/>
-  <!--
+  <include file="$(find velodyne_pointcloud)/launch/transform_nodelet.launch">
+    <arg name="calibration"
+         value="$(find velodyne_pointcloud)/tests/angles.config"/>
+  </include>
+  <include file="$(find velodyne_height_map)/launch/heightmap_nodelet.launch"/>
+  <!-- alternative obstacle detector:
   <node pkg="velodyne_ringcomp" type="ringcomp" name="velodyne_ringcomp"/>
   -->
-  <node pkg="velodyne_height_map" type="height_map" name="velodyne_height_map"/>
 
   <!-- start commander -->
   <node pkg="art_nav" type="commander" name="commander" >

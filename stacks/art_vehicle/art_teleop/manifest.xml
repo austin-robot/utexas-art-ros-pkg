@@ -19,6 +19,6 @@
   <depend package="std_msgs"/>
 
   <!-- declare run-time dependency on Qt4 python package -->
-  <rosdep name="PyQt4"/>
+  <rosdep name="python-qt-bindings"/>
 
 </package>

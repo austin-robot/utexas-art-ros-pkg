@@ -159,7 +159,7 @@ void MapLanesDriver::markCar()
 {
   using art_msgs::ArtVehicle;
   visualization_msgs::Marker car;
-  car.header.stamp = ros::Time::now();
+  car.header.stamp = ros::Time();       // zero time means "always"
   car.header.frame_id = "/vehicle";
   car.frame_locked = true;
 

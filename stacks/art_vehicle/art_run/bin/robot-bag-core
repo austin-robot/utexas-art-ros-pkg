@@ -5,12 +5,13 @@
 
 # run this with: roslaunch art_run sensory_overload.launch
 
+PREFIX=$1
 BAGS=${ROS_HOME:-~/.ros}/bags/sensors
 mkdir -p $BAGS
 
-rosbag record -o $BAGS/rviz /visualization_marker /visualization_marker_array &
+rosbag record -o $BAGS/${PREFIX}rviz /visualization_marker /visualization_marker_array &
 
-rosbag record -o $BAGS/other \
+rosbag record -o $BAGS/${PREFIX}other \
         /odom /imu /gps /tf \
         /brake/cmd /brake/state \
         /ioadr/cmd /ioadr/state \

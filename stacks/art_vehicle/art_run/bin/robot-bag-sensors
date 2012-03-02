@@ -5,23 +5,27 @@
 
 # run this with: roslaunch art_run sensory_overload.launch
 
+PREFIX=$1
+if [ "$PREFIX" != "" ]
+then PREFIX="${PREFIX}_"
+fi
+
 BAGS=${ROS_HOME:-~/.ros}/bags/sensors
 mkdir -p $BAGS
 
 ### start recording the new format...
-#rosbag record -o $BAGS/velodyne /velodyne/rawscan &
-rosbag record -o $BAGS/velodyne /velodyne/packets &
+rosbag record -o $BAGS/${PREFIX}velodyne /velodyne_packets &
 
 ### collect Sick data (if any)
-rosbag record -o $BAGS/sicks /front_sick /rear_sick &
+rosbag record -o $BAGS/${PREFIX}sicks /front_sick /rear_sick &
 
 CAMERA1=/left_front/camera
 CAMERA2=/center_front/camera
 CAMERA3=/right_front/camera
 
-rosbag record -o $BAGS/camera \
+rosbag record -o $BAGS/${PREFIX}camera \
         $CAMERA1/image_raw/compressed $CAMERA1/camera_info \
         $CAMERA2/image_raw/compressed $CAMERA2/camera_info \
         $CAMERA3/image_raw/compressed $CAMERA3/camera_info &
 
-exec robot-bag-core
+exec robot-bag-core ${PREFIX}

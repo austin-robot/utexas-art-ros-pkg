@@ -7,6 +7,7 @@
   <review status="experiemental" notes=""/>
   <url>http://ros.org/wiki/ackermann_teleop</url>
 
+  <depend stack="ackermann_msgs" />
   <depend stack="ros" />
 
 </stack>

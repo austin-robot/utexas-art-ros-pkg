@@ -27,6 +27,5 @@
   <depend package="velodyne_driver"/>
   <depend package="velodyne_height_map"/>
   <depend package="velodyne_pointcloud"/>
-  <depend package="velodyne_ringcomp"/>
 
 </package>

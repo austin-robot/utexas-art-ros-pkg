@@ -22,6 +22,7 @@
   <depend stack="ros_comm" /> <!-- std_msgs, rosbag, rospy, roscpp, rosbagmigration -->
   <depend stack="rx" /> <!-- rxtools -->
   <depend stack="simulator_stage" /> <!-- stage (unified stack in Electric) -->
-  <depend stack="velodyne" /> <!-- velodyne_common -->
+  <depend stack="velodyne" /> <!-- velodyne_driver velodyne_pointcloud -->
+  <depend stack="velodyne_utils" /> <!-- velodyne_height_map -->
 
 </stack>

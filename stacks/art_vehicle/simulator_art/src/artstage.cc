@@ -59,12 +59,23 @@
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_broadcaster.h>
 
-#if ROS_VERSION_MINIMUM(1, 4, 0)        // Diamondback or later?
 #include <rosgraph_msgs/Clock.h>
 typedef rosgraph_msgs::Clock Clock;
-#else                                   // Cturtle or earlier?
-#include <roslib/Clock.h>
-typedef roslib::Clock Clock;
+
+#if ROS_VERSION_MINIMUM(1, 8, 0)        // Fuerte or later?
+
+#define STAGE_VERSION 4                 // Fuerte: stage 4.1.1
+typedef Stg::ModelRanger StgLaser;      // use new ranger interface
+typedef Stg::model_callback_t model_callback_t;
+typedef Stg::world_callback_t world_callback_t;
+
+#else
+
+#define STAGE_VERSION 3                 // Electric: stage 3.2.2
+typedef Stg::ModelLaser StgLaser;       // use old laser interface
+typedef Stg::stg_model_callback_t model_callback_t;
+typedef Stg::stg_world_callback_t world_callback_t;
+
 #endif
 
 #include <art/frames.h>                 // ART vehicle frames of reference
@@ -91,7 +102,7 @@ class StageNode
     boost::mutex msg_lock;
 
     // The models that we're interested in
-    std::vector<Stg::ModelLaser *> lasermodels;
+    std::vector<StgLaser *> lasermodels;
     std::vector<Stg::ModelPosition *> positionmodels;
     std::vector<ros::Publisher> laser_pubs_;
     ros::Publisher clock_pub_;
@@ -161,8 +172,8 @@ StageNode::mapName(const char *name, size_t robotID)
 void
 StageNode::ghfunc(Stg::Model* mod, StageNode* node)
 {
-  if (dynamic_cast<Stg::ModelLaser *>(mod))
-    node->lasermodels.push_back(dynamic_cast<Stg::ModelLaser *>(mod));
+  if (dynamic_cast<StgLaser *>(mod))
+    node->lasermodels.push_back(dynamic_cast<StgLaser *>(mod));
 
 #if 0  // newer version
   if (dynamic_cast<Stg::ModelPosition *>(mod))
@@ -202,14 +213,17 @@ StageNode::StageNode(int argc, char** argv, bool gui, const char* fname)
   
   // Apparently an Update is needed before the Load to avoid crashes on
   // startup on some systems.
+#if STAGE_VERSION == 3
+  // As of Stage 4.1.1, this update call causes a hang on start.
   this->UpdateWorld();
+#endif
   this->world->Load(fname);
 
   // We add our callback here, after the Update, so avoid our callback
   // being invoked before we're ready.
-  this->world->AddUpdateCallback((Stg::stg_world_callback_t)s_update, this);
+  this->world->AddUpdateCallback((world_callback_t)s_update, this);
 
-  this->world->ForEachDescendant((Stg::stg_model_callback_t)ghfunc, this);
+  this->world->ForEachDescendant((model_callback_t)ghfunc, this);
 
   size_t numRobots = positionmodels.size();
   ROS_INFO_STREAM("found " << numRobots << " position model(s) in the file");
@@ -309,11 +323,49 @@ StageNode::WorldCallback()
   // Get latest laser data
   for (size_t r = 0; r < this->lasermodels.size(); r++)
   {
-    std::vector<Stg::ModelLaser::Sample> samples = this->lasermodels[r]->GetSamples();
+
+#if STAGE_VERSION == 4
+
+    const std::vector<Stg::ModelRanger::Sensor>& sensors =
+      this->lasermodels[r]->GetSensors();
+		
+    if( sensors.size() > 1 )
+      ROS_WARN( "ART Stage currently supports rangers with 1 sensor only." );
+
+    // for now we access only the zeroth sensor of the ranger - good
+    // enough for most laser models that have a single beam origin
+    const Stg::ModelRanger::Sensor& s = sensors[0];
+		
+    if( s.ranges.size() )
+      {
+        // Translate into ROS message format and publish
+        this->laserMsgs[r].angle_min = -s.fov/2.0;
+        this->laserMsgs[r].angle_max = +s.fov/2.0;
+        this->laserMsgs[r].angle_increment = s.fov/(double)(s.sample_count-1);
+        this->laserMsgs[r].range_min = s.range.min;
+        this->laserMsgs[r].range_max = s.range.max;
+        this->laserMsgs[r].ranges.resize(s.ranges.size());
+        this->laserMsgs[r].intensities.resize(s.intensities.size());
+      		
+        for(unsigned int i=0; i<s.ranges.size(); i++)
+          {
+            this->laserMsgs[r].ranges[i] = s.ranges[i];
+            this->laserMsgs[r].intensities[i] = (uint8_t)s.intensities[i];
+          }
+
+        // TODO map each laser to separate frame and topic names
+        this->laserMsgs[r].header.frame_id = "/" + ArtFrames::front_sick;
+        this->laserMsgs[r].header.stamp = sim_time;
+        this->laser_pubs_[r].publish(this->laserMsgs[r]);
+      }
+
+#else // STAGE_VERSION 3
+
+    std::vector<StgLaser::Sample> samples = this->lasermodels[r]->GetSamples();
     if(samples.size())
     {
       // Translate into ROS message format and publish
-      Stg::ModelLaser::Config cfg = this->lasermodels[r]->GetConfig();
+      StgLaser::Config cfg = this->lasermodels[r]->GetConfig();
       this->laserMsgs[r].angle_min = -cfg.fov/2.0;
       this->laserMsgs[r].angle_max = +cfg.fov/2.0;
       this->laserMsgs[r].angle_increment = cfg.fov/(double)(cfg.sample_count-1);
@@ -332,6 +384,8 @@ StageNode::WorldCallback()
       this->laserMsgs[r].header.stamp = sim_time;
       this->laser_pubs_[r].publish(this->laserMsgs[r]);
     }
+
+#endif // STAGE_VERSION
   }
 
   // update latest position data
@@ -344,12 +398,14 @@ StageNode::WorldCallback()
   this->clock_pub_.publish(this->clockMsg);
 }
 
+#if STAGE_VERSION == 3
 static bool quit = false;
 void
 sigint_handler(int num)
 {
   quit = true;
 }
+#endif // STAGE_VERSION 3
 
 int 
 main(int argc, char** argv)
@@ -392,6 +448,11 @@ main(int argc, char** argv)
 
   // spawn a thread to read incoming ROS messages
   boost::thread t(boost::thread(boost::bind(&ros::spin)));
+
+#if STAGE_VERSION == 4
+  // New in Stage 4.1.1: must Start() the world.
+  sn.world->Start();
+#endif
 
   // TODO: get rid of this fixed-duration sleep, using some Stage builtin
   // PauseUntilNextUpdate() functionality.

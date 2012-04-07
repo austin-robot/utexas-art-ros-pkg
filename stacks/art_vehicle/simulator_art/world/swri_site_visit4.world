@@ -1,0 +1,80 @@
+
+# Desc: 6 marvin robots with laser	
+# CVS: $Id$
+
+# defines car-like robots
+include "car.inc"
+
+# defines 'map' object used for floorplans
+include "map.inc"
+
+# defines sick laser
+include "sick4.inc"
+
+# size of the world in meters
+size [240 168 4]
+
+# set the resolution of the underlying raytrace model in meters
+#resolution 0.02
+resolution 0.1
+
+# run simulation and screen updates every 50ms
+#interval_sim 50
+# BUG workaround for stage: only update every 100ms
+interval_sim 100
+
+# configure the GUI window
+window
+( 
+  # size [ 750 800 ]
+  scale 3.500
+
+  # initial GUI options
+  show_data 1
+  show_flags 1
+  show_blocks 1
+  show_clock 0
+  show_footprints 0
+  show_grid 0
+  show_trailarrows 0
+  show_trailrise 0
+  show_trailfast 0
+  show_occupancy 0
+)
+
+# load an environment bitmap with non-blocking lanes
+map
+( 
+  gui_grid 0
+  bitmap "site_visit.png"
+  size [240 168 0.1]
+  name "site_visit"
+  obstacle_return 0
+  laser_return 0
+)
+
+# create Marvin
+car
+(
+  name "marvin"
+  color "purple"
+  pose [ 46.511 -1.645 0 175.000 ]
+  localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
+  localization "gps"
+  sick_laser( samples 181 origin [3.178 0.0 -0.94 0.0] )
+  #sick_laser( samples 181 origin [-1.140 0.0 0.94 180.0] )
+  laser_return 1          # visible to lasers
+)
+
+
+# create another robot as an obstacle
+car
+(
+ name "robot4"
+  color "blue"
+  size [4.8 2.12 3.0]     # make tall enough for lasers to see
+  pose [ -35.967 59.908 0 180.000 ]
+  localization_origin [0.0 0.0 0.0 0.0 0.0 0.0]
+  localization "gps"
+  laser_return 1          # visible to lasers
+)

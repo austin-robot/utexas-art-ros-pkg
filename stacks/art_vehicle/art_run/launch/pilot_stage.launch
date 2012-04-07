@@ -3,6 +3,7 @@
 
      WORLD = base name (without prefix) of world file and RNDF
              (default prc_large)
+     STAGE = 4, if stage-4.1.1 world file needed (otherwise omitted)
 
      $Id$
   -->
@@ -16,7 +17,7 @@
 
   <!-- stage simulator for ART vehicle -->
   <node pkg="simulator_art" type="artstage" name="artstage"
-        args="$(find simulator_art)/world/$(optenv WORLD prc_large).world">
+        args="$(find simulator_art)/world/$(optenv WORLD prc_large)$(optenv STAGE).world">
     <rosparam
        file="$(find simulator_art)/world/$(optenv WORLD prc_large).yaml"/>
   </node>

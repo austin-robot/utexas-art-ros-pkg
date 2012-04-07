@@ -2,7 +2,13 @@ python-qt-bindings:
   ubuntu:
     lucid:
       apt:
-        packages: [python-qt4 python-qt4-dev python-sip-dev python-qt4-gl]
+        packages: [python-qt4, python-qt4-dev, python-sip-dev, python-qt4-gl]
+    maverick:
+      apt:
+        packages: [python-qt4, python-qt4-dev, python-sip-dev, python-qt4-gl]
+    natty:
+      apt:
+        packages: [python-pyside.qtcore, python-pyside.qtgui, libpyside-dev, libshiboken-dev, shiboken, libgenrunner-dev, python-qt4, python-qt4-dev, python-sip-dev, python-qt4-gl]
     oneiric:
       apt:
-        packages: [python-pyside.qtcore python-pyside.qtgui libpyside-dev libshiboken-dev shiboken libgenrunner-dev python-qt4 python-qt4-dev python-sip-dev python-qt4-gl]
+        packages: [python-pyside.qtcore, python-pyside.qtgui, libpyside-dev, libshiboken-dev, shiboken, libgenrunner-dev, python-qt4, python-qt4-dev, python-sip-dev, python-qt4-gl]

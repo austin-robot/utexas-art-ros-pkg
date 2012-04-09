@@ -26,18 +26,12 @@ import rospy
 # ROS messages
 from art_msgs.msg import ArtVehicle
 from art_msgs.msg import Gear
-
-# In ROS Electric, the Joy message gained a header and moved to
-# sensor_msgs.  Use that if it's available.
-try:
-    from sensor_msgs.msg import Joy
-except ImportError:
-    from joy.msg import Joy
+from sensor_msgs.msg import Joy
 
 # dynamic parameter reconfiguration
 from driver_base.msg import SensorLevels
 from dynamic_reconfigure.server import Server as ReconfigureServer
-import art_teleop.cfg.JoyConfig as JoyConfig
+import ackermann_hks.cfg.JoyConfig as JoyConfig
 
 def clamp(minimum, value, maximum):
     "constrain value to the range [minimum .. maximum]"

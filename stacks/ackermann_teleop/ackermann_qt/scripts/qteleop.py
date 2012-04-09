@@ -24,13 +24,12 @@ import rospy
 from ackermann_msgs.msg import AckermannDrive
 from ackermann_msgs.msg import AckermannDriveStamped
 
-# TODO make these configuration parameters
-epsilon_steering = math.radians(0.001)
-max_steer_radians = math.radians(29)
-min_steer_radians = math.radians(-29)
+# dynamic parameter reconfiguration
+from dynamic_reconfigure.server import Server as ReconfigureServer
+import ackermann_qt.cfg.QTeleopConfig as Config
 
 g_topic = rospy.Publisher('ackermann_cmd', AckermannDriveStamped)
-rospy.init_node('teleop')
+rospy.init_node('qteleop')
 
 # set path name for resolving icons
 icons_path = os.path.join(roslib.packages.get_pkg_dir(PKG_NAME),
@@ -64,6 +63,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)
 
         self.topic = topic
+        self.reconf_server = ReconfigureServer(Config, self.reconfigure)
 
         self.resize(350, 250)
         self.setIconSize(QtCore.QSize(32,32))
@@ -178,13 +178,13 @@ class MainWindow(QtGui.QMainWindow):
         self.drive.steering_angle += a
 
         # impose limits on commanded angle
-        if self.drive.steering_angle > max_steer_radians:
-            self.drive.steering_angle = max_steer_radians
-        if self.drive.steering_angle < min_steer_radians:
-            self.drive.steering_angle = min_steer_radians
+        if self.drive.steering_angle > self.config.max_steering:
+            self.drive.steering_angle = self.config.max_steering
+        if self.drive.steering_angle < self.config.min_steering:
+            self.drive.steering_angle = self.config.min_steering
 
         # clean up angle if it is very close to zero
-        if math.fabs(self.drive.steering_angle) < epsilon_steering:
+        if math.fabs(self.drive.steering_angle) < self.config.epsilon_steering:
             self.drive.steering_angle = 0.0
 
         self.ack_cmd.header.stamp = rospy.Time.now()
@@ -232,6 +232,13 @@ class MainWindow(QtGui.QMainWindow):
     def stop_car(self):
         "stop car immediately"
         self.adjustCarCmd(-self.drive.speed, 0.0)
+
+    def reconfigure(self, config, level):
+        "Dynamic reconfigure server callback."
+        rospy.logdebug('Reconfigure callback, level ' + str(level))
+        rospy.logdebug('New config ' + str(config))
+        self.config = config
+        return config
 
 
 class QtThread(threading.Thread):

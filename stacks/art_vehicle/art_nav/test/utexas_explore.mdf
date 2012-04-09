@@ -1,0 +1,12 @@
+MDF_name	utexas_explore.mdf
+RNDF	utexas_explore.rndf
+creation_date	25/10/2010
+checkpoints
+num_checkpoints	6
+1
+2
+1
+2
+1
+2
+end_checkpoints

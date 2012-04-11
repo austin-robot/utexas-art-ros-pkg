@@ -11,7 +11,7 @@
   <url>http://www.ros.org/wiki/ackermann_hks</url>
 
   <depend package="ackermann_msgs"/>
-  <depend package="driver_base" />
+  <depend package="sensor_msgs"/>
   <depend package="dynamic_reconfigure" />
   <depend package="joy"/>
   <depend package="rospy"/>

@@ -16,7 +16,6 @@ import math
 import Queue
 
 import pilot_cmd                # ART pilot interface
-import nav_estop                # ART navigator E-stop package
 
 # ROS node setup
 import roslib;
@@ -24,14 +23,13 @@ roslib.load_manifest(PKG_NAME)
 import rospy
 
 # ROS messages
-from art_msgs.msg import ArtVehicle
 from art_msgs.msg import Gear
 from sensor_msgs.msg import Joy
 
 # dynamic parameter reconfiguration
 from driver_base.msg import SensorLevels
 from dynamic_reconfigure.server import Server as ReconfigureServer
-import ackermann_hks.cfg.JoyConfig as JoyConfig
+import ackermann_hks.cfg.HKSConfig as Config
 
 def clamp(minimum, value, maximum):
     "constrain value to the range [minimum .. maximum]"
@@ -43,9 +41,7 @@ class JoyNode():
     def __init__(self):
         "JoyNode constructor"
 
-        # estop controls
-        self.run = 3                    # start autonomous run
-        self.suspend = 12               # suspend autonomous running
+        # estop control
         self.estop = 13                 # emergency stop
 
         # tele-operation controls
@@ -63,9 +59,9 @@ class JoyNode():
 	self.cruise = False
 	
         # initialize ROS topics
-        rospy.init_node('josh_teleop2')
+        rospy.init_node('hks_teleop')
         self.pilot = pilot_cmd.PilotCommand()
-        self.reconf_server = ReconfigureServer(JoyConfig, self.reconfigure)
+        self.reconf_server = ReconfigureServer(Config, self.reconfigure)
         self.joy = rospy.Subscriber('joy', Joy, self.joyCallback)
 
 
@@ -73,19 +69,10 @@ class JoyNode():
         "invoked every time a joystick message arrives"
         rospy.logdebug('joystick input:\n' + str(joy))
 
-        # handle E-stop buttons
+        # handle E-stop button
         if joy.buttons[self.estop]:
             rospy.logwarn('emergency stop')
-            if self.use_navigator:
-                self.nav.pause()        # tell navigator to pause
-            else:
-                self.pilot.halt()       # halt car using pilot
-        elif joy.buttons[self.suspend] and self.use_navigator:
-            rospy.logwarn('suspend autonomous operation')
-            self.nav.suspend()
-        elif joy.buttons[self.run] and self.use_navigator:
-            rospy.logwarn('start autonomous operation')
-            self.nav.run()
+            self.pilot.halt()           # halt car using pilot
 
         # handle shifter buttons
         if joy.buttons[self.drive]:
@@ -99,11 +86,11 @@ class JoyNode():
             rospy.loginfo('shifting to park')
 
 	if joy.buttons[self.cruiseSwitch]:
-		if self.cruise:
-			self.cruise = False
-		else:
-			self.cruise = True
-			self.pilot.pstate.target.speed = self.pilot.pstate.current.speed
+            if self.cruise:
+                self.cruise = False
+            else:
+                self.cruise = True
+                self.pilot.pstate.target.speed = self.pilot.pstate.current.speed
 
         # set steering angle
 	self.setAngle(joy.axes[self.steer])
@@ -176,17 +163,8 @@ class JoyNode():
         "Dynamic reconfigure server callback."
         rospy.loginfo('Reconfigure callback, level ' + str(level))
         rospy.loginfo('New config ' + str(config))
-
-        if level & SensorLevels.RECONFIGURE_CLOSE:
-            # create new EstopNavigator and PilotCommand instances 
-            self.use_navigator = config['use_navigator']
-            rospy.loginfo('use navigator = ' + str(self.use_navigator))
-
-            self.nav = nav_estop.EstopNavigator(self.use_navigator)
-
         self.pilot.reconfigure(config['limit_forward'],
                                config['limit_reverse'])
-
         self.config = config
         return config
 
@@ -197,8 +175,8 @@ class JoyNode():
         # sensitivity while retaining sign. At higher speeds, it may
         # make sense to limit the range, avoiding too-sharp turns and
         # providing better control sensitivity.
-        #turn = math.pow(turn, 3) * ArtVehicle.max_steer_radians
-        #turn = math.tan(turn) * ArtVehicle.max_steer_radians
+        #turn = math.pow(turn, 3) * self.config.max_steering
+        #turn = math.tan(turn) * self.config.max_steering
 	if self.pilot.pstate.current.speed == 0:
 		percentage = 1
 	# Expirimental steering over speed preference
@@ -208,7 +186,7 @@ class JoyNode():
 	else:
 		#percentage = -0.2738*(math.log(math.fabs(self.pilot.pstate.current.speed))) + 0.6937
 		percentage = (-math.atan2(math.fabs(self.pilot.pstate.current.speed)-3, 1) / 1.5) + 1
-	turn = turn * percentage * ArtVehicle.max_steer_radians
+	turn = turn * percentage * self.config.max_steering
 
         # ensure maximum wheel angle never exceeded
         self.pilot.steer(turn)

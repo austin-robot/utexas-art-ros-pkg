@@ -7,7 +7,7 @@
 #
 # $Id$
 
-PKG_NAME = 'ackermann_teleop'
+PKG_NAME = 'ackermann_hks'
 
 # ROS node setup
 import roslib;
@@ -15,30 +15,29 @@ roslib.load_manifest(PKG_NAME)
 import rospy
 
 # ROS messages
-from art_msgs.msg import ArtVehicle
-from art_msgs.msg import CarDrive
-from art_msgs.msg import CarDriveStamped
-from art_msgs.msg import DriverState
-from art_msgs.msg import Epsilon
-from art_msgs.msg import Gear
-from art_msgs.msg import PilotState
+from ackermann_msgs.msg import AckermannDrive
+from ackermann_msgs.msg import AckermannDriveStamped
+#from art_msgs.msg import DriverState
+#from art_msgs.msg import Epsilon
+#from art_msgs.msg import Gear
+#from art_msgs.msg import PilotState
 
 def clamp(minimum, value, maximum):
     "constrain value to the range [minimum .. maximum]"
     return max(minimum, min(value, maximum))
 
 class PilotCommand():
-    "ART pilot command interface."
+    "Ackermann steering command interface."
 
     def __init__(self, limit_forward=6.0, limit_reverse=3.0):
         "PilotCommand constructor"
         self.reconfigure(limit_forward, limit_reverse)
         self.pstate = PilotState()
-        self.car_ctl = CarDrive()
-        self.car_msg = CarDriveStamped()
-        self.pub = rospy.Publisher('pilot/drive', CarDriveStamped)
-        self.sub = rospy.Subscriber('pilot/state', PilotState,
-                                    self.pilotCallback)
+        self.car_ctl = AckermannDrive()
+        self.car_msg = AckermannDriveStamped()
+        self.pub = rospy.Publisher('ackermann_cmd', AckermannDriveStamped)
+        #self.sub = rospy.Subscriber('pilot/state', PilotState,
+        #                            self.pilotCallback)
 
     def accelerate(self, dv):
         "accelerate dv meters/second^2"
@@ -108,9 +107,9 @@ class PilotCommand():
     def steer(self, angle):
         "set wheel angle (radians)"
         # ensure maximum wheel angle never exceeded
-        self.car_ctl.steering_angle = clamp(-ArtVehicle.max_steer_radians,
-                                             angle,
-                                             ArtVehicle.max_steer_radians)
+        self.car_ctl.steering_angle = clamp(self.config.min_steering,
+                                            angle,
+                                            self.config.max_steering)
 
 
 # standalone test of package

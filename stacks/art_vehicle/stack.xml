@@ -11,6 +11,7 @@
   <depend stack="camera_drivers" /> <!-- camera1394 -->
   <depend stack="common_msgs" /> <!-- nav_msgs, sensor_msgs, geometry_msgs, visualization_msgs -->
   <depend stack="driver_common" /> <!-- dynamic_reconfigure, driver_base -->
+  <depend stack="filters" /> <!-- filters (unified stack in Electric) -->
   <depend stack="geometry" /> <!-- tf, angles -->
   <depend stack="image_common" /> <!-- image_transport -->
   <depend stack="image_pipeline" /> <!-- image_view -->

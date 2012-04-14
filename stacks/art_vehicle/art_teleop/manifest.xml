@@ -14,7 +14,6 @@
   <depend package="art_msgs"/>
   <depend package="driver_base" />
   <depend package="dynamic_reconfigure" />
-  <depend package="joy"/>
   <depend package="rospy"/>
   <depend package="std_msgs"/>
 

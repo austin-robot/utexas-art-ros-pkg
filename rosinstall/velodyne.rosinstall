@@ -1,0 +1,4 @@
+- svn:
+    uri: http://utexas-art-ros-pkg.googlecode.com/svn/trunk/stacks/velodyne
+    local-name: velodyne
+

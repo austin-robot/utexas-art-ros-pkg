@@ -3,7 +3,7 @@
  *  Copyright (C) 2011 Austin Robot Technology
  *  License: Modified BSD Software License Agreement
  * 
- *  $Id: adjacent_left.h 1744 2011-10-27 16:07:00Z jack.oquin $
+ *  $Id$
  */
 
 /**  @file

@@ -4,7 +4,7 @@
  *
  *  License: Modified BSD Software License Agreement
  *
- *  $Id: data_base.h 1554 2011-06-14 22:11:17Z jack.oquin $
+ *  $Id$
  */
 
 /** \file

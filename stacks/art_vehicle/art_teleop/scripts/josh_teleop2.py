@@ -5,7 +5,7 @@
 #   Copyright (C) 2011 Austin Robot Technology
 #   License: Modified BSD Software License Agreement
 #
-# $Id: joy_teleop.py 1321 2011-04-19 20:23:37Z jack.oquin $
+# $Id$
 
 PKG_NAME = 'art_teleop'
 

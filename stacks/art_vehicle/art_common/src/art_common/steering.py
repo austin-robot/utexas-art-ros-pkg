@@ -6,7 +6,7 @@
 *
 *  License: Modified BSD Software License Agreement
 *
-*  $Id: steering.h 2 2010-01-17 01:54:03Z jack.oquin $
+*  $Id$
 *"""
 
 # This code originally imported angles.h

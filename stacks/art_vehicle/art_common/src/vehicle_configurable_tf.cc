@@ -3,7 +3,7 @@
  *
  *  License: Modified BSD Software License Agreement
  * 
- *  $Id: vehicle_configurable_tf.cc 1774 2011-09-10 19:23:37Z austinrobot $
+ *  $Id$
  */
 
 #include <ros/ros.h>
